@@ -40,7 +40,7 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
   children,
 }) => {
   const navigate = useNavigate();
-  const { settings, logCompletedActivity } = useApp();
+  const { settings, activeProfile, logCompletedActivity, recordStrategyPreference } = useApp();
 
   const storageKey = `synapseplay_runner_${activity.id}`;
   const savedCheckpoint = (() => {
@@ -95,8 +95,10 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
   });
 
   const ageBand: AgeBandId = settings.ageBand ?? '6-8';
+  const profilePlayCount = activeProfile.learnedModel.activityPlayCounts[activity.id] ?? 0;
+  const effectiveSessionSeed = sessionSeed + profilePlayCount;
 
-  // Invisible Adaptive Scenario Engine (evaluates silently in real time)
+  // Invisible Adaptive Scenario Engine (evaluates silently in real time + child's learned profile)
   const adaptiveProfile = useMemo(
     () =>
       evaluateInvisibleScenario({
@@ -107,6 +109,7 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
         absorbedImpulsiveTaps: state.impulsiveTapsAbsorbed,
         lastResponseTimeMs: lastResponseMsRef.current,
         seatedModeActive: state.seatedMode,
+        learnedModel: activeProfile.learnedModel,
       }),
     [
       ageBand,
@@ -115,6 +118,7 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
       state.totalHintsUsed,
       state.impulsiveTapsAbsorbed,
       state.seatedMode,
+      activeProfile.learnedModel,
     ]
   );
 
@@ -128,7 +132,7 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
         gentleNudges: state.gentleNudgesCount,
         hintsUsed: state.totalHintsUsed,
         absorbedImpulsiveTaps: state.impulsiveTapsAbsorbed,
-        variantNumber: (sessionSeed % 12) + 1,
+        variantNumber: (effectiveSessionSeed % 12) + 1,
       }),
     [
       ageBand,
@@ -137,7 +141,7 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
       state.gentleNudgesCount,
       state.totalHintsUsed,
       state.impulsiveTapsAbsorbed,
-      sessionSeed,
+      effectiveSessionSeed,
     ]
   );
 
@@ -407,7 +411,7 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
               className="touch-target px-4 py-2 rounded-2xl bg-sand border-2 border-sand-dark text-charcoal font-bold text-sm flex items-center gap-1.5 hover:bg-slate-surface"
             >
               <span className="text-xl" aria-hidden="true">🎲</span>
-              <span>Νέα Παραλλαγή (#{(sessionSeed % 12) + 1})</span>
+              <span>Νέα Παραλλαγή (#{(effectiveSessionSeed % 12) + 1})</span>
             </button>
 
             {activity.supportsSeatedMode && (
@@ -535,7 +539,10 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
                   type="button"
                   data-testid={`metacognitive-opt-${item.id}`}
                   aria-pressed={selectedStrategy === item.id}
-                  onClick={() => setSelectedStrategy(item.id)}
+                  onClick={() => {
+                    setSelectedStrategy(item.id);
+                    void recordStrategyPreference(item.id as 'time' | 'example' | 'retry');
+                  }}
                   className={`touch-target px-4 py-2 rounded-xl border-2 text-sm font-bold flex items-center gap-1.5 ${
                     selectedStrategy === item.id
                       ? 'bg-sage text-white border-sage-dark'
@@ -583,7 +590,7 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
             seatedMode: state.seatedMode,
             ageBand,
             adaptiveProfile,
-            sessionSeed,
+            sessionSeed: effectiveSessionSeed,
             setSeatedMode: (val: boolean) => toggleSeatedMode(val),
             advanceRound: handleAdvanceRound,
             triggerGentleFeedback: handleGentleFeedback,

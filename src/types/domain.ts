@@ -1,7 +1,21 @@
 import type { AgeBandId } from '../data/ageProtocols';
 import type { AdaptiveScenarioId, SilentAdaptationProfile } from '../utils/adaptiveScenarioEngine';
+import type {
+  ChildMicroProfile,
+  ChildAdaptiveLearningModel,
+  DomainMasteryScores,
+  ClinicalDomainKey,
+} from '../utils/childProfileLearningEngine';
 
-export type { AgeBandId, AdaptiveScenarioId, SilentAdaptationProfile };
+export type {
+  AgeBandId,
+  AdaptiveScenarioId,
+  SilentAdaptationProfile,
+  ChildMicroProfile,
+  ChildAdaptiveLearningModel,
+  DomainMasteryScores,
+  ClinicalDomainKey,
+};
 
 export type CategoryId =
   | 'detective-eyes'
@@ -116,10 +130,13 @@ export interface ActivitySessionLog {
   seatedModeUsed: boolean;
   ageBand?: AgeBandId;
   adaptiveScenarioId?: AdaptiveScenarioId;
+  childProfileId?: string;
+  childNickname?: string;
 }
 
 export interface AppSettings {
   id: string; // always 'default'
+  activeChildProfileId?: string; // default 'child-default'
   ageBand: AgeBandId; // default '6-8'
   sessionLimitMinutes: number; // default 20
   warningWindowMinutes: number; // default 2

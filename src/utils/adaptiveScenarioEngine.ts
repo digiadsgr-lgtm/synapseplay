@@ -1,4 +1,5 @@
 import type { AgeBandId } from '../data/ageProtocols';
+import type { ChildAdaptiveLearningModel } from './childProfileLearningEngine';
 
 export type AdaptiveScenarioId =
   | 'SCENARIO_BALANCED_FLOW'
@@ -17,6 +18,7 @@ export interface ChildInteractionTelemetry {
   absorbedImpulsiveTaps: number;
   lastResponseTimeMs: number;
   seatedModeActive: boolean;
+  learnedModel?: ChildAdaptiveLearningModel;
 }
 
 export interface SilentAdaptationProfile {
@@ -107,11 +109,14 @@ export const ADAPTIVE_SCENARIO_CATALOG: Record<
 };
 
 /**
- * Evaluates live telemetry invisibly and returns the best-fitting adaptation profile.
+ * Evaluates live telemetry AND the child's persisted continual-learning profile invisibly,
+ * returning the best-fitting adaptation profile.
  */
 export function evaluateInvisibleScenario(
   telemetry: ChildInteractionTelemetry
 ): SilentAdaptationProfile {
+  const learned = telemetry.learnedModel;
+
   // 1. Frustration recovery takes highest priority so the child never feels discouraged
   if (telemetry.gentleNudgesInCurrentActivity >= 2) {
     return {
@@ -120,22 +125,29 @@ export function evaluateInvisibleScenario(
     };
   }
 
-  // 2. Rapid impulsive tapping modulation
+  // 2. Rapid impulsive tapping modulation (live or learned from child's historical profile)
   if (
     telemetry.absorbedImpulsiveTaps >= 2 ||
-    (telemetry.lastResponseTimeMs > 0 && telemetry.lastResponseTimeMs < 750)
+    (telemetry.lastResponseTimeMs > 0 && telemetry.lastResponseTimeMs < 750) ||
+    (learned && learned.totalSessionsCompleted >= 1 && learned.impulsivityIndex >= 0.45)
   ) {
     return {
       scenarioId: 'SCENARIO_IMPULSIVE_RAPID',
       ...ADAPTIVE_SCENARIO_CATALOG.SCENARIO_IMPULSIVE_RAPID,
+      speechRate: learned?.optimalSpeechRate ?? ADAPTIVE_SCENARIO_CATALOG.SCENARIO_IMPULSIVE_RAPID.speechRate,
     };
   }
 
-  // 3. Language scaffold for 4-5 band or when multiple hints are requested early
-  if (telemetry.ageBand === '4-5' || telemetry.hintsUsedInCurrentActivity >= 2) {
+  // 3. Language scaffold for 4-5 band, when multiple hints are requested early, or learned from profile
+  if (
+    telemetry.ageBand === '4-5' ||
+    telemetry.hintsUsedInCurrentActivity >= 2 ||
+    (learned && learned.totalSessionsCompleted >= 1 && learned.scaffoldingNeedIndex >= 0.48)
+  ) {
     return {
       scenarioId: 'SCENARIO_LANGUAGE_SCAFFOLD',
       ...ADAPTIVE_SCENARIO_CATALOG.SCENARIO_LANGUAGE_SCAFFOLD,
+      speechRate: learned?.optimalSpeechRate ?? ADAPTIVE_SCENARIO_CATALOG.SCENARIO_LANGUAGE_SCAFFOLD.speechRate,
     };
   }
 
@@ -144,19 +156,25 @@ export function evaluateInvisibleScenario(
     return {
       scenarioId: 'SCENARIO_INATTENTIVE_DISTRACTIBLE',
       ...ADAPTIVE_SCENARIO_CATALOG.SCENARIO_INATTENTIVE_DISTRACTIBLE,
+      speechRate: learned?.optimalSpeechRate ?? ADAPTIVE_SCENARIO_CATALOG.SCENARIO_INATTENTIVE_DISTRACTIBLE.speechRate,
     };
   }
 
-  // 5. Mastery challenge when completing rounds smoothly with 0 nudges and 0 hints
+  // 5. Mastery challenge when completing rounds smoothly OR when child's learned profile shows high readiness
   if (
-    telemetry.completedRoundsCount >= 1 &&
-    telemetry.gentleNudgesInCurrentActivity === 0 &&
-    telemetry.hintsUsedInCurrentActivity === 0 &&
-    telemetry.absorbedImpulsiveTaps === 0
+    (telemetry.completedRoundsCount >= 1 &&
+      telemetry.gentleNudgesInCurrentActivity === 0 &&
+      telemetry.hintsUsedInCurrentActivity === 0 &&
+      telemetry.absorbedImpulsiveTaps === 0) ||
+    (learned &&
+      learned.totalSessionsCompleted >= 2 &&
+      learned.scaffoldingNeedIndex <= 0.22 &&
+      telemetry.gentleNudgesInCurrentActivity === 0)
   ) {
     return {
       scenarioId: 'SCENARIO_MASTERY_CHALLENGE',
       ...ADAPTIVE_SCENARIO_CATALOG.SCENARIO_MASTERY_CHALLENGE,
+      speechRate: learned?.optimalSpeechRate ?? ADAPTIVE_SCENARIO_CATALOG.SCENARIO_MASTERY_CHALLENGE.speechRate,
     };
   }
 
@@ -165,11 +183,13 @@ export function evaluateInvisibleScenario(
     return {
       scenarioId: 'SCENARIO_KINETIC_SEEKING',
       ...ADAPTIVE_SCENARIO_CATALOG.SCENARIO_KINETIC_SEEKING,
+      speechRate: learned?.optimalSpeechRate ?? ADAPTIVE_SCENARIO_CATALOG.SCENARIO_KINETIC_SEEKING.speechRate,
     };
   }
 
   return {
     scenarioId: 'SCENARIO_BALANCED_FLOW',
     ...ADAPTIVE_SCENARIO_CATALOG.SCENARIO_BALANCED_FLOW,
+    speechRate: learned?.optimalSpeechRate ?? ADAPTIVE_SCENARIO_CATALOG.SCENARIO_BALANCED_FLOW.speechRate,
   };
 }

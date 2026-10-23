@@ -1,20 +1,44 @@
-import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
-import type { ActivitySessionLog, AppSettings } from '../types/domain';
+import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react';
+import type {
+  ActivitySessionLog,
+  AgeBandId,
+  AppSettings,
+  ChildMicroProfile,
+} from '../types/domain';
 import {
   DEFAULT_SETTINGS,
   getSessionLogs,
   getTodayUsageSeconds,
+  loadChildProfiles,
   loadSettings,
   recordSessionLog,
+  removeChildProfile,
+  saveChildProfile,
   saveSettings,
   setTodayUsageSeconds,
   wipeAllLocalData,
 } from '../db/database';
+import {
+  createDefaultChildProfile,
+  createInitialLearningModel,
+  trainChildProfileOnActivityCompletion,
+} from '../utils/childProfileLearningEngine';
+import { getAgeBandProtocol } from '../data/ageProtocols';
 import { playCalmTone, speakGreek } from '../utils/soundAndSpeech';
 
 interface AppContextValue {
   settings: AppSettings;
   updateSettings: (partial: Partial<AppSettings>) => Promise<void>;
+  childProfiles: ChildMicroProfile[];
+  activeProfile: ChildMicroProfile;
+  switchChildProfile: (profileId: string) => Promise<void>;
+  createChildProfile: (params: {
+    nickname: string;
+    avatarEmoji: string;
+    ageBand: AgeBandId;
+  }) => Promise<ChildMicroProfile>;
+  deleteChildProfile: (profileId: string) => Promise<void>;
+  recordStrategyPreference: (strategyId: 'time' | 'example' | 'retry') => Promise<void>;
   elapsedSeconds: number;
   remainingRatio: number; // 1.0 (full) down to 0.0 (depleted)
   isWarningWindow: boolean; // true when <= warningWindowMinutes left and > 0
@@ -36,6 +60,9 @@ const AppContext = createContext<AppContextValue | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [settings, setSettings] = useState<AppSettings>(DEFAULT_SETTINGS);
+  const [childProfiles, setChildProfiles] = useState<ChildMicroProfile[]>(() => [
+    createDefaultChildProfile(DEFAULT_SETTINGS.ageBand),
+  ]);
   const [elapsedSeconds, setElapsedSeconds] = useState<number>(0);
   const [isBreakActive, setBreakActive] = useState<boolean>(false);
   const [isParentUnlocked, setParentUnlocked] = useState<boolean>(false);
@@ -45,21 +72,33 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     let mounted = true;
     async function init() {
-      const [loadedSettings, loadedUsage, loadedLogs] = await Promise.all([
+      const [loadedSettings, loadedUsage, loadedLogs, loadedProfiles] = await Promise.all([
         loadSettings(),
         getTodayUsageSeconds(),
         getSessionLogs(),
+        loadChildProfiles(),
       ]);
       if (!mounted) return;
       setSettings(loadedSettings);
       setElapsedSeconds(loadedUsage);
       setSessionLogs(loadedLogs);
+      setChildProfiles(loadedProfiles);
     }
     init();
     return () => {
       mounted = false;
     };
   }, []);
+
+  const activeProfile = useMemo<ChildMicroProfile>(() => {
+    const found = childProfiles.find((p) => p.id === settings.activeChildProfileId);
+    const base = found ?? childProfiles[0] ?? createDefaultChildProfile(settings.ageBand);
+    // Keep ageBand aligned with settings.ageBand if updated via settings
+    if (base.ageBand !== settings.ageBand) {
+      return { ...base, ageBand: settings.ageBand };
+    }
+    return base;
+  }, [childProfiles, settings.activeChildProfileId, settings.ageBand]);
 
   // Apply reduced-motion class to document.documentElement
   useEffect(() => {
@@ -107,24 +146,142 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   }, [isWarningWindow, warningAnnounced, settings.soundEnabled, settings.voiceEnabled]);
 
-  const updateSettings = useCallback(async (partial: Partial<AppSettings>) => {
-    setSettings((prev) => ({ ...prev, ...partial }));
-    const updated = await saveSettings(partial);
-    setSettings(updated);
-  }, []);
+  const updateSettings = useCallback(
+    async (partial: Partial<AppSettings>) => {
+      setSettings((prev) => ({ ...prev, ...partial }));
+      const updated = await saveSettings(partial);
+      setSettings(updated);
+      if (partial.ageBand) {
+        const updatedProfile: ChildMicroProfile = {
+          ...activeProfile,
+          ageBand: partial.ageBand,
+        };
+        const list = await saveChildProfile(updatedProfile);
+        setChildProfiles(list);
+      }
+    },
+    [activeProfile]
+  );
 
-  const logCompletedActivity = useCallback(
-    async (log: Omit<ActivitySessionLog, 'id' | 'timestamp' | 'dateKey'>) => {
-      await recordSessionLog(log);
-      const refreshed = await getSessionLogs();
-      setSessionLogs(refreshed);
+  const switchChildProfile = useCallback(
+    async (profileId: string) => {
+      const target = childProfiles.find((p) => p.id === profileId);
+      if (!target) return;
+      const proto = getAgeBandProtocol(target.ageBand);
+      const partial: Partial<AppSettings> = {
+        activeChildProfileId: target.id,
+        ageBand: target.ageBand,
+        sessionLimitMinutes: proto.recommendedTotalMinutes,
+      };
+      setSettings((prev) => ({ ...prev, ...partial }));
+      const nextSettings = await saveSettings(partial);
+      setSettings(nextSettings);
+    },
+    [childProfiles]
+  );
+
+  const createChildProfile = useCallback(
+    async (params: { nickname: string; avatarEmoji: string; ageBand: AgeBandId }) => {
+      const cleanName = params.nickname.trim() || 'Μικρός Εξερευνητής';
+      const newProfile: ChildMicroProfile = {
+        id: `child-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+        nickname: cleanName,
+        avatarEmoji: params.avatarEmoji || '🐨',
+        ageBand: params.ageBand,
+        createdAt: new Date().toISOString(),
+        learnedModel: createInitialLearningModel(params.ageBand),
+      };
+      const proto = getAgeBandProtocol(params.ageBand);
+      const partial: Partial<AppSettings> = {
+        activeChildProfileId: newProfile.id,
+        ageBand: params.ageBand,
+        sessionLimitMinutes: proto.recommendedTotalMinutes,
+      };
+      setChildProfiles((prev) => [...prev, newProfile]);
+      setSettings((prev) => ({ ...prev, ...partial }));
+
+      const updatedList = await saveChildProfile(newProfile);
+      setChildProfiles(updatedList);
+      const nextSettings = await saveSettings(partial);
+      setSettings(nextSettings);
+      return newProfile;
     },
     []
   );
 
+  const deleteChildProfile = useCallback(
+    async (profileId: string) => {
+      if (childProfiles.length <= 1) return;
+      setChildProfiles((prev) => prev.filter((p) => p.id !== profileId));
+      const updatedList = await removeChildProfile(profileId);
+      setChildProfiles(updatedList);
+      if (settings.activeChildProfileId === profileId) {
+        const fallback = updatedList[0];
+        if (fallback) {
+          const partial: Partial<AppSettings> = {
+            activeChildProfileId: fallback.id,
+            ageBand: fallback.ageBand,
+          };
+          setSettings((prev) => ({ ...prev, ...partial }));
+          const nextSettings = await saveSettings(partial);
+          setSettings(nextSettings);
+        }
+      }
+    },
+    [childProfiles.length, settings.activeChildProfileId]
+  );
+
+  const recordStrategyPreference = useCallback(
+    async (strategyId: 'time' | 'example' | 'retry') => {
+      const updatedProfile: ChildMicroProfile = {
+        ...activeProfile,
+        learnedModel: {
+          ...activeProfile.learnedModel,
+          preferredStrategyId: strategyId,
+          lastUpdatedTimestamp: new Date().toISOString(),
+        },
+      };
+      setChildProfiles((prev) =>
+        prev.map((p) => (p.id === updatedProfile.id ? updatedProfile : p))
+      );
+      const list = await saveChildProfile(updatedProfile);
+      setChildProfiles(list);
+    },
+    [activeProfile]
+  );
+
+  const logCompletedActivity = useCallback(
+    async (log: Omit<ActivitySessionLog, 'id' | 'timestamp' | 'dateKey'>) => {
+      // 1. Train the active child profile's continual learning model on this completion
+      const trainedProfile = trainChildProfileOnActivityCompletion(activeProfile, {
+        activityId: log.activityId,
+        hintsUsed: log.hintsUsed,
+        impulsiveTapsAbsorbed: log.impulsiveTapsAbsorbed,
+        durationSeconds: log.durationSeconds,
+      });
+      setChildProfiles((prev) =>
+        prev.map((p) => (p.id === trainedProfile.id ? trainedProfile : p))
+      );
+      const updatedProfiles = await saveChildProfile(trainedProfile);
+      setChildProfiles(updatedProfiles);
+
+      // 2. Record the session log tagged with the child's micro-profile
+      await recordSessionLog({
+        ...log,
+        childProfileId: trainedProfile.id,
+        childNickname: trainedProfile.nickname,
+      });
+      const refreshed = await getSessionLogs();
+      setSessionLogs(refreshed);
+    },
+    [activeProfile]
+  );
+
   const wipeAllData = useCallback(async () => {
     await wipeAllLocalData();
+    const defaultProfile = createDefaultChildProfile(DEFAULT_SETTINGS.ageBand);
     setSettings(DEFAULT_SETTINGS);
+    setChildProfiles([defaultProfile]);
     setElapsedSeconds(0);
     setSessionLogs([]);
     setWarningAnnounced(false);
@@ -165,6 +322,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       value={{
         settings,
         updateSettings,
+        childProfiles,
+        activeProfile,
+        switchChildProfile,
+        createChildProfile,
+        deleteChildProfile,
+        recordStrategyPreference,
         elapsedSeconds,
         remainingRatio,
         isWarningWindow,

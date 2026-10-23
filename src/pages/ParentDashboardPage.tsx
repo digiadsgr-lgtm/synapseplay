@@ -11,6 +11,10 @@ import {
 import { INTERDISCIPLINARY_PROTOCOLS } from '../data/interdisciplinaryProtocols';
 import { ADAPTIVE_SCENARIO_CATALOG } from '../utils/adaptiveScenarioEngine';
 import { CLINICAL_STUDIES_AND_TRIALS } from '../utils/clinicalAdhdEngine';
+import {
+  DOMAIN_LABELS_EL,
+  type ClinicalDomainKey,
+} from '../utils/childProfileLearningEngine';
 import { ParentGateModal } from '../components/ParentGateModal';
 
 export const ParentDashboardPage: React.FC = () => {
@@ -18,6 +22,10 @@ export const ParentDashboardPage: React.FC = () => {
   const {
     settings,
     updateSettings,
+    childProfiles,
+    activeProfile,
+    switchChildProfile,
+    deleteChildProfile,
     sessionLogs,
     wipeAllData,
     elapsedSeconds,
@@ -298,6 +306,112 @@ export const ParentDashboardPage: React.FC = () => {
               </span>
             </button>
           </div>
+        </div>
+      </section>
+
+      {/* Per-Device Child Micro-Profiles & Continual Learning Adaptation */}
+      <section
+        data-testid="child-profiles-learning-section"
+        className="bg-white border-2 border-sage rounded-3xl p-6 space-y-5"
+      >
+        <div>
+          <h2 className="text-xl font-extrabold text-charcoal">
+            👤 Μικρά Προφίλ Παιδιών & Αυτο-Εκπαιδευόμενο Μοντέλο Προσαρμογής ({childProfiles.length})
+          </h2>
+          <p className="text-sm text-charcoal-muted">
+            Κάθε παιδί στη συσκευή διαθέτει ανεξάρτητο τοπικό προφίλ που εκπαιδεύεται αυτόματα (EMA
+            Continual Learning) από τις ολοκληρωμένες συνεδρίες, τις βοήθειες και τον ρυθμό
+            απόκρισής του:
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {childProfiles.map((prof) => {
+            const isSelected = prof.id === activeProfile.id;
+            const masteryEntries = Object.entries(prof.learnedModel.domainMastery) as Array<
+              [ClinicalDomainKey, number]
+            >;
+            return (
+              <div
+                key={prof.id}
+                data-testid={`parent-profile-card-${prof.id}`}
+                className={`p-5 rounded-3xl border-2 space-y-3 ${
+                  isSelected
+                    ? 'bg-sage-surface/60 border-sage-dark'
+                    : 'bg-sand-light border-sand-dark'
+                }`}
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-3">
+                    <span className="text-4xl" aria-hidden="true">{prof.avatarEmoji}</span>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-lg font-extrabold text-charcoal">{prof.nickname}</h3>
+                        {isSelected && (
+                          <span className="px-2 py-0.5 rounded-full bg-sage text-white text-[10px] font-extrabold">
+                            Ενεργό
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs font-bold text-slate-dark">
+                        Ηλικία {prof.ageBand} ετών • {prof.learnedModel.totalSessionsCompleted}{' '}
+                        ολοκληρωμένες συνεδρίες
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-1.5">
+                    {!isSelected && (
+                      <button
+                        type="button"
+                        onClick={() => void switchChildProfile(prof.id)}
+                        className="px-3 py-1.5 rounded-xl bg-white border border-slate text-xs font-extrabold text-charcoal"
+                      >
+                        Επιλογή
+                      </button>
+                    )}
+                    {childProfiles.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => void deleteChildProfile(prof.id)}
+                        className="px-2.5 py-1.5 rounded-xl bg-terracotta-surface border border-terracotta text-xs font-extrabold text-charcoal"
+                      >
+                        🗑️
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                <p className="text-xs font-bold text-charcoal bg-white p-2.5 rounded-xl border border-sand-dark">
+                  🧭 {prof.learnedModel.adaptationSummaryEl}
+                </p>
+
+                {/* 6 Clinical Domain Mastery Progress Bars */}
+                <div className="space-y-1.5 pt-1">
+                  {masteryEntries.map(([domKey, score]) => {
+                    const meta = DOMAIN_LABELS_EL[domKey];
+                    const pct = Math.round(score * 100);
+                    return (
+                      <div key={domKey} className="space-y-0.5">
+                        <div className="flex justify-between text-[11px] font-bold text-charcoal">
+                          <span>
+                            {meta.emoji} {meta.labelEl}
+                          </span>
+                          <span>{pct}%</span>
+                        </div>
+                        <div className="w-full h-2 rounded-full bg-white border border-sand-dark overflow-hidden">
+                          <div
+                            className="h-full bg-sage-dark rounded-full transition-all"
+                            style={{ width: `${pct}%` }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
         </div>
       </section>
 

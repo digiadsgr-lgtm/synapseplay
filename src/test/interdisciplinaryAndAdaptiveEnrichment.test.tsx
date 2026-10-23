@@ -7,6 +7,10 @@ import { INTERDISCIPLINARY_PROTOCOLS } from '../data/interdisciplinaryProtocols'
 import { evaluateInvisibleScenario } from '../utils/adaptiveScenarioEngine';
 import { normalizeGreekForSpeech } from '../utils/soundAndSpeech';
 import { CLINICAL_STUDIES_AND_TRIALS } from '../utils/clinicalAdhdEngine';
+import {
+  createDefaultChildProfile,
+  trainChildProfileOnActivityCompletion,
+} from '../utils/childProfileLearningEngine';
 import { saveSettings, wipeAllLocalData } from '../db/database';
 
 function renderRoute(route: string = '/') {
@@ -260,5 +264,59 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
     });
     expect(screen.getByTestId('clinical-study-card-barkley-ef-1997')).toBeInTheDocument();
     expect(screen.getByTestId('clinical-study-card-kollins-stars-adhd-2020')).toBeInTheDocument();
+  });
+
+  it('Per-Device Child Micro-Profiles & Continual Learning: creates independent profiles per child and trains the adaptation model from progress', async () => {
+    // 1. Unit-test the Continual Learning EMA update on a child profile
+    const initialProfile = createDefaultChildProfile('6-8');
+    expect(initialProfile.learnedModel.totalSessionsCompleted).toBe(0);
+    expect(initialProfile.learnedModel.domainMastery.visualAttention).toBe(0.5);
+
+    // Child completes 01-visual-search with 0 hints and 0 impulsive taps -> visualAttention mastery increases!
+    const trained1 = trainChildProfileOnActivityCompletion(initialProfile, {
+      activityId: '01-visual-search',
+      hintsUsed: 0,
+      impulsiveTapsAbsorbed: 0,
+      durationSeconds: 35,
+    });
+    expect(trained1.learnedModel.totalSessionsCompleted).toBe(1);
+    expect(trained1.learnedModel.domainMastery.visualAttention).toBeGreaterThan(0.5);
+    expect(trained1.learnedModel.activityPlayCounts['01-visual-search']).toBe(1);
+
+    // After 2 smooth completions, evaluateInvisibleScenario adopts SCENARIO_MASTERY_CHALLENGE from Round 1!
+    const trained2 = trainChildProfileOnActivityCompletion(trained1, {
+      activityId: '02-spot-difference',
+      hintsUsed: 0,
+      impulsiveTapsAbsorbed: 0,
+      durationSeconds: 30,
+    });
+    const adoptedScenario = evaluateInvisibleScenario({
+      ageBand: trained2.ageBand,
+      completedRoundsCount: 0,
+      gentleNudgesInCurrentActivity: 0,
+      hintsUsedInCurrentActivity: 0,
+      absorbedImpulsiveTaps: 0,
+      lastResponseTimeMs: 0,
+      seatedModeActive: false,
+      learnedModel: trained2.learnedModel,
+    });
+    expect(adoptedScenario.scenarioId).toBe('SCENARIO_MASTERY_CHALLENGE');
+    expect(adoptedScenario.enrichChallenge).toBe(true);
+
+    // 2. Integration test: Create a second Child Micro-Profile on the Child Hub and verify isolation
+    renderRoute('/');
+    expect(screen.getByTestId('child-profile-switcher')).toBeInTheDocument();
+    expect(screen.getByTestId('personalized-recommendation-card')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('open-create-profile-btn'));
+    fireEvent.change(screen.getByTestId('new-profile-name-input'), {
+      target: { value: 'Αριάδνη' },
+    });
+    fireEvent.click(screen.getByTestId('new-profile-age-8-10'));
+    fireEvent.click(screen.getByTestId('submit-create-profile-btn'));
+
+    await waitFor(() => {
+      expect(screen.getByText(/Γεια σου, Αριάδνη!/i)).toBeInTheDocument();
+    });
   });
 });
