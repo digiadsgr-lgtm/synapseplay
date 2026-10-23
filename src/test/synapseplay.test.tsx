@@ -31,7 +31,7 @@ describe('SynapsePlay (FocusEngine 5+) — Full Gate 1 to Gate 5 Verification Su
 
     it('enforces maximum 4 primary categories on Child Hub and displays non-medical disclaimer', () => {
       expect(CATEGORIES).toHaveLength(4);
-      expect(ACTIVITIES).toHaveLength(12);
+      expect(ACTIVITIES).toHaveLength(20);
 
       renderWithRouter(['/']);
       expect(screen.getByTestId('child-hub-page')).toBeInTheDocument();
@@ -147,12 +147,12 @@ describe('SynapsePlay (FocusEngine 5+) — Full Gate 1 to Gate 5 Verification Su
       fireEvent.click(screen.getByTestId('open-parent-gate-btn'));
       expect(screen.getByTestId('parent-gate-modal')).toBeInTheDocument();
 
-      // Wrong answer shows alert
+      // Wrong answer shows alert and dynamically rotates the challenge to c2 ((7 × 6) + 9 = 51)
       fireEvent.click(screen.getByTestId('parent-gate-option-12'));
       expect(screen.getByRole('alert')).toBeInTheDocument();
 
-      // Correct answer (7 + 8 = 15) navigates to Parent Dashboard
-      fireEvent.click(screen.getByTestId('parent-gate-option-15'));
+      // Correct answer for the rotated challenge (51) navigates to Parent Dashboard
+      fireEvent.click(screen.getByTestId('parent-gate-option-51'));
       await waitFor(() => {
         expect(screen.getByTestId('parent-dashboard-page')).toBeInTheDocument();
       });

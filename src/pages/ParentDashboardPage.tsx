@@ -8,6 +8,8 @@ import {
   getAgeBandProtocol,
   type AgeBandId,
 } from '../data/ageProtocols';
+import { INTERDISCIPLINARY_PROTOCOLS } from '../data/interdisciplinaryProtocols';
+import { ADAPTIVE_SCENARIO_CATALOG } from '../utils/adaptiveScenarioEngine';
 import { ParentGateModal } from '../components/ParentGateModal';
 
 export const ParentDashboardPage: React.FC = () => {
@@ -418,10 +420,68 @@ export const ParentDashboardPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Pedagogical Reference Guide for All 12 Activities */}
+      {/* Pedagogical Reference Guide for All 20 Activities */}
+      <section
+        data-testid="interdisciplinary-protocols-section"
+        className="bg-white border-2 border-sage rounded-3xl p-6 space-y-4"
+      >
+        <h2 className="text-xl font-extrabold text-charcoal">
+          🩺 Διεπιστημονικά Κλινικά Πρωτόκολλα (8 Ειδικότητες)
+        </h2>
+        <p className="text-sm text-charcoal-muted">
+          Ενσωματωμένες κατευθυντήριες αρχές Εργοθεραπείας, Φυσιατρικής, Λογοθεραπείας,
+          Παιδοψυχολογίας, Παιδοψυχιατρικής, Κοινωνικής Εργασίας, Μουσικοκινητικής & Θεατρικής
+          Αγωγής:
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {INTERDISCIPLINARY_PROTOCOLS.map((proto) => (
+            <div
+              key={proto.id}
+              data-testid={`discipline-card-${proto.id}`}
+              className="p-4 rounded-2xl bg-sand-light border border-sand-dark space-y-1.5"
+            >
+              <div className="flex items-center gap-2">
+                <span className="text-2xl" aria-hidden="true">{proto.emoji}</span>
+                <h3 className="font-extrabold text-charcoal text-sm">{proto.titleEl}</h3>
+              </div>
+              <p className="text-xs font-bold text-slate-dark">{proto.coreClinicalObjectiveEl}</p>
+              <p className="text-xs text-charcoal-muted">{proto.methodologyEl}</p>
+              <p className="text-[11px] font-bold text-sage-dark">{proto.platformImplementationEl}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Invisible Adaptive Scenario Engine Overview (Visible Only to Parents/Clinicians) */}
+      <section
+        data-testid="invisible-adaptive-engine-section"
+        className="bg-white border-2 border-slate rounded-3xl p-6 space-y-4"
+      >
+        <h2 className="text-xl font-extrabold text-charcoal">
+          🧭 Αόρατη Μηχανή Δυναμικής Προσαρμογής Σεναρίων (Invisible Adaptive Engine)
+        </h2>
+        <p className="text-sm text-charcoal-muted">
+          Το σύστημα προσαρμόζεται δυναμικά και αόρατα στο παιδί (ρυθμός εκφώνησης, μείωση
+          περισπασμών, πρόληψη ματαίωσης ή εμπλουτισμός δυσκολίας) χωρίς καμία ετικέτα ή αγχωτική
+          ένδειξη στην παιδική οθόνη:
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {Object.entries(ADAPTIVE_SCENARIO_CATALOG).map(([key, sc]) => (
+            <div
+              key={key}
+              className="p-3.5 rounded-2xl bg-slate-surface/60 border border-slate/40 space-y-1"
+            >
+              <p className="text-xs font-extrabold text-charcoal">{sc.internalTitleEl}</p>
+              <p className="text-xs text-charcoal-muted">{sc.clinicalRationaleEl}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Pedagogical Reference Guide for All 20 Activities */}
       <section className="bg-sand-light border-2 border-sand-dark rounded-3xl p-6 space-y-4">
         <h2 className="text-xl font-extrabold text-charcoal">
-          📚 Παιδαγωγικός Οδηγός των 12 Δραστηριοτήτων
+          📚 Παιδαγωγικός & Κλινικός Οδηγός των {ACTIVITIES.length} Δραστηριοτήτων
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {ACTIVITIES.map((act) => (

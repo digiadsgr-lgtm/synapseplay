@@ -84,6 +84,25 @@ export const CategoryPage: React.FC = () => {
               </h2>
               <p className="text-sm text-charcoal-muted text-center">{activity.subtitleEl}</p>
 
+              {/* Interdisciplinary Badges & Active Age Adaptation */}
+              <div className="flex flex-wrap items-center justify-center gap-1 pt-1">
+                {activity.specialistDisciplines.map((disc) => (
+                  <span
+                    key={disc}
+                    className="px-2 py-0.5 rounded-full bg-sage-surface border border-sage text-[11px] font-bold text-charcoal"
+                  >
+                    {disc}
+                  </span>
+                ))}
+              </div>
+
+              {activity.ageAdaptationsEl?.[settings.ageBand ?? '6-8'] && (
+                <p className="text-xs font-bold text-slate-dark bg-slate-surface/70 p-2.5 rounded-xl text-center">
+                  🎯 Ηλικία {settings.ageBand ?? '6-8'}:{' '}
+                  {activity.ageAdaptationsEl[settings.ageBand ?? '6-8']}
+                </p>
+              )}
+
               {/* Pictogram steps preview */}
               <div className="pt-2 space-y-1.5">
                 {activity.cues.map((cue, idx) => (

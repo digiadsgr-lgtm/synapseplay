@@ -1,9 +1,16 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import type { ActivityDefinition, HintLevel, RunnerPhase } from '../types/domain';
+import type {
+  ActivityDefinition,
+  AgeBandId,
+  HintLevel,
+  RunnerPhase,
+  SilentAdaptationProfile,
+} from '../types/domain';
 import { useApp } from '../context/AppContext';
 import { playCalmTone, speakGreek } from '../utils/soundAndSpeech';
 import { useActivityRunnerMachine } from '../hooks/useActivityRunnerMachine';
+import { evaluateInvisibleScenario } from '../utils/adaptiveScenarioEngine';
 
 export interface ActivityRunnerRenderProps {
   phase: RunnerPhase;
@@ -11,6 +18,8 @@ export interface ActivityRunnerRenderProps {
   totalRounds: number;
   hintLevel: HintLevel;
   seatedMode: boolean;
+  ageBand: AgeBandId;
+  adaptiveProfile: SilentAdaptationProfile;
   setSeatedMode: (val: boolean) => void;
   advanceRound: (impulsiveTapsInRound?: number) => void;
   triggerGentleFeedback: (messageEl: string) => void;
@@ -64,8 +73,40 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
   });
 
   const startTimeRef = useRef<number>(Date.now());
+  const roundStartRef = useRef<number>(Date.now());
+  const lastResponseMsRef = useRef<number>(0);
   const loggedCompletionRef = useRef<boolean>(false);
   const [selectedStrategy, setSelectedStrategy] = React.useState<string | null>(null);
+
+  const ageBand: AgeBandId = settings.ageBand ?? '6-8';
+
+  // Invisible Adaptive Scenario Engine (evaluates silently in real time)
+  const adaptiveProfile = useMemo(
+    () =>
+      evaluateInvisibleScenario({
+        ageBand,
+        completedRoundsCount: state.currentRound - 1,
+        gentleNudgesInCurrentActivity: state.gentleNudgesCount,
+        hintsUsedInCurrentActivity: state.totalHintsUsed,
+        absorbedImpulsiveTaps: state.impulsiveTapsAbsorbed,
+        lastResponseTimeMs: lastResponseMsRef.current,
+        seatedModeActive: state.seatedMode,
+      }),
+    [
+      ageBand,
+      state.currentRound,
+      state.gentleNudgesCount,
+      state.totalHintsUsed,
+      state.impulsiveTapsAbsorbed,
+      state.seatedMode,
+    ]
+  );
+
+  // Effective hint level incorporates silent frustration-prevention scaffolding when needed
+  const effectiveHintLevel: HintLevel =
+    state.hintLevel === 0 && adaptiveProfile.autoHintBoost && state.gentleNudgesCount >= 2
+      ? 1
+      : state.hintLevel;
 
   // Persist active round checkpoint for seamless page-refresh recovery
   useEffect(() => {
@@ -92,8 +133,8 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
   }, [settings.seatedModeDefault, toggleSeatedMode]);
 
   useEffect(() => {
-    speakGreek(activity.voicePromptEl, settings.voiceEnabled);
-  }, [activity.voicePromptEl, settings.voiceEnabled]);
+    speakGreek(activity.voicePromptEl, settings.voiceEnabled, adaptiveProfile.speechRate);
+  }, [activity.voicePromptEl, settings.voiceEnabled, adaptiveProfile.speechRate]);
 
   const handleRequestHint = () => {
     if (state.hintLevel >= 2 || state.phase === 'PAUSED' || state.phase === 'COMPLETED') {
@@ -105,34 +146,40 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
     if (nextLevel === 1) {
       speakGreek(
         'Βοήθεια 1: Κοίτα το στοιχείο που ξεχωρίζει με το πλαίσιο!',
-        settings.voiceEnabled
+        settings.voiceEnabled,
+        adaptiveProfile.speechRate
       );
     } else {
       speakGreek(
         'Βοήθεια 2: Λιγότερες επιλογές για να διαλέξεις με άνεση!',
-        settings.voiceEnabled
+        settings.voiceEnabled,
+        adaptiveProfile.speechRate
       );
     }
   };
 
   const handleGentleFeedback = (messageEl: string) => {
+    lastResponseMsRef.current = Date.now() - roundStartRef.current;
     recordGentleNudge(messageEl);
     playCalmTone('gentle-nudge', settings.soundEnabled);
-    speakGreek(messageEl, settings.voiceEnabled);
+    speakGreek(messageEl, settings.voiceEnabled, adaptiveProfile.speechRate);
   };
 
   const handleAdvanceRound = (impulsiveTapsInRound: number = 0) => {
+    lastResponseMsRef.current = Date.now() - roundStartRef.current;
+    roundStartRef.current = Date.now();
     const isFinalRound = state.currentRound >= state.totalRounds;
     completeRound(impulsiveTapsInRound);
 
     if (!isFinalRound) {
       playCalmTone('chime', settings.soundEnabled);
-      speakGreek('Μπράβο! Πάμε στο επόμενο βήμα.', settings.voiceEnabled);
+      speakGreek('Μπράβο! Πάμε στο επόμενο βήμα.', settings.voiceEnabled, adaptiveProfile.speechRate);
     } else {
       playCalmTone('complete', settings.soundEnabled);
       speakGreek(
         `Συγχαρητήρια! Ολοκλήρωσες τη δραστηριότητα ${activity.titleEl} με ηρεμία!`,
-        settings.voiceEnabled
+        settings.voiceEnabled,
+        adaptiveProfile.speechRate
       );
       if (!loggedCompletionRef.current) {
         loggedCompletionRef.current = true;
@@ -150,6 +197,8 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
           hintsUsed: state.totalHintsUsed,
           impulsiveTapsAbsorbed: state.impulsiveTapsAbsorbed + impulsiveTapsInRound,
           seatedModeUsed: Boolean(activity.supportsSeatedMode && state.seatedMode),
+          ageBand,
+          adaptiveScenarioId: adaptiveProfile.scenarioId,
         });
       }
     }
@@ -157,20 +206,23 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
 
   const handleRestart = () => {
     startTimeRef.current = Date.now();
+    roundStartRef.current = Date.now();
     loggedCompletionRef.current = false;
     dispatchRestart(activity.totalRounds, settings.seatedModeDefault);
-    speakGreek(activity.voicePromptEl, settings.voiceEnabled);
+    speakGreek(activity.voicePromptEl, settings.voiceEnabled, adaptiveProfile.speechRate);
   };
 
   const isCompleted = state.phase === 'COMPLETED';
   const isPaused = state.phase === 'PAUSED';
   const isIntro = state.phase === 'INTRO';
+  const ageAdaptationText = activity.ageAdaptationsEl?.[ageBand];
 
   return (
     <main
       className="max-w-5xl mx-auto px-4 py-6 space-y-6"
       data-testid="shared-activity-runner"
       data-runner-phase={state.phase}
+      data-age-band={ageBand}
     >
       {/* Top Activity Navigation & Progress Bar */}
       <div className="flex flex-wrap items-center justify-between gap-4 bg-sand-light border-2 border-sand-dark rounded-3xl p-4">
@@ -187,13 +239,21 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
           </button>
 
           <div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <span className="text-3xl" aria-hidden="true">{activity.pictogram}</span>
               <h1 className="text-xl md:text-2xl font-extrabold text-charcoal">
                 {activity.code}. {activity.titleEl}
               </h1>
+              <span className="px-2.5 py-0.5 rounded-full bg-sage-surface border border-sage text-xs font-extrabold text-charcoal">
+                Ηλικία {ageBand} ετών
+              </span>
             </div>
             <p className="text-sm text-charcoal-muted">{activity.subtitleEl}</p>
+            {ageAdaptationText && (
+              <p className="text-xs font-bold text-slate-dark mt-0.5" data-testid="age-adaptation-subtitle">
+                ✨ Προσαρμογή {ageBand}: {ageAdaptationText}
+              </p>
+            )}
           </div>
         </div>
 
@@ -250,7 +310,7 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
           <div className="flex items-center gap-3">
             <button
               type="button"
-              onClick={() => speakGreek(activity.voicePromptEl, true)}
+              onClick={() => speakGreek(activity.voicePromptEl, true, adaptiveProfile.speechRate)}
               data-testid="replay-voice-prompt-btn"
               aria-label="Ακρόαση φωνητικής οδηγίας"
               className="touch-target px-4 py-2 rounded-2xl bg-sage-surface border-2 border-sage text-charcoal font-bold flex items-center gap-2 hover:bg-sage hover:text-white shrink-0"
@@ -391,7 +451,7 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
             ηρεμία και συγκέντρωση.
           </p>
 
-          {/* Metacognitive Self-Observation & Regulation Prompt (Age 10-12 & All Ages Support) */}
+          {/* Metacognitive Self-Observation & Regulation Prompt */}
           <div
             data-testid="metacognitive-reflection-box"
             className="p-4 rounded-2xl bg-white border-2 border-sand-dark max-w-xl mx-auto space-y-3"
@@ -454,8 +514,10 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
             phase: state.phase,
             currentRound: state.currentRound,
             totalRounds: state.totalRounds,
-            hintLevel: state.hintLevel,
+            hintLevel: effectiveHintLevel,
             seatedMode: state.seatedMode,
+            ageBand,
+            adaptiveProfile,
             setSeatedMode: (val: boolean) => toggleSeatedMode(val),
             advanceRound: handleAdvanceRound,
             triggerGentleFeedback: handleGentleFeedback,

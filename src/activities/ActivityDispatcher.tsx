@@ -13,6 +13,14 @@ import { Activity09WaitSignal } from './Activity09WaitSignal';
 import { Activity10CopyAnimal } from './Activity10CopyAnimal';
 import { Activity11RealWorldMission } from './Activity11RealWorldMission';
 import { Activity12BuildPattern } from './Activity12BuildPattern';
+import { Activity13SpeechArticulation } from './Activity13SpeechArticulation';
+import { Activity14NarrativeBuilder } from './Activity14NarrativeBuilder';
+import { Activity15AuditoryDiscrimination } from './Activity15AuditoryDiscrimination';
+import { Activity16ErgoFineMotor } from './Activity16ErgoFineMotor';
+import { Activity17SensoryProprioception } from './Activity17SensoryProprioception';
+import { Activity18AdlPraxis } from './Activity18AdlPraxis';
+import { Activity19EmotionalTheater } from './Activity19EmotionalTheater';
+import { Activity20MusicKineticRhythm } from './Activity20MusicKineticRhythm';
 
 interface ActivityDispatcherProps {
   activityId: ActivityId;
@@ -48,5 +56,21 @@ export const ActivityDispatcher: React.FC<ActivityDispatcherProps> = ({
       return <Activity11RealWorldMission {...runnerProps} />;
     case '12-build-pattern':
       return <Activity12BuildPattern {...runnerProps} />;
+    case '13-speech-articulation':
+      return <Activity13SpeechArticulation {...runnerProps} />;
+    case '14-narrative-builder':
+      return <Activity14NarrativeBuilder {...runnerProps} />;
+    case '15-auditory-discrimination':
+      return <Activity15AuditoryDiscrimination {...runnerProps} />;
+    case '16-ergo-fine-motor':
+      return <Activity16ErgoFineMotor {...runnerProps} />;
+    case '17-sensory-proprioception':
+      return <Activity17SensoryProprioception {...runnerProps} />;
+    case '18-adl-praxis':
+      return <Activity18AdlPraxis {...runnerProps} />;
+    case '19-emotional-theater':
+      return <Activity19EmotionalTheater {...runnerProps} />;
+    case '20-music-kinetic-rhythm':
+      return <Activity20MusicKineticRhythm {...runnerProps} />;
   }
 };

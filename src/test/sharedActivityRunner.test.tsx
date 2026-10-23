@@ -20,6 +20,15 @@ const MOCK_ACTIVITY: ActivityDefinition = {
   subtitleEl: 'Βρες το αντικείμενο-στόχο',
   voicePromptEl: 'Κοίτα το αντικείμενο-στόχο επάνω και πάτησε το ίδιο!',
   executiveDomain: 'Επιλεκτική Προσοχή',
+  specialistDisciplines: ['Εργοθεραπεία', 'Παιδοψυχολογία'],
+  recommendedAges: ['4-5', '5-6', '6-8', '8-10', '10-12'],
+  ageAdaptationsEl: {
+    '4-5': '3 αντικείμενα',
+    '5-6': '4 αντικείμενα',
+    '6-8': '6 αντικείμενα',
+    '8-10': '8 αντικείμενα',
+    '10-12': 'Σύνθετη αναζήτηση',
+  },
   pictogram: '🎯',
   cues: [
     { emoji: '👀', labelEl: 'Κοίτα τον στόχο' },

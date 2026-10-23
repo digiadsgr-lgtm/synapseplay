@@ -5,7 +5,7 @@
  * the application continues smoothly with zero errors.
  */
 
-export function speakGreek(text: string, enabled: boolean = true): void {
+export function speakGreek(text: string, enabled: boolean = true, rate: number = 0.92): void {
   if (!enabled || !text) return;
   try {
     if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
@@ -14,7 +14,7 @@ export function speakGreek(text: string, enabled: boolean = true): void {
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'el-GR';
-    utterance.rate = 0.92; // Calm, clear child-friendly pacing
+    utterance.rate = rate; // Calm, adaptive child-friendly pacing
     utterance.pitch = 1.0;
     window.speechSynthesis.speak(utterance);
   } catch {

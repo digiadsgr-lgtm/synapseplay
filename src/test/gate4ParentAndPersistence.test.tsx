@@ -61,13 +61,13 @@ describe('Gate 4 — Parent Area, Accidental-Access Gate, IndexedDB Persistence 
     expect(screen.queryByTestId('parent-dashboard-page')).not.toBeInTheDocument();
     expect(screen.queryByTestId('one-click-wipe-trigger-btn')).not.toBeInTheDocument();
 
-    // Incorrect arithmetic answer keeps it locked
+    // Incorrect arithmetic answer keeps it locked and rotates to a new challenge (c2: (7 × 6) + 9 = 51)
     fireEvent.click(screen.getByTestId('parent-gate-option-18'));
     expect(screen.getByRole('alert')).toBeInTheDocument();
     expect(screen.queryByTestId('parent-dashboard-page')).not.toBeInTheDocument();
 
-    // Correct arithmetic answer (7 + 8 = 15) unlocks the Parent Dashboard
-    fireEvent.click(screen.getByTestId('parent-gate-option-15'));
+    // Correct arithmetic answer for the rotated challenge (51) unlocks the Parent Dashboard
+    fireEvent.click(screen.getByTestId('parent-gate-option-51'));
     await waitFor(() => {
       expect(screen.getByTestId('parent-dashboard-page')).toBeInTheDocument();
     });

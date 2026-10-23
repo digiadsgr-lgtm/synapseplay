@@ -1,6 +1,7 @@
 import type { AgeBandId } from '../data/ageProtocols';
+import type { AdaptiveScenarioId, SilentAdaptationProfile } from '../utils/adaptiveScenarioEngine';
 
-export type { AgeBandId };
+export type { AgeBandId, AdaptiveScenarioId, SilentAdaptationProfile };
 
 export type CategoryId =
   | 'detective-eyes'
@@ -20,7 +21,15 @@ export type ActivityId =
   | '09-wait-signal'
   | '10-copy-animal'
   | '11-real-world-mission'
-  | '12-build-pattern';
+  | '12-build-pattern'
+  | '13-speech-articulation'
+  | '14-narrative-builder'
+  | '15-auditory-discrimination'
+  | '16-ergo-fine-motor'
+  | '17-sensory-proprioception'
+  | '18-adl-praxis'
+  | '19-emotional-theater'
+  | '20-music-kinetic-rhythm';
 
 export type HintLevel = 0 | 1 | 2;
 
@@ -70,6 +79,9 @@ export interface ActivityDefinition {
   subtitleEl: string;
   voicePromptEl: string;
   executiveDomain: string;
+  specialistDisciplines: string[];
+  recommendedAges: AgeBandId[];
+  ageAdaptationsEl: Record<AgeBandId, string>;
   pictogram: string;
   cues: PictogramCue[];
   parentGuidanceEl: string;
@@ -102,6 +114,8 @@ export interface ActivitySessionLog {
   hintsUsed: number;
   impulsiveTapsAbsorbed: number;
   seatedModeUsed: boolean;
+  ageBand?: AgeBandId;
+  adaptiveScenarioId?: AdaptiveScenarioId;
 }
 
 export interface AppSettings {

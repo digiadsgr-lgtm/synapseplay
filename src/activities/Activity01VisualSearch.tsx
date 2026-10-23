@@ -50,19 +50,30 @@ const ROUNDS: SearchRoundConfig[] = [
 export const Activity01VisualSearch: React.FC<ActivityRunnerRenderProps> = ({
   currentRound,
   hintLevel,
+  ageBand,
+  adaptiveProfile,
   advanceRound,
   triggerGentleFeedback,
 }) => {
   const { runDebounced, getAbsorbedCount } = useDebouncedAction();
   const roundData = ROUNDS[(currentRound - 1) % ROUNDS.length];
 
-  // Hint Level 2 reduces distractors to 2 while keeping the target
+  // Age-graded & Invisible Adaptive Scenario distractor scaling:
+  // - Hint Level 2 or Age 4-5: 3 items (2 distractors + 1 target)
+  // - Age 5-6 or high distractorReductionRatio: 4 items
+  // - Age 6-8 / 8-10 / 10-12: full calibrated grid (6-8 items)
   const visibleItems = useMemo(() => {
-    if (hintLevel < 2) return roundData.grid;
-    const distractors = roundData.grid.filter((i) => !i.isTarget).slice(0, 2);
     const targetItem = roundData.grid.find((i) => i.isTarget)!;
-    return [distractors[0], targetItem, distractors[1]];
-  }, [roundData, hintLevel]);
+    const distractors = roundData.grid.filter((i) => !i.isTarget);
+
+    if (hintLevel >= 2 || ageBand === '4-5' || adaptiveProfile.distractorReductionRatio >= 0.5) {
+      return [distractors[0], targetItem, distractors[1]];
+    }
+    if (ageBand === '5-6' || adaptiveProfile.distractorReductionRatio >= 0.3) {
+      return [distractors[0], distractors[1], targetItem, distractors[2]];
+    }
+    return roundData.grid;
+  }, [roundData, hintLevel, ageBand, adaptiveProfile.distractorReductionRatio]);
 
   const handleSelect = useCallback(
     (isTarget: boolean, labelEl: string) => {
