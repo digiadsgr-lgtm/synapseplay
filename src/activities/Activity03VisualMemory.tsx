@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import type { ActivityRunnerRenderProps } from '../components/ActivityRunner';
 import { useDebouncedAction } from '../hooks/useDebouncedAction';
+import { selectSessionRounds } from '../utils/clinicalAdhdEngine';
 
 interface MemoryCard {
   id: string;
@@ -39,21 +40,87 @@ const ROUNDS: Array<{ targetLabelEl: string; targetEmoji: string; cards: MemoryC
       { id: 'm3-4', emoji: '🐢', labelEl: 'Χελώνα', isTarget: false },
     ],
   },
+  {
+    targetLabelEl: 'Πράσινο Τριφύλλι',
+    targetEmoji: '🍀',
+    cards: [
+      { id: 'm4-1', emoji: '🌻', labelEl: 'Ηλίανθος', isTarget: false },
+      { id: 'm4-2', emoji: '🍀', labelEl: 'Πράσινο Τριφύλλι', isTarget: true },
+      { id: 'm4-3', emoji: '🐚', labelEl: 'Κοχύλι', isTarget: false },
+      { id: 'm4-4', emoji: '🥁', labelEl: 'Τύμπανο', isTarget: false },
+    ],
+  },
+  {
+    targetLabelEl: 'Σοφή Κουκουβάγια',
+    targetEmoji: '🦉',
+    cards: [
+      { id: 'm5-1', emoji: '🦉', labelEl: 'Σοφή Κουκουβάγια', isTarget: true },
+      { id: 'm5-2', emoji: '🐬', labelEl: 'Δελφίνι', isTarget: false },
+      { id: 'm5-3', emoji: '🚂', labelEl: 'Τρενάκι', isTarget: false },
+      { id: 'm5-4', emoji: '🍓', labelEl: 'Φράουλα', isTarget: false },
+    ],
+  },
+  {
+    targetLabelEl: 'Διαστημικός Πύραυλος',
+    targetEmoji: '🚀',
+    cards: [
+      { id: 'm6-1', emoji: '⛺', labelEl: 'Σκηνή', isTarget: false },
+      { id: 'm6-2', emoji: '🎻', labelEl: 'Βιολί', isTarget: false },
+      { id: 'm6-3', emoji: '🚀', labelEl: 'Διαστημικός Πύραυλος', isTarget: true },
+      { id: 'm6-4', emoji: '🍐', labelEl: 'Αχλάδι', isTarget: false },
+    ],
+  },
+  {
+    targetLabelEl: 'Χρυσό Καμπανάκι',
+    targetEmoji: '🔔',
+    cards: [
+      { id: 'm7-1', emoji: '📘', labelEl: 'Βιβλίο', isTarget: false },
+      { id: 'm7-2', emoji: '🔔', labelEl: 'Χρυσό Καμπανάκι', isTarget: true },
+      { id: 'm7-3', emoji: '🦀', labelEl: 'Καβούρι', isTarget: false },
+      { id: 'm7-4', emoji: '🌙', labelEl: 'Φεγγάρι', isTarget: false },
+    ],
+  },
+  {
+    targetLabelEl: 'Μικρό Σκιουράκι',
+    targetEmoji: '🐿️',
+    cards: [
+      { id: 'm8-1', emoji: '🐳', labelEl: 'Φάλαινα', isTarget: false },
+      { id: 'm8-2', emoji: '🍋', labelEl: 'Λεμόνι', isTarget: false },
+      { id: 'm8-3', emoji: '🏠', labelEl: 'Σπιτάκι', isTarget: false },
+      { id: 'm8-4', emoji: '🐿️', labelEl: 'Μικρό Σκιουράκι', isTarget: true },
+    ],
+  },
+  {
+    targetLabelEl: 'Μπλε Δελφίνι',
+    targetEmoji: '🐬',
+    cards: [
+      { id: 'm9-1', emoji: '🐬', labelEl: 'Μπλε Δελφίνι', isTarget: true },
+      { id: 'm9-2', emoji: '🌻', labelEl: 'Ηλίανθος', isTarget: false },
+      { id: 'm9-3', emoji: '🎒', labelEl: 'Τσάντα', isTarget: false },
+      { id: 'm9-4', emoji: '🎹', labelEl: 'Πιάνο', isTarget: false },
+    ],
+  },
 ];
 
 export const Activity03VisualMemory: React.FC<ActivityRunnerRenderProps> = ({
   currentRound,
+  totalRounds,
   hintLevel,
+  sessionSeed = 0,
   advanceRound,
   triggerGentleFeedback,
 }) => {
   const { runDebounced, getAbsorbedCount } = useDebouncedAction();
-  const roundData = ROUNDS[(currentRound - 1) % ROUNDS.length];
+  const activeRounds = useMemo(
+    () => selectSessionRounds(ROUNDS, totalRounds, sessionSeed),
+    [totalRounds, sessionSeed]
+  );
+  const roundData = activeRounds[(currentRound - 1) % activeRounds.length];
   const [isHidden, setIsHidden] = useState<boolean>(false);
 
   useEffect(() => {
     setIsHidden(false);
-  }, [currentRound]);
+  }, [currentRound, sessionSeed]);
 
   const visibleCards =
     hintLevel === 2

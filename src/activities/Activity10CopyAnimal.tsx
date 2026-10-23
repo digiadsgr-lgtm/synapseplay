@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import type { ActivityRunnerRenderProps } from '../components/ActivityRunner';
 import { useDebouncedAction } from '../hooks/useDebouncedAction';
+import { selectSessionRounds } from '../utils/clinicalAdhdEngine';
 
 interface AnimalPose {
   emoji: string;
@@ -28,21 +29,45 @@ const ANIMAL_POSES: AnimalPose[] = [
     standingPromptEl: 'Αγκάλιασε τους ώμους σου απαλά και πάρε μια βαθιά, ήρεμη ανάσα σαν χελωνάκι!',
     seatedPromptEl: 'Καθιστός, αγκάλιασε απαλά τους ώμους σου και βγάλε αργά τον αέρα!',
   },
+  {
+    emoji: '🦒',
+    nameEl: 'Ψηλός Λαιμός Καμηλοπάρδαλης',
+    standingPromptEl: 'Τέντωσε τα χέρια ψηλά προς τον ουρανό σαν καμηλοπάρδαλη που φτάνει τα φύλλα του δέντρου!',
+    seatedPromptEl: 'Καθιστός με ίσια πλάτη, τέντωσε ήρεμα τα δύο χέρια ψηλά και μέτρησε 3 ανάσες!',
+  },
+  {
+    emoji: '🦀',
+    nameEl: 'Πλάγια Κίνηση Καβουριού',
+    standingPromptEl: 'Λύγισε λίγο τα γόνατα, άνοιξε τους αγκώνες και κάνε 2 μικρά πλάγια βήματα με έλεγχο!',
+    seatedPromptEl: 'Καθιστός, άνοιξε και κλείσε ρυθμικά τις παλάμες σαν δαγκάνες καβουριού 3 φορές!',
+  },
+  {
+    emoji: '🦋',
+    nameEl: 'Ήρεμα Φτερά Πεταλούδας',
+    standingPromptEl: 'Ακούμπησε τα δάχτυλα στους ώμους και κάνε 3 αργούς κύκλους με τους αγκώνες σου!',
+    seatedPromptEl: 'Καθιστός, κάνε 3 αργές, ήρεμες κινήσεις στους ώμους σαν φτερά πεταλούδας!',
+  },
 ];
 
 export const Activity10CopyAnimal: React.FC<ActivityRunnerRenderProps> = ({
   currentRound,
+  totalRounds,
   hintLevel,
   seatedMode,
+  sessionSeed = 0,
   advanceRound,
 }) => {
   const { runDebounced, getAbsorbedCount } = useDebouncedAction();
-  const pose = ANIMAL_POSES[(currentRound - 1) % ANIMAL_POSES.length];
+  const activePoses = useMemo(
+    () => selectSessionRounds(ANIMAL_POSES, totalRounds, sessionSeed),
+    [totalRounds, sessionSeed]
+  );
+  const pose = activePoses[(currentRound - 1) % activePoses.length];
   const [countsDone, setCountsDone] = useState<number>(0);
 
   useEffect(() => {
     setCountsDone(hintLevel === 2 ? 2 : 0);
-  }, [currentRound, hintLevel]);
+  }, [currentRound, hintLevel, sessionSeed]);
 
   const handleCountTap = () => {
     runDebounced(() => {

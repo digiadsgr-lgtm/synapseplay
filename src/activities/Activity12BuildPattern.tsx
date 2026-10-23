@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import type { ActivityRunnerRenderProps } from '../components/ActivityRunner';
 import { useDebouncedAction } from '../hooks/useDebouncedAction';
+import { selectSessionRounds } from '../utils/clinicalAdhdEngine';
 
 type BlockColor = 'sage' | 'slate' | 'terracotta';
 
@@ -26,16 +27,28 @@ const PATTERNS: BlockColor[][] = [
   ['sage', 'slate', 'sage'],
   ['terracotta', 'sage', 'slate'],
   ['slate', 'terracotta', 'slate'],
+  ['sage', 'terracotta', 'sage'],
+  ['slate', 'sage', 'terracotta'],
+  ['terracotta', 'slate', 'terracotta'],
+  ['sage', 'sage', 'slate'],
+  ['slate', 'slate', 'terracotta'],
+  ['terracotta', 'sage', 'terracotta'],
 ];
 
 export const Activity12BuildPattern: React.FC<ActivityRunnerRenderProps> = ({
   currentRound,
+  totalRounds,
   hintLevel,
+  sessionSeed = 0,
   advanceRound,
   triggerGentleFeedback,
 }) => {
   const { runDebounced, getAbsorbedCount } = useDebouncedAction();
-  const targetPattern = PATTERNS[(currentRound - 1) % PATTERNS.length];
+  const activePatterns = useMemo(
+    () => selectSessionRounds(PATTERNS, totalRounds, sessionSeed),
+    [totalRounds, sessionSeed]
+  );
+  const targetPattern = activePatterns[(currentRound - 1) % activePatterns.length];
   const [builtBlocks, setBuiltBlocks] = useState<BlockColor[]>([]);
 
   useEffect(() => {
@@ -44,7 +57,7 @@ export const Activity12BuildPattern: React.FC<ActivityRunnerRenderProps> = ({
     } else {
       setBuiltBlocks([]);
     }
-  }, [currentRound, hintLevel, targetPattern]);
+  }, [currentRound, hintLevel, targetPattern, sessionSeed]);
 
   const nextExpectedColor = targetPattern[builtBlocks.length];
 
@@ -151,7 +164,7 @@ export const Activity12BuildPattern: React.FC<ActivityRunnerRenderProps> = ({
           className="touch-target px-5 py-2.5 rounded-2xl bg-white border-2 border-slate text-charcoal font-bold text-sm inline-flex items-center gap-2 hover:bg-slate-surface"
         >
           <span aria-hidden="true">🧱</span>
-          <span>Το έφτιαξα με τα αληθινά μου τουβλάκια (LEGO)!</span>
+          <span>Το έφτιαξα με τα αληθινά μου τουβλάκια!</span>
         </button>
       </div>
     </div>

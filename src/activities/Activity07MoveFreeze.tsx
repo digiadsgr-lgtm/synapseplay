@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import type { ActivityRunnerRenderProps } from '../components/ActivityRunner';
 import { useDebouncedAction } from '../hooks/useDebouncedAction';
+import { selectSessionRounds } from '../utils/clinicalAdhdEngine';
 
 interface PulsePhase {
   mode: 'go' | 'freeze';
@@ -11,39 +12,64 @@ interface PulsePhase {
 const PHASES: PulsePhase[] = [
   {
     mode: 'go',
-    instructionEl: 'ΠΡΑΣΙΝΟ! Κούνησε ρυθμικά τα χέρια και πάτα το πράσινο κουμπί 2 φορές!',
+    instructionEl: 'Πράσινο Σήμα! Κούνησε ρυθμικά τα χέρια και πάτα το πράσινο κουμπί 2 φορές!',
     seatedInstructionEl:
-      'ΠΡΑΣΙΝΟ (Καθιστή)! Χτύπα απαλά τα δάχτυλα και πάτα το πράσινο κουμπί 2 φορές!',
+      'Πράσινο Σήμα (Καθιστή)! Χτύπα απαλά τα δάχτυλα και πάτα το πράσινο κουμπί 2 φορές!',
   },
   {
     mode: 'freeze',
     instructionEl:
-      'ΣΤΟΠ! Πάγωσε σαν άγαλμα! ΜΗΝ πατήσεις το κουμπί κίνησης — πάτα «Έμεινα Ακίνητος»!',
+      'Στοπ! Πάγωσε σαν άγαλμα! Μην πατήσεις το κουμπί κίνησης — πάτα «Έμεινα Ακίνητος»!',
     seatedInstructionEl:
-      'ΣΤΟΠ (Καθιστή)! Ακούμπησε ήρεμα τις παλάμες στα γόνατα και πάτα «Έμεινα Ακίνητος»!',
+      'Στοπ (Καθιστή)! Ακούμπησε ήρεμα τις παλάμες στα γόνατα και πάτα «Έμεινα Ακίνητος»!',
   },
   {
     mode: 'go',
-    instructionEl: 'ΠΡΑΣΙΝΟ ΞΑΝΑ! Ρυθμική κίνηση! Πάτα το πράσινο κουμπί 2 φορές!',
+    instructionEl: 'Πράσινο ξανά! Ρυθμική κίνηση! Πάτα το πράσινο κουμπί 2 φορές!',
     seatedInstructionEl:
-      'ΠΡΑΣΙΝΟ ΞΑΝΑ (Καθιστή)! Ρυθμικό άγγιγμα! Πάτα το πράσινο κουμπί 2 φορές!',
+      'Πράσινο ξανά (Καθιστή)! Ρυθμικό άγγιγμα! Πάτα το πράσινο κουμπί 2 φορές!',
+  },
+  {
+    mode: 'go',
+    instructionEl: 'Πράσινο! Άνοιξε και κλείσε τις παλάμες ρυθμικά και πάτα το πράσινο κουμπί 2 φορές!',
+    seatedInstructionEl:
+      'Πράσινο (Καθιστή)! Ακούμπησε τους ώμους ρυθμικά και πάτα το πράσινο κουμπί 2 φορές!',
+  },
+  {
+    mode: 'freeze',
+    instructionEl:
+      'Στοπ! Κάνε το ακίνητο δεντράκι με βαθιά ανάσα και πάτα «Έμεινα Ακίνητος»!',
+    seatedInstructionEl:
+      'Στοπ (Καθιστή)! Κράτα την πλάτη ίσια, πάρε ανάσα και πάτα «Έμεινα Ακίνητος»!',
+  },
+  {
+    mode: 'go',
+    instructionEl: 'Πράσινο! Σήκωσε εναλλάξ τις φτέρνες σου και πάτα το πράσινο κουμπί 2 φορές!',
+    seatedInstructionEl:
+      'Πράσινο (Καθιστή)! Χτύπα ρυθμικά τα πέλματα στο πάτωμα και πάτα το πράσινο κουμπί 2 φορές!',
   },
 ];
 
 export const Activity07MoveFreeze: React.FC<ActivityRunnerRenderProps> = ({
   currentRound,
+  totalRounds,
   hintLevel,
   seatedMode,
+  sessionSeed = 0,
   advanceRound,
   triggerGentleFeedback,
 }) => {
   const { runDebounced, getAbsorbedCount } = useDebouncedAction();
-  const phase = PHASES[(currentRound - 1) % PHASES.length];
+  const activePhases = useMemo(
+    () => selectSessionRounds(PHASES, totalRounds, sessionSeed),
+    [totalRounds, sessionSeed]
+  );
+  const phase = activePhases[(currentRound - 1) % activePhases.length];
   const [goTaps, setGoTaps] = useState<number>(0);
 
   useEffect(() => {
     setGoTaps(0);
-  }, [currentRound]);
+  }, [currentRound, sessionSeed]);
 
   const handleGoPulseTap = () => {
     runDebounced(() => {
@@ -91,7 +117,7 @@ export const Activity07MoveFreeze: React.FC<ActivityRunnerRenderProps> = ({
           {phase.mode === 'go' ? '🌿🥁' : '🛑🧘'}
         </div>
         <h2 className="text-2xl font-extrabold text-charcoal">
-          {phase.mode === 'go' ? 'ΣΗΜΑ: ΚΙΝΗΣΗ (GO)' : 'ΣΗΜΑ: ΠΑΓΩΣΕ (STOP)'}
+          {phase.mode === 'go' ? 'Σήμα: Κίνηση' : 'Σήμα: Πάγωσε'}
         </h2>
         <p className="text-lg font-bold text-charcoal" data-testid="move-freeze-instruction">
           {seatedMode ? phase.seatedInstructionEl : phase.instructionEl}

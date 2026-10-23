@@ -1,6 +1,7 @@
 import React, { useMemo, useEffect, useCallback } from 'react';
 import type { ActivityRunnerRenderProps } from '../components/ActivityRunner';
 import { useDebouncedAction } from '../hooks/useDebouncedAction';
+import { selectSessionRounds } from '../utils/clinicalAdhdEngine';
 
 interface SearchRoundConfig {
   target: { emoji: string; labelEl: string };
@@ -45,18 +46,90 @@ const ROUNDS: SearchRoundConfig[] = [
       { id: '3-8', emoji: '🐥', labelEl: 'Κοτοπουλάκι', isTarget: false },
     ],
   },
+  {
+    target: { emoji: '🦉', labelEl: 'Σοφή Κουκουβάγια' },
+    grid: [
+      { id: '4-1', emoji: '🐿️', labelEl: 'Σκιουράκι', isTarget: false },
+      { id: '4-2', emoji: '🦔', labelEl: 'Σκατζόχοιρος', isTarget: false },
+      { id: '4-3', emoji: '🦉', labelEl: 'Σοφή Κουκουβάγια', isTarget: true },
+      { id: '4-4', emoji: '🦌', labelEl: 'Ελάφι', isTarget: false },
+      { id: '4-5', emoji: '🍄', labelEl: 'Μανιτάρι', isTarget: false },
+      { id: '4-6', emoji: '🌰', labelEl: 'Κάστανο', isTarget: false },
+    ],
+  },
+  {
+    target: { emoji: '🐬', labelEl: 'Μπλε Δελφίνι' },
+    grid: [
+      { id: '5-1', emoji: '🐳', labelEl: 'Φάλαινα', isTarget: false },
+      { id: '5-2', emoji: '🐟', labelEl: 'Ψαράκι', isTarget: false },
+      { id: '5-3', emoji: '🦀', labelEl: 'Καβούρι', isTarget: false },
+      { id: '5-4', emoji: '🐬', labelEl: 'Μπλε Δελφίνι', isTarget: true },
+      { id: '5-5', emoji: '🐙', labelEl: 'Χταπόδι', isTarget: false },
+      { id: '5-6', emoji: '🐚', labelEl: 'Κοχύλι', isTarget: false },
+    ],
+  },
+  {
+    target: { emoji: '🎸', labelEl: 'Ξύλινη Κιθάρα' },
+    grid: [
+      { id: '6-1', emoji: '🥁', labelEl: 'Τύμπανο', isTarget: false },
+      { id: '6-2', emoji: '🎹', labelEl: 'Πιάνο', isTarget: false },
+      { id: '6-3', emoji: '🎺', labelEl: 'Τρομπέτα', isTarget: false },
+      { id: '6-4', emoji: '🎻', labelEl: 'Βιολί', isTarget: false },
+      { id: '6-5', emoji: '🎸', labelEl: 'Ξύλινη Κιθάρα', isTarget: true },
+      { id: '6-6', emoji: '🪈', labelEl: 'Φλάουτο', isTarget: false },
+    ],
+  },
+  {
+    target: { emoji: '🚀', labelEl: 'Διαστημικός Πύραυλος' },
+    grid: [
+      { id: '7-1', emoji: '🪐', labelEl: 'Πλανήτης', isTarget: false },
+      { id: '7-2', emoji: '🌕', labelEl: 'Πανσέληνος', isTarget: false },
+      { id: '7-3', emoji: '🚀', labelEl: 'Διαστημικός Πύραυλος', isTarget: true },
+      { id: '7-4', emoji: '☄️', labelEl: 'Κομήτης', isTarget: false },
+      { id: '7-5', emoji: '🛰️', labelEl: 'Δορυφόρος', isTarget: false },
+      { id: '7-6', emoji: '🔭', labelEl: 'Τηλεσκόπιο', isTarget: false },
+    ],
+  },
+  {
+    target: { emoji: '🍓', labelEl: 'Κόκκινη Φράουλα' },
+    grid: [
+      { id: '8-1', emoji: '🍒', labelEl: 'Κεράσια', isTarget: false },
+      { id: '8-2', emoji: '🍎', labelEl: 'Κόκκινο Μήλο', isTarget: false },
+      { id: '8-3', emoji: '🍉', labelEl: 'Καρπούζι', isTarget: false },
+      { id: '8-4', emoji: '🍓', labelEl: 'Κόκκινη Φράουλα', isTarget: true },
+      { id: '8-5', emoji: '🍅', labelEl: 'Ντομάτα', isTarget: false },
+      { id: '8-6', emoji: '🌶️', labelEl: 'Πιπεριά', isTarget: false },
+    ],
+  },
+  {
+    target: { emoji: '🦋', labelEl: 'Πολύχρωμη Πεταλούδα' },
+    grid: [
+      { id: '9-1', emoji: '🐝', labelEl: 'Μέλισσα', isTarget: false },
+      { id: '9-2', emoji: '🐞', labelEl: 'Πασχαλίτσα', isTarget: false },
+      { id: '9-3', emoji: '🦋', labelEl: 'Πολύχρωμη Πεταλούδα', isTarget: true },
+      { id: '9-4', emoji: '🐌', labelEl: 'Σαλιγκάρι', isTarget: false },
+      { id: '9-5', emoji: '🐛', labelEl: 'Κάμπια', isTarget: false },
+      { id: '9-6', emoji: '🌸', labelEl: 'Άνθος Κερασιάς', isTarget: false },
+    ],
+  },
 ];
 
 export const Activity01VisualSearch: React.FC<ActivityRunnerRenderProps> = ({
   currentRound,
+  totalRounds,
   hintLevel,
   ageBand,
   adaptiveProfile,
+  sessionSeed = 0,
   advanceRound,
   triggerGentleFeedback,
 }) => {
   const { runDebounced, getAbsorbedCount } = useDebouncedAction();
-  const roundData = ROUNDS[(currentRound - 1) % ROUNDS.length];
+  const activeRounds = useMemo(
+    () => selectSessionRounds(ROUNDS, totalRounds, sessionSeed),
+    [totalRounds, sessionSeed]
+  );
+  const roundData = activeRounds[(currentRound - 1) % activeRounds.length];
 
   // Age-graded & Invisible Adaptive Scenario distractor scaling:
   // - Hint Level 2 or Age 4-5: 3 items (2 distractors + 1 target)

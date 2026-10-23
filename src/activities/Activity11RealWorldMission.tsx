@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import type { ActivityRunnerRenderProps } from '../components/ActivityRunner';
 import { useDebouncedAction } from '../hooks/useDebouncedAction';
+import { selectSessionRounds } from '../utils/clinicalAdhdEngine';
 
 interface MissionConfig {
   titleEl: string;
@@ -9,40 +10,67 @@ interface MissionConfig {
 
 const MISSIONS: MissionConfig[] = [
   {
-    titleEl: 'Αποστολή 1: Το Κουτάλι & το Μολύβι',
+    titleEl: 'Αποστολή: Το Κουτάλι & το Μολύβι',
     steps: [
       { emoji: '🥄', textEl: 'Βρες ένα κουτάλι ή ένα ασφαλές αντικείμενο στο δωμάτιο.' },
       { emoji: '✏️', textEl: 'Ακούμπησέ το ήρεμα δίπλα σε ένα μολύβι ή μαρκαδόρο.' },
     ],
   },
   {
-    titleEl: 'Αποστολή 2: Το Βιβλίο στο Τραπέζι',
+    titleEl: 'Αποστολή: Το Βιβλίο στο Τραπέζι',
     steps: [
       { emoji: '📗', textEl: 'Διάλεξε ένα αγαπημένο σου παραμύθι ή τετράδιο.' },
       { emoji: '🪑', textEl: 'Βάλ’ το τακτοποιημένα στη γωνία του τραπεζιού.' },
     ],
   },
   {
-    titleEl: 'Αποστολή 3: Το Μαξιλάρι της Ηρεμίας',
+    titleEl: 'Αποστολή: Το Μαξιλάρι της Ηρεμίας',
     steps: [
       { emoji: '🛋️', textEl: 'Φτιάξε όμορφα ένα μαξιλάρι στον καναπέ ή στο κρεβάτι.' },
       { emoji: '🌬️', textEl: 'Κάθισε αναπαυτικά και πάρε μία βαθιά ανάσα!' },
+    ],
+  },
+  {
+    titleEl: 'Αποστολή: Τα Δύο Παπούτσια στη Σειρά',
+    steps: [
+      { emoji: '👟', textEl: 'Βρες ένα ζευγάρι παπούτσια ή παντόφλες στο δωμάτιο.' },
+      { emoji: '✨', textEl: 'Βάλ’ τα δίπλα-δίπλα τακτοποιημένα κοντά στην πόρτα.' },
+    ],
+  },
+  {
+    titleEl: 'Αποστολή: Το Ποτήρι με το Νερό',
+    steps: [
+      { emoji: '💧', textEl: 'Πήγαινε ήρεμα στην κουζίνα και πιες δύο γουλιές δροσερό νερό.' },
+      { emoji: '🤲', textEl: 'Ακούμπησε το ποτήρι προσεκτικά πάνω στον πάγκο.' },
+    ],
+  },
+  {
+    titleEl: 'Αποστολή: Ταξινομώ 3 Μικρά Παιχνίδια',
+    steps: [
+      { emoji: '🧸', textEl: 'Διάλεξε 3 μικρά παιχνίδια ή τουβλάκια από το πάτωμα.' },
+      { emoji: '📦', textEl: 'Τοποθέτησέ τα με τη σειρά μέσα στο κουτί ή στο ράφι τους.' },
     ],
   },
 ];
 
 export const Activity11RealWorldMission: React.FC<ActivityRunnerRenderProps> = ({
   currentRound,
+  totalRounds,
   hintLevel,
+  sessionSeed = 0,
   advanceRound,
 }) => {
   const { runDebounced, getAbsorbedCount } = useDebouncedAction();
-  const mission = MISSIONS[(currentRound - 1) % MISSIONS.length];
+  const activeMissions = useMemo(
+    () => selectSessionRounds(MISSIONS, totalRounds, sessionSeed),
+    [totalRounds, sessionSeed]
+  );
+  const mission = activeMissions[(currentRound - 1) % activeMissions.length];
   const [checkedSteps, setCheckedSteps] = useState<boolean[]>([false, false]);
 
   useEffect(() => {
     setCheckedSteps([false, false]);
-  }, [currentRound]);
+  }, [currentRound, sessionSeed]);
 
   const toggleStep = (index: number) => {
     runDebounced(() => {

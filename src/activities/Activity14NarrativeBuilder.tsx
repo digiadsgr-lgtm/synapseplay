@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import type { ActivityRunnerRenderProps } from '../components/ActivityRunner';
 import { useDebouncedAction } from '../hooks/useDebouncedAction';
 import { speakGreek } from '../utils/soundAndSpeech';
 import { useApp } from '../context/AppContext';
+import { selectSessionRounds } from '../utils/clinicalAdhdEngine';
 
 interface NarrativePrompt {
   storyGoalEl: string;
@@ -14,7 +15,7 @@ interface NarrativePrompt {
 
 const NARRATIVE_ROUNDS: NarrativePrompt[] = [
   {
-    storyGoalEl: 'Ιστορία 1: Έξω αρχίζει να βρέχει δυνατά. Πώς ολοκληρώνεται λογικά η πρόταση;',
+    storyGoalEl: 'Ιστορία: Έξω αρχίζει να βρέχει δυνατά. Πώς ολοκληρώνεται λογικά η πρόταση;',
     whoCard: { emoji: '🧒', textEl: 'Ο Μικρός Ήρωας' },
     whereCard: { emoji: '🌧️', textEl: 'στην αυλή με τη βροχή' },
     actionOptions: [
@@ -25,7 +26,7 @@ const NARRATIVE_ROUNDS: NarrativePrompt[] = [
     fullSentenceEl: 'Ο μικρός ήρωας στην αυλή με τη βροχή ανοίγει την ομπρέλα του για να μη βραχεί!',
   },
   {
-    storyGoalEl: 'Ιστορία 2: Το γατάκι πεινάει το πρωί. Τι κάνει;',
+    storyGoalEl: 'Ιστορία: Το γατάκι πεινάει το πρωί. Τι κάνει;',
     whoCard: { emoji: '🐱', textEl: 'Το Γατάκι' },
     whereCard: { emoji: '🥣', textEl: 'δίπλα στο μπολ της κουζίνας' },
     actionOptions: [
@@ -36,28 +37,67 @@ const NARRATIVE_ROUNDS: NarrativePrompt[] = [
     fullSentenceEl: 'Το γατάκι δίπλα στο μπολ της κουζίνας πίνει ήρεμα το φρέσκο του γάλα!',
   },
   {
-    storyGoalEl: 'Ιστορία 3: Η φίλη μας θέλει να ζωγραφίσει ένα δέντρο. Τι επιλέγει;',
+    storyGoalEl: 'Ιστορία: Η φίλη μας θέλει να ζωγραφίσει ένα δέντρο. Τι επιλέγει;',
     whoCard: { emoji: '👧', textEl: 'Η Μαθήτρια' },
     whereCard: { emoji: '🎨', textEl: 'στο τραπέζι ζωγραφικής' },
     actionOptions: [
       { id: 'nb3-1', emoji: '🖍️', textEl: 'παίρνει τον πράσινο μαρκαδόρο και το χαρτί', isCorrect: true },
       { id: 'nb3-2', emoji: '🥄', textEl: 'παίρνει το κουτάλι της σούπας', isCorrect: false },
-      { id: 'nb3-3', emoji: '枕', textEl: 'ξαπλώνει για ύπνο', isCorrect: false },
+      { id: 'nb3-3', emoji: '🛏️', textEl: 'ξαπλώνει για ύπνο', isCorrect: false },
     ],
     fullSentenceEl: 'Η μαθήτρια στο τραπέζι ζωγραφικής παίρνει τον πράσινο μαρκαδόρο και το χαρτί!',
+  },
+  {
+    storyGoalEl: 'Ιστορία: Ο σκυλάκος λερώθηκε με χώμα στον κήπο. Τι κάνει η οικογένεια;',
+    whoCard: { emoji: '🐶', textEl: 'Ο Σκυλάκος' },
+    whereCard: { emoji: '🛁', textEl: 'στο μπάνιο με το ζεστό νερό' },
+    actionOptions: [
+      { id: 'nb4-1', emoji: '🧼', textEl: 'πλένεται με αφρό και σκουπίζεται με την πετσέτα', isCorrect: true },
+      { id: 'nb4-2', emoji: '🎸', textEl: 'παίζει ηλεκτρική κιθάρα', isCorrect: false },
+      { id: 'nb4-3', emoji: '🚀', textEl: 'πετάει με πύραυλο στο φεγγάρι', isCorrect: false },
+    ],
+    fullSentenceEl: 'Ο σκυλάκος στο μπάνιο με το ζεστό νερό πλένεται με αφρό και σκουπίζεται με την πετσέτα!',
+  },
+  {
+    storyGoalEl: 'Ιστορία: Ο παππούς θέλει να φυτέψει ντομάτες. Τι κάνει;',
+    whoCard: { emoji: '👴', textEl: 'Ο Παππούς' },
+    whereCard: { emoji: '🪴', textEl: 'στον ηλιόλουστο κήπο' },
+    actionOptions: [
+      { id: 'nb5-1', emoji: '🚿', textEl: 'σκάβει απαλά το χώμα και ποτίζει τα σποράκια', isCorrect: true },
+      { id: 'nb5-2', emoji: '⛸️', textEl: 'κάνει πατινάζ στον πάγο', isCorrect: false },
+      { id: 'nb5-3', emoji: '📺', textEl: 'ανάβει την τηλεόραση στο σαλόνι', isCorrect: false },
+    ],
+    fullSentenceEl: 'Ο παππούς στον ηλιόλουστο κήπο σκάβει απαλά το χώμα και ποτίζει τα σποράκια!',
+  },
+  {
+    storyGoalEl: 'Ιστορία: Το βράδυ βγήκαν τα αστέρια στον ουρανό. Τι κάνει το παιδί;',
+    whoCard: { emoji: '🧒', textEl: 'Το Παιδί' },
+    whereCard: { emoji: '🛏️', textEl: 'στο ήσυχο υπνοδωμάτιο' },
+    actionOptions: [
+      { id: 'nb6-1', emoji: '📖', textEl: 'ακούει ένα παραμύθι και κλείνει ήρεμα τα μάτια', isCorrect: true },
+      { id: 'nb6-2', emoji: '⚽', textEl: 'παίζει ποδόσφαιρο στον δρόμο', isCorrect: false },
+      { id: 'nb6-3', emoji: '🥁', textEl: 'χτυπάει δυνατά τα τύμπανα', isCorrect: false },
+    ],
+    fullSentenceEl: 'Το παιδί στο ήσυχο υπνοδωμάτιο ακούει ένα παραμύθι και κλείνει ήρεμα τα μάτια!',
   },
 ];
 
 export const Activity14NarrativeBuilder: React.FC<ActivityRunnerRenderProps> = ({
   currentRound,
+  totalRounds,
   hintLevel,
   adaptiveProfile,
+  sessionSeed = 0,
   advanceRound,
   triggerGentleFeedback,
 }) => {
   const { settings } = useApp();
   const { runDebounced, getAbsorbedCount } = useDebouncedAction();
-  const round = NARRATIVE_ROUNDS[(currentRound - 1) % NARRATIVE_ROUNDS.length];
+  const activeRounds = useMemo(
+    () => selectSessionRounds(NARRATIVE_ROUNDS, totalRounds, sessionSeed),
+    [totalRounds, sessionSeed]
+  );
+  const round = activeRounds[(currentRound - 1) % activeRounds.length];
   const [whoConfirmed, setWhoConfirmed] = useState<boolean>(false);
   const [whereConfirmed, setWhereConfirmed] = useState<boolean>(false);
 
@@ -69,7 +109,7 @@ export const Activity14NarrativeBuilder: React.FC<ActivityRunnerRenderProps> = (
       setWhoConfirmed(false);
       setWhereConfirmed(false);
     }
-  }, [currentRound, hintLevel]);
+  }, [currentRound, hintLevel, sessionSeed]);
 
   const visibleActions =
     hintLevel === 2

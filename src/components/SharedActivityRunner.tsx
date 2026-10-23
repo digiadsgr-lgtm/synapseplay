@@ -11,6 +11,7 @@ import { useApp } from '../context/AppContext';
 import { playCalmTone, speakGreek } from '../utils/soundAndSpeech';
 import { useActivityRunnerMachine } from '../hooks/useActivityRunnerMachine';
 import { evaluateInvisibleScenario } from '../utils/adaptiveScenarioEngine';
+import { computeClinicalStaircaseSnapshot } from '../utils/clinicalAdhdEngine';
 
 export interface ActivityRunnerRenderProps {
   phase: RunnerPhase;
@@ -20,6 +21,7 @@ export interface ActivityRunnerRenderProps {
   seatedMode: boolean;
   ageBand: AgeBandId;
   adaptiveProfile: SilentAdaptationProfile;
+  sessionSeed?: number;
   setSeatedMode: (val: boolean) => void;
   advanceRound: (impulsiveTapsInRound?: number) => void;
   triggerGentleFeedback: (messageEl: string) => void;
@@ -77,6 +79,20 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
   const lastResponseMsRef = useRef<number>(0);
   const loggedCompletionRef = useRef<boolean>(false);
   const [selectedStrategy, setSelectedStrategy] = React.useState<string | null>(null);
+  const [sessionSeed, setSessionSeed] = React.useState<number>(() => {
+    try {
+      if (typeof window === 'undefined' || import.meta.env.MODE === 'test') {
+        return 0;
+      }
+      const seedKey = `synapseplay_variety_seed_${activity.id}`;
+      const prev = parseInt(window.localStorage.getItem(seedKey) ?? '-1', 10);
+      const next = isNaN(prev) ? 0 : prev + 1;
+      window.localStorage.setItem(seedKey, String(next));
+      return next;
+    } catch {
+      return 0;
+    }
+  });
 
   const ageBand: AgeBandId = settings.ageBand ?? '6-8';
 
@@ -99,6 +115,29 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
       state.totalHintsUsed,
       state.impulsiveTapsAbsorbed,
       state.seatedMode,
+    ]
+  );
+
+  // Real-time Clinical Staircase & Inner-Speech Self-Guidance (Barkley / Meichenbaum / Kollins RCT)
+  const staircaseSnapshot = useMemo(
+    () =>
+      computeClinicalStaircaseSnapshot({
+        ageBand,
+        scenarioId: adaptiveProfile.scenarioId,
+        completedRounds: state.currentRound - 1,
+        gentleNudges: state.gentleNudgesCount,
+        hintsUsed: state.totalHintsUsed,
+        absorbedImpulsiveTaps: state.impulsiveTapsAbsorbed,
+        variantNumber: (sessionSeed % 12) + 1,
+      }),
+    [
+      ageBand,
+      adaptiveProfile.scenarioId,
+      state.currentRound,
+      state.gentleNudgesCount,
+      state.totalHintsUsed,
+      state.impulsiveTapsAbsorbed,
+      sessionSeed,
     ]
   );
 
@@ -208,8 +247,15 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
     startTimeRef.current = Date.now();
     roundStartRef.current = Date.now();
     loggedCompletionRef.current = false;
+    setSessionSeed((prev) => prev + 1);
     dispatchRestart(activity.totalRounds, settings.seatedModeDefault);
     speakGreek(activity.voicePromptEl, settings.voiceEnabled, adaptiveProfile.speechRate);
+  };
+
+  const handleShuffleVariation = () => {
+    setSessionSeed((prev) => prev + 1);
+    playCalmTone('soft-step', settings.soundEnabled);
+    speakGreek('Φορτώθηκε νέα παραλλαγή δραστηριότητας!', settings.voiceEnabled, adaptiveProfile.speechRate);
   };
 
   const isCompleted = state.phase === 'COMPLETED';
@@ -340,11 +386,30 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
               </div>
             ))}
           </div>
+
+          {/* Inner-Speech Self-Coaching Cue (Meichenbaum CBT / Barkley Verbal Self-Regulation) */}
+          <div
+            data-testid="inner-speech-cue-pill"
+            className="inline-flex items-center gap-2 px-3 py-1 rounded-xl bg-sage-surface/70 border border-sage text-xs font-extrabold text-charcoal"
+          >
+            <span>{staircaseSnapshot.innerSpeechCueEl}</span>
+          </div>
         </div>
 
-        {/* Unified Hint Ladder & Seated Mode Controls */}
+        {/* Unified Hint Ladder, Variety Shuffle & Seated Mode Controls */}
         {!isCompleted && !isPaused && (
           <div className="flex flex-wrap items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={handleShuffleVariation}
+              data-testid="shuffle-variation-btn"
+              title="Εναλλαγή σε νέο σετ ερωτήσεων και εικόνων"
+              className="touch-target px-4 py-2 rounded-2xl bg-sand border-2 border-sand-dark text-charcoal font-bold text-sm flex items-center gap-1.5 hover:bg-slate-surface"
+            >
+              <span className="text-xl" aria-hidden="true">🎲</span>
+              <span>Νέα Παραλλαγή (#{(sessionSeed % 12) + 1})</span>
+            </button>
+
             {activity.supportsSeatedMode && (
               <button
                 type="button"
@@ -518,6 +583,7 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
             seatedMode: state.seatedMode,
             ageBand,
             adaptiveProfile,
+            sessionSeed,
             setSeatedMode: (val: boolean) => toggleSeatedMode(val),
             advanceRound: handleAdvanceRound,
             triggerGentleFeedback: handleGentleFeedback,

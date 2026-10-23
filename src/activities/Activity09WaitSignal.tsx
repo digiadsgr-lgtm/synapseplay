@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import type { ActivityRunnerRenderProps } from '../components/ActivityRunner';
 import { useDebouncedAction } from '../hooks/useDebouncedAction';
+import { selectSessionRounds } from '../utils/clinicalAdhdEngine';
 
 interface SignalItem {
   emoji: string;
@@ -8,31 +9,64 @@ interface SignalItem {
   hasStarCue: boolean;
 }
 
-const STREAM_ITEMS: SignalItem[] = [
-  { emoji: '☁️', labelEl: 'Σύννεφο (Χωρίς Αστέρι)', hasStarCue: false },
-  { emoji: '🍃', labelEl: 'Φύλλο (Χωρίς Αστέρι)', hasStarCue: false },
-  { emoji: '🌟🐢', labelEl: 'Χελώνα με Χρυσό Αστέρι!', hasStarCue: true },
+const STREAM_SETS: SignalItem[][] = [
+  [
+    { emoji: '☁️', labelEl: 'Σύννεφο (Χωρίς Αστέρι)', hasStarCue: false },
+    { emoji: '🍃', labelEl: 'Φύλλο (Χωρίς Αστέρι)', hasStarCue: false },
+    { emoji: '🌟🐢', labelEl: 'Χελώνα με Χρυσό Αστέρι!', hasStarCue: true },
+  ],
+  [
+    { emoji: '🌊', labelEl: 'Κύμα (Χωρίς Αστέρι)', hasStarCue: false },
+    { emoji: '🐚', labelEl: 'Κοχύλι (Χωρίς Αστέρι)', hasStarCue: false },
+    { emoji: '🌟🐬', labelEl: 'Δελφίνι με Χρυσό Αστέρι!', hasStarCue: true },
+  ],
+  [
+    { emoji: '🌲', labelEl: 'Έλατο (Χωρίς Αστέρι)', hasStarCue: false },
+    { emoji: '🍄', labelEl: 'Μανιτάρι (Χωρίς Αστέρι)', hasStarCue: false },
+    { emoji: '🌟🦉', labelEl: 'Κουκουβάγια με Χρυσό Αστέρι!', hasStarCue: true },
+  ],
+  [
+    { emoji: '🪐', labelEl: 'Πλανήτης (Χωρίς Αστέρι)', hasStarCue: false },
+    { emoji: '🌙', labelEl: 'Φεγγάρι (Χωρίς Αστέρι)', hasStarCue: false },
+    { emoji: '🌟🚀', labelEl: 'Πύραυλος με Χρυσό Αστέρι!', hasStarCue: true },
+  ],
+  [
+    { emoji: '🥁', labelEl: 'Τύμπανο (Χωρίς Αστέρι)', hasStarCue: false },
+    { emoji: '🎹', labelEl: 'Πιάνο (Χωρίς Αστέρι)', hasStarCue: false },
+    { emoji: '🌟🎸', labelEl: 'Κιθάρα με Χρυσό Αστέρι!', hasStarCue: true },
+  ],
+  [
+    { emoji: '🚲', labelEl: 'Ποδήλατο (Χωρίς Αστέρι)', hasStarCue: false },
+    { emoji: '🚂', labelEl: 'Τρενάκι (Χωρίς Αστέρι)', hasStarCue: false },
+    { emoji: '🌟⛵', labelEl: 'Καραβάκι με Χρυσό Αστέρι!', hasStarCue: true },
+  ],
 ];
 
 export const Activity09WaitSignal: React.FC<ActivityRunnerRenderProps> = ({
   currentRound,
+  totalRounds,
   hintLevel,
+  sessionSeed = 0,
   advanceRound,
   triggerGentleFeedback,
 }) => {
   const { runDebounced, getAbsorbedCount } = useDebouncedAction();
+  const activeSets = useMemo(
+    () => selectSessionRounds(STREAM_SETS, totalRounds, sessionSeed),
+    [totalRounds, sessionSeed]
+  );
+  const streamItems = activeSets[(currentRound - 1) % activeSets.length];
   const [stepIndex, setStepIndex] = useState<number>(0);
 
   useEffect(() => {
-    // If hintLevel === 2, jump straight to the cue item so the child experiences immediate success
     if (hintLevel === 2) {
       setStepIndex(2);
     } else {
       setStepIndex(0);
     }
-  }, [currentRound, hintLevel]);
+  }, [currentRound, hintLevel, sessionSeed]);
 
-  const currentItem = STREAM_ITEMS[stepIndex % STREAM_ITEMS.length];
+  const currentItem = streamItems[stepIndex % streamItems.length];
 
   const handleTapTarget = () => {
     runDebounced(() => {
@@ -40,7 +74,7 @@ export const Activity09WaitSignal: React.FC<ActivityRunnerRenderProps> = ({
         advanceRound(getAbsorbedCount());
       } else {
         triggerGentleFeedback(
-          'Περίμενε λίγο ακόμα! Αυτό δεν έχει το Χρυσό Αστέρι 🌟. Πάτησε «Επόμενο Αντικείμενο».'
+          'Περίμενε λίγο ακόμα! Αυτό δεν έχει το Χρυσό Αστέρι. Πάτησε «Επόμενο Αντικείμενο».'
         );
       }
     });
@@ -48,7 +82,7 @@ export const Activity09WaitSignal: React.FC<ActivityRunnerRenderProps> = ({
 
   const handleWaitNext = () => {
     runDebounced(() => {
-      setStepIndex((prev) => Math.min(STREAM_ITEMS.length - 1, prev + 1));
+      setStepIndex((prev) => Math.min(streamItems.length - 1, prev + 1));
     });
   };
 
@@ -56,7 +90,7 @@ export const Activity09WaitSignal: React.FC<ActivityRunnerRenderProps> = ({
     <div className="space-y-6 text-center max-w-xl mx-auto" data-testid="activity-09-wait-signal">
       <div className="p-4 rounded-2xl bg-slate-surface border-2 border-slate">
         <p className="font-extrabold text-charcoal text-lg">
-          Κανόνας: Πατάω «Επιλογή!» ΜΟΝΟ όταν βλέπω το Χρυσό Αστέρι 🌟!
+          Κανόνας: Πατάω «Επιλογή!» μόνο όταν βλέπω το Χρυσό Αστέρι 🌟!
         </p>
       </div>
 

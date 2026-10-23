@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import type { ActivityRunnerRenderProps } from '../components/ActivityRunner';
 import { useDebouncedAction } from '../hooks/useDebouncedAction';
+import { selectSessionRounds } from '../utils/clinicalAdhdEngine';
 
 interface RuleRound {
   ruleType: 'color' | 'shape';
@@ -13,7 +14,7 @@ interface RuleRound {
 const RULE_ROUNDS: RuleRound[] = [
   {
     ruleType: 'color',
-    ruleTitleEl: 'ΚΑΝΟΝΑΣ: Διαλέγω το ΙΔΙΟ ΧΡΩΜΑ (Πράσινο)',
+    ruleTitleEl: 'Κανόνας: Διαλέγω το ίδιο χρώμα (Πράσινο)',
     targetEmoji: '🍏',
     targetDescriptionEl: 'Πράσινο Μήλο',
     options: [
@@ -24,7 +25,7 @@ const RULE_ROUNDS: RuleRound[] = [
   },
   {
     ruleType: 'color',
-    ruleTitleEl: 'ΚΑΝΟΝΑΣ: Διαλέγω το ΙΔΙΟ ΧΡΩΜΑ (Μπλε)',
+    ruleTitleEl: 'Κανόνας: Διαλέγω το ίδιο χρώμα (Μπλε)',
     targetEmoji: '📘',
     targetDescriptionEl: 'Μπλε Βιβλίο',
     options: [
@@ -35,7 +36,7 @@ const RULE_ROUNDS: RuleRound[] = [
   },
   {
     ruleType: 'shape',
-    ruleTitleEl: '🔄 ΑΛΛΑΓΗ ΚΑΝΟΝΑ! Τώρα διαλέγω το ΙΔΙΟ ΣΧΗΜΑ (Στρογγυλό)',
+    ruleTitleEl: '🔄 Αλλαγή Κανόνα! Τώρα διαλέγω το ίδιο σχήμα (Στρογγυλό)',
     targetEmoji: '⚽',
     targetDescriptionEl: 'Στρογγυλή Μπάλα',
     options: [
@@ -46,7 +47,7 @@ const RULE_ROUNDS: RuleRound[] = [
   },
   {
     ruleType: 'shape',
-    ruleTitleEl: 'ΚΑΝΟΝΑΣ ΣΧΗΜΑΤΟΣ: Διαλέγω το ΙΔΙΟ ΣΧΗΜΑ (Αστέρι)',
+    ruleTitleEl: 'Κανόνας Σχήματος: Διαλέγω το ίδιο σχήμα (Αστέρι)',
     targetEmoji: '⭐',
     targetDescriptionEl: 'Αστέρι',
     options: [
@@ -55,16 +56,66 @@ const RULE_ROUNDS: RuleRound[] = [
       { id: 'r4-3', emoji: '📘', labelEl: 'Τετράγωνο Βιβλίο', isCorrect: false },
     ],
   },
+  {
+    ruleType: 'color',
+    ruleTitleEl: 'Κανόνας: Διαλέγω το ίδιο χρώμα (Κίτρινο)',
+    targetEmoji: '🍋',
+    targetDescriptionEl: 'Κίτρινο Λεμόνι',
+    options: [
+      { id: 'r5-1', emoji: '🌻', labelEl: 'Κίτρινος Ηλίανθος', isCorrect: true },
+      { id: 'r5-2', emoji: '🍓', labelEl: 'Κόκκινη Φράουλα', isCorrect: false },
+      { id: 'r5-3', emoji: '🐳', labelEl: 'Μπλε Φάλαινα', isCorrect: false },
+    ],
+  },
+  {
+    ruleType: 'shape',
+    ruleTitleEl: '🔄 Αλλαγή Κανόνα! Τώρα διαλέγω το ίδιο σχήμα (Τετράγωνο)',
+    targetEmoji: '📦',
+    targetDescriptionEl: 'Τετράγωνο Κουτί',
+    options: [
+      { id: 'r6-1', emoji: '⚽', labelEl: 'Στρογγυλή Μπάλα', isCorrect: false },
+      { id: 'r6-2', emoji: '🖼️', labelEl: 'Τετράγωνο Κάδρο', isCorrect: true },
+      { id: 'r6-3', emoji: '🌙', labelEl: 'Καμπύλο Φεγγάρι', isCorrect: false },
+    ],
+  },
+  {
+    ruleType: 'color',
+    ruleTitleEl: '🔄 Αλλαγή Κανόνα! Διαλέγω το ίδιο χρώμα (Κόκκινο)',
+    targetEmoji: '🍎',
+    targetDescriptionEl: 'Κόκκινο Μήλο',
+    options: [
+      { id: 'r7-1', emoji: '🍓', labelEl: 'Κόκκινη Φράουλα', isCorrect: true },
+      { id: 'r7-2', emoji: '🍐', labelEl: 'Πράσινο Αχλάδι', isCorrect: false },
+      { id: 'r7-3', emoji: '📘', labelEl: 'Μπλε Τετράδιο', isCorrect: false },
+    ],
+  },
+  {
+    ruleType: 'shape',
+    ruleTitleEl: 'Κανόνας Σχήματος: Διαλέγω το ίδιο σχήμα (Τρίγωνο)',
+    targetEmoji: '📐',
+    targetDescriptionEl: 'Τριγωνικός Χάρακας',
+    options: [
+      { id: 'r8-1', emoji: '⛺', labelEl: 'Τριγωνική Σκηνή', isCorrect: true },
+      { id: 'r8-2', emoji: '🍊', labelEl: 'Στρογγυλό Πορτοκάλι', isCorrect: false },
+      { id: 'r8-3', emoji: '📦', labelEl: 'Τετράγωνο Κιβώτιο', isCorrect: false },
+    ],
+  },
 ];
 
 export const Activity06SwitchRule: React.FC<ActivityRunnerRenderProps> = ({
   currentRound,
+  totalRounds,
   hintLevel,
+  sessionSeed = 0,
   advanceRound,
   triggerGentleFeedback,
 }) => {
   const { runDebounced, getAbsorbedCount } = useDebouncedAction();
-  const round = RULE_ROUNDS[(currentRound - 1) % RULE_ROUNDS.length];
+  const activeRounds = useMemo(
+    () => selectSessionRounds(RULE_ROUNDS, totalRounds, sessionSeed),
+    [totalRounds, sessionSeed]
+  );
+  const round = activeRounds[(currentRound - 1) % activeRounds.length];
 
   const visibleOptions =
     hintLevel === 2
@@ -78,7 +129,7 @@ export const Activity06SwitchRule: React.FC<ActivityRunnerRenderProps> = ({
       } else {
         triggerGentleFeedback(
           `Προσοχή στον ενεργό κανόνα! Τώρα ταιριάζουμε με βάση το ${
-            round.ruleType === 'color' ? 'ΧΡΩΜΑ 🎨' : 'ΣΧΗΜΑ ⭐'
+            round.ruleType === 'color' ? 'χρώμα' : 'σχήμα'
           }, όχι το «${labelEl}».`
         );
       }

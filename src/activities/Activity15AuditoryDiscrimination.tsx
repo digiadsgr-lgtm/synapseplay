@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import type { ActivityRunnerRenderProps } from '../components/ActivityRunner';
 import { useDebouncedAction } from '../hooks/useDebouncedAction';
 import { speakGreek } from '../utils/soundAndSpeech';
 import { useApp } from '../context/AppContext';
+import { selectSessionRounds } from '../utils/clinicalAdhdEngine';
 
 interface AuditoryConceptRound {
   conceptBadgeEl: string;
@@ -12,44 +13,77 @@ interface AuditoryConceptRound {
 
 const AUDITORY_ROUNDS: AuditoryConceptRound[] = [
   {
-    conceptBadgeEl: 'Χωρική Έννοια: ΜΕΣΑ στο κουτί',
-    spokenInstructionEl: 'Διάλεξε την εικόνα όπου το μπαλάκι ή το δώρο είναι ΜΕΣΑ στο κουτί!',
+    conceptBadgeEl: 'Χωρική Έννοια: Μέσα στο κουτί',
+    spokenInstructionEl: 'Διάλεξε την εικόνα όπου το δώρο είναι μέσα στο κουτί!',
     options: [
-      { id: 'au1-1', emoji: '🎁📦', labelEl: 'ΜΕΣΑ στο κουτί', isCorrect: true },
-      { id: 'au1-2', emoji: '📦⬆️⚽', labelEl: 'ΠΑΝΩ από το κουτί', isCorrect: false },
-      { id: 'au1-3', emoji: '📦➡️⚽', labelEl: 'ΔΙΠΛΑ στο κουτί', isCorrect: false },
+      { id: 'au1-1', emoji: '🎁📦', labelEl: 'Μέσα στο κουτί', isCorrect: true },
+      { id: 'au1-2', emoji: '📦⬆️⚽', labelEl: 'Πάνω από το κουτί', isCorrect: false },
+      { id: 'au1-3', emoji: '📦➡️⚽', labelEl: 'Δίπλα στο κουτί', isCorrect: false },
     ],
   },
   {
-    conceptBadgeEl: 'Ακουστική Διάκριση Ελάχιστων Ζευγών: /ΚΟΤΑ/ vs /ΠΟΡΤΑ/',
-    spokenInstructionEl: 'Άκου προσεκτικά τη λέξη: «ΚΟ - ΤΑ». Ποια εικόνα δείχνει την ΚΟΤΑ (όχι την ΠΟΡΤΑ);',
+    conceptBadgeEl: 'Ακουστική Διάκριση Ελάχιστων Ζευγών: «Κότα» vs «Πόρτα»',
+    spokenInstructionEl: 'Άκου προσεκτικά τη λέξη «κότα». Ποια εικόνα δείχνει την κότα και όχι την πόρτα;',
     options: [
-      { id: 'au2-1', emoji: '🚪', labelEl: 'Πόρτα (/Π/)', isCorrect: false },
-      { id: 'au2-2', emoji: '🐔', labelEl: 'Κότα (/Κ/)', isCorrect: true },
-      { id: 'au2-3', emoji: '🎂', labelEl: 'Τούρτα (/Τ/)', isCorrect: false },
+      { id: 'au2-1', emoji: '🚪', labelEl: 'Πόρτα', isCorrect: false },
+      { id: 'au2-2', emoji: '🐔', labelEl: 'Κότα', isCorrect: true },
+      { id: 'au2-3', emoji: '🎂', labelEl: 'Τούρτα', isCorrect: false },
     ],
   },
   {
-    conceptBadgeEl: 'Χωροχρονική Σχέση: ΑΝΑΜΕΣΑ στα δύο δέντρα',
-    spokenInstructionEl: 'Βρες την εικόνα όπου το σπιτάκι βρίσκεται ΑΝΑΜΕΣΑ στα δύο δέντρα!',
+    conceptBadgeEl: 'Χωροχρονική Σχέση: Ανάμεσα στα δύο δέντρα',
+    spokenInstructionEl: 'Βρες την εικόνα όπου το σπιτάκι βρίσκεται ανάμεσα στα δύο δέντρα!',
     options: [
-      { id: 'au3-1', emoji: '🌳🏠🌳', labelEl: 'ΑΝΑΜΕΣΑ στα δύο δέντρα', isCorrect: true },
+      { id: 'au3-1', emoji: '🌳🏠🌳', labelEl: 'Ανάμεσα στα δύο δέντρα', isCorrect: true },
       { id: 'au3-2', emoji: '🌳🌳🏠', labelEl: 'Μετά από τα δέντρα', isCorrect: false },
       { id: 'au3-3', emoji: '🏠🌳🌳', labelEl: 'Πριν από τα δέντρα', isCorrect: false },
+    ],
+  },
+  {
+    conceptBadgeEl: 'Ακουστική Διάκριση: «Ρόδι» vs «Πόδι»',
+    spokenInstructionEl: 'Άκου προσεκτικά τη λέξη «ρόδι». Ποια εικόνα δείχνει το κόκκινο ρόδι και όχι το πόδι;',
+    options: [
+      { id: 'au4-1', emoji: '🦶', labelEl: 'Πόδι', isCorrect: false },
+      { id: 'au4-2', emoji: '🍎', labelEl: 'Ρόδι', isCorrect: true },
+      { id: 'au4-3', emoji: '🌹', labelEl: 'Ρόδο', isCorrect: false },
+    ],
+  },
+  {
+    conceptBadgeEl: 'Ακουστική Διάκριση: «Τρένο» vs «Φρένο»',
+    spokenInstructionEl: 'Άκου καθαρά τη λέξη «τρένο». Ποια εικόνα δείχνει το τρένο στις ράγες;',
+    options: [
+      { id: 'au5-1', emoji: '🚂', labelEl: 'Τρένο', isCorrect: true },
+      { id: 'au5-2', emoji: '🛑', labelEl: 'Φρένο', isCorrect: false },
+      { id: 'au5-3', emoji: '⛺', labelEl: 'Σκηνή', isCorrect: false },
+    ],
+  },
+  {
+    conceptBadgeEl: 'Ακουστική Διάκριση: «Κάστρο» vs «Άστρο»',
+    spokenInstructionEl: 'Άκου προσεκτικά τη λέξη «άστρο». Ποια εικόνα δείχνει το λαμπερό άστρο στον ουρανό;',
+    options: [
+      { id: 'au6-1', emoji: '🏰', labelEl: 'Κάστρο', isCorrect: false },
+      { id: 'au6-2', emoji: '🌟', labelEl: 'Άστρο', isCorrect: true },
+      { id: 'au6-3', emoji: '🌻', labelEl: 'Λουλούδι', isCorrect: false },
     ],
   },
 ];
 
 export const Activity15AuditoryDiscrimination: React.FC<ActivityRunnerRenderProps> = ({
   currentRound,
+  totalRounds,
   hintLevel,
   adaptiveProfile,
+  sessionSeed = 0,
   advanceRound,
   triggerGentleFeedback,
 }) => {
   const { settings } = useApp();
   const { runDebounced, getAbsorbedCount } = useDebouncedAction();
-  const round = AUDITORY_ROUNDS[(currentRound - 1) % AUDITORY_ROUNDS.length];
+  const activeRounds = useMemo(
+    () => selectSessionRounds(AUDITORY_ROUNDS, totalRounds, sessionSeed),
+    [totalRounds, sessionSeed]
+  );
+  const round = activeRounds[(currentRound - 1) % activeRounds.length];
 
   const visibleOptions =
     hintLevel === 2
@@ -62,7 +96,7 @@ export const Activity15AuditoryDiscrimination: React.FC<ActivityRunnerRenderProp
         advanceRound(getAbsorbedCount());
       } else {
         triggerGentleFeedback(
-          `Επέλεξες «${labelEl}». Άκου ξανά την εντολή: «${round.conceptBadgeEl}»!`
+          `Επέλεξες «${labelEl}». Άκου ξανά την εντολή: ${round.spokenInstructionEl}`
         );
       }
     });

@@ -10,6 +10,7 @@ import {
 } from '../data/ageProtocols';
 import { INTERDISCIPLINARY_PROTOCOLS } from '../data/interdisciplinaryProtocols';
 import { ADAPTIVE_SCENARIO_CATALOG } from '../utils/adaptiveScenarioEngine';
+import { CLINICAL_STUDIES_AND_TRIALS } from '../utils/clinicalAdhdEngine';
 import { ParentGateModal } from '../components/ParentGateModal';
 
 export const ParentDashboardPage: React.FC = () => {
@@ -473,6 +474,48 @@ export const ParentDashboardPage: React.FC = () => {
             >
               <p className="text-xs font-extrabold text-charcoal">{sc.internalTitleEl}</p>
               <p className="text-xs text-charcoal-muted">{sc.clinicalRationaleEl}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Evidence-Based Clinical Studies & Randomized Controlled Trials (RCTs) */}
+      <section
+        data-testid="clinical-studies-rct-section"
+        className="bg-white border-2 border-sage rounded-3xl p-6 space-y-4"
+      >
+        <h2 className="text-xl font-extrabold text-charcoal">
+          🔬 Επιστημονική Τεκμηρίωση, Κλινικές Δοκιμές (RCTs) & Διεπιστημονική Ομάδα ΔΕΠΥ
+        </h2>
+        <p className="text-sm text-charcoal-muted">
+          Η μηχανή του SynapsePlay (FocusEngine 5+) βασίζεται σε διεθνείς τυχαιοποιημένες κλινικές
+          δοκιμές (RCTs) και νευροαναπτυξιακά μοντέλα για τη ΔΕΠΥ:
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {CLINICAL_STUDIES_AND_TRIALS.map((study) => (
+            <div
+              key={study.id}
+              data-testid={`clinical-study-card-${study.id}`}
+              className="p-4 rounded-2xl bg-sand-light border border-sand-dark space-y-1.5"
+            >
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <h3 className="font-extrabold text-charcoal text-sm">{study.authorsAndYear}</h3>
+                <span className="px-2 py-0.5 rounded-full bg-white border border-sage text-[11px] font-bold text-sage-dark">
+                  {study.journalOrSource}
+                </span>
+              </div>
+              <p className="text-xs font-bold text-slate-dark">{study.clinicalFocusEl}</p>
+              <p className="text-xs text-charcoal-muted">{study.engineImplementationEl}</p>
+              <div className="flex flex-wrap gap-1 pt-1">
+                {study.specialtiesInvolvedEl.map((sp) => (
+                  <span
+                    key={sp}
+                    className="px-2 py-0.5 rounded-lg bg-sage-surface text-[10px] font-extrabold text-charcoal"
+                  >
+                    {sp}
+                  </span>
+                ))}
+              </div>
             </div>
           ))}
         </div>

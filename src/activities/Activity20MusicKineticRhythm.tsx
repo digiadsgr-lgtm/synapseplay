@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import type { ActivityRunnerRenderProps } from '../components/ActivityRunner';
 import { useDebouncedAction } from '../hooks/useDebouncedAction';
 import { playCalmTone } from '../utils/soundAndSpeech';
 import { useApp } from '../context/AppContext';
+import { selectSessionRounds } from '../utils/clinicalAdhdEngine';
 
 type PercussionMove = 'clap' | 'knees' | 'rest';
 
@@ -32,36 +33,57 @@ const MOVE_META: Record<PercussionMove, { emoji: string; labelEl: string; colorC
 
 const RHYTHM_ROUNDS: RhythmPatternRound[] = [
   {
-    tempoTitleEl: 'Ρυθμός 1: Adagio (Αργά σαν Χελώνα 🐢)',
+    tempoTitleEl: 'Ρυθμός: Αργός Βηματισμός Χελώνας 🐢',
     tempoDescEl: 'Ακολούθησε το μουσικοκινητικό μέτρο: Παλαμάκι ➔ Γόνατα ➔ Μουσική Παύση!',
     pattern: ['clap', 'knees', 'rest'],
   },
   {
-    tempoTitleEl: 'Ρυθμός 2: Moderato (Σταθερός Βηματισμός 🚶)',
-    tempoDescEl: 'Συγχρόνισε τα χέρια με το μοτίβο Orff: Γόνατα ➔ Παλαμάκι ➔ Γόνατα!',
+    tempoTitleEl: 'Ρυθμός: Σταθερός Παλμός 🚶',
+    tempoDescEl: 'Συγχρόνισε τα χέρια με το μοτίβο: Γόνατα ➔ Παλαμάκι ➔ Γόνατα!',
     pattern: ['knees', 'clap', 'knees'],
   },
   {
-    tempoTitleEl: 'Ρυθμός 3: Ρυθμική Αυτορρύθμιση & Σιωπή 🎼',
+    tempoTitleEl: 'Ρυθμός: Αυτορρύθμιση & Σιωπή 🎼',
     tempoDescEl: 'Ξεκίνα με Παλαμάκι, κράτα τη Μουσική Παύση και ολοκλήρωσε στα Γόνατα!',
     pattern: ['clap', 'rest', 'knees'],
+  },
+  {
+    tempoTitleEl: 'Ρυθμός: Ηχώ του Δάσους 🌲',
+    tempoDescEl: 'Ακολούθησε την παρτιτούρα: Γόνατα ➔ Μουσική Παύση ➔ Παλαμάκι!',
+    pattern: ['knees', 'rest', 'clap'],
+  },
+  {
+    tempoTitleEl: 'Ρυθμός: Ήρεμο Κύμα Θάλασσας 🌊',
+    tempoDescEl: 'Ξεκίνα με Μουσική Παύση (εισπνοή), συνέχισε στα Γόνατα και κλείσε με Παλαμάκι!',
+    pattern: ['rest', 'knees', 'clap'],
+  },
+  {
+    tempoTitleEl: 'Ρυθμός: Διπλός Παλμός & Σιωπή 🥁',
+    tempoDescEl: 'Χτύπα Παλαμάκι ➔ Παλαμάκι ➔ και κράτα Μουσική Παύση!',
+    pattern: ['clap', 'clap', 'rest'],
   },
 ];
 
 export const Activity20MusicKineticRhythm: React.FC<ActivityRunnerRenderProps> = ({
   currentRound,
+  totalRounds,
   hintLevel,
+  sessionSeed = 0,
   advanceRound,
   triggerGentleFeedback,
 }) => {
   const { settings } = useApp();
   const { runDebounced, getAbsorbedCount } = useDebouncedAction();
-  const round = RHYTHM_ROUNDS[(currentRound - 1) % RHYTHM_ROUNDS.length];
+  const activeRounds = useMemo(
+    () => selectSessionRounds(RHYTHM_ROUNDS, totalRounds, sessionSeed),
+    [totalRounds, sessionSeed]
+  );
+  const round = activeRounds[(currentRound - 1) % activeRounds.length];
   const [stepIdx, setStepIdx] = useState<number>(0);
 
   useEffect(() => {
     setStepIdx(hintLevel === 2 ? round.pattern.length - 1 : 0);
-  }, [currentRound, hintLevel, round.pattern.length]);
+  }, [currentRound, hintLevel, round.pattern.length, sessionSeed]);
 
   const expectedMove = round.pattern[stepIdx];
 

@@ -5,6 +5,8 @@ import { MemoryRouter } from 'react-router-dom';
 import App from '../App';
 import { INTERDISCIPLINARY_PROTOCOLS } from '../data/interdisciplinaryProtocols';
 import { evaluateInvisibleScenario } from '../utils/adaptiveScenarioEngine';
+import { normalizeGreekForSpeech } from '../utils/soundAndSpeech';
+import { CLINICAL_STUDIES_AND_TRIALS } from '../utils/clinicalAdhdEngine';
 import { saveSettings, wipeAllLocalData } from '../db/database';
 
 function renderRoute(route: string = '/') {
@@ -47,7 +49,7 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
     expect(screen.getByTestId('visual-search-grid').children).toHaveLength(3);
     unmount45();
 
-    // 2. Age 10-12: Speech Articulation serves 4-syllable compound words (ΠΟ-ΔΗ-ΛΑ-ΤΟ)
+    // 2. Age 10-12: Speech Articulation serves 4-syllable compound words (Πο-δή-λα-το)
     await saveSettings({ ageBand: '10-12' });
     renderRoute('/activity/13-speech-articulation');
     await waitFor(() => {
@@ -56,7 +58,7 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
         '10-12'
       );
     });
-    expect(screen.getByTestId('activity-13-speech-articulation')).toHaveTextContent('ΠΟ-ΔΗ-ΛΑ-ΤΟ');
+    expect(screen.getByTestId('activity-13-speech-articulation')).toHaveTextContent('Πο-δή-λα-το');
   });
 
   it('Requirement C: Renders all 8 Interdisciplinary Protocols (OT, Physiatry, SLT, Psychology, Psychiatry, Social Work, Music-Kinetic, Theater) in Parent Dashboard', async () => {
@@ -211,5 +213,52 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
     u20();
 
     vi.useRealTimers();
+  });
+
+  it('Greek Speech & Prosody Engine: normalizes ΚΟΤΑ, «ΚΟ - ΤΑ», Κοτα, syllables and phonemes into natural accented Greek (zero letter-by-letter spelling)', () => {
+    const rawSentence =
+      'Άκου προσεκτικά τη λέξη: «ΚΟ - ΤΑ». Ποια εικόνα δείχνει την ΚΟΤΑ (όχι την ΠΟΡΤΑ); 🐔';
+    const normalized = normalizeGreekForSpeech(rawSentence);
+
+    expect(normalized).toContain('κότα');
+    expect(normalized).toContain('πόρτα');
+    expect(normalized).not.toContain('ΚΟΤΑ');
+    expect(normalized).not.toContain('ΚΟ - ΤΑ');
+    expect(normalized).not.toContain('🐔');
+
+    // Title-case unaccented "Κοτα" also normalizes to accented "κότα"
+    expect(normalizeGreekForSpeech('Η λέξη Κοτα')).toContain('κότα');
+
+    // Hyphenated syllables normalize to fluent words
+    expect(normalizeGreekForSpeech('Χτύπα «ΜΠΑ - ΛΑ» και «ΧΕ-ΛΩ-ΝΑ»')).toContain('μπάλα');
+    expect(normalizeGreekForSpeech('Χτύπα «ΜΠΑ - ΛΑ» και «ΧΕ-ΛΩ-ΝΑ»')).toContain('χελώνα');
+  });
+
+  it('Dynamic Variety & Clinical RCT Engine: rotates game scenarios on shuffle/replay and renders clinical trials in Parent Dashboard', async () => {
+    const { unmount } = renderRoute('/activity/01-visual-search');
+
+    // Inner-speech coaching cue (Meichenbaum CBT / Barkley) is active
+    expect(screen.getByTestId('inner-speech-cue-pill')).toBeInTheDocument();
+
+    const firstTarget = screen.getByTestId('visual-search-target-badge').textContent;
+    expect(firstTarget).toContain('Πράσινη Χελώνα');
+
+    // Clicking "Νέα Παραλλαγή" rotates to a brand-new set of items from the expanded pool
+    fireEvent.click(screen.getByTestId('shuffle-variation-btn'));
+    const nextTarget = screen.getByTestId('visual-search-target-badge').textContent;
+    expect(nextTarget).not.toBe(firstTarget);
+    expect(nextTarget).toContain('Σοφή Κουκουβάγια');
+    unmount();
+
+    // Verify Clinical Studies & RCTs section in Parent Dashboard
+    expect(CLINICAL_STUDIES_AND_TRIALS.length).toBeGreaterThanOrEqual(6);
+    renderRoute('/parent');
+    fireEvent.click(screen.getByTestId('parent-gate-option-15'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('clinical-studies-rct-section')).toBeInTheDocument();
+    });
+    expect(screen.getByTestId('clinical-study-card-barkley-ef-1997')).toBeInTheDocument();
+    expect(screen.getByTestId('clinical-study-card-kollins-stars-adhd-2020')).toBeInTheDocument();
   });
 });

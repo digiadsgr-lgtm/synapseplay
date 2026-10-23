@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import type { ActivityRunnerRenderProps } from '../components/ActivityRunner';
 import { useDebouncedAction } from '../hooks/useDebouncedAction';
+import { selectSessionRounds } from '../utils/clinicalAdhdEngine';
 
 interface ProprioceptiveExercise {
   emoji: string;
@@ -13,8 +14,8 @@ interface ProprioceptiveExercise {
 const SENSORY_EXERCISES: ProprioceptiveExercise[] = [
   {
     emoji: '🐘👐',
-    titleEl: '1. Ισομετρική Πίεση Παλαμών (Βαθιά Πίεση / Heavy Work)',
-    disciplineTagEl: 'Εργοθεραπεία (Αισθητηριακή Ολοκλήρωση) & Φυσιατρική',
+    titleEl: 'Ισομετρική Πίεση Παλαμών (Βαθιά Πίεση / Heavy Work)',
+    disciplineTagEl: 'Εργοθεραπεία (Αισθητηριακή Ολοκλήρωση Ayres) & Φυσιατρική',
     standingInstructionEl:
       'Ένωσε τις παλάμες σου μπροστά στο στήθος και σπρώξε τις σταθερά μεταξύ τους για 3 ήρεμους ρυθμούς!',
     seatedInstructionEl:
@@ -22,37 +23,70 @@ const SENSORY_EXERCISES: ProprioceptiveExercise[] = [
   },
   {
     emoji: '🪑💪',
-    titleEl: '2. Εργονομική Ευθυγράμμιση Κορμού & Αποφόρτιση Ώμων',
+    titleEl: 'Εργονομική Ευθυγράμμιση Κορμού & Αποφόρτιση Ώμων',
     disciplineTagEl: 'Φυσιατρική Στάση Σώματος & Ιδιοδεκτικότητα Κορμού',
     standingInstructionEl:
-      'Σήκωσε τους ώμους ψηλά προς τα αυτιά στην εισπνοή... και άφησέ τους να κατέβουν χαλαρά στην εκπνοή!',
+      'Σήκωσε τους ώμους ψηλά προς τα αυτιά στην εισπνοή, και άφησέ τους να κατέβουν χαλαρά στην εκπνοή!',
     seatedInstructionEl:
       'Πιάσε τα πλαϊνά της καρέκλας, ίσιωσε την πλάτη σου και κατέβασε ήρεμα τους ώμους μακριά από τα αυτιά!',
   },
   {
     emoji: '🐢🧘',
-    titleEl: '3. Σφιχτή Αγκαλιά Αρκούδας (Αυτορρύθμιση Βαθιάς Πίεσης)',
+    titleEl: 'Σφιχτή Αγκαλιά Αρκούδας (Αυτορρύθμιση Βαθιάς Πίεσης)',
     disciplineTagEl: 'Εργοθεραπεία & Παιδοψυχιατρική Αποφόρτιση Διέγερσης',
     standingInstructionEl:
       'Σταύρωσε τα χέρια και αγκάλιασε σφιχτά τους ώμους σου δίνοντας σταθερή, ήρεμη πίεση στο σώμα!',
     seatedInstructionEl:
       'Καθιστός αναπαυτικά, αγκάλιασε τους ώμους σου και μέτρησε 3 ήρεμες εκπνοές!',
   },
+  {
+    emoji: '🌳🦶',
+    titleEl: 'Ρίζες Δέντρου στο Πάτωμα (Ιδιοδεκτική Γείωση Κάτω Άκρων)',
+    disciplineTagEl: 'Φυσιατρική & Εργοθεραπεία (Στασική Σταθερότητα)',
+    standingInstructionEl:
+      'Πίεσε σταθερά και τα δύο πέλματα στο πάτωμα σαν βαθιές ρίζες δέντρου και νιώσε τα πόδια σου δυνατά!',
+    seatedInstructionEl:
+      'Καθιστός με γωνία 90 μοιρών στα γόνατα, πίεσε σταθερά τα πέλματα στο πάτωμα για 3 ήρεμους ρυθμούς!',
+  },
+  {
+    emoji: '🧱🤲',
+    titleEl: 'Σπρώχνω τον Αόρατο Τοίχο (Ισομετρική Ενδυνάμωση Άνω Άκρων)',
+    disciplineTagEl: 'Εργοθεραπεία (Ayres SI Heavy Work) & Φυσιατρική',
+    standingInstructionEl:
+      'Τέντωσε τα χέρια μπροστά (ή σε έναν αληθινό τοίχο) και σπρώξε σταθερά με ήρεμη εκπνοή!',
+    seatedInstructionEl:
+      'Ακούμπησε τις παλάμες πάνω στο τραπέζι και δώσε σταθερή, ήρεμη πίεση προς τα κάτω για 3 ρυθμούς!',
+  },
+  {
+    emoji: '🦋🌬️',
+    titleEl: 'Διάταση Θώρακα & Αναπνοή Πνευμονογαστρικής Ηρεμίας',
+    disciplineTagEl: 'Παιδοψυχιατρική (Polyvagal Regulation) & Φυσιατρική',
+    standingInstructionEl:
+      'Άνοιξε τα χέρια στο πλάι παίρνοντας βαθιά εισπνοή από τη μύτη και ένωσέ τα μπροστά με αργή εκπνοή!',
+    seatedInstructionEl:
+      'Καθιστός με ίσιο κορμό, άνοιξε ελαφρά τους αγκώνες στην εισπνοή και χαλάρωσε στην εκπνοή!',
+  },
 ];
 
 export const Activity17SensoryProprioception: React.FC<ActivityRunnerRenderProps> = ({
   currentRound,
+  totalRounds,
   hintLevel,
   seatedMode,
+  sessionSeed = 0,
   advanceRound,
 }) => {
   const { runDebounced, getAbsorbedCount } = useDebouncedAction();
-  const item = SENSORY_EXERCISES[(currentRound - 1) % SENSORY_EXERCISES.length];
+  const activeExercises = useMemo(
+    () => selectSessionRounds(SENSORY_EXERCISES, totalRounds, sessionSeed),
+    [totalRounds, sessionSeed]
+  );
+  const item = activeExercises[(currentRound - 1) % activeExercises.length];
   const [pulsesCompleted, setPulsesCompleted] = useState<number>(0);
 
   useEffect(() => {
     setPulsesCompleted(hintLevel === 2 ? 2 : 0);
-  }, [currentRound, hintLevel]);
+  }, [currentRound, hintLevel, sessionSeed]);
 
   const handleProprioceptivePulse = () => {
     runDebounced(() => {

@@ -1,11 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import type { ActivityRunnerRenderProps } from '../components/ActivityRunner';
 import { useDebouncedAction } from '../hooks/useDebouncedAction';
-import { playCalmTone, speakGreek } from '../utils/soundAndSpeech';
+import { playCalmTone, speakGreek, speakGreekSyllable } from '../utils/soundAndSpeech';
 import { useApp } from '../context/AppContext';
+import { selectSessionRounds } from '../utils/clinicalAdhdEngine';
 
 interface SpeechRound {
   wordEl: string;
+  spokenWordEl: string;
   syllables: string[];
   promptQuestionEl: string;
   targetEmoji: string;
@@ -15,9 +17,10 @@ interface SpeechRound {
 const AGE_SPEECH_ROUNDS: Record<string, SpeechRound[]> = {
   '4-5': [
     {
-      wordEl: 'ΜΠΑ-ΛΑ',
-      syllables: ['ΜΠΑ', 'ΛΑ'],
-      promptQuestionEl: 'Χτύπα 2 παλαμάκια («ΜΠΑ - ΛΑ») και βρες την Μπάλα!',
+      wordEl: 'Μπά-λα',
+      spokenWordEl: 'μπάλα',
+      syllables: ['μπά', 'λα'],
+      promptQuestionEl: 'Χτύπα 2 παλαμάκια για τη λέξη «μπάλα» και βρες την μπάλα!',
       targetEmoji: '⚽',
       options: [
         { id: 'sp4-1', emoji: '⚽', labelEl: 'Μπάλα (2 συλλαβές)', isCorrect: true },
@@ -26,9 +29,10 @@ const AGE_SPEECH_ROUNDS: Record<string, SpeechRound[]> = {
       ],
     },
     {
-      wordEl: 'ΓΑ-ΤΑ',
-      syllables: ['ΓΑ', 'ΤΑ'],
-      promptQuestionEl: 'Χτύπα 2 παλαμάκια («ΓΑ - ΤΑ») και βρες τη Γάτα!',
+      wordEl: 'Γά-τα',
+      spokenWordEl: 'γάτα',
+      syllables: ['γά', 'τα'],
+      promptQuestionEl: 'Χτύπα 2 παλαμάκια για τη λέξη «γάτα» και βρες τη γάτα!',
       targetEmoji: '🐱',
       options: [
         { id: 'sp4-4', emoji: '🐶', labelEl: 'Σκύλος', isCorrect: false },
@@ -37,9 +41,10 @@ const AGE_SPEECH_ROUNDS: Record<string, SpeechRound[]> = {
       ],
     },
     {
-      wordEl: 'ΠΑ-ΠΙ',
-      syllables: ['ΠΑ', 'ΠΙ'],
-      promptQuestionEl: 'Χτύπα 2 παλαμάκια («ΠΑ - ΠΙ») και βρες το Παπί!',
+      wordEl: 'Πα-πί',
+      spokenWordEl: 'παπί',
+      syllables: ['πα', 'πί'],
+      promptQuestionEl: 'Χτύπα 2 παλαμάκια για τη λέξη «παπί» και βρες το παπί!',
       targetEmoji: '🦆',
       options: [
         { id: 'sp4-7', emoji: '🦆', labelEl: 'Παπί (2 συλλαβές)', isCorrect: true },
@@ -47,23 +52,61 @@ const AGE_SPEECH_ROUNDS: Record<string, SpeechRound[]> = {
         { id: 'sp4-9', emoji: '🐴', labelEl: 'Άλογο', isCorrect: false },
       ],
     },
-  ],
-  '6-8': [
     {
-      wordEl: 'ΧΕ-ΛΩ-ΝΑ',
-      syllables: ['ΧΕ', 'ΛΩ', 'ΝΑ'],
-      promptQuestionEl: 'Χτύπα τις 3 συλλαβές («ΧΕ-ΛΩ-ΝΑ») και βρες ποια λέξη αρχίζει επίσης με /Χ/!',
-      targetEmoji: '🐢',
+      wordEl: 'Κό-τα',
+      spokenWordEl: 'κότα',
+      syllables: ['κό', 'τα'],
+      promptQuestionEl: 'Χτύπα 2 παλαμάκια για τη λέξη «κότα» και βρες την κότα!',
+      targetEmoji: '🐔',
       options: [
-        { id: 'sp6-1', emoji: '🐙', labelEl: 'Χταπόδι (Αρχίζει με /Χ/)', isCorrect: true },
-        { id: 'sp6-2', emoji: '⛵', labelEl: 'Καράβι (Αρχίζει με /Κ/)', isCorrect: false },
-        { id: 'sp6-3', emoji: '🌻', labelEl: 'Ηλίανθος (Αρχίζει με /Η/)', isCorrect: false },
+        { id: 'sp4-10', emoji: '🐔', labelEl: 'Κότα (2 συλλαβές)', isCorrect: true },
+        { id: 'sp4-11', emoji: '🐟', labelEl: 'Ψάρι', isCorrect: false },
+        { id: 'sp4-12', emoji: '🐢', labelEl: 'Χελώνα', isCorrect: false },
       ],
     },
     {
-      wordEl: 'ΚΑ-ΡΑ-ΒΙ',
-      syllables: ['ΚΑ', 'ΡΑ', 'ΒΙ'],
-      promptQuestionEl: 'Χτύπα τις 3 συλλαβές («ΚΑ-ΡΑ-ΒΙ») — πρόσεξε το καθαρό /Ρ/ — και βρες τι ομοιοκαταληκτεί με το «Καράβι»!',
+      wordEl: 'Μή-λο',
+      spokenWordEl: 'μήλο',
+      syllables: ['μή', 'λο'],
+      promptQuestionEl: 'Χτύπα 2 παλαμάκια για τη λέξη «μήλο» και βρες το κόκκινο μήλο!',
+      targetEmoji: '🍎',
+      options: [
+        { id: 'sp4-13', emoji: '🍌', labelEl: 'Μπανάνα', isCorrect: false },
+        { id: 'sp4-14', emoji: '🍎', labelEl: 'Μήλο (2 συλλαβές)', isCorrect: true },
+        { id: 'sp4-15', emoji: '🍓', labelEl: 'Φράουλα', isCorrect: false },
+      ],
+    },
+    {
+      wordEl: 'Ψά-ρι',
+      spokenWordEl: 'ψάρι',
+      syllables: ['ψά', 'ρι'],
+      promptQuestionEl: 'Χτύπα 2 παλαμάκια για τη λέξη «ψάρι» και βρες το ψαράκι!',
+      targetEmoji: '🐟',
+      options: [
+        { id: 'sp4-16', emoji: '🐟', labelEl: 'Ψάρι (2 συλλαβές)', isCorrect: true },
+        { id: 'sp4-17', emoji: '🦁', labelEl: 'Λιοντάρι', isCorrect: false },
+        { id: 'sp4-18', emoji: '🐘', labelEl: 'Ελέφαντας', isCorrect: false },
+      ],
+    },
+  ],
+  '6-8': [
+    {
+      wordEl: 'Χε-λώ-να',
+      spokenWordEl: 'χελώνα',
+      syllables: ['χε', 'λώ', 'να'],
+      promptQuestionEl: 'Χτύπα τις 3 συλλαβές στη λέξη «χελώνα» και βρες ποια λέξη αρχίζει επίσης με την ίδια φωνούλα!',
+      targetEmoji: '🐢',
+      options: [
+        { id: 'sp6-1', emoji: '🐙', labelEl: 'Χταπόδι (Αρχίζει με Χ)', isCorrect: true },
+        { id: 'sp6-2', emoji: '⛵', labelEl: 'Καράβι (Αρχίζει με Κ)', isCorrect: false },
+        { id: 'sp6-3', emoji: '🌻', labelEl: 'Ηλίανθος (Αρχίζει με Η)', isCorrect: false },
+      ],
+    },
+    {
+      wordEl: 'Κα-ρά-βι',
+      spokenWordEl: 'καράβι',
+      syllables: ['κα', 'ρά', 'βι'],
+      promptQuestionEl: 'Χτύπα τις 3 συλλαβές στη λέξη «καράβι» και βρες τι ομοιοκαταληκτεί με το «καράβι»!',
       targetEmoji: '⛵',
       options: [
         { id: 'sp6-4', emoji: '🌳', labelEl: 'Δέντρο', isCorrect: false },
@@ -72,33 +115,72 @@ const AGE_SPEECH_ROUNDS: Record<string, SpeechRound[]> = {
       ],
     },
     {
-      wordEl: 'ΘΑ-ΛΑ-ΣΣΑ',
-      syllables: ['ΘΑ', 'ΛΑ', 'ΣΣΑ'],
-      promptQuestionEl: 'Πες καθαρά «ΘΑ-ΛΑ-ΣΣΑ» (/Θ/ και /Σ/) και βρες τη λέξη που έχει 3 συλλαβές!',
+      wordEl: 'Θά-λα-σσα',
+      spokenWordEl: 'θάλασσα',
+      syllables: ['θά', 'λα', 'σσα'],
+      promptQuestionEl: 'Πες καθαρά «θάλασσα» και βρες τη λέξη που έχει επίσης 3 συλλαβές!',
       targetEmoji: '🌊',
       options: [
-        { id: 'sp6-7', emoji: '☀️', labelEl: 'Ή-λιος (2)', isCorrect: false },
-        { id: 'sp6-8', emoji: '🦋', labelEl: 'Μέ-λι-σσα (3 συλλαβές)', isCorrect: true },
-        { id: 'sp6-9', emoji: '🏠', labelEl: 'Σπί-τι (2)', isCorrect: false },
+        { id: 'sp6-7', emoji: '☀️', labelEl: 'Ήλιος (2 συλλαβές)', isCorrect: false },
+        { id: 'sp6-8', emoji: '🦋', labelEl: 'Μέλισσα (3 συλλαβές)', isCorrect: true },
+        { id: 'sp6-9', emoji: '🏠', labelEl: 'Σπίτι (2 συλλαβές)', isCorrect: false },
+      ],
+    },
+    {
+      wordEl: 'Λε-μό-νι',
+      spokenWordEl: 'λεμόνι',
+      syllables: ['λε', 'μό', 'νι'],
+      promptQuestionEl: 'Χτύπα τις 3 συλλαβές στη λέξη «λεμόνι» και βρες τι ομοιοκαταληκτεί με το «λεμόνι»!',
+      targetEmoji: '🍋',
+      options: [
+        { id: 'sp6-10', emoji: '🎈', labelEl: 'Μπαλόνι (Λεμόνι - Μπαλόνι)', isCorrect: true },
+        { id: 'sp6-11', emoji: '🍎', labelEl: 'Μήλο', isCorrect: false },
+        { id: 'sp6-12', emoji: '🚲', labelEl: 'Ποδήλατο', isCorrect: false },
+      ],
+    },
+    {
+      wordEl: 'Τρε-νά-κι',
+      spokenWordEl: 'τρενάκι',
+      syllables: ['τρε', 'νά', 'κι'],
+      promptQuestionEl: 'Πες καθαρά το σύμπλεγμα στην αρχή της λέξης «τρενάκι» και βρες ποια λέξη αρχίζει επίσης με «τρ»!',
+      targetEmoji: '🚂',
+      options: [
+        { id: 'sp6-13', emoji: '🍀', labelEl: 'Τριφύλλι (Αρχίζει με Τρ)', isCorrect: true },
+        { id: 'sp6-14', emoji: '⛵', labelEl: 'Καράβι', isCorrect: false },
+        { id: 'sp6-15', emoji: '🌙', labelEl: 'Φεγγάρι', isCorrect: false },
+      ],
+    },
+    {
+      wordEl: 'Κι-θά-ρα',
+      spokenWordEl: 'κιθάρα',
+      syllables: ['κι', 'θά', 'ρα'],
+      promptQuestionEl: 'Χτύπα τις 3 συλλαβές στη λέξη «κιθάρα» και βρες το άλλο μουσικό όργανο με 3 συλλαβές!',
+      targetEmoji: '🎸',
+      options: [
+        { id: 'sp6-16', emoji: '🥁', labelEl: 'Τύμπανο (3 συλλαβές)', isCorrect: true },
+        { id: 'sp6-17', emoji: '🔔', labelEl: 'Κουδούνι', isCorrect: false },
+        { id: 'sp6-18', emoji: '🏠', labelEl: 'Σπίτι (2 συλλαβές)', isCorrect: false },
       ],
     },
   ],
   '10-12': [
     {
-      wordEl: 'ΠΟ-ΔΗ-ΛΑ-ΤΟ',
-      syllables: ['ΠΟ', 'ΔΗ', 'ΛΑ', 'ΤΟ'],
-      promptQuestionEl: 'Κατάτμησε τις 4 συλλαβές («ΠΟ-ΔΗ-ΛΑ-ΤΟ») και επίλεξε την πολυσύλλαβη σύνθετη λέξη (4 συλλαβές):',
+      wordEl: 'Πο-δή-λα-το',
+      spokenWordEl: 'ποδήλατο',
+      syllables: ['πο', 'δή', 'λα', 'το'],
+      promptQuestionEl: 'Κατάτμησε τις 4 συλλαβές στη λέξη «ποδήλατο» και επίλεξε την πολυσύλλαβη σύνθετη λέξη (4 συλλαβές):',
       targetEmoji: '🚲',
       options: [
-        { id: 'sp10-1', emoji: '🔭', labelEl: 'Τη-λε-σκό-πι-ο / Α-στρο-ναύ-της (4 συλλαβές)', isCorrect: true },
-        { id: 'sp10-2', emoji: '🎒', labelEl: 'Τσά-ντα (2 συλλαβές)', isCorrect: false },
-        { id: 'sp10-3', emoji: '✏️', labelEl: 'Μο-λύ-βι (3 συλλαβές)', isCorrect: false },
+        { id: 'sp10-1', emoji: '🔭', labelEl: 'Αστροναύτης (4 συλλαβές)', isCorrect: true },
+        { id: 'sp10-2', emoji: '🎒', labelEl: 'Τσάντα (2 συλλαβές)', isCorrect: false },
+        { id: 'sp10-3', emoji: '✏️', labelEl: 'Μολύβι (3 συλλαβές)', isCorrect: false },
       ],
     },
     {
-      wordEl: 'Ε-ΛΕ-ΦΑ-ΝΤΑΣ',
-      syllables: ['Ε', 'ΛΕ', 'ΦΑ', 'ΝΤΑΣ'],
-      promptQuestionEl: 'Ένωσε τις συλλαβές και βρες το ακριβές συνώνυμο της λέξης «ΗΡΕΜΟΣ»:',
+      wordEl: 'Ε-λέ-φα-ντας',
+      spokenWordEl: 'ελέφαντας',
+      syllables: ['ε', 'λέ', 'φα', 'ντας'],
+      promptQuestionEl: 'Ένωσε τις συλλαβές και βρες το ακριβές συνώνυμο της λέξης «ήρεμος»:',
       targetEmoji: '🐘',
       options: [
         { id: 'sp10-4', emoji: '⚡', labelEl: 'Βιαστικός', isCorrect: false },
@@ -107,14 +189,51 @@ const AGE_SPEECH_ROUNDS: Record<string, SpeechRound[]> = {
       ],
     },
     {
-      wordEl: 'ΣΥ-ΓΚΕ-ΝΤΡΩ-ΣΗ',
-      syllables: ['ΣΥ', 'ΓΚΕ', 'ΝΤΡΩ', 'ΣΗ'],
-      promptQuestionEl: 'Πες καθαρά τα συμπλέγματα συμφώνων (/ΓΚ/, /ΝΤΡ/) και βρες το συγγενικό ρήμα:',
+      wordEl: 'Συ-γκέ-ντρω-ση',
+      spokenWordEl: 'συγκέντρωση',
+      syllables: ['συ', 'γκέ', 'ντρω', 'ση'],
+      promptQuestionEl: 'Πες καθαρά τη λέξη «συγκέντρωση» και βρες το συγγενικό ρήμα:',
       targetEmoji: '🎯',
       options: [
-        { id: 'sp10-7', emoji: '🎯', labelEl: 'Εστιάζω / Συγκεντρώνομαι', isCorrect: true },
+        { id: 'sp10-7', emoji: '🎯', labelEl: 'Εστιάζω και Συγκεντρώνομαι', isCorrect: true },
         { id: 'sp10-8', emoji: '🏃', labelEl: 'Απομακρύνομαι', isCorrect: false },
         { id: 'sp10-9', emoji: '😴', labelEl: 'Αποκοιμιέμαι', isCorrect: false },
+      ],
+    },
+    {
+      wordEl: 'Πε-τα-λού-δα',
+      spokenWordEl: 'πεταλούδα',
+      syllables: ['πε', 'τα', 'λού', 'δα'],
+      promptQuestionEl: 'Κατάτμησε τις 4 συλλαβές και βρες το αντίθετο της λέξης «βιασύνη»:',
+      targetEmoji: '🦋',
+      options: [
+        { id: 'sp10-10', emoji: '🧘', labelEl: 'Υπομονή και Ψυχραιμία', isCorrect: true },
+        { id: 'sp10-11', emoji: '🌪️', labelEl: 'Αναστάτωση', isCorrect: false },
+        { id: 'sp10-12', emoji: '🏎️', labelEl: 'Ταχύτητα', isCorrect: false },
+      ],
+    },
+    {
+      wordEl: 'Βι-βλι-ο-θή-κη',
+      spokenWordEl: 'βιβλιοθήκη',
+      syllables: ['βι', 'βλι', 'ο', 'θή', 'κη'],
+      promptQuestionEl: 'Ένωσε τις 5 συλλαβές της σύνθετης λέξης «βιβλιοθήκη» και βρες από ποιες λέξεις προέρχεται:',
+      targetEmoji: '📚',
+      options: [
+        { id: 'sp10-13', emoji: '📖', labelEl: 'Βιβλίο + Θήκη', isCorrect: true },
+        { id: 'sp10-14', emoji: '✏️', labelEl: 'Μολύβι + Χαρτί', isCorrect: false },
+        { id: 'sp10-15', emoji: '🎒', labelEl: 'Σχολείο + Τσάντα', isCorrect: false },
+      ],
+    },
+    {
+      wordEl: 'Αυ-το-ρρύ-θμι-ση',
+      spokenWordEl: 'αυτορρύθμιση',
+      syllables: ['αυ', 'το', 'ρρύ', 'θμι', 'ση'],
+      promptQuestionEl: 'Πες καθαρά τη λέξη «αυτορρύθμιση» και επίλεξε τι σημαίνει στην πράξη:',
+      targetEmoji: '🧭',
+      options: [
+        { id: 'sp10-16', emoji: '🧭', labelEl: 'Κυβερνώ ήρεμα τις κινήσεις και τη σκέψη μου', isCorrect: true },
+        { id: 'sp10-17', emoji: '🎲', labelEl: 'Πατάω στην τύχη χωρίς να κοιτάζω', isCorrect: false },
+        { id: 'sp10-18', emoji: '🛑', labelEl: 'Σταματάω να προσπαθώ', isCorrect: false },
       ],
     },
   ],
@@ -122,9 +241,11 @@ const AGE_SPEECH_ROUNDS: Record<string, SpeechRound[]> = {
 
 export const Activity13SpeechArticulation: React.FC<ActivityRunnerRenderProps> = ({
   currentRound,
+  totalRounds,
   hintLevel,
   ageBand,
   adaptiveProfile,
+  sessionSeed = 0,
   advanceRound,
   triggerGentleFeedback,
 }) => {
@@ -138,14 +259,18 @@ export const Activity13SpeechArticulation: React.FC<ActivityRunnerRenderProps> =
       ? '10-12'
       : '6-8';
 
-  const rounds = AGE_SPEECH_ROUNDS[tierKey];
-  const round = rounds[(currentRound - 1) % rounds.length];
+  const pool = AGE_SPEECH_ROUNDS[tierKey];
+  const activeRounds = useMemo(
+    () => selectSessionRounds(pool, totalRounds, sessionSeed),
+    [pool, totalRounds, sessionSeed]
+  );
+  const round = activeRounds[(currentRound - 1) % activeRounds.length];
 
   const [clappedCount, setClappedCount] = useState<number>(0);
 
   useEffect(() => {
     setClappedCount(hintLevel === 2 ? round.syllables.length : 0);
-  }, [currentRound, hintLevel, round.syllables.length]);
+  }, [currentRound, hintLevel, round.syllables.length, sessionSeed]);
 
   const allClapped = clappedCount >= round.syllables.length;
 
@@ -154,8 +279,17 @@ export const Activity13SpeechArticulation: React.FC<ActivityRunnerRenderProps> =
       if (clappedCount < round.syllables.length) {
         const syl = round.syllables[clappedCount];
         playCalmTone('pulse', settings.soundEnabled);
-        speakGreek(syl, settings.voiceEnabled, adaptiveProfile.speechRate);
-        setClappedCount((c) => c + 1);
+        // Uses dedicated syllable phonetic synthesis so single syllables are NEVER spelled out as letters
+        speakGreekSyllable(syl, settings.voiceEnabled, adaptiveProfile.speechRate);
+        setClappedCount((c) => {
+          const next = c + 1;
+          if (next === round.syllables.length) {
+            window.setTimeout(() => {
+              speakGreek(round.spokenWordEl, settings.voiceEnabled, adaptiveProfile.speechRate);
+            }, 380);
+          }
+          return next;
+        });
       }
     });
   };
@@ -169,7 +303,7 @@ export const Activity13SpeechArticulation: React.FC<ActivityRunnerRenderProps> =
     runDebounced(() => {
       if (!allClapped && hintLevel < 1) {
         triggerGentleFeedback(
-          `Πρώτα χτύπα παλαμάκια για όλες τις συλλαβές της λέξης «${round.wordEl}»!`
+          `Πρώτα χτύπα παλαμάκια για όλες τις συλλαβές της λέξης «${round.spokenWordEl}»!`
         );
         return;
       }
@@ -177,7 +311,7 @@ export const Activity13SpeechArticulation: React.FC<ActivityRunnerRenderProps> =
         advanceRound(getAbsorbedCount());
       } else {
         triggerGentleFeedback(
-          `Άκου ξανά καθαρά: ψάχνουμε το φωνολογικό ταίρι για «${round.wordEl}», όχι «${labelEl}».`
+          `Άκου ξανά καθαρά: ψάχνουμε το φωνολογικό ταίρι για τη λέξη «${round.spokenWordEl}», όχι «${labelEl}».`
         );
       }
     });
@@ -188,7 +322,17 @@ export const Activity13SpeechArticulation: React.FC<ActivityRunnerRenderProps> =
       {/* Syllabic Rhythm & Articulation Stage */}
       <div className="p-6 rounded-3xl bg-sage-surface border-4 border-sage space-y-4">
         <div className="text-5xl" aria-hidden="true">{round.targetEmoji}</div>
-        <h2 className="text-2xl font-extrabold text-charcoal">{round.wordEl}</h2>
+        <div className="flex flex-wrap items-center justify-center gap-3">
+          <h2 className="text-2xl font-extrabold text-charcoal">{round.wordEl}</h2>
+          <button
+            type="button"
+            data-testid="speech-word-listen-btn"
+            onClick={() => speakGreek(round.spokenWordEl, true, adaptiveProfile.speechRate)}
+            className="px-3 py-1.5 rounded-xl bg-white border-2 border-sage text-xs font-extrabold text-charcoal hover:bg-sage hover:text-white"
+          >
+            🔊 Άκου τη λέξη «{round.spokenWordEl}»
+          </button>
+        </div>
         <p className="text-base font-bold text-charcoal">{round.promptQuestionEl}</p>
 
         {/* Interactive Syllable Clapping Boxes */}

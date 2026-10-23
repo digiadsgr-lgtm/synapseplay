@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import type { ActivityRunnerRenderProps } from '../components/ActivityRunner';
 import { useDebouncedAction } from '../hooks/useDebouncedAction';
+import { selectSessionRounds } from '../utils/clinicalAdhdEngine';
 
 interface SceneSlot {
   id: string;
@@ -29,16 +30,58 @@ const SCENES: SceneSlot[][] = [
     { id: 's3-3', leftEmoji: '🥛', rightEmoji: '🥛', labelEl: 'Ποτήρι', isDifferent: false },
     { id: 's3-4', leftEmoji: '🥄', rightEmoji: '🥄', labelEl: 'Κουτάλι', isDifferent: false },
   ],
+  [
+    { id: 's4-1', leftEmoji: '🎒', rightEmoji: '🎒', labelEl: 'Σχολική Τσάντα', isDifferent: false },
+    { id: 's4-2', leftEmoji: '✏️', rightEmoji: '🖍️', labelEl: 'Κασετίνα (Μολύβι / Μαρκαδόρος)', isDifferent: true },
+    { id: 's4-3', leftEmoji: '📘', rightEmoji: '📘', labelEl: 'Τετράδιο', isDifferent: false },
+    { id: 's4-4', leftEmoji: '📏', rightEmoji: '📏', labelEl: 'Χάρακας', isDifferent: false },
+  ],
+  [
+    { id: 's5-1', leftEmoji: '🚀', rightEmoji: '🚀', labelEl: 'Πύραυλος', isDifferent: false },
+    { id: 's5-2', leftEmoji: '🪐', rightEmoji: '🪐', labelEl: 'Πλανήτης Κρόνος', isDifferent: false },
+    { id: 's5-3', leftEmoji: '⭐', rightEmoji: '☄️', labelEl: 'Διάστημα (Αστέρι / Κομήτης)', isDifferent: true },
+    { id: 's5-4', leftEmoji: '🌕', rightEmoji: '🌕', labelEl: 'Φεγγάρι', isDifferent: false },
+  ],
+  [
+    { id: 's6-1', leftEmoji: '🎸', rightEmoji: '🎻', labelEl: 'Έγχορδο (Κιθάρα / Βιολί)', isDifferent: true },
+    { id: 's6-2', leftEmoji: '🥁', rightEmoji: '🥁', labelEl: 'Τύμπανο', isDifferent: false },
+    { id: 's6-3', leftEmoji: '🎹', rightEmoji: '🎹', labelEl: 'Πιάνο', isDifferent: false },
+    { id: 's6-4', leftEmoji: '🔔', rightEmoji: '🔔', labelEl: 'Καμπανάκι', isDifferent: false },
+  ],
+  [
+    { id: 's7-1', leftEmoji: '🌲', rightEmoji: '🌲', labelEl: 'Έλατο', isDifferent: false },
+    { id: 's7-2', leftEmoji: '⛺', rightEmoji: '⛺', labelEl: 'Σκηνή Κατασκήνωσης', isDifferent: false },
+    { id: 's7-3', leftEmoji: '🦉', rightEmoji: '🐿️', labelEl: 'Δάσος (Κουκουβάγια / Σκιουράκι)', isDifferent: true },
+    { id: 's7-4', leftEmoji: '🍄', rightEmoji: '🍄', labelEl: 'Μανιτάρι', isDifferent: false },
+  ],
+  [
+    { id: 's8-1', leftEmoji: '🚲', rightEmoji: '🛴', labelEl: 'Ρόδες (Ποδήλατο / Πατίνι)', isDifferent: true },
+    { id: 's8-2', leftEmoji: '⚽', rightEmoji: '⚽', labelEl: 'Μπάλα', isDifferent: false },
+    { id: 's8-3', leftEmoji: '🛝', rightEmoji: '🛝', labelEl: 'Τσουλήθρα', isDifferent: false },
+    { id: 's8-4', leftEmoji: '🌳', rightEmoji: '🌳', labelEl: 'Πάρκο', isDifferent: false },
+  ],
+  [
+    { id: 's9-1', leftEmoji: '🛏️', rightEmoji: '🛏️', labelEl: 'Κρεβάτι', isDifferent: false },
+    { id: 's9-2', leftEmoji: '🧸', rightEmoji: '🐰', labelEl: 'Παιχνίδι (Αρκουδάκι / Κουνελάκι)', isDifferent: true },
+    { id: 's9-3', leftEmoji: '📚', rightEmoji: '📚', labelEl: 'Παραμύθια', isDifferent: false },
+    { id: 's9-4', leftEmoji: '🕰️', rightEmoji: '🕰️', labelEl: 'Ρολόι', isDifferent: false },
+  ],
 ];
 
 export const Activity02SpotDifference: React.FC<ActivityRunnerRenderProps> = ({
   currentRound,
+  totalRounds,
   hintLevel,
+  sessionSeed = 0,
   advanceRound,
   triggerGentleFeedback,
 }) => {
   const { runDebounced, getAbsorbedCount } = useDebouncedAction();
-  const slots = SCENES[(currentRound - 1) % SCENES.length];
+  const activeScenes = useMemo(
+    () => selectSessionRounds(SCENES, totalRounds, sessionSeed),
+    [totalRounds, sessionSeed]
+  );
+  const slots = activeScenes[(currentRound - 1) % activeScenes.length];
 
   const visibleSlots = hintLevel === 2 ? slots.filter((s, i) => s.isDifferent || i === 0) : slots;
 

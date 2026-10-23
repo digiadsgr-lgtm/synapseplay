@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import type { ActivityRunnerRenderProps } from '../components/ActivityRunner';
 import { useDebouncedAction } from '../hooks/useDebouncedAction';
+import { selectSessionRounds } from '../utils/clinicalAdhdEngine';
 
 interface RoutineStep {
   order: number;
@@ -36,21 +37,81 @@ const ROUTINES: Array<{ titleEl: string; steps: RoutineStep[]; displayOrder: num
     ],
     displayOrder: [2, 3, 1],
   },
+  {
+    titleEl: 'Ρουτίνα: Φυτεύω ένα Σποράκι στον Κήπο',
+    steps: [
+      { order: 1, emoji: '🪴', labelEl: 'Βάζω χώμα στη γλάστρα και φυτεύω το σποράκι' },
+      { order: 2, emoji: '🚿', labelEl: 'Ποτίζω απαλά με λίγο νερό' },
+      { order: 3, emoji: '🌱', labelEl: 'Το φυτό μεγαλώνει στον ήλιο' },
+    ],
+    displayOrder: [3, 1, 2],
+  },
+  {
+    titleEl: 'Ρουτίνα: Ετοιμάζω το Τοστ μου',
+    steps: [
+      { order: 1, emoji: '🍞', labelEl: 'Παίρνω δύο φέτες ψωμί' },
+      { order: 2, emoji: '🧀', labelEl: 'Βάζω το τυρί ανάμεσα στις φέτες' },
+      { order: 3, emoji: '🥪', labelEl: 'Ακουμπάω το έτοιμο σάντουιτς στο πιάτο' },
+    ],
+    displayOrder: [2, 3, 1],
+  },
+  {
+    titleEl: 'Ρουτίνα: Ετοιμάζομαι για Βραδινό Ύπνο',
+    steps: [
+      { order: 1, emoji: '👕', labelEl: 'Φοράω τις άνετες πιτζάμες μου' },
+      { order: 2, emoji: '📖', labelEl: 'Διαβάζουμε ένα ήρεμο παραμύθι' },
+      { order: 3, emoji: '😴', labelEl: 'Κλείνω το φως και ξαπλώνω στο μαξιλάρι' },
+    ],
+    displayOrder: [3, 1, 2],
+  },
+  {
+    titleEl: 'Ρουτίνα: Διασχίζω τον Δρόμο με Ασφάλεια',
+    steps: [
+      { order: 1, emoji: '🛑', labelEl: 'Σταματάω στο πεζοδρόμιο στη διάβαση' },
+      { order: 2, emoji: '👀', labelEl: 'Κοιτάζω αριστερά και δεξιά αν έρχεται όχημα' },
+      { order: 3, emoji: '🚶', labelEl: 'Περνάω ήρεμα με το πράσινο φανάρι πεζών' },
+    ],
+    displayOrder: [2, 1, 3],
+  },
+  {
+    titleEl: 'Ρουτίνα: Ζωγραφίζω με Νερομπογιές',
+    steps: [
+      { order: 1, emoji: '🖌️', labelEl: 'Βουτάω το πινέλο σε λίγο νερό και χρώμα' },
+      { order: 2, emoji: '🎨', labelEl: 'Ζωγραφίζω πάνω στο λευκό χαρτί' },
+      { order: 3, emoji: '🧼', labelEl: 'Πλένω το πινέλο και μαζεύω το τραπέζι' },
+    ],
+    displayOrder: [3, 2, 1],
+  },
+  {
+    titleEl: 'Ρουτίνα: Στρώνω το Τραπέζι του Φαγητού',
+    steps: [
+      { order: 1, emoji: '🍽️', labelEl: 'Τοποθετώ τα πιάτα και τα κουτάλια στο τραπέζι' },
+      { order: 2, emoji: '🍲', labelEl: 'Καθόμαστε όλοι μαζί και τρώμε ήρεμα' },
+      { order: 3, emoji: '🧽', labelEl: 'Μαζεύουμε τα πιάτα στον νεροχύτη' },
+    ],
+    displayOrder: [2, 1, 3],
+  },
 ];
 
 export const Activity05OrderSteps: React.FC<ActivityRunnerRenderProps> = ({
   currentRound,
+  totalRounds,
   hintLevel,
+  sessionSeed = 0,
   advanceRound,
   triggerGentleFeedback,
 }) => {
   const { runDebounced, getAbsorbedCount } = useDebouncedAction();
-  const routine = ROUTINES[(currentRound - 1) % ROUTINES.length];
+  const activeRoutines = useMemo(
+    () => selectSessionRounds(ROUTINES, totalRounds, sessionSeed),
+    [totalRounds, sessionSeed]
+  );
+  const routine = activeRoutines[(currentRound - 1) % activeRoutines.length];
   const [selectedOrders, setSelectedOrders] = useState<number[]>([]);
 
   useEffect(() => {
     setSelectedOrders([]);
-  }, [currentRound]);
+  }, [currentRound, sessionSeed]);
 
   const nextExpectedOrder = selectedOrders.length + 1;
 

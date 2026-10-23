@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import type { ActivityRunnerRenderProps } from '../components/ActivityRunner';
 import { useDebouncedAction } from '../hooks/useDebouncedAction';
 import { speakGreek } from '../utils/soundAndSpeech';
 import { useApp } from '../context/AppContext';
+import { selectSessionRounds } from '../utils/clinicalAdhdEngine';
 
 interface ListenRound {
   instructionEl: string;
@@ -12,7 +13,7 @@ interface ListenRound {
 
 const LISTEN_ROUNDS: ListenRound[] = [
   {
-    instructionEl: 'Περίμενε να ολοκληρωθεί η οδηγία... και μετά πάτησε το ΚΙΤΡΙΝΟ ΑΣΤΕΡΙ!',
+    instructionEl: 'Περίμενε να ολοκληρωθεί η οδηγία, και μετά πάτησε το κίτρινο αστέρι!',
     pictogramCue: '👂 ⏳ ➡️ ⭐',
     options: [
       { id: 'l1-1', emoji: '🍎', labelEl: 'Κόκκινο Μήλο', isTarget: false },
@@ -21,7 +22,7 @@ const LISTEN_ROUNDS: ListenRound[] = [
     ],
   },
   {
-    instructionEl: 'Άκου προσεκτικά μέχρι το τέλος... και πάτησε την ΠΡΑΣΙΝΗ ΧΕΛΩΝΑ!',
+    instructionEl: 'Άκου προσεκτικά μέχρι το τέλος, και πάτησε την πράσινη χελώνα!',
     pictogramCue: '👂 ⏳ ➡️ 🐢',
     options: [
       { id: 'l2-1', emoji: '🐢', labelEl: 'Πράσινη Χελώνα', isTarget: true },
@@ -30,7 +31,7 @@ const LISTEN_ROUNDS: ListenRound[] = [
     ],
   },
   {
-    instructionEl: 'Κράτα τα χέρια ήρεμα... και τώρα πάτησε το ΜΠΛΕ ΚΑΡΑΒΑΚΙ!',
+    instructionEl: 'Κράτα τα χέρια ήρεμα, και τώρα πάτησε το μπλε καραβάκι!',
     pictogramCue: '👂 ⏳ ➡️ ⛵',
     options: [
       { id: 'l3-1', emoji: '🌻', labelEl: 'Ηλίανθος', isTarget: false },
@@ -38,17 +39,50 @@ const LISTEN_ROUNDS: ListenRound[] = [
       { id: 'l3-3', emoji: '⛵', labelEl: 'Μπλε Καραβάκι', isTarget: true },
     ],
   },
+  {
+    instructionEl: 'Πάρε μια ήρεμη ανάσα, άκου το σύνθημα, και πάτησε τη σοφή κουκουβάγια!',
+    pictogramCue: '👂 ⏳ ➡️ 🦉',
+    options: [
+      { id: 'l4-1', emoji: '🦉', labelEl: 'Σοφή Κουκουβάγια', isTarget: true },
+      { id: 'l4-2', emoji: '🐿️', labelEl: 'Σκιουράκι', isTarget: false },
+      { id: 'l4-3', emoji: '🦌', labelEl: 'Ελάφι', isTarget: false },
+    ],
+  },
+  {
+    instructionEl: 'Μη βιαστείς να πατήσεις, περίμενε το πράσινο σήμα και διάλεξε το δελφίνι!',
+    pictogramCue: '👂 ⏳ ➡️ 🐬',
+    options: [
+      { id: 'l5-1', emoji: '🦀', labelEl: 'Καβούρι', isTarget: false },
+      { id: 'l5-2', emoji: '🐬', labelEl: 'Μπλε Δελφίνι', isTarget: true },
+      { id: 'l5-3', emoji: '🐚', labelEl: 'Κοχύλι', isTarget: false },
+    ],
+  },
+  {
+    instructionEl: 'Άκου όλη την πρόταση με υπομονή, και μετά πάτησε την ξύλινη κιθάρα!',
+    pictogramCue: '👂 ⏳ ➡️ 🎸',
+    options: [
+      { id: 'l6-1', emoji: '🥁', labelEl: 'Τύμπανο', isTarget: false },
+      { id: 'l6-2', emoji: '🎹', labelEl: 'Πιάνο', isTarget: false },
+      { id: 'l6-3', emoji: '🎸', labelEl: 'Ξύλινη Κιθάρα', isTarget: true },
+    ],
+  },
 ];
 
 export const Activity08ListenDo: React.FC<ActivityRunnerRenderProps> = ({
   currentRound,
+  totalRounds,
   hintLevel,
+  sessionSeed = 0,
   advanceRound,
   triggerGentleFeedback,
 }) => {
   const { settings } = useApp();
   const { runDebounced, getAbsorbedCount } = useDebouncedAction();
-  const round = LISTEN_ROUNDS[(currentRound - 1) % LISTEN_ROUNDS.length];
+  const activeRounds = useMemo(
+    () => selectSessionRounds(LISTEN_ROUNDS, totalRounds, sessionSeed),
+    [totalRounds, sessionSeed]
+  );
+  const round = activeRounds[(currentRound - 1) % activeRounds.length];
   const [isListeningFinished, setIsListeningFinished] = useState<boolean>(false);
 
   useEffect(() => {
@@ -58,7 +92,7 @@ export const Activity08ListenDo: React.FC<ActivityRunnerRenderProps> = ({
       setIsListeningFinished(true);
     }, 900);
     return () => window.clearTimeout(timer);
-  }, [currentRound, round.instructionEl, settings.voiceEnabled]);
+  }, [currentRound, sessionSeed, round.instructionEl, settings.voiceEnabled]);
 
   const visibleOptions =
     hintLevel === 2

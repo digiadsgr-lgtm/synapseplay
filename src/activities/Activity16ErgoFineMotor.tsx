@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import type { ActivityRunnerRenderProps } from '../components/ActivityRunner';
 import { useDebouncedAction } from '../hooks/useDebouncedAction';
 import { playCalmTone } from '../utils/soundAndSpeech';
 import { useApp } from '../context/AppContext';
+import { selectSessionRounds } from '../utils/clinicalAdhdEngine';
 
 interface FineMotorExercise {
   titleEl: string;
@@ -13,7 +14,7 @@ interface FineMotorExercise {
 
 const EXERCISES: FineMotorExercise[] = [
   {
-    titleEl: 'Άσκηση 1: Τσιμπίδα Καβουριού & Οριζόντια Ιχνηλάτηση (Αριστερά ➔ Δεξιά)',
+    titleEl: 'Άσκηση: Τσιμπίδα Καβουριού & Οριζόντια Ιχνηλάτηση (Αριστερά ➔ Δεξιά)',
     ergoPromptEl:
       'Ένωσε τον αντίχειρα με τον δείκτη σαν «τσιμπίδα καβουριού» 🦀 και άγγιξε τα σημεία με τη σειρά από αριστερά προς τα δεξιά!',
     seatedPromptEl:
@@ -25,7 +26,7 @@ const EXERCISES: FineMotorExercise[] = [
     ],
   },
   {
-    titleEl: 'Άσκηση 2: Πιάνο Δακτύλων & Αμφίπλευρος Συντονισμός',
+    titleEl: 'Άσκηση: Πιάνο Δακτύλων & Αμφίπλευρος Συντονισμός',
     ergoPromptEl:
       'Ακούμπησε και τις δύο παλάμες στο τραπέζι. Χτύπα απαλά ένα-ένα τα δάχτυλα σαν πιάνο 🎹 και πάτησε τα 3 σημεία!',
     seatedPromptEl:
@@ -37,34 +38,76 @@ const EXERCISES: FineMotorExercise[] = [
     ],
   },
   {
-    titleEl: 'Άσκηση 3: Γραφοκινητικό Κύμα & Τριποδική Λαβή',
+    titleEl: 'Άσκηση: Γραφοκινητικό Κύμα & Τριποδική Λαβή',
     ergoPromptEl:
       'Κράτησε ένα αληθινό μολύβι (ή το δάχτυλό σου) με 3 δάχτυλα («φωλιά πουλιού») και ακολούθησε το κύμα!',
     seatedPromptEl:
-      'Το ένα χέρι σταθεροποιεί το χαρτί/τάμπλετ στο τραπέζι και το άλλο ακολουθεί ήρεμα τα 3 σημεία του κύματος!',
+      'Το ένα χέρι σταθεροποιεί το χαρτί ή το τάμπλετ στο τραπέζι και το άλλο ακολουθεί ήρεμα τα 3 σημεία του κύματος!',
     waypoints: [
       { step: 1, emoji: '🌊', labelEl: 'Κορυφή 1' },
       { step: 2, emoji: '⛵', labelEl: 'Καμπύλη 2' },
       { step: 3, emoji: '🏝️', labelEl: 'Λιμάνι 3' },
     ],
   },
+  {
+    titleEl: 'Άσκηση: Διαγώνια Τροχιά Αστεριού & Οπτικοκινητική Παρακολούθηση',
+    ergoPromptEl:
+      'Ακολούθησε με τον δείκτη σου το αστέρι χωρίς να κουνάς το κεφάλι, μόνο με τα μάτια και το χέρι!',
+    seatedPromptEl:
+      'Κράτα τους ώμους χαλαρούς στην καρέκλα και ένωσε τα 3 φωτεινά σημεία του ουρανού!',
+    waypoints: [
+      { step: 1, emoji: '🌙', labelEl: 'Φεγγάρι 1' },
+      { step: 2, emoji: '✨', labelEl: 'Αστερισμός 2' },
+      { step: 3, emoji: '🌟', labelEl: 'Πολικός Αστέρας 3' },
+    ],
+  },
+  {
+    titleEl: 'Άσκηση: Απομόνωση Δακτύλων — Άγγιγμα Αντίχειρα με κάθε Δάχτυλο',
+    ergoPromptEl:
+      'Ακούμπησε τον αντίχειρα διαδοχικά με τον δείκτη, τον μεσαίο και το μικρό δαχτυλάκι και πάτησε τα 3 βήματα!',
+    seatedPromptEl:
+      'Με τους καρπούς σταθερούς πάνω στο τραπέζι, κάνε 3 απαλά αγγίγματα αντίχειρα-δακτύλων!',
+    waypoints: [
+      { step: 1, emoji: '👌', labelEl: 'Αντίχειρας + Δείκτης' },
+      { step: 2, emoji: '🤏', labelEl: 'Αντίχειρας + Μεσαίος' },
+      { step: 3, emoji: '🙌', labelEl: 'Ανοιχτές Παλάμες' },
+    ],
+  },
+  {
+    titleEl: 'Άσκηση: Ζιγκ-Ζαγκ Βουνού & Έλεγχος Πίεσης Δακτύλου',
+    ergoPromptEl:
+      'Ακούμπησε απαλά την οθόνη (χωρίς δυνατή πίεση) ανεβαίνοντας στην κορυφή του βουνού και κατεβαίνοντας στην κατασκήνωση!',
+    seatedPromptEl:
+      'Καθιστός με σταθερά πέλματα, χάραξε με απαλό άγγιγμα τις 3 στάσεις του βουνού!',
+    waypoints: [
+      { step: 1, emoji: '🌲', labelEl: 'Πρόποδες 1' },
+      { step: 2, emoji: '⛰️', labelEl: 'Κορυφή 2' },
+      { step: 3, emoji: '⛺', labelEl: 'Κατασκήνωση 3' },
+    ],
+  },
 ];
 
 export const Activity16ErgoFineMotor: React.FC<ActivityRunnerRenderProps> = ({
   currentRound,
+  totalRounds,
   hintLevel,
   seatedMode,
+  sessionSeed = 0,
   advanceRound,
   triggerGentleFeedback,
 }) => {
   const { settings } = useApp();
   const { runDebounced, getAbsorbedCount } = useDebouncedAction();
-  const exercise = EXERCISES[(currentRound - 1) % EXERCISES.length];
+  const activeExercises = useMemo(
+    () => selectSessionRounds(EXERCISES, totalRounds, sessionSeed),
+    [totalRounds, sessionSeed]
+  );
+  const exercise = activeExercises[(currentRound - 1) % activeExercises.length];
   const [tracedStep, setTracedStep] = useState<number>(0);
 
   useEffect(() => {
     setTracedStep(hintLevel === 2 ? 2 : 0);
-  }, [currentRound, hintLevel]);
+  }, [currentRound, hintLevel, sessionSeed]);
 
   const nextExpectedStep = tracedStep + 1;
 

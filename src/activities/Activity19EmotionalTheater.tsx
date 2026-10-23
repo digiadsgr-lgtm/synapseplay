@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import type { ActivityRunnerRenderProps } from '../components/ActivityRunner';
 import { useDebouncedAction } from '../hooks/useDebouncedAction';
+import { selectSessionRounds } from '../utils/clinicalAdhdEngine';
 
 interface TheaterScene {
   sceneEmoji: string;
@@ -13,7 +14,7 @@ interface TheaterScene {
 const THEATER_SCENES: TheaterScene[] = [
   {
     sceneEmoji: '🎭🧱',
-    titleEl: 'Σκηνή 1: Ο Πύργος που Έπεσε',
+    titleEl: 'Σκηνή: Ο Πύργος που Έπεσε',
     storyEl:
       'Χτίζεις έναν ψηλό πύργο με τουβλάκια και ξαφνικά πέφτει κάτω! Νιώθεις εκνευρισμό στο σώμα.',
     theatricalPromptEl:
@@ -41,7 +42,7 @@ const THEATER_SCENES: TheaterScene[] = [
   },
   {
     sceneEmoji: '🎭🛝',
-    titleEl: 'Σκηνή 2: Η Σειρά στην Τσουλήθρα / στο Παιχνίδι',
+    titleEl: 'Σκηνή: Η Σειρά στην Τσουλήθρα',
     storyEl:
       'Είσαι στην αυλή και ένα άλλο παιδί βρίσκεται μπροστά σου. Θέλεις πολύ να παίξεις τώρα!',
     theatricalPromptEl:
@@ -69,7 +70,7 @@ const THEATER_SCENES: TheaterScene[] = [
   },
   {
     sceneEmoji: '🎭✏️',
-    titleEl: 'Σκηνή 3: Κάτι μου Φαίνεται Δύσκολο στην Τάξη',
+    titleEl: 'Σκηνή: Κάτι μου Φαίνεται Δύσκολο στην Τάξη',
     storyEl:
       'Βλέπεις μια άσκηση που φαίνεται μπερδεμένη και δεν ξέρεις από πού να ξεκινήσεις.',
     theatricalPromptEl:
@@ -78,7 +79,7 @@ const THEATER_SCENES: TheaterScene[] = [
       {
         id: 'th3-1',
         emoji: '🙋💡',
-        labelEl: 'Ζητάω ήρεμα βοήθεια και ξεκινάω από το 1ο μικρό βήμα!',
+        labelEl: 'Ζητάω ήρεμα βοήθεια και ξεκινάω από το πρώτο μικρό βήμα!',
         isCalmSolution: true,
       },
       {
@@ -95,17 +96,107 @@ const THEATER_SCENES: TheaterScene[] = [
       },
     ],
   },
+  {
+    sceneEmoji: '🎭🎲',
+    titleEl: 'Σκηνή: Χάνω σε ένα Επιτραπέζιο Παιχνίδι',
+    storyEl:
+      'Παίζεις με τους φίλους σου ένα επιτραπέζιο και κάποιος άλλος κερδίζει στον γύρο.',
+    theatricalPromptEl:
+      'Θεατρικός Ρόλος: Χαμογέλασε ευγενικά 😊, δώσε το χέρι και διάλεξε τη θετική σκέψη:',
+    options: [
+      {
+        id: 'th4-1',
+        emoji: '🤝🌟',
+        labelEl: 'Λέω «Μπράβο, ωραίο παιχνίδι! Πάμε άλλον έναν γύρο όλοι μαζί!»',
+        isCalmSolution: true,
+      },
+      {
+        id: 'th4-2',
+        emoji: '🌪️',
+        labelEl: 'Χαλάω το ταμπλό του παιχνιδιού',
+        isCalmSolution: false,
+      },
+      {
+        id: 'th4-3',
+        emoji: '😤',
+        labelEl: 'Φωνάζω ότι δεν θα ξαναπαίξω ποτέ',
+        isCalmSolution: false,
+      },
+    ],
+  },
+  {
+    sceneEmoji: '🎭🔊',
+    titleEl: 'Σκηνή: Δυνατός Θόρυβος στο Δωμάτιο',
+    storyEl:
+      'Ξαφνικά ακούγεται πολλή φασαρία γύρω σου και νιώθεις τα αυτιά και το κεφάλι σου να κουράζονται.',
+    theatricalPromptEl:
+      'Θεατρική Δράση: Κάνε το «Ήρεμο Καβούκι» 🐢, πάρε αργή εκπνοή και διάλεξε τι θα κάνεις:',
+    options: [
+      {
+        id: 'th5-1',
+        emoji: '🎧🌿',
+        labelEl: 'Ζητάω ήρεμα μια ήσυχη γωνιά για 2 λεπτά να ξεκουραστώ',
+        isCalmSolution: true,
+      },
+      {
+        id: 'th5-2',
+        emoji: '📢',
+        labelEl: 'Φωνάζω ακόμα πιο δυνατά από τους άλλους',
+        isCalmSolution: false,
+      },
+      {
+        id: 'th5-3',
+        emoji: '🏃‍♂️',
+        labelEl: 'Σπρώχνω τις καρέκλες',
+        isCalmSolution: false,
+      },
+    ],
+  },
+  {
+    sceneEmoji: '🎭🎨',
+    titleEl: 'Σκηνή: Μοιραζόμαστε τους Μαρκαδόρους',
+    storyEl:
+      'Ο διπλανός σου θέλει τον μπλε μαρκαδόρο την ίδια στιγμή που τον κρατάς κι εσύ.',
+    theatricalPromptEl:
+      'Θεατρική Έκφραση: Άνοιξε φιλικά την παλάμη 🖐️ και διάλεξε τη συνεργατική λύση:',
+    options: [
+      {
+        id: 'th6-1',
+        emoji: '🎨🤝',
+        labelEl: '«Βάφω αυτό το συννεφάκι σε 1 λεπτό και σου τον δίνω αμέσως!»',
+        isCalmSolution: true,
+      },
+      {
+        id: 'th6-2',
+        emoji: '✊',
+        labelEl: 'Κρύβω όλους τους μαρκαδόρους στην τσάντα μου',
+        isCalmSolution: false,
+      },
+      {
+        id: 'th6-3',
+        emoji: '😠',
+        labelEl: 'Τραβάω απότομα το χαρτί του',
+        isCalmSolution: false,
+      },
+    ],
+  },
 ];
 
 export const Activity19EmotionalTheater: React.FC<ActivityRunnerRenderProps> = ({
   currentRound,
+  totalRounds,
   hintLevel,
   adaptiveProfile,
+  sessionSeed = 0,
   advanceRound,
   triggerGentleFeedback,
 }) => {
   const { runDebounced, getAbsorbedCount } = useDebouncedAction();
-  const scene = THEATER_SCENES[(currentRound - 1) % THEATER_SCENES.length];
+  const activeScenes = useMemo(
+    () => selectSessionRounds(THEATER_SCENES, totalRounds, sessionSeed),
+    [totalRounds, sessionSeed]
+  );
+  const scene = activeScenes[(currentRound - 1) % activeScenes.length];
 
   const visibleOptions =
     hintLevel === 2

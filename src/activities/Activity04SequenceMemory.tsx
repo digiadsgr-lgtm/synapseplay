@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import type { ActivityRunnerRenderProps } from '../components/ActivityRunner';
 import { useDebouncedAction } from '../hooks/useDebouncedAction';
 import { playCalmTone } from '../utils/soundAndSpeech';
 import { useApp } from '../context/AppContext';
+import { selectSessionRounds } from '../utils/clinicalAdhdEngine';
 
 interface SymbolTile {
   id: string;
@@ -22,18 +23,30 @@ const SEQUENCES: string[][] = [
   ['sun', 'leaf'],
   ['leaf', 'wave', 'sun'],
   ['wave', 'star', 'leaf'],
+  ['star', 'sun'],
+  ['sun', 'wave', 'star'],
+  ['leaf', 'star', 'wave'],
+  ['wave', 'leaf'],
+  ['star', 'leaf', 'sun'],
+  ['sun', 'star', 'wave'],
 ];
 
 export const Activity04SequenceMemory: React.FC<ActivityRunnerRenderProps> = ({
   currentRound,
+  totalRounds,
   hintLevel,
+  sessionSeed = 0,
   advanceRound,
   triggerGentleFeedback,
 }) => {
   const { settings } = useApp();
   const { runDebounced, getAbsorbedCount } = useDebouncedAction();
 
-  const targetSequence = SEQUENCES[(currentRound - 1) % SEQUENCES.length];
+  const activeSequences = useMemo(
+    () => selectSessionRounds(SEQUENCES, totalRounds, sessionSeed),
+    [totalRounds, sessionSeed]
+  );
+  const targetSequence = activeSequences[(currentRound - 1) % activeSequences.length];
   const [userProgress, setUserProgress] = useState<string[]>([]);
   const [activeFlashId, setActiveFlashId] = useState<string | null>(null);
   const [isDemonstrating, setIsDemonstrating] = useState<boolean>(false);
@@ -70,7 +83,7 @@ export const Activity04SequenceMemory: React.FC<ActivityRunnerRenderProps> = ({
     setUserProgress([]);
     playDemonstration();
     return () => clearDemoTimers();
-  }, [currentRound, playDemonstration, clearDemoTimers]);
+  }, [currentRound, sessionSeed, playDemonstration, clearDemoTimers]);
 
   const nextExpectedTileId = targetSequence[userProgress.length];
 
