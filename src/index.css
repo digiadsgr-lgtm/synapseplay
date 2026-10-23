@@ -1,0 +1,54 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-soft-sage: #7A9A7B;
+  --color-warm-sand: #EFE8D8;
+  --color-slate-blue: #4A6B82;
+  --color-muted-charcoal: #2C3539;
+  --color-accent-terracotta: #D97757;
+}
+
+@layer base {
+  body {
+    background-color: var(--color-warm-sand);
+    color: var(--color-muted-charcoal);
+    font-family: 'Nunito', 'Segoe UI', Roboto, system-ui, sans-serif;
+    overflow-x: hidden;
+  }
+
+  /* WCAG 2.2 AA high-visibility focus indicators */
+  *:focus-visible {
+    outline: 3px solid var(--color-slate-blue);
+    outline-offset: 3px;
+    border-radius: 0.5rem;
+  }
+}
+
+/* Respect prefers-reduced-motion both via OS media query and explicit app class */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+.reduced-motion *,
+.reduced-motion *::before,
+.reduced-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* Guaranteed 64x64px minimum touch target utility */
+.touch-target {
+  min-width: 64px;
+  min-height: 64px;
+}

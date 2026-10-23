@@ -1,0 +1,443 @@
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useApp } from '../context/AppContext';
+import { ACTIVITIES } from '../data/activitiesCatalog';
+import {
+  AGE_BAND_PROTOCOLS,
+  DEVICE_STRATEGY_SUMMARY,
+  getAgeBandProtocol,
+  type AgeBandId,
+} from '../data/ageProtocols';
+import { ParentGateModal } from '../components/ParentGateModal';
+
+export const ParentDashboardPage: React.FC = () => {
+  const navigate = useNavigate();
+  const {
+    settings,
+    updateSettings,
+    sessionLogs,
+    wipeAllData,
+    elapsedSeconds,
+    isParentUnlocked,
+    setParentUnlocked,
+    simulateTimeStateForDemo,
+  } = useApp();
+
+  const [confirmWipe, setConfirmWipe] = useState(false);
+  const [wipeDoneMessage, setWipeDoneMessage] = useState(false);
+
+  // Enforce accidental-access barrier even on direct URL navigation to /parent
+  if (!isParentUnlocked) {
+    return (
+      <main className="max-w-xl mx-auto px-4 py-12" data-testid="parent-locked-barrier">
+        <ParentGateModal
+          onSuccess={() => setParentUnlocked(true)}
+          onCancel={() => navigate('/')}
+        />
+      </main>
+    );
+  }
+
+  const handleWipeConfirm = async () => {
+    await wipeAllData();
+    setConfirmWipe(false);
+    setWipeDoneMessage(true);
+  };
+
+  const handleExitToChild = () => {
+    setParentUnlocked(false);
+    navigate('/');
+  };
+
+  const elapsedMinutes = Math.floor(elapsedSeconds / 60);
+  const activeAgeProtocol = getAgeBandProtocol(settings.ageBand ?? '6-8');
+
+  const handleSelectAgeBand = (bandId: AgeBandId) => {
+    const proto = getAgeBandProtocol(bandId);
+    void updateSettings({
+      ageBand: bandId,
+      sessionLimitMinutes: proto.recommendedTotalMinutes,
+      warningWindowMinutes: proto.smoothLandingMinutes,
+    });
+  };
+
+  return (
+    <main className="max-w-5xl mx-auto px-4 py-6 space-y-8" data-testid="parent-dashboard-page">
+      {/* Header & Non-Medical Notice */}
+      <section className="bg-sand-light border-2 border-slate rounded-3xl p-6 space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-extrabold text-charcoal">
+              Πίνακας Γονέων & Παιδαγωγών
+            </h1>
+            <p className="text-sm text-charcoal-muted">
+              Ρυθμίσεις συνεδρίας, προσβασιμότητα, ιστορικό εξάσκησης και πλήρης έλεγχος τοπικών
+              δεδομένων.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={handleExitToChild}
+            data-testid="parent-back-to-child-btn"
+            className="touch-target px-5 py-3 rounded-2xl bg-sage-dark text-white font-extrabold flex items-center gap-2 hover:bg-sage"
+          >
+            <span aria-hidden="true">🧒</span>
+            <span>Επιστροφή στο Περιβάλλον Παιδιού</span>
+          </button>
+        </div>
+
+        <div className="p-4 rounded-2xl bg-slate-surface border border-slate text-xs md:text-sm text-charcoal space-y-1">
+          <p className="font-extrabold">
+            ⚖️ Παιδαγωγική Δήλωση & Προστασία Ιδιωτικότητας (Privacy-by-Design):
+          </p>
+          <p>
+            Το SynapsePlay είναι εκπαιδευτικό εργαλείο ενίσχυσης της εκτελεστικής λειτουργίας και
+            αυτορρύθμισης.{' '}
+            <strong>
+              Δεν αποτελεί ιατρική συσκευή, διαγνωστικό τεστ ή κλινική θεραπεία ΔΕΠΥ.
+            </strong>{' '}
+            Όλα τα δεδομένα αποθηκεύονται αποκλειστικά τοπικά στη συσκευή σας (IndexedDB) χωρίς
+            απομακρυσμένο διακομιστή, αναλυτικά trackers ή διαφημίσεις.
+          </p>
+        </div>
+      </section>
+
+      {/* Session Time Limit & Smooth Landing Controls */}
+      <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="bg-white border-2 border-sand-dark rounded-3xl p-6 space-y-4">
+          <h2 className="text-xl font-extrabold text-charcoal flex items-center gap-2">
+            <span aria-hidden="true">⏳</span>
+            <span>Όριο Συνεδρίας & Smooth Landing (Module 13)</span>
+          </h2>
+          <p className="text-sm text-charcoal-muted">
+            Σημερινός χρόνος χρήσης:{' '}
+            <strong>
+              {elapsedMinutes} λεπτά ({elapsedSeconds} δευτ.)
+            </strong>
+          </p>
+
+          <div className="space-y-2">
+            <label className="block text-sm font-bold text-charcoal">
+              Ηλικιακή Ομάδα & Κλινικό Πρωτόκολλο (4–12 Ετών):
+            </label>
+            <div className="flex flex-wrap gap-2" data-testid="age-band-selector">
+              {AGE_BAND_PROTOCOLS.map((proto) => (
+                <button
+                  key={proto.id}
+                  type="button"
+                  data-testid={`age-band-btn-${proto.id}`}
+                  onClick={() => handleSelectAgeBand(proto.id)}
+                  aria-pressed={activeAgeProtocol.id === proto.id}
+                  className={`touch-target px-3.5 py-2 rounded-2xl border-2 text-xs font-extrabold ${
+                    activeAgeProtocol.id === proto.id
+                      ? 'bg-sage-dark text-white border-sage-dark'
+                      : 'bg-sand-light text-charcoal border-sand-dark hover:bg-sand'
+                  }`}
+                >
+                  {proto.labelEl} ({proto.recommendedTotalMinutes}&apos;)
+                </button>
+              ))}
+            </div>
+            <div
+              data-testid="active-age-protocol-summary"
+              className="p-3 rounded-2xl bg-sage-surface border border-sage text-xs text-charcoal space-y-1"
+            >
+              <p className="font-extrabold">
+                {activeAgeProtocol.labelEl} — {activeAgeProtocol.stageEl}: Split{' '}
+                {activeAgeProtocol.digitalMinutes}&apos; Ψηφιακό + {activeAgeProtocol.physicalMinutes}
+                &apos; Φυσική Δράση + {activeAgeProtocol.smoothLandingMinutes}&apos; Smooth Landing
+              </p>
+              <p>{activeAgeProtocol.clinicalGoalEl}</p>
+              <p className="text-charcoal-muted">{activeAgeProtocol.specialistProtocolEl}</p>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className="block text-sm font-bold text-charcoal">
+              Μέγιστη Διάρκεια Συνεδρίας (Λεπτά):
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {[10, 12, 15, 18, 20, 30].map((mins) => (
+                <button
+                  key={mins}
+                  type="button"
+                  data-testid={`limit-mins-btn-${mins}`}
+                  onClick={() => void updateSettings({ sessionLimitMinutes: mins })}
+                  aria-pressed={settings.sessionLimitMinutes === mins}
+                  className={`touch-target px-4 py-2 rounded-2xl border-2 font-extrabold ${
+                    settings.sessionLimitMinutes === mins
+                      ? 'bg-slate text-white border-slate-dark'
+                      : 'bg-sand-light text-charcoal border-sand-dark hover:bg-sand'
+                  }`}
+                >
+                  {mins} λεπτά
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className="block text-sm font-bold text-charcoal">
+              Προειδοποίηση Πριν τη Λήξη (Λεπτά):
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {[2, 5].map((warnMins) => (
+                <button
+                  key={warnMins}
+                  type="button"
+                  data-testid={`warning-mins-btn-${warnMins}`}
+                  onClick={() => void updateSettings({ warningWindowMinutes: warnMins })}
+                  aria-pressed={settings.warningWindowMinutes === warnMins}
+                  className={`touch-target px-4 py-2 rounded-2xl border-2 font-extrabold ${
+                    settings.warningWindowMinutes === warnMins
+                      ? 'bg-slate text-white border-slate-dark'
+                      : 'bg-sand-light text-charcoal border-sand-dark hover:bg-sand'
+                  }`}
+                >
+                  {warnMins} λεπτά πριν
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="pt-2 space-y-2 border-t border-sand-dark">
+            <p className="text-xs font-bold text-charcoal-muted">
+              Δοκιμή Καταστάσεων Ομαλής Μετάβασης (Smooth Landing):
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                data-testid="simulate-normal-time-btn"
+                onClick={() => simulateTimeStateForDemo('normal')}
+                className="touch-target px-3 py-2 rounded-xl bg-sage-surface border border-sage text-xs font-bold text-charcoal"
+              >
+                🌿 Επαναφορά Χρόνου
+              </button>
+              <button
+                type="button"
+                data-testid="simulate-warning-time-btn"
+                onClick={() => simulateTimeStateForDemo('warning')}
+                className="touch-target px-3 py-2 rounded-xl bg-terracotta-surface border border-terracotta text-xs font-bold text-charcoal"
+              >
+                🌅 Δοκιμή Προειδοποίησης 2 Λεπτών
+              </button>
+              <button
+                type="button"
+                data-testid="simulate-depleted-time-btn"
+                onClick={() => simulateTimeStateForDemo('depleted')}
+                className="touch-target px-3 py-2 rounded-xl bg-slate-surface border border-slate text-xs font-bold text-charcoal"
+              >
+                🌙 Δοκιμή Οθόνης Ξεκούρασης
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Accessibility & Sensory Guardrails */}
+        <div className="bg-white border-2 border-sand-dark rounded-3xl p-6 space-y-4">
+          <h2 className="text-xl font-extrabold text-charcoal flex items-center gap-2">
+            <span aria-hidden="true">♿</span>
+            <span>Προσβασιμότητα & Αισθητηριακές Ρυθμίσεις</span>
+          </h2>
+
+          <div className="space-y-3">
+            <button
+              type="button"
+              data-testid="parent-toggle-voice"
+              onClick={() => void updateSettings({ voiceEnabled: !settings.voiceEnabled })}
+              aria-pressed={settings.voiceEnabled}
+              className="touch-target w-full px-4 py-3 rounded-2xl bg-sand-light border-2 border-sand-dark flex items-center justify-between font-bold text-charcoal"
+            >
+              <span>🔊 Φωνητική Εκφώνηση (Ελληνικά)</span>
+              <span className="px-3 py-1 rounded-xl bg-white border border-charcoal/20 text-sm">
+                {settings.voiceEnabled ? 'ΕΝΕΡΓΗ' : 'ΑΝΕΝΕΡΓΗ'}
+              </span>
+            </button>
+
+            <button
+              type="button"
+              data-testid="parent-toggle-sound"
+              onClick={() => void updateSettings({ soundEnabled: !settings.soundEnabled })}
+              aria-pressed={settings.soundEnabled}
+              className="touch-target w-full px-4 py-3 rounded-2xl bg-sand-light border-2 border-sand-dark flex items-center justify-between font-bold text-charcoal"
+            >
+              <span>🎵 Ήρεμοι Ήχοι Ανατροφοδότησης</span>
+              <span className="px-3 py-1 rounded-xl bg-white border border-charcoal/20 text-sm">
+                {settings.soundEnabled ? 'ΕΝΕΡΓΟΙ' : 'ΑΝΕΝΕΡΓΟΙ'}
+              </span>
+            </button>
+
+            <button
+              type="button"
+              data-testid="parent-toggle-reduced-motion"
+              onClick={() => void updateSettings({ reducedMotion: !settings.reducedMotion })}
+              aria-pressed={settings.reducedMotion}
+              className="touch-target w-full px-4 py-3 rounded-2xl bg-sand-light border-2 border-sand-dark flex items-center justify-between font-bold text-charcoal"
+            >
+              <span>🐢 Μειωμένη Κίνηση (Reduced Motion)</span>
+              <span className="px-3 py-1 rounded-xl bg-white border border-charcoal/20 text-sm">
+                {settings.reducedMotion ? 'ΝΑΙ' : 'ΟΧΙ'}
+              </span>
+            </button>
+
+            <button
+              type="button"
+              data-testid="parent-toggle-seated-default"
+              onClick={() =>
+                void updateSettings({ seatedModeDefault: !settings.seatedModeDefault })
+              }
+              aria-pressed={settings.seatedModeDefault}
+              className="touch-target w-full px-4 py-3 rounded-2xl bg-sand-light border-2 border-sand-dark flex items-center justify-between font-bold text-charcoal"
+            >
+              <span>🪑 Προεπιλογή Καθιστής Εκδοχής (Κινητικές Ασκήσεις)</span>
+              <span className="px-3 py-1 rounded-xl bg-white border border-charcoal/20 text-sm">
+                {settings.seatedModeDefault ? 'ΝΑΙ' : 'ΟΧΙ'}
+              </span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* Activity Session Logs & One-Click Data Wipe */}
+      <section className="bg-white border-2 border-sand-dark rounded-3xl p-6 space-y-5">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <h2 className="text-xl font-extrabold text-charcoal">
+              📊 Ιστορικό Δραστηριοτήτων ({sessionLogs.length})
+            </h2>
+            <p className="text-sm text-charcoal-muted">
+              Καταγραφή ολοκληρωμένων γύρων, χρήσης βοήθειας (Hint Ladder) και απορρόφησης διπλών
+              πατημάτων.
+            </p>
+          </div>
+
+          {/* One-Click Data Wipe */}
+          <div>
+            {!confirmWipe ? (
+              <button
+                type="button"
+                data-testid="one-click-wipe-trigger-btn"
+                onClick={() => {
+                  setWipeDoneMessage(false);
+                  setConfirmWipe(true);
+                }}
+                className="touch-target px-5 py-3 rounded-2xl bg-terracotta-surface border-2 border-terracotta-dark text-charcoal font-extrabold flex items-center gap-2 hover:bg-terracotta-dark hover:text-white"
+              >
+                <span aria-hidden="true">🗑️</span>
+                <span>Διαγραφή Όλων των Δεδομένων</span>
+              </button>
+            ) : (
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  data-testid="confirm-data-wipe-btn"
+                  onClick={() => void handleWipeConfirm()}
+                  className="touch-target px-5 py-3 rounded-2xl bg-terracotta-dark text-white font-extrabold"
+                >
+                  ✓ Επιβεβαίωση Οριστικής Διαγραφής
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setConfirmWipe(false)}
+                  className="touch-target px-4 py-3 rounded-2xl bg-sand border border-charcoal/20 font-bold text-charcoal"
+                >
+                  Ακύρωση
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {wipeDoneMessage && (
+          <div
+            role="status"
+            data-testid="wipe-success-banner"
+            className="p-4 rounded-2xl bg-sage-surface border-2 border-sage font-bold text-charcoal"
+          >
+            ✅ Όλα τα τοπικά δεδομένα και το ιστορικό διαγράφηκαν επιτυχώς από τη συσκευή.
+          </div>
+        )}
+
+        {sessionLogs.length === 0 ? (
+          <p className="text-sm text-charcoal-muted py-4 text-center" data-testid="empty-logs-message">
+            Δεν υπάρχουν ακόμη καταγεγραμμένες συνεδρίες.
+          </p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse text-sm" data-testid="session-logs-table">
+              <thead>
+                <tr className="border-b-2 border-sand-dark text-charcoal font-extrabold">
+                  <th className="py-3 px-2">Δραστηριότητα</th>
+                  <th className="py-3 px-2">Γύροι</th>
+                  <th className="py-3 px-2">Βοήθειες (Hints)</th>
+                  <th className="py-3 px-2">Απορροφημένα Διπλά Κλικ</th>
+                  <th className="py-3 px-2">Διάρκεια</th>
+                  <th className="py-3 px-2">Ημερομηνία</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sessionLogs.map((log, i) => (
+                  <tr key={log.id ?? i} className="border-b border-sand" data-testid={`session-log-row-${i}`}>
+                    <td className="py-3 px-2 font-bold text-charcoal">{log.activityTitleEl}</td>
+                    <td className="py-3 px-2">
+                      {log.completedRounds}/{log.totalRounds}
+                    </td>
+                    <td className="py-3 px-2">{log.hintsUsed}</td>
+                    <td className="py-3 px-2">{log.impulsiveTapsAbsorbed}</td>
+                    <td className="py-3 px-2">{log.durationSeconds} δευτ.</td>
+                    <td className="py-3 px-2 text-charcoal-muted">{log.dateKey}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
+
+      {/* Device Ergonomics Strategy & Pedagogical Reference Guide */}
+      <section
+        data-testid="device-strategy-section"
+        className="bg-white border-2 border-slate rounded-3xl p-6 space-y-3"
+      >
+        <h2 className="text-xl font-extrabold text-charcoal">
+          📱 {DEVICE_STRATEGY_SUMMARY.titleEl}
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-charcoal">
+          <div className="p-4 rounded-2xl bg-terracotta-surface border border-terracotta space-y-1">
+            <p className="font-extrabold">Γιατί ΟΧΙ Κινητό:</p>
+            <p>{DEVICE_STRATEGY_SUMMARY.whyNotMobileEl}</p>
+          </div>
+          <div className="p-4 rounded-2xl bg-slate-surface border border-slate space-y-1">
+            <p className="font-extrabold">Γιατί ΟΧΙ Υπολογιστής (PC):</p>
+            <p>{DEVICE_STRATEGY_SUMMARY.whyNotPcEl}</p>
+          </div>
+          <div className="p-4 rounded-2xl bg-sage-surface border border-sage space-y-1">
+            <p className="font-extrabold">Η Βέλτιστη Λύση (Tablet 10–11&quot; Kiosk):</p>
+            <p>{DEVICE_STRATEGY_SUMMARY.ergonomicsEl}</p>
+          </div>
+        </div>
+      </section>
+
+      {/* Pedagogical Reference Guide for All 12 Activities */}
+      <section className="bg-sand-light border-2 border-sand-dark rounded-3xl p-6 space-y-4">
+        <h2 className="text-xl font-extrabold text-charcoal">
+          📚 Παιδαγωγικός Οδηγός των 12 Δραστηριοτήτων
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {ACTIVITIES.map((act) => (
+            <div key={act.id} className="p-4 rounded-2xl bg-white border border-sand-dark space-y-1">
+              <div className="flex items-center justify-between">
+                <span className="font-extrabold text-charcoal">
+                  {act.code}. {act.titleEl} ({act.titleEn})
+                </span>
+                <span className="text-xl" aria-hidden="true">{act.pictogram}</span>
+              </div>
+              <p className="text-xs font-bold text-slate-dark">Τομέας: {act.executiveDomain}</p>
+              <p className="text-xs text-charcoal-muted">{act.parentGuidanceEl}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+    </main>
+  );
+};

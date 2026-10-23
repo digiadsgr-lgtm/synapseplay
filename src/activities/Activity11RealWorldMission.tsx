@@ -1,0 +1,122 @@
+import React, { useState, useEffect } from 'react';
+import type { ActivityRunnerRenderProps } from '../components/ActivityRunner';
+import { useDebouncedAction } from '../hooks/useDebouncedAction';
+
+interface MissionConfig {
+  titleEl: string;
+  steps: Array<{ emoji: string; textEl: string }>;
+}
+
+const MISSIONS: MissionConfig[] = [
+  {
+    titleEl: 'Αποστολή 1: Το Κουτάλι & το Μολύβι',
+    steps: [
+      { emoji: '🥄', textEl: 'Βρες ένα κουτάλι ή ένα ασφαλές αντικείμενο στο δωμάτιο.' },
+      { emoji: '✏️', textEl: 'Ακούμπησέ το ήρεμα δίπλα σε ένα μολύβι ή μαρκαδόρο.' },
+    ],
+  },
+  {
+    titleEl: 'Αποστολή 2: Το Βιβλίο στο Τραπέζι',
+    steps: [
+      { emoji: '📗', textEl: 'Διάλεξε ένα αγαπημένο σου παραμύθι ή τετράδιο.' },
+      { emoji: '🪑', textEl: 'Βάλ’ το τακτοποιημένα στη γωνία του τραπεζιού.' },
+    ],
+  },
+  {
+    titleEl: 'Αποστολή 3: Το Μαξιλάρι της Ηρεμίας',
+    steps: [
+      { emoji: '🛋️', textEl: 'Φτιάξε όμορφα ένα μαξιλάρι στον καναπέ ή στο κρεβάτι.' },
+      { emoji: '🌬️', textEl: 'Κάθισε αναπαυτικά και πάρε μία βαθιά ανάσα!' },
+    ],
+  },
+];
+
+export const Activity11RealWorldMission: React.FC<ActivityRunnerRenderProps> = ({
+  currentRound,
+  hintLevel,
+  advanceRound,
+}) => {
+  const { runDebounced, getAbsorbedCount } = useDebouncedAction();
+  const mission = MISSIONS[(currentRound - 1) % MISSIONS.length];
+  const [checkedSteps, setCheckedSteps] = useState<boolean[]>([false, false]);
+
+  useEffect(() => {
+    setCheckedSteps([false, false]);
+  }, [currentRound]);
+
+  const toggleStep = (index: number) => {
+    runDebounced(() => {
+      const next = [...checkedSteps];
+      next[index] = !next[index];
+      setCheckedSteps(next);
+    });
+  };
+
+  const allChecked = checkedSteps.every(Boolean) || hintLevel === 2;
+
+  const handleCompleteMission = () => {
+    runDebounced(() => {
+      advanceRound(getAbsorbedCount());
+    });
+  };
+
+  return (
+    <div className="space-y-6 max-w-2xl mx-auto" data-testid="activity-11-real-world-mission">
+      <div className="p-5 rounded-3xl bg-sage-surface border-2 border-sage text-center space-y-2">
+        <h2 className="text-xl md:text-2xl font-extrabold text-charcoal">{mission.titleEl}</h2>
+        <p className="text-sm text-charcoal-muted">
+          Κάνε τα βήματα στον πραγματικό χώρο και πάτησε το καθένα μόλις το ολοκληρώσεις!
+        </p>
+      </div>
+
+      <div className="space-y-4">
+        {mission.steps.map((step, idx) => {
+          const isDone = checkedSteps[idx];
+          const isNextHint = hintLevel >= 1 && !isDone && (idx === 0 || checkedSteps[0]);
+          return (
+            <button
+              key={step.textEl}
+              type="button"
+              data-testid={`mission-step-check-${idx}`}
+              onClick={() => toggleStep(idx)}
+              aria-pressed={isDone}
+              className={`touch-target w-full p-5 rounded-2xl border-2 text-left flex items-center justify-between gap-4 transition-colors ${
+                isDone
+                  ? 'bg-sage text-white border-sage-dark'
+                  : isNextHint
+                  ? 'bg-white border-4 border-terracotta ring-4 ring-terracotta/30 text-charcoal'
+                  : 'bg-white border-sand-dark text-charcoal hover:border-slate'
+              }`}
+            >
+              <div className="flex items-center gap-4">
+                <span className="text-4xl" aria-hidden="true">{step.emoji}</span>
+                <div>
+                  <span className="text-xs font-extrabold uppercase tracking-wider opacity-80">
+                    Βήμα {idx + 1}
+                  </span>
+                  <p className="text-lg font-bold">{step.textEl}</p>
+                </div>
+              </div>
+              <span className="text-3xl font-extrabold" aria-hidden="true">
+                {isDone ? '☑️' : '⬜'}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="text-center pt-2">
+        <button
+          type="button"
+          data-testid="mission-complete-btn"
+          disabled={!allChecked}
+          onClick={handleCompleteMission}
+          className="touch-target px-8 py-4 rounded-3xl bg-sage-dark text-white font-extrabold text-xl inline-flex items-center gap-3 hover:bg-sage disabled:opacity-40"
+        >
+          <span aria-hidden="true">🌟</span>
+          <span>Ολοκλήρωσα την Αποστολή!</span>
+        </button>
+      </div>
+    </div>
+  );
+};
