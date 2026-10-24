@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { SynapsePlayLogoMark } from '../components/SynapsePlayLogoMark';
+import { clearGdprConsentAck } from '../components/GdprConsentBanner';
 
 export const LegalCompliancePage: React.FC = () => {
-  const { settings, childProfiles, history, feedbackNotes, wipeAllData } = useApp();
+  const { settings, childProfiles, sessionLogs, feedbackEntries, wipeAllData } = useApp();
   const [wipeConfirmedMessage, setWipeConfirmedMessage] = useState<string | null>(null);
 
   const handleExportGdprPortabilityJson = () => {
@@ -14,20 +15,10 @@ export const LegalCompliancePage: React.FC = () => {
       application: 'SynapsePlay (FocusEngine 5+)',
       gdprBasis: 'Article 15 & Article 20 GDPR — Right of Access & Data Portability (Local Device Data)',
       localDeviceData: {
-        settings: {
-          ageBand: settings.ageBand,
-          sessionDurationMinutes: settings.sessionDurationMinutes,
-          tabletMinutes: settings.tabletMinutes,
-          physicalMinutes: settings.physicalMinutes,
-          transitionMinutes: settings.transitionMinutes,
-          soundEnabled: settings.soundEnabled,
-          voiceEnabled: settings.voiceEnabled,
-          reducedMotion: settings.reducedMotion,
-          licenseTier: settings.licenseTier ?? 'dev-unlocked',
-        },
+        settings,
         childProfiles,
-        activityHistory: history,
-        feedbackNotes,
+        activityHistory: sessionLogs,
+        feedbackNotes: feedbackEntries,
       },
     };
 
@@ -46,11 +37,7 @@ export const LegalCompliancePage: React.FC = () => {
 
   const handleGdprRightToErasure = async () => {
     await wipeAllData();
-    try {
-      window.localStorage.removeItem('synapseplay_gdpr_consent_v1');
-    } catch {
-      // ignore storage errors
-    }
+    clearGdprConsentAck();
     setWipeConfirmedMessage(
       'Όλα τα τοπικά δεδομένα της συσκευής (προφίλ, ιστορικό, ρυθμίσεις και παρατηρήσεις) διαγράφηκαν οριστικά σύμφωνα με το Άρθρο 17 του ΓΚΠΔ (Δικαίωμα στη Λήθη).'
     );

@@ -2,33 +2,58 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
 const GDPR_ACK_STORAGE_KEY = 'synapseplay_gdpr_consent_v1';
+let memoryGdprConsentFallback: string | null = null;
+
+export function getGdprConsentAck(): string | null {
+  try {
+    if (typeof window !== 'undefined' && typeof window.localStorage?.getItem === 'function') {
+      return window.localStorage.getItem(GDPR_ACK_STORAGE_KEY);
+    }
+  } catch {
+    // ignore storage errors
+  }
+  return memoryGdprConsentFallback;
+}
+
+export function setGdprConsentAck(value: string): void {
+  memoryGdprConsentFallback = value;
+  try {
+    if (typeof window !== 'undefined' && typeof window.localStorage?.setItem === 'function') {
+      window.localStorage.setItem(GDPR_ACK_STORAGE_KEY, value);
+    }
+  } catch {
+    // ignore storage errors
+  }
+}
+
+export function clearGdprConsentAck(): void {
+  memoryGdprConsentFallback = null;
+  try {
+    if (typeof window !== 'undefined' && typeof window.localStorage?.removeItem === 'function') {
+      window.localStorage.removeItem(GDPR_ACK_STORAGE_KEY);
+    }
+  } catch {
+    // ignore storage errors
+  }
+}
 
 export const GdprConsentBanner: React.FC = () => {
   const [isVisible, setIsVisible] = useState<boolean>(false);
 
   useEffect(() => {
-    try {
-      const saved = window.localStorage.getItem(GDPR_ACK_STORAGE_KEY);
-      if (!saved) {
-        setIsVisible(true);
-      }
-    } catch {
-      setIsVisible(false);
+    const saved = getGdprConsentAck();
+    if (!saved) {
+      setIsVisible(true);
     }
   }, []);
 
   const handleAcceptNecessary = () => {
-    try {
-      window.localStorage.setItem(
-        GDPR_ACK_STORAGE_KEY,
-        JSON.stringify({
-          acceptedAt: new Date().toISOString(),
-          mode: 'strictly-necessary-local-only',
-        })
-      );
-    } catch {
-      // ignore storage errors in private mode
-    }
+    setGdprConsentAck(
+      JSON.stringify({
+        acceptedAt: new Date().toISOString(),
+        mode: 'strictly-necessary-local-only',
+      })
+    );
     setIsVisible(false);
   };
 
