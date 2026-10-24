@@ -200,6 +200,10 @@ describe('SynapsePlay (FocusEngine 5+) — Full Gate 1 to Gate 5 Verification Su
       fireEvent.click(screen.getByTestId('close-beginner-guide-btn'));
       expect(screen.queryByTestId('beginner-quick-start-modal')).not.toBeInTheDocument();
 
+      // 2b. TopBar Website Home Button returns from /app to Landing Page (/)
+      fireEvent.click(screen.getByTestId('nav-website-home-btn'));
+      expect(screen.getByTestId('landing-page')).toBeInTheDocument();
+
       // 3. In-Game Parent Coaching Tip
       renderWithRouter(['/activity/01-visual-search']);
       const coachingBtn = screen.getByTestId('toggle-parent-coaching-tip-btn');

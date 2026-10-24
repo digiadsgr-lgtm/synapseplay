@@ -14,27 +14,50 @@ export const TopBar: React.FC = () => {
   const [showBeginnerGuide, setShowBeginnerGuide] = useState(false);
 
   const isParentRoute = location.pathname.startsWith('/parent');
+  const isChildHubRoute = location.pathname === '/app';
 
   const handleReturnToChild = () => {
     setParentUnlocked(false);
-    navigate('/app');
+    if (isChildHubRoute) {
+      navigate('/');
+    } else {
+      navigate('/app');
+    }
+  };
+
+  const handleGoToWebsiteHome = () => {
+    setParentUnlocked(false);
+    navigate('/');
   };
 
   return (
     <header className="w-full bg-sand-light border-b-2 border-sand-dark sticky top-0 z-30">
       <SmoothLandingWarningBanner />
       <div className="max-w-6xl mx-auto px-4 py-2.5 flex flex-wrap items-center justify-between gap-3">
-        {/* Left: Home & Title */}
-        <div className="flex items-center gap-3">
+        {/* Left: Brand Logo & Website Home Button */}
+        <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={handleReturnToChild}
             data-testid="nav-home-btn"
-            aria-label="Αρχική Οθόνη Παιδιού"
-            className="touch-target px-4 py-2 rounded-2xl bg-sage-surface border-2 border-sage text-charcoal font-extrabold flex items-center gap-2.5 hover:bg-sage hover:text-white transition-colors"
+            aria-label={isChildHubRoute ? 'Επιστροφή στην Αρχική Σελίδα' : 'Αρχική Οθόνη Παιδιού'}
+            title={isChildHubRoute ? 'Επιστροφή στην Αρχική Σελίδα (synapseplay.gr)' : 'Επιστροφή στα Παιχνίδια (/app)'}
+            className="touch-target px-3.5 py-2 rounded-2xl bg-sage-surface border-2 border-sage text-charcoal font-extrabold flex items-center gap-2 hover:bg-sage hover:text-white transition-colors"
           >
             <SynapsePlayLogoMark sizeClassName="w-9 h-9 rounded-xl" />
             <span className="text-base md:text-lg">SynapsePlay</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={handleGoToWebsiteHome}
+            data-testid="nav-website-home-btn"
+            aria-label="Επιστροφή στην Αρχική Σελίδα Ιστότοπου"
+            title="Επιστροφή στην Αρχική Σελίδα (Παρουσίαση)"
+            className="touch-target px-3.5 py-2 rounded-2xl bg-white border-2 border-charcoal/25 text-charcoal font-extrabold text-xs md:text-sm flex items-center gap-1.5 hover:bg-sand-dark transition-colors"
+          >
+            <span aria-hidden="true">🏠</span>
+            <span>Αρχική Σελίδα</span>
           </button>
         </div>
 

@@ -1,82 +1,82 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://synapseplay.vercel.app/</loc>
+    <loc>https://www.synapseplay.gr/</loc>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://synapseplay.vercel.app/app</loc>
+    <loc>https://www.synapseplay.gr/app</loc>
     <changefreq>weekly</changefreq>
     <priority>0.95</priority>
   </url>
   <url>
-    <loc>https://synapseplay.vercel.app/articles</loc>
+    <loc>https://www.synapseplay.gr/articles</loc>
     <changefreq>weekly</changefreq>
     <priority>0.90</priority>
   </url>
   <url>
-    <loc>https://synapseplay.vercel.app/articles/01-smooth-landing-screen-meltdowns</loc>
+    <loc>https://www.synapseplay.gr/articles/01-smooth-landing-screen-meltdowns</loc>
     <changefreq>monthly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://synapseplay.vercel.app/articles/02-morning-routine-steps</loc>
+    <loc>https://www.synapseplay.gr/articles/02-morning-routine-steps</loc>
     <changefreq>monthly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://synapseplay.vercel.app/articles/03-impulse-wait-signal</loc>
+    <loc>https://www.synapseplay.gr/articles/03-impulse-wait-signal</loc>
     <changefreq>monthly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://synapseplay.vercel.app/articles/04-zero-punishment-confidence</loc>
+    <loc>https://www.synapseplay.gr/articles/04-zero-punishment-confidence</loc>
     <changefreq>monthly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://synapseplay.vercel.app/articles/05-movement-fuels-focus</loc>
+    <loc>https://www.synapseplay.gr/articles/05-movement-fuels-focus</loc>
     <changefreq>monthly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://synapseplay.vercel.app/articles/06-auditory-memory-listen-do</loc>
+    <loc>https://www.synapseplay.gr/articles/06-auditory-memory-listen-do</loc>
     <changefreq>monthly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://synapseplay.vercel.app/articles/07-emotional-regulation-turtle</loc>
+    <loc>https://www.synapseplay.gr/articles/07-emotional-regulation-turtle</loc>
     <changefreq>monthly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://synapseplay.vercel.app/articles/08-cognitive-flexibility-rule-switch</loc>
+    <loc>https://www.synapseplay.gr/articles/08-cognitive-flexibility-rule-switch</loc>
     <changefreq>monthly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://synapseplay.vercel.app/articles/09-fine-motor-writing-readiness</loc>
+    <loc>https://www.synapseplay.gr/articles/09-fine-motor-writing-readiness</loc>
     <changefreq>monthly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://synapseplay.vercel.app/articles/10-metacognition-daily-question</loc>
+    <loc>https://www.synapseplay.gr/articles/10-metacognition-daily-question</loc>
     <changefreq>monthly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://synapseplay.vercel.app/articles/11-linkedin-b2b-therapists-clinics</loc>
+    <loc>https://www.synapseplay.gr/articles/11-linkedin-b2b-therapists-clinics</loc>
     <changefreq>monthly</changefreq>
     <priority>0.80</priority>
   </url>
   <url>
-    <loc>https://synapseplay.vercel.app/articles/12-linkedin-investors-healthtech-vision</loc>
+    <loc>https://www.synapseplay.gr/articles/12-linkedin-investors-healthtech-vision</loc>
     <changefreq>monthly</changefreq>
     <priority>0.80</priority>
   </url>
   <url>
-    <loc>https://synapseplay.vercel.app/legal</loc>
+    <loc>https://www.synapseplay.gr/legal</loc>
     <changefreq>monthly</changefreq>
     <priority>0.60</priority>
   </url>

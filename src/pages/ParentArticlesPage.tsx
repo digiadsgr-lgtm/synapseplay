@@ -62,7 +62,7 @@ export const ParentArticlesPage: React.FC = () => {
   // Dynamic SEO Head Tags & Schema.org JSON-LD Structured Data
   useEffect(() => {
     if (typeof document === 'undefined') return;
-    const baseUrl = 'https://synapseplay.vercel.app';
+    const baseUrl = 'https://www.synapseplay.gr';
 
     if (activeSingleArticle) {
       const canonicalUrl = `${baseUrl}/articles/${activeSingleArticle.id}`;
@@ -94,7 +94,7 @@ export const ParentArticlesPage: React.FC = () => {
   }, [activeSingleArticle]);
 
   const jsonLdSchema = useMemo(() => {
-    const baseUrl = 'https://synapseplay.vercel.app';
+    const baseUrl = 'https://www.synapseplay.gr';
     if (activeSingleArticle) {
       return {
         '@context': 'https://schema.org',
