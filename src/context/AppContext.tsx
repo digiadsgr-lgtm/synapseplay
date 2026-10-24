@@ -4,13 +4,17 @@ import type {
   AgeBandId,
   AppSettings,
   ChildMicroProfile,
+  ClinicalFeedbackEntry,
 } from '../types/domain';
 import {
   DEFAULT_SETTINGS,
+  deleteFeedbackEntry,
+  getFeedbackEntries,
   getSessionLogs,
   getTodayUsageSeconds,
   loadChildProfiles,
   loadSettings,
+  recordFeedbackEntry,
   recordSessionLog,
   removeChildProfile,
   saveChildProfile,
@@ -51,6 +55,11 @@ interface AppContextValue {
   logCompletedActivity: (
     log: Omit<ActivitySessionLog, 'id' | 'timestamp' | 'dateKey'>
   ) => Promise<void>;
+  feedbackEntries: ClinicalFeedbackEntry[];
+  submitFeedbackEntry: (
+    entry: Omit<ClinicalFeedbackEntry, 'id' | 'timestamp' | 'dateKey'>
+  ) => Promise<ClinicalFeedbackEntry>;
+  removeFeedbackEntry: (id: number) => Promise<void>;
   wipeAllData: () => Promise<void>;
   extendSessionForParent: (extraMinutes: number) => Promise<void>;
   simulateTimeStateForDemo: (state: 'normal' | 'warning' | 'depleted') => void;
@@ -67,22 +76,26 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [isBreakActive, setBreakActive] = useState<boolean>(false);
   const [isParentUnlocked, setParentUnlocked] = useState<boolean>(false);
   const [sessionLogs, setSessionLogs] = useState<ActivitySessionLog[]>([]);
+  const [feedbackEntries, setFeedbackEntries] = useState<ClinicalFeedbackEntry[]>([]);
   const [warningAnnounced, setWarningAnnounced] = useState<boolean>(false);
 
   useEffect(() => {
     let mounted = true;
     async function init() {
-      const [loadedSettings, loadedUsage, loadedLogs, loadedProfiles] = await Promise.all([
-        loadSettings(),
-        getTodayUsageSeconds(),
-        getSessionLogs(),
-        loadChildProfiles(),
-      ]);
+      const [loadedSettings, loadedUsage, loadedLogs, loadedProfiles, loadedFeedback] =
+        await Promise.all([
+          loadSettings(),
+          getTodayUsageSeconds(),
+          getSessionLogs(),
+          loadChildProfiles(),
+          getFeedbackEntries(),
+        ]);
       if (!mounted) return;
       setSettings(loadedSettings);
       setElapsedSeconds(loadedUsage);
       setSessionLogs(loadedLogs);
       setChildProfiles(loadedProfiles);
+      setFeedbackEntries(loadedFeedback);
     }
     init();
     return () => {
@@ -277,6 +290,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     [activeProfile]
   );
 
+  const submitFeedbackEntry = useCallback(
+    async (entryData: Omit<ClinicalFeedbackEntry, 'id' | 'timestamp' | 'dateKey'>) => {
+      const saved = await recordFeedbackEntry(entryData);
+      const refreshed = await getFeedbackEntries();
+      setFeedbackEntries(refreshed);
+      return saved;
+    },
+    []
+  );
+
+  const removeFeedbackEntry = useCallback(async (id: number) => {
+    setFeedbackEntries((prev) => prev.filter((f) => f.id !== id));
+    const refreshed = await deleteFeedbackEntry(id);
+    setFeedbackEntries(refreshed);
+  }, []);
+
   const wipeAllData = useCallback(async () => {
     await wipeAllLocalData();
     const defaultProfile = createDefaultChildProfile(DEFAULT_SETTINGS.ageBand);
@@ -284,6 +313,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setChildProfiles([defaultProfile]);
     setElapsedSeconds(0);
     setSessionLogs([]);
+    setFeedbackEntries([]);
     setWarningAnnounced(false);
   }, []);
 
@@ -338,6 +368,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setParentUnlocked,
         sessionLogs,
         logCompletedActivity,
+        feedbackEntries,
+        submitFeedbackEntry,
+        removeFeedbackEntry,
         wipeAllData,
         extendSessionForParent,
         simulateTimeStateForDemo,

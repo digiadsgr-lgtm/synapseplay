@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import type { ActivityRunnerRenderProps } from '../components/ActivityRunner';
 import { useDebouncedAction } from '../hooks/useDebouncedAction';
 import { selectSessionRounds } from '../utils/clinicalAdhdEngine';
@@ -50,10 +50,13 @@ const ANIMAL_POSES: AnimalPose[] = [
 ];
 
 export const Activity10CopyAnimal: React.FC<ActivityRunnerRenderProps> = ({
+  phase,
   currentRound,
   totalRounds,
   hintLevel,
   seatedMode,
+  ageBand,
+  adaptiveProfile,
   sessionSeed = 0,
   advanceRound,
 }) => {
@@ -64,10 +67,30 @@ export const Activity10CopyAnimal: React.FC<ActivityRunnerRenderProps> = ({
   );
   const pose = activePoses[(currentRound - 1) % activePoses.length];
   const [countsDone, setCountsDone] = useState<number>(0);
+  const advanceRef = useRef(advanceRound);
+  advanceRef.current = advanceRound;
+  const absorbedRef = useRef(getAbsorbedCount);
+  absorbedRef.current = getAbsorbedCount;
 
   useEffect(() => {
-    setCountsDone(hintLevel === 2 ? 2 : 0);
-  }, [currentRound, hintLevel, sessionSeed]);
+    setCountsDone(hintLevel === 2 || ageBand === '4-5' ? 2 : 0);
+  }, [currentRound, hintLevel, ageBand, sessionSeed]);
+
+  // Automatic Hands-Free Rhythm Metronome (ticks every 1800ms while child holds the physical animal pose)
+  useEffect(() => {
+    if (phase === 'PAUSED' || phase === 'COMPLETED') return;
+    const timer = window.setTimeout(() => {
+      setCountsDone((prev) => {
+        const next = prev + 1;
+        if (next >= 3) {
+          advanceRef.current(absorbedRef.current());
+          return 0;
+        }
+        return next;
+      });
+    }, 1800);
+    return () => window.clearTimeout(timer);
+  }, [phase, countsDone, currentRound]);
 
   const handleCountTap = () => {
     runDebounced(() => {
@@ -83,7 +106,10 @@ export const Activity10CopyAnimal: React.FC<ActivityRunnerRenderProps> = ({
 
   return (
     <div className="space-y-6 text-center max-w-xl mx-auto" data-testid="activity-10-copy-animal">
-      <div className="p-6 rounded-3xl bg-sage-surface border-4 border-sage space-y-3">
+      <div
+        onClick={handleCountTap}
+        className="p-6 rounded-3xl bg-sage-surface border-4 border-sage space-y-3 cursor-pointer"
+      >
         <div className="text-6xl" aria-hidden="true">{pose.emoji}</div>
         <h2 className="text-2xl font-extrabold text-charcoal">{pose.nameEl}</h2>
         <span className="inline-block px-3 py-1 rounded-full bg-white text-xs font-extrabold text-slate-dark border border-slate">
@@ -92,18 +118,21 @@ export const Activity10CopyAnimal: React.FC<ActivityRunnerRenderProps> = ({
         <p className="text-lg font-bold text-charcoal" data-testid="animal-pose-prompt">
           {seatedMode ? pose.seatedPromptEl : pose.standingPromptEl}
         </p>
+        <p className="text-xs font-extrabold text-sage-dark">
+          ⏱️ Ο αυτόματος μετρητής μετράει 3 ήρεμους ρυθμούς όσο κρατάς τη στάση ({countsDone} / 3)
+        </p>
       </div>
 
       <div className="space-y-3">
         <p className="text-sm font-bold text-charcoal-muted">
-          Μέτρησε 3 ήρεμους ρυθμούς πατώντας το κουμπί:
+          Κράτα τη στάση (μετράει αυτόματα) ή πάτησε το κουμπί:
         </p>
         <button
           type="button"
           data-testid="copy-animal-rhythm-btn"
           onClick={handleCountTap}
           className={`touch-target px-8 py-4 rounded-3xl border-4 font-extrabold text-xl inline-flex items-center gap-3 ${
-            hintLevel >= 1
+            hintLevel >= 1 || adaptiveProfile.autoHintBoost
               ? 'bg-sage-dark text-white border-charcoal ring-4 ring-sage/40'
               : 'bg-sage text-white border-sage-dark hover:bg-sage-dark'
           }`}

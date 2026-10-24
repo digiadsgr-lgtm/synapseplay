@@ -57,6 +57,8 @@ export const Activity11RealWorldMission: React.FC<ActivityRunnerRenderProps> = (
   currentRound,
   totalRounds,
   hintLevel,
+  ageBand,
+  adaptiveProfile,
   sessionSeed = 0,
   advanceRound,
 }) => {
@@ -92,15 +94,20 @@ export const Activity11RealWorldMission: React.FC<ActivityRunnerRenderProps> = (
     <div className="space-y-6 max-w-2xl mx-auto" data-testid="activity-11-real-world-mission">
       <div className="p-5 rounded-3xl bg-sage-surface border-2 border-sage text-center space-y-2">
         <h2 className="text-xl md:text-2xl font-extrabold text-charcoal">{mission.titleEl}</h2>
-        <p className="text-sm text-charcoal-muted">
-          Κάνε τα βήματα στον πραγματικό χώρο και πάτησε το καθένα μόλις το ολοκληρώσεις!
+        <p className="text-sm font-bold text-charcoal-muted">
+          {allChecked
+            ? '✅ Όλα τα βήματα ολοκληρώθηκαν! Πάτησε το κουμπί «Ολοκλήρωσα την Αποστολή!» κάτω!'
+            : '👉 Πάτησε πρώτα τα 2 βήματα (1 & 2) καθώς τα κάνεις στον χώρο και μετά το κουμπί ολοκλήρωσης!'}
         </p>
       </div>
 
       <div className="space-y-4">
         {mission.steps.map((step, idx) => {
           const isDone = checkedSteps[idx];
-          const isNextHint = hintLevel >= 1 && !isDone && (idx === 0 || checkedSteps[0]);
+          const isNextHint =
+            (hintLevel >= 1 || ageBand === '4-5' || adaptiveProfile.autoHintBoost) &&
+            !isDone &&
+            (idx === 0 || checkedSteps[0]);
           return (
             <button
               key={step.textEl}

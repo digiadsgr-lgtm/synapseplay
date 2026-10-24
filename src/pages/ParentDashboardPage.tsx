@@ -16,6 +16,7 @@ import {
   type ClinicalDomainKey,
 } from '../utils/childProfileLearningEngine';
 import { ParentGateModal } from '../components/ParentGateModal';
+import { ClinicalFeedbackSection } from '../components/ClinicalFeedbackSection';
 
 export const ParentDashboardPage: React.FC = () => {
   const navigate = useNavigate();
@@ -308,6 +309,9 @@ export const ParentDashboardPage: React.FC = () => {
           </div>
         </div>
       </section>
+
+      {/* Clinical & Parent Evaluation, Observations & Suggestions Hub */}
+      <ClinicalFeedbackSection />
 
       {/* Per-Device Child Micro-Profiles & Continual Learning Adaptation */}
       <section

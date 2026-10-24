@@ -86,6 +86,7 @@ export const Activity14NarrativeBuilder: React.FC<ActivityRunnerRenderProps> = (
   currentRound,
   totalRounds,
   hintLevel,
+  ageBand,
   adaptiveProfile,
   sessionSeed = 0,
   advanceRound,
@@ -102,17 +103,26 @@ export const Activity14NarrativeBuilder: React.FC<ActivityRunnerRenderProps> = (
   const [whereConfirmed, setWhereConfirmed] = useState<boolean>(false);
 
   useEffect(() => {
-    if (hintLevel === 2) {
+    if (hintLevel === 2 || ageBand === '4-5') {
       setWhoConfirmed(true);
       setWhereConfirmed(true);
     } else {
       setWhoConfirmed(false);
       setWhereConfirmed(false);
     }
-  }, [currentRound, hintLevel, sessionSeed]);
+    speakGreek(round.storyGoalEl, settings.voiceEnabled, adaptiveProfile.speechRate);
+  }, [
+    currentRound,
+    hintLevel,
+    ageBand,
+    sessionSeed,
+    round.storyGoalEl,
+    settings.voiceEnabled,
+    adaptiveProfile.speechRate,
+  ]);
 
   const visibleActions =
-    hintLevel === 2
+    hintLevel === 2 || ageBand === '4-5' || adaptiveProfile.distractorReductionRatio >= 0.5
       ? round.actionOptions.filter((o, i) => o.isCorrect || i === 0)
       : round.actionOptions;
 

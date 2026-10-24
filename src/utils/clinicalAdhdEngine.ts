@@ -1,4 +1,122 @@
-import type { AgeBandId, AdaptiveScenarioId } from '../types/domain';
+import type {
+  AgeBandId,
+  AdaptiveScenarioId,
+  HintLevel,
+  SilentAdaptationProfile,
+} from '../types/domain';
+
+export interface AgeAndPerformanceDifficultyProfile {
+  tierLevel: 1 | 2 | 3 | 4 | 5;
+  ageTierLabelEl: string;
+  performanceStateLabelEl: string;
+  isSimplified: boolean; // true for 4-5, hintLevel >= 2, or distractorReductionRatio >= 0.5
+  isGuided: boolean; // true for 4-5, 5-6, hintLevel >= 1, or autoHintBoost
+  isAdvancedMastery: boolean; // true for 8-10/10-12 or enrichChallenge
+  cptIntervalMs: number; // Wait Signal (09) automatic stream cadence
+  memoryObservationMs: number; // Visual Memory (03) automatic card hide countdown
+  freezeHoldMs: number; // Move & Freeze (07) automatic statue hold window
+  rhythmPulseIntervalMs: number; // Copy Animal (10) & Proprioception (17) automatic metronome
+}
+
+/**
+ * Computes age-specific and real-time performance-adapted difficulty parameters
+ * across all 20 activities (4-5, 5-6, 6-8, 8-10, 10-12 years + live staircase).
+ */
+export function getAgeAndPerformanceDifficulty(
+  ageBand: AgeBandId,
+  adaptiveProfile: SilentAdaptationProfile,
+  hintLevel: HintLevel = 0
+): AgeAndPerformanceDifficultyProfile {
+  const baseTierMap: Record<AgeBandId, 1 | 2 | 3 | 4 | 5> = {
+    '4-5': 1,
+    '5-6': 2,
+    '6-8': 3,
+    '8-10': 4,
+    '10-12': 5,
+  };
+
+  const baseTier = baseTierMap[ageBand] ?? 3;
+  const isScaffoldingActive =
+    hintLevel >= 1 ||
+    adaptiveProfile.autoHintBoost ||
+    adaptiveProfile.distractorReductionRatio >= 0.3;
+  const isMasteryBoost =
+    hintLevel === 0 && !isScaffoldingActive && adaptiveProfile.enrichChallenge;
+
+  const effectiveTier = Math.max(
+    1,
+    Math.min(5, baseTier + (isMasteryBoost ? 1 : isScaffoldingActive ? -1 : 0))
+  ) as 1 | 2 | 3 | 4 | 5;
+
+  const ageTierLabels: Record<AgeBandId, string> = {
+    '4-5': 'Βαθμίδα 1 (4–5 ετών: Αισθητηριοκινητική Απλοποίηση & Μεγάλοι Στόχοι)',
+    '5-6': 'Βαθμίδα 2 (5–6 ετών: Προ-Ακαδημαϊκή Εστίαση & Οπτική Καθοδήγηση)',
+    '6-8': 'Βαθμίδα 3 (6–8 ετών: Βασική Εκτελεστική Λειτουργία & Αυτοέλεγχος)',
+    '8-10': 'Βαθμίδα 4 (8–10 ετών: Γνωστική Ευελιξία & Αυξημένη Μνήμη)',
+    '10-12': 'Βαθμίδα 5 (10–12 ετών: Σύνθετη Αυτορρύθμιση & Μεταγνώση)',
+  };
+
+  let performanceStateLabelEl = '⚖️ Ισορροπημένη Ροή (Ζώνη Βέλτιστης Πρόκλησης)';
+  if (hintLevel >= 2 || adaptiveProfile.distractorReductionRatio >= 0.5) {
+    performanceStateLabelEl =
+      '🛡️ Ενισχυμένη Υποστήριξη Ενεργή (Μείωση Περισπασμών & Απλοποίηση Βημάτων)';
+  } else if (isScaffoldingActive) {
+    performanceStateLabelEl =
+      '💡 Καθοδηγούμενη Προσαρμογή Ενεργή (Οπτική Επισήμανση & Ήρεμος Ρυθμός)';
+  } else if (isMasteryBoost) {
+    performanceStateLabelEl =
+      '🚀 Προσαρμογή Mastery Ενεργή (+1 Επίπεδο Πρόκλησης λόγω Άριστης Επίδοσης)';
+  }
+
+  const isSimplified =
+    ageBand === '4-5' || hintLevel >= 2 || adaptiveProfile.distractorReductionRatio >= 0.5;
+  const isGuided =
+    ageBand === '4-5' ||
+    ageBand === '5-6' ||
+    hintLevel >= 1 ||
+    adaptiveProfile.autoHintBoost;
+  const isAdvancedMastery =
+    !isSimplified &&
+    !isScaffoldingActive &&
+    (ageBand === '8-10' || ageBand === '10-12' || adaptiveProfile.enrichChallenge);
+
+  const cptMap: Record<1 | 2 | 3 | 4 | 5, number> = {
+    1: 2600,
+    2: 2400,
+    3: 2100,
+    4: 1800,
+    5: 1550,
+  };
+
+  const memoryMap: Record<1 | 2 | 3 | 4 | 5, number> = {
+    1: 4500,
+    2: 4000,
+    3: 3400,
+    4: 2800,
+    5: 2300,
+  };
+
+  const freezeMap: Record<1 | 2 | 3 | 4 | 5, number> = {
+    1: 2600,
+    2: 2800,
+    3: 3000,
+    4: 3300,
+    5: 3600,
+  };
+
+  return {
+    tierLevel: effectiveTier,
+    ageTierLabelEl: ageTierLabels[ageBand],
+    performanceStateLabelEl,
+    isSimplified,
+    isGuided,
+    isAdvancedMastery,
+    cptIntervalMs: cptMap[effectiveTier],
+    memoryObservationMs: memoryMap[effectiveTier],
+    freezeHoldMs: freezeMap[effectiveTier],
+    rhythmPulseIntervalMs: effectiveTier <= 2 ? 2000 : 1700,
+  };
+}
 
 export interface ClinicalTrialReference {
   id: string;

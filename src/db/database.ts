@@ -3,6 +3,7 @@ import type {
   ActivitySessionLog,
   AppSettings,
   ChildMicroProfile,
+  ClinicalFeedbackEntry,
   DailyUsageRecord,
 } from '../types/domain';
 import { createDefaultChildProfile } from '../utils/childProfileLearningEngine';
@@ -24,6 +25,7 @@ export class SynapsePlayDatabase extends Dexie {
   settings!: Table<AppSettings, string>;
   dailyUsage!: Table<DailyUsageRecord, string>;
   childProfiles!: Table<ChildMicroProfile, string>;
+  feedbackEntries!: Table<ClinicalFeedbackEntry, number>;
 
   constructor() {
     super('SynapsePlayLocalDB');
@@ -38,6 +40,13 @@ export class SynapsePlayDatabase extends Dexie {
       dailyUsage: 'dateKey',
       childProfiles: 'id, createdAt',
     });
+    this.version(3).stores({
+      sessionLogs: '++id, timestamp, dateKey, activityId, categoryId, childProfileId',
+      settings: 'id',
+      dailyUsage: 'dateKey',
+      childProfiles: 'id, createdAt',
+      feedbackEntries: '++id, timestamp, dateKey, reviewerRole, targetScope',
+    });
   }
 }
 
@@ -48,6 +57,7 @@ let memorySettings: AppSettings = { ...DEFAULT_SETTINGS };
 let memoryLogs: ActivitySessionLog[] = [];
 let memoryUsage: Record<string, number> = {};
 let memoryProfiles: ChildMicroProfile[] = [createDefaultChildProfile('6-8')];
+let memoryFeedbackEntries: ClinicalFeedbackEntry[] = [];
 
 export function getTodayDateKey(): string {
   const now = new Date();
@@ -162,6 +172,52 @@ export async function getSessionLogs(): Promise<ActivitySessionLog[]> {
   }
 }
 
+export async function recordFeedbackEntry(
+  entryData: Omit<ClinicalFeedbackEntry, 'id' | 'timestamp' | 'dateKey'>
+): Promise<ClinicalFeedbackEntry> {
+  const entry: ClinicalFeedbackEntry = {
+    ...entryData,
+    timestamp: new Date().toISOString(),
+    dateKey: getTodayDateKey(),
+  };
+  const fallbackId = Date.now() + Math.floor(Math.random() * 1000);
+  const optimistic = { ...entry, id: fallbackId };
+  memoryFeedbackEntries = [optimistic, ...memoryFeedbackEntries];
+  try {
+    const id = await db.feedbackEntries.add(entry);
+    const saved = { ...entry, id };
+    memoryFeedbackEntries = memoryFeedbackEntries.map((item) =>
+      item.id === fallbackId ? saved : item
+    );
+    return saved;
+  } catch {
+    return optimistic;
+  }
+}
+
+export async function getFeedbackEntries(): Promise<ClinicalFeedbackEntry[]> {
+  try {
+    const list = await db.feedbackEntries.orderBy('timestamp').reverse().toArray();
+    if (list.length > 0) {
+      memoryFeedbackEntries = list;
+      return list;
+    }
+    return [...memoryFeedbackEntries];
+  } catch {
+    return [...memoryFeedbackEntries];
+  }
+}
+
+export async function deleteFeedbackEntry(id: number): Promise<ClinicalFeedbackEntry[]> {
+  memoryFeedbackEntries = memoryFeedbackEntries.filter((f) => f.id !== id);
+  try {
+    await db.feedbackEntries.delete(id);
+  } catch {
+    // Fallback already updated
+  }
+  return [...memoryFeedbackEntries];
+}
+
 export async function getTodayUsageSeconds(): Promise<number> {
   const key = getTodayDateKey();
   try {
@@ -188,6 +244,7 @@ export async function wipeAllLocalData(): Promise<void> {
   memoryLogs = [];
   memoryUsage = {};
   memoryProfiles = [createDefaultChildProfile('6-8')];
+  memoryFeedbackEntries = [];
   try {
     if (typeof window !== 'undefined' && window.sessionStorage) {
       window.sessionStorage.clear();
@@ -198,15 +255,13 @@ export async function wipeAllLocalData(): Promise<void> {
   try {
     await db.transaction(
       'rw',
-      db.sessionLogs,
-      db.settings,
-      db.dailyUsage,
-      db.childProfiles,
+      [db.sessionLogs, db.settings, db.dailyUsage, db.childProfiles, db.feedbackEntries],
       async () => {
         await db.sessionLogs.clear();
         await db.settings.clear();
         await db.dailyUsage.clear();
         await db.childProfiles.clear();
+        await db.feedbackEntries.clear();
         await db.settings.put(DEFAULT_SETTINGS);
         await db.childProfiles.put(createDefaultChildProfile('6-8'));
       }

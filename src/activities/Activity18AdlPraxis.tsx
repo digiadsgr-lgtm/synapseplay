@@ -77,6 +77,7 @@ export const Activity18AdlPraxis: React.FC<ActivityRunnerRenderProps> = ({
   currentRound,
   totalRounds,
   hintLevel,
+  ageBand,
   adaptiveProfile,
   sessionSeed = 0,
   advanceRound,
@@ -90,7 +91,7 @@ export const Activity18AdlPraxis: React.FC<ActivityRunnerRenderProps> = ({
   const round = activeRounds[(currentRound - 1) % activeRounds.length];
 
   const visibleOptions =
-    hintLevel === 2
+    hintLevel === 2 || ageBand === '4-5' || adaptiveProfile.distractorReductionRatio >= 0.5
       ? round.options.filter((o, i) => o.isCorrect || i === 0)
       : round.options;
 

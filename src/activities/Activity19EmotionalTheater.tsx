@@ -186,6 +186,7 @@ export const Activity19EmotionalTheater: React.FC<ActivityRunnerRenderProps> = (
   currentRound,
   totalRounds,
   hintLevel,
+  ageBand,
   adaptiveProfile,
   sessionSeed = 0,
   advanceRound,
@@ -199,7 +200,7 @@ export const Activity19EmotionalTheater: React.FC<ActivityRunnerRenderProps> = (
   const scene = activeScenes[(currentRound - 1) % activeScenes.length];
 
   const visibleOptions =
-    hintLevel === 2
+    hintLevel === 2 || ageBand === '4-5' || adaptiveProfile.distractorReductionRatio >= 0.5
       ? scene.options.filter((o, i) => o.isCalmSolution || i === 0)
       : scene.options;
 

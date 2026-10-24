@@ -72,6 +72,8 @@ export const Activity08ListenDo: React.FC<ActivityRunnerRenderProps> = ({
   currentRound,
   totalRounds,
   hintLevel,
+  ageBand,
+  adaptiveProfile,
   sessionSeed = 0,
   advanceRound,
   triggerGentleFeedback,
@@ -87,17 +89,32 @@ export const Activity08ListenDo: React.FC<ActivityRunnerRenderProps> = ({
 
   useEffect(() => {
     setIsListeningFinished(false);
-    speakGreek(round.instructionEl, settings.voiceEnabled);
+    speakGreek(round.instructionEl, settings.voiceEnabled, adaptiveProfile.speechRate);
     const timer = window.setTimeout(() => {
       setIsListeningFinished(true);
     }, 900);
     return () => window.clearTimeout(timer);
-  }, [currentRound, sessionSeed, round.instructionEl, settings.voiceEnabled]);
+  }, [currentRound, sessionSeed, round.instructionEl, settings.voiceEnabled, adaptiveProfile.speechRate]);
 
-  const visibleOptions =
-    hintLevel === 2
-      ? round.options.filter((o, i) => o.isTarget || i === 0)
-      : round.options;
+  const visibleOptions = useMemo(() => {
+    if (hintLevel === 2 || ageBand === '4-5' || adaptiveProfile.distractorReductionRatio >= 0.5) {
+      return round.options.filter((o, i) => o.isTarget || i === 0);
+    }
+    if (ageBand === '8-10' || ageBand === '10-12' || adaptiveProfile.enrichChallenge) {
+      return [
+        ...round.options,
+        { id: `l-extra-${currentRound}`, emoji: '🔔', labelEl: 'Καμπανάκι', isTarget: false },
+      ];
+    }
+    return round.options;
+  }, [
+    round.options,
+    hintLevel,
+    ageBand,
+    adaptiveProfile.distractorReductionRatio,
+    adaptiveProfile.enrichChallenge,
+    currentRound,
+  ]);
 
   const handleSelect = (isTarget: boolean, labelEl: string) => {
     runDebounced(() => {

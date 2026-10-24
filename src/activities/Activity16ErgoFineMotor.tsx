@@ -92,6 +92,8 @@ export const Activity16ErgoFineMotor: React.FC<ActivityRunnerRenderProps> = ({
   totalRounds,
   hintLevel,
   seatedMode,
+  ageBand,
+  adaptiveProfile,
   sessionSeed = 0,
   advanceRound,
   triggerGentleFeedback,
@@ -148,7 +150,8 @@ export const Activity16ErgoFineMotor: React.FC<ActivityRunnerRenderProps> = ({
           {exercise.waypoints.map((wp) => {
             const isCompletedStep = wp.step <= tracedStep;
             const isNextStep = wp.step === nextExpectedStep;
-            const highlight = hintLevel >= 1 && isNextStep;
+            const highlight =
+              (hintLevel >= 1 || ageBand === '4-5' || adaptiveProfile.autoHintBoost) && isNextStep;
 
             return (
               <button

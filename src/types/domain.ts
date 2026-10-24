@@ -150,3 +150,37 @@ export interface DailyUsageRecord {
   dateKey: string; // YYYY-MM-DD
   elapsedSeconds: number;
 }
+
+export type ReviewerRole =
+  | 'parent'
+  | 'occupational-therapist'
+  | 'speech-therapist'
+  | 'child-psychologist'
+  | 'child-psychiatrist'
+  | 'physiatrist'
+  | 'social-worker'
+  | 'adhd-center-director';
+
+export type ObservationCategory =
+  | 'clinical-suggestion'
+  | 'bug-ux'
+  | 'age-calibration'
+  | 'new-game-idea'
+  | 'positive-review';
+
+export interface ClinicalFeedbackEntry {
+  id?: number;
+  timestamp: string;
+  dateKey: string;
+  reviewerRole: ReviewerRole;
+  reviewerRoleLabelEl: string;
+  reviewerNameOrCenter: string;
+  targetScope: string; // 'general' | 'voice-engine' | 'age-adaptation' | ActivityId
+  targetScopeLabelEl: string;
+  ageBandTested: AgeBandId;
+  ratingStars: 1 | 2 | 3 | 4 | 5;
+  usabilityScore: 1 | 2 | 3 | 4 | 5;
+  clinicalAppropriatenessScore: 1 | 2 | 3 | 4 | 5;
+  observationCategory: ObservationCategory;
+  commentEl: string;
+}

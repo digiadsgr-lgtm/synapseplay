@@ -1,7 +1,12 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import type { ActivityRunnerRenderProps } from '../components/ActivityRunner';
 import { useDebouncedAction } from '../hooks/useDebouncedAction';
-import { selectSessionRounds } from '../utils/clinicalAdhdEngine';
+import {
+  getAgeAndPerformanceDifficulty,
+  selectSessionRounds,
+} from '../utils/clinicalAdhdEngine';
+import { playCalmTone } from '../utils/soundAndSpeech';
+import { useApp } from '../context/AppContext';
 
 interface MemoryCard {
   id: string;
@@ -103,14 +108,23 @@ const ROUNDS: Array<{ targetLabelEl: string; targetEmoji: string; cards: MemoryC
 ];
 
 export const Activity03VisualMemory: React.FC<ActivityRunnerRenderProps> = ({
+  phase,
   currentRound,
   totalRounds,
   hintLevel,
+  ageBand,
+  adaptiveProfile,
   sessionSeed = 0,
   advanceRound,
   triggerGentleFeedback,
 }) => {
+  const { settings } = useApp();
   const { runDebounced, getAbsorbedCount } = useDebouncedAction();
+  const diff = useMemo(
+    () => getAgeAndPerformanceDifficulty(ageBand, adaptiveProfile, hintLevel),
+    [ageBand, adaptiveProfile, hintLevel]
+  );
+
   const activeRounds = useMemo(
     () => selectSessionRounds(ROUNDS, totalRounds, sessionSeed),
     [totalRounds, sessionSeed]
@@ -122,15 +136,34 @@ export const Activity03VisualMemory: React.FC<ActivityRunnerRenderProps> = ({
     setIsHidden(false);
   }, [currentRound, sessionSeed]);
 
-  const visibleCards =
-    hintLevel === 2
-      ? roundData.cards.filter((c, idx) => c.isTarget || idx === 0)
-      : roundData.cards;
+  // Automatic Observation Countdown: cards automatically flip face-down after the age-calibrated observation window
+  useEffect(() => {
+    if (phase === 'PAUSED' || phase === 'COMPLETED' || isHidden) return;
+    const timer = window.setTimeout(() => {
+      setIsHidden(true);
+      playCalmTone('soft-step', settings.soundEnabled);
+    }, diff.memoryObservationMs);
+    return () => window.clearTimeout(timer);
+  }, [phase, isHidden, diff.memoryObservationMs, settings.soundEnabled]);
+
+  const visibleCards = useMemo(() => {
+    if (diff.isSimplified) {
+      return roundData.cards.filter((c, idx) => c.isTarget || idx === 0);
+    }
+    if (diff.isAdvancedMastery) {
+      return [
+        ...roundData.cards,
+        { id: `extra-${currentRound}`, emoji: '🧭', labelEl: 'Πυξίδα', isTarget: false },
+      ];
+    }
+    return roundData.cards;
+  }, [roundData.cards, diff.isSimplified, diff.isAdvancedMastery, currentRound]);
 
   const handleCardPick = (card: MemoryCard) => {
     runDebounced(() => {
       if (!isHidden) {
         setIsHidden(true);
+        playCalmTone('soft-step', settings.soundEnabled);
         return;
       }
       if (card.isTarget) {
@@ -138,7 +171,7 @@ export const Activity03VisualMemory: React.FC<ActivityRunnerRenderProps> = ({
       } else {
         setIsHidden(false);
         triggerGentleFeedback(
-          `Εκεί ήταν «${card.labelEl}». Δες ξανά τις κάρτες και πάτησε «Κρύψε τις Κάρτες» όταν είσαι έτοιμος!`
+          `Εκεί ήταν «${card.labelEl}». Δες ξανά τις κάρτες — θα γυρίσουν αυτόματα σε λίγο!`
         );
       }
     });
@@ -147,11 +180,16 @@ export const Activity03VisualMemory: React.FC<ActivityRunnerRenderProps> = ({
   return (
     <div className="space-y-6 text-center" data-testid="activity-03-visual-memory">
       <div className="p-4 rounded-2xl bg-slate-surface border-2 border-slate flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3 text-left">
           <span className="text-lg font-extrabold text-charcoal">Θυμήσου πού βρίσκεται:</span>
           <span className="px-4 py-2 rounded-xl bg-white border-2 border-slate font-extrabold text-lg flex items-center gap-2">
             <span className="text-2xl" aria-hidden="true">{roundData.targetEmoji}</span>
             <span>{roundData.targetLabelEl}</span>
+          </span>
+          <span className="text-xs font-bold text-slate-dark">
+            {isHidden
+              ? '👉 Τώρα πάτησε την κάρτα όπου κρύβεται!'
+              : `⏳ Οι κάρτες κρύβονται αυτόματα σε ${(diff.memoryObservationMs / 1000).toFixed(1)} δευτ.`}
           </span>
         </div>
 
@@ -162,13 +200,13 @@ export const Activity03VisualMemory: React.FC<ActivityRunnerRenderProps> = ({
           className="touch-target px-5 py-2.5 rounded-2xl bg-sage-dark text-white font-extrabold flex items-center gap-2 hover:bg-sage"
         >
           <span aria-hidden="true">{isHidden ? '👀' : '🙈'}</span>
-          <span>{isHidden ? 'Δείξε λίγο τις Κάρτες' : 'Κρύψε τις Κάρτες & Βρες!'}</span>
+          <span>{isHidden ? 'Δείξε λίγο τις Κάρτες' : 'Κρύψε τις Κάρτες Τώρα'}</span>
         </button>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-2xl mx-auto">
         {visibleCards.map((card) => {
-          const highlight = isHidden && hintLevel >= 1 && card.isTarget;
+          const highlight = isHidden && diff.isGuided && hintLevel >= 1 && card.isTarget;
           return (
             <button
               key={card.id}

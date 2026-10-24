@@ -97,6 +97,8 @@ export const Activity05OrderSteps: React.FC<ActivityRunnerRenderProps> = ({
   currentRound,
   totalRounds,
   hintLevel,
+  ageBand,
+  adaptiveProfile,
   sessionSeed = 0,
   advanceRound,
   triggerGentleFeedback,
@@ -135,11 +137,31 @@ export const Activity05OrderSteps: React.FC<ActivityRunnerRenderProps> = ({
 
   return (
     <div className="space-y-6" data-testid="activity-05-order-steps">
-      <div className="p-4 rounded-2xl bg-sage-surface border-2 border-sage text-center">
+      <div className="p-4 rounded-2xl bg-sage-surface border-2 border-sage text-center space-y-2">
         <h2 className="text-xl font-extrabold text-charcoal">{routine.titleEl}</h2>
-        <p className="text-sm text-charcoal-muted">
-          Επίλεξε το Βήμα {nextExpectedOrder} από τα {routine.steps.length}
+        <p className="text-sm font-bold text-charcoal-muted">
+          Επίλεξε το Βήμα {nextExpectedOrder} από τα {routine.steps.length} με τη σωστή χρονική σειρά:
         </p>
+        {/* Visual Sequence Timeline Strip */}
+        <div className="flex items-center justify-center gap-2 pt-1">
+          {routine.steps.map((s) => {
+            const done = selectedOrders.includes(s.order);
+            return (
+              <span
+                key={`timeline-${s.order}`}
+                className={`px-3 py-1 rounded-xl text-xs font-extrabold border ${
+                  done
+                    ? 'bg-sage-dark text-white border-charcoal'
+                    : s.order === nextExpectedOrder
+                    ? 'bg-white text-charcoal border-slate-dark'
+                    : 'bg-sand-light text-charcoal-muted border-sand-dark'
+                }`}
+              >
+                {done ? `${s.order}. ${s.emoji} ✓` : `Βήμα ${s.order}`}
+              </span>
+            );
+          })}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -147,7 +169,9 @@ export const Activity05OrderSteps: React.FC<ActivityRunnerRenderProps> = ({
           const step = routine.steps.find((s) => s.order === orderNum)!;
           const isAlreadyPicked = selectedOrders.includes(step.order);
           const isNextHint =
-            !isAlreadyPicked && hintLevel >= 1 && step.order === nextExpectedOrder;
+            !isAlreadyPicked &&
+            (hintLevel >= 1 || ageBand === '4-5' || adaptiveProfile.autoHintBoost) &&
+            step.order === nextExpectedOrder;
 
           return (
             <button
@@ -166,7 +190,7 @@ export const Activity05OrderSteps: React.FC<ActivityRunnerRenderProps> = ({
             >
               <span className="text-5xl" aria-hidden="true">{step.emoji}</span>
               <span className="text-base font-extrabold">{step.labelEl}</span>
-              {(isAlreadyPicked || hintLevel === 2) && (
+              {(isAlreadyPicked || hintLevel === 2 || ageBand === '4-5') && (
                 <span className="px-3 py-1 rounded-full bg-sand text-charcoal text-xs font-extrabold">
                   Βήμα {step.order}
                 </span>

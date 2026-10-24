@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import type { ActivityRunnerRenderProps } from '../components/ActivityRunner';
 import { useDebouncedAction } from '../hooks/useDebouncedAction';
 import { speakGreek } from '../utils/soundAndSpeech';
@@ -72,6 +72,7 @@ export const Activity15AuditoryDiscrimination: React.FC<ActivityRunnerRenderProp
   currentRound,
   totalRounds,
   hintLevel,
+  ageBand,
   adaptiveProfile,
   sessionSeed = 0,
   advanceRound,
@@ -85,8 +86,13 @@ export const Activity15AuditoryDiscrimination: React.FC<ActivityRunnerRenderProp
   );
   const round = activeRounds[(currentRound - 1) % activeRounds.length];
 
+  // Automatically speak the auditory discrimination instruction at the start of every round!
+  useEffect(() => {
+    speakGreek(round.spokenInstructionEl, settings.voiceEnabled, adaptiveProfile.speechRate);
+  }, [currentRound, sessionSeed, round.spokenInstructionEl, settings.voiceEnabled, adaptiveProfile.speechRate]);
+
   const visibleOptions =
-    hintLevel === 2
+    hintLevel === 2 || ageBand === '4-5' || adaptiveProfile.distractorReductionRatio >= 0.5
       ? round.options.filter((o, i) => o.isCorrect || i === 0)
       : round.options;
 

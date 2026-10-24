@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import type { ActivityRunnerRenderProps } from '../components/ActivityRunner';
 import { useDebouncedAction } from '../hooks/useDebouncedAction';
 import { selectSessionRounds } from '../utils/clinicalAdhdEngine';
@@ -69,10 +69,13 @@ const SENSORY_EXERCISES: ProprioceptiveExercise[] = [
 ];
 
 export const Activity17SensoryProprioception: React.FC<ActivityRunnerRenderProps> = ({
+  phase,
   currentRound,
   totalRounds,
   hintLevel,
   seatedMode,
+  ageBand,
+  adaptiveProfile,
   sessionSeed = 0,
   advanceRound,
 }) => {
@@ -83,10 +86,30 @@ export const Activity17SensoryProprioception: React.FC<ActivityRunnerRenderProps
   );
   const item = activeExercises[(currentRound - 1) % activeExercises.length];
   const [pulsesCompleted, setPulsesCompleted] = useState<number>(0);
+  const advanceRef = useRef(advanceRound);
+  advanceRef.current = advanceRound;
+  const absorbedRef = useRef(getAbsorbedCount);
+  absorbedRef.current = getAbsorbedCount;
 
   useEffect(() => {
-    setPulsesCompleted(hintLevel === 2 ? 2 : 0);
-  }, [currentRound, hintLevel, sessionSeed]);
+    setPulsesCompleted(hintLevel === 2 || ageBand === '4-5' ? 2 : 0);
+  }, [currentRound, hintLevel, ageBand, sessionSeed]);
+
+  // Automatic Hands-Free Proprioceptive Metronome (ticks every 1800ms while child presses palms/feet)
+  useEffect(() => {
+    if (phase === 'PAUSED' || phase === 'COMPLETED') return;
+    const timer = window.setTimeout(() => {
+      setPulsesCompleted((prev) => {
+        const next = prev + 1;
+        if (next >= 3) {
+          advanceRef.current(absorbedRef.current());
+          return 0;
+        }
+        return next;
+      });
+    }, 1800);
+    return () => window.clearTimeout(timer);
+  }, [phase, pulsesCompleted, currentRound]);
 
   const handleProprioceptivePulse = () => {
     runDebounced(() => {
@@ -102,7 +125,10 @@ export const Activity17SensoryProprioception: React.FC<ActivityRunnerRenderProps
 
   return (
     <div className="space-y-6 text-center max-w-2xl mx-auto" data-testid="activity-17-sensory-proprioception">
-      <div className="p-6 rounded-3xl bg-slate-surface border-4 border-slate space-y-3">
+      <div
+        onClick={handleProprioceptivePulse}
+        className="p-6 rounded-3xl bg-slate-surface border-4 border-slate space-y-3 cursor-pointer"
+      >
         <span className="inline-block px-3 py-1 rounded-full bg-white text-xs font-extrabold text-slate-dark border border-slate">
           🧘 {item.disciplineTagEl}
         </span>
@@ -111,6 +137,9 @@ export const Activity17SensoryProprioception: React.FC<ActivityRunnerRenderProps
         <p className="text-lg font-bold text-charcoal" data-testid="proprioception-instruction">
           {seatedMode ? item.seatedInstructionEl : item.standingInstructionEl}
         </p>
+        <p className="text-xs font-extrabold text-slate-dark">
+          ⏱️ Κράτα τη σταθερή πίεση — ο μετρητής προχωράει αυτόματα ({pulsesCompleted} / 3)
+        </p>
       </div>
 
       <button
@@ -118,7 +147,7 @@ export const Activity17SensoryProprioception: React.FC<ActivityRunnerRenderProps
         data-testid="proprioception-pulse-btn"
         onClick={handleProprioceptivePulse}
         className={`touch-target px-8 py-4 rounded-3xl border-4 font-extrabold text-xl inline-flex items-center gap-3 ${
-          hintLevel >= 1
+          hintLevel >= 1 || adaptiveProfile.autoHintBoost
             ? 'bg-sage-dark text-white border-charcoal ring-4 ring-sage/40'
             : 'bg-sage text-white border-sage-dark hover:bg-sage-dark'
         }`}

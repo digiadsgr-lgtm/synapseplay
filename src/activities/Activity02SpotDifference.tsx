@@ -1,7 +1,10 @@
 import React, { useMemo } from 'react';
 import type { ActivityRunnerRenderProps } from '../components/ActivityRunner';
 import { useDebouncedAction } from '../hooks/useDebouncedAction';
-import { selectSessionRounds } from '../utils/clinicalAdhdEngine';
+import {
+  getAgeAndPerformanceDifficulty,
+  selectSessionRounds,
+} from '../utils/clinicalAdhdEngine';
 
 interface SceneSlot {
   id: string;
@@ -72,18 +75,40 @@ export const Activity02SpotDifference: React.FC<ActivityRunnerRenderProps> = ({
   currentRound,
   totalRounds,
   hintLevel,
+  ageBand,
+  adaptiveProfile,
   sessionSeed = 0,
   advanceRound,
   triggerGentleFeedback,
 }) => {
   const { runDebounced, getAbsorbedCount } = useDebouncedAction();
+  const diff = useMemo(
+    () => getAgeAndPerformanceDifficulty(ageBand, adaptiveProfile, hintLevel),
+    [ageBand, adaptiveProfile, hintLevel]
+  );
+
   const activeScenes = useMemo(
     () => selectSessionRounds(SCENES, totalRounds, sessionSeed),
     [totalRounds, sessionSeed]
   );
   const slots = activeScenes[(currentRound - 1) % activeScenes.length];
 
-  const visibleSlots = hintLevel === 2 ? slots.filter((s, i) => s.isDifferent || i === 0) : slots;
+  const visibleSlots = useMemo(() => {
+    if (diff.isSimplified) {
+      return slots.filter((s, i) => s.isDifferent || i === 0);
+    }
+    if (ageBand === '5-6') {
+      return slots.slice(0, 3);
+    }
+    if (diff.isAdvancedMastery) {
+      return [
+        ...slots,
+        { id: `ex1-${currentRound}`, leftEmoji: '☁️', rightEmoji: '☁️', labelEl: 'Σύννεφο', isDifferent: false },
+        { id: `ex2-${currentRound}`, leftEmoji: '🍀', rightEmoji: '🍀', labelEl: 'Τριφύλλι', isDifferent: false },
+      ];
+    }
+    return slots;
+  }, [slots, diff.isSimplified, diff.isAdvancedMastery, ageBand, currentRound]);
 
   const handleRightCardClick = (slot: SceneSlot) => {
     runDebounced(() => {
@@ -100,20 +125,22 @@ export const Activity02SpotDifference: React.FC<ActivityRunnerRenderProps> = ({
   return (
     <div className="space-y-6" data-testid="activity-02-spot-difference">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Left Reference Scene */}
+        {/* Left Reference Scene (also clickable if the child taps the difference on the left!) */}
         <div className="p-5 rounded-3xl bg-white border-2 border-sand-dark space-y-3">
           <h2 className="text-lg font-extrabold text-charcoal text-center">
             Εικόνα Α (Αρχική)
           </h2>
           <div className="grid grid-cols-2 gap-3">
             {visibleSlots.map((slot) => (
-              <div
+              <button
                 key={`left-${slot.id}`}
-                className="min-h-[96px] p-4 rounded-2xl bg-sand border-2 border-sand-dark flex flex-col items-center justify-center gap-1"
+                type="button"
+                onClick={() => handleRightCardClick(slot)}
+                className="touch-target min-h-[96px] p-4 rounded-2xl bg-sand border-2 border-sand-dark flex flex-col items-center justify-center gap-1 hover:border-slate"
               >
                 <span className="text-5xl" aria-hidden="true">{slot.leftEmoji}</span>
                 <span className="text-xs font-bold text-charcoal-muted text-center">{slot.labelEl}</span>
-              </div>
+              </button>
             ))}
           </div>
         </div>
@@ -125,7 +152,7 @@ export const Activity02SpotDifference: React.FC<ActivityRunnerRenderProps> = ({
           </h2>
           <div className="grid grid-cols-2 gap-3">
             {visibleSlots.map((slot) => {
-              const highlight = hintLevel >= 1 && slot.isDifferent;
+              const highlight = diff.isGuided && hintLevel >= 1 && slot.isDifferent;
               return (
                 <button
                   key={`right-${slot.id}`}

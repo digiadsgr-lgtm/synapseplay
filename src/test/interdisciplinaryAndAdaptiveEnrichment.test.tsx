@@ -1,16 +1,20 @@
 import React from 'react';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import App from '../App';
 import { INTERDISCIPLINARY_PROTOCOLS } from '../data/interdisciplinaryProtocols';
 import { evaluateInvisibleScenario } from '../utils/adaptiveScenarioEngine';
 import { normalizeGreekForSpeech } from '../utils/soundAndSpeech';
-import { CLINICAL_STUDIES_AND_TRIALS } from '../utils/clinicalAdhdEngine';
+import {
+  CLINICAL_STUDIES_AND_TRIALS,
+  getAgeAndPerformanceDifficulty,
+} from '../utils/clinicalAdhdEngine';
 import {
   createDefaultChildProfile,
   trainChildProfileOnActivityCompletion,
 } from '../utils/childProfileLearningEngine';
+import { formatFeedbackReportText } from '../components/ClinicalFeedbackSection';
 import { saveSettings, wipeAllLocalData } from '../db/database';
 
 function renderRoute(route: string = '/') {
@@ -318,5 +322,168 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
     await waitFor(() => {
       expect(screen.getByText(/Γεια σου, Αριάδνη!/i)).toBeInTheDocument();
     });
+  });
+
+  it('Autonomous Game Mechanics: Activity 09 (Wait Signal), Activity 03 (Visual Memory), and Activity 07 (Move & Freeze) advance automatically on screen without requiring manual Next/Hide clicks', () => {
+    vi.useFakeTimers();
+
+    // 1. Activity 09 (Wait Signal): Objects appear automatically on screen every cptIntervalMs (2100ms for 6-8)
+    const { unmount: u09 } = renderRoute('/activity/09-wait-signal');
+    expect(screen.getByTestId('signal-stage-waiting')).toBeInTheDocument();
+
+    // Advance timer twice (2 x 2200ms) WITHOUT pressing any manual Next button -> Golden Star appears automatically!
+    act(() => {
+      vi.advanceTimersByTime(2200);
+    });
+    act(() => {
+      vi.advanceTimersByTime(2200);
+    });
+    expect(screen.getByTestId('signal-stage-ready')).toBeInTheDocument();
+
+    // Tapping directly on the central stage card completes Round 1 -> Round 2!
+    fireEvent.click(screen.getByTestId('signal-stage-ready'));
+    expect(screen.getByTestId('round-pebble-2')).toHaveTextContent('2');
+    u09();
+
+    // 2. Activity 03 (Visual Memory): Cards automatically flip face-down after the observation countdown (3400ms)
+    const { unmount: u03 } = renderRoute('/activity/03-visual-memory');
+    expect(screen.getByTestId('memory-card-target')).toHaveTextContent('Κόκκινο Μήλο');
+
+    act(() => {
+      vi.advanceTimersByTime(3500);
+    });
+    // Now cards are automatically hidden ('Πού ήταν;') without pressing any button!
+    expect(screen.getByTestId('memory-card-target')).toHaveTextContent('Πού ήταν;');
+    fireEvent.click(screen.getByTestId('memory-card-target'));
+    expect(screen.getByTestId('round-pebble-2')).toHaveTextContent('2');
+    u03();
+
+    // 3. Activity 07 (Move & Freeze): Staying still during FREEZE phase automatically completes the statue hold!
+    const { unmount: u07 } = renderRoute('/activity/07-move-freeze');
+    // Complete Round 1 (GO)
+    fireEvent.click(screen.getByTestId('signal-card-go'));
+    act(() => {
+      vi.advanceTimersByTime(450);
+    });
+    fireEvent.click(screen.getByTestId('signal-card-go'));
+    expect(screen.getByTestId('signal-card-freeze')).toBeInTheDocument();
+
+    // Stay still for 3100ms during FREEZE -> automatically advances to Round 3!
+    act(() => {
+      vi.advanceTimersByTime(3100);
+    });
+    expect(screen.getByTestId('round-pebble-3')).toHaveTextContent('3');
+    u07();
+
+    vi.useRealTimers();
+  });
+
+  it('Age-Graded & Performance Difficulty Calibration: scales complexity across all 5 age bands (4-5 to 10-12) and live performance', async () => {
+    const balanced68 = evaluateInvisibleScenario({
+      ageBand: '6-8',
+      completedRoundsCount: 0,
+      gentleNudgesInCurrentActivity: 0,
+      hintsUsedInCurrentActivity: 0,
+      absorbedImpulsiveTaps: 0,
+      lastResponseTimeMs: 0,
+      seatedModeActive: false,
+    });
+    const diff45 = getAgeAndPerformanceDifficulty('4-5', balanced68, 0);
+    const diff68 = getAgeAndPerformanceDifficulty('6-8', balanced68, 0);
+    const diff1012 = getAgeAndPerformanceDifficulty('10-12', balanced68, 0);
+
+    expect(diff45.tierLevel).toBe(1);
+    expect(diff45.isSimplified).toBe(true);
+    expect(diff68.tierLevel).toBe(3);
+    expect(diff1012.tierLevel).toBe(5);
+    expect(diff1012.isAdvancedMastery).toBe(true);
+    expect(diff45.cptIntervalMs).toBeGreaterThan(diff1012.cptIntervalMs);
+
+    // Verify Activity 12 (Build Pattern) scales from 2 blocks (Age 4-5) to 4 blocks (Age 10-12)
+    await saveSettings({ ageBand: '4-5' });
+    const { unmount: u45 } = renderRoute('/activity/12-build-pattern');
+    await waitFor(() => {
+      expect(screen.getByTestId('live-difficulty-calibration-bar')).toHaveAttribute(
+        'data-difficulty-tier',
+        '1'
+      );
+    });
+    expect(screen.getByTestId('pattern-slot-1')).toBeInTheDocument();
+    expect(screen.queryByTestId('pattern-slot-2')).not.toBeInTheDocument();
+    u45();
+
+    await saveSettings({ ageBand: '10-12' });
+    const { unmount: u1012 } = renderRoute('/activity/12-build-pattern');
+    await waitFor(() => {
+      expect(screen.getByTestId('live-difficulty-calibration-bar')).toHaveAttribute(
+        'data-difficulty-tier',
+        '5'
+      );
+    });
+    expect(screen.getByTestId('pattern-slot-3')).toBeInTheDocument();
+    u1012();
+  });
+
+  it('Clinical & Parent Feedback Hub: allows therapists and parents to submit, persist, and export observations in Parent Dashboard', async () => {
+    renderRoute('/parent');
+    fireEvent.click(screen.getByTestId('parent-gate-option-15'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('parent-feedback-evaluation-section')).toBeInTheDocument();
+    });
+
+    fireEvent.change(screen.getByTestId('feedback-role-select'), {
+      target: { value: 'occupational-therapist' },
+    });
+    fireEvent.change(screen.getByTestId('feedback-center-input'), {
+      target: { value: 'Πρότυπο Κέντρο ΔΕΠΥ Αθήνας' },
+    });
+    fireEvent.change(screen.getByTestId('feedback-scope-select'), {
+      target: { value: '09-wait-signal' },
+    });
+    fireEvent.click(screen.getByTestId('feedback-age-6-8'));
+    fireEvent.click(screen.getByTestId('feedback-star-5'));
+    fireEvent.change(screen.getByTestId('feedback-comment-textarea'), {
+      target: {
+        value:
+          'Εξαιρετική η αυτόματη εναλλαγή αντικειμένων στο 09. Προτείνουμε και επιλογή ήχου μετρονόμου.',
+      },
+    });
+
+    fireEvent.click(screen.getByTestId('submit-feedback-btn'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('feedback-entries-list')).toBeInTheDocument();
+    });
+
+    expect(screen.getByTestId('feedback-entry-card-0')).toHaveTextContent(
+      'Πρότυπο Κέντρο ΔΕΠΥ Αθήνας'
+    );
+    expect(screen.getByTestId('feedback-entry-card-0')).toHaveTextContent(
+      'Εξαιρετική η αυτόματη εναλλαγή αντικειμένων'
+    );
+    expect(screen.getByTestId('copy-feedback-report-btn')).toBeInTheDocument();
+    expect(screen.getByTestId('download-feedback-report-btn')).toBeInTheDocument();
+
+    const reportText = formatFeedbackReportText([
+      {
+        id: 1,
+        timestamp: new Date().toISOString(),
+        dateKey: '2026-10-24',
+        reviewerRole: 'occupational-therapist',
+        reviewerRoleLabelEl: '👐 Εργοθεραπευτής (OT)',
+        reviewerNameOrCenter: 'Πρότυπο Κέντρο ΔΕΠΥ Αθήνας',
+        targetScope: '09-wait-signal',
+        targetScopeLabelEl: '09. Περίμενε το Σήμα',
+        ageBandTested: '6-8',
+        ratingStars: 5,
+        usabilityScore: 5,
+        clinicalAppropriatenessScore: 5,
+        observationCategory: 'clinical-suggestion',
+        commentEl: 'Δοκιμή αναφοράς Κέντρου ΔΕΠΥ.',
+      },
+    ]);
+    expect(reportText).toContain('Πρότυπο Κέντρο ΔΕΠΥ Αθήνας');
+    expect(reportText).toContain('Δοκιμή αναφοράς Κέντρου ΔΕΠΥ.');
   });
 });

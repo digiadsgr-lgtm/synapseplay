@@ -35,6 +35,8 @@ export const Activity04SequenceMemory: React.FC<ActivityRunnerRenderProps> = ({
   currentRound,
   totalRounds,
   hintLevel,
+  ageBand,
+  adaptiveProfile,
   sessionSeed = 0,
   advanceRound,
   triggerGentleFeedback,
@@ -46,7 +48,23 @@ export const Activity04SequenceMemory: React.FC<ActivityRunnerRenderProps> = ({
     () => selectSessionRounds(SEQUENCES, totalRounds, sessionSeed),
     [totalRounds, sessionSeed]
   );
-  const targetSequence = activeSequences[(currentRound - 1) % activeSequences.length];
+  const baseSequence = activeSequences[(currentRound - 1) % activeSequences.length];
+
+  // Calibrate sequence span by ageBand & live performance:
+  // - 4-5 years: max 2 symbols
+  // - 6-8 years: standard 2-3 symbols
+  // - 10-12 years or Mastery challenge: +1 symbol (3-4 symbols)
+  const targetSequence = useMemo(() => {
+    if (ageBand === '4-5' || adaptiveProfile.distractorReductionRatio >= 0.5) {
+      return baseSequence.slice(0, 2);
+    }
+    if (ageBand === '10-12' || adaptiveProfile.enrichChallenge) {
+      const extraSymbol = baseSequence[0] === 'sun' ? 'star' : 'sun';
+      return [...baseSequence, extraSymbol];
+    }
+    return baseSequence;
+  }, [baseSequence, ageBand, adaptiveProfile.distractorReductionRatio, adaptiveProfile.enrichChallenge]);
+
   const [userProgress, setUserProgress] = useState<string[]>([]);
   const [activeFlashId, setActiveFlashId] = useState<string | null>(null);
   const [isDemonstrating, setIsDemonstrating] = useState<boolean>(false);
@@ -149,7 +167,11 @@ export const Activity04SequenceMemory: React.FC<ActivityRunnerRenderProps> = ({
             {targetSequence.map((tileId, idx) => {
               const tile = TILES.find((t) => t.id === tileId)!;
               const isEntered = idx < userProgress.length;
-              const showCue = isEntered || hintLevel >= 2 || (hintLevel === 1 && idx === 0);
+              const showCue =
+                isEntered ||
+                hintLevel >= 2 ||
+                ageBand === '4-5' ||
+                ((hintLevel === 1 || adaptiveProfile.autoHintBoost) && idx === 0);
               return (
                 <div
                   key={`${tileId}-${idx}`}

@@ -270,7 +270,16 @@ export const Activity13SpeechArticulation: React.FC<ActivityRunnerRenderProps> =
 
   useEffect(() => {
     setClappedCount(hintLevel === 2 ? round.syllables.length : 0);
-  }, [currentRound, hintLevel, round.syllables.length, sessionSeed]);
+    speakGreek(round.promptQuestionEl, settings.voiceEnabled, adaptiveProfile.speechRate);
+  }, [
+    currentRound,
+    hintLevel,
+    round.syllables.length,
+    round.promptQuestionEl,
+    sessionSeed,
+    settings.voiceEnabled,
+    adaptiveProfile.speechRate,
+  ]);
 
   const allClapped = clappedCount >= round.syllables.length;
 
@@ -295,19 +304,17 @@ export const Activity13SpeechArticulation: React.FC<ActivityRunnerRenderProps> =
   };
 
   const visibleOptions =
-    hintLevel === 2 || adaptiveProfile.distractorReductionRatio >= 0.5
+    hintLevel === 2 || ageBand === '4-5' || adaptiveProfile.distractorReductionRatio >= 0.5
       ? round.options.filter((o, i) => o.isCorrect || i === 0)
       : round.options;
 
   const handleSelectOption = (isCorrect: boolean, labelEl: string) => {
     runDebounced(() => {
-      if (!allClapped && hintLevel < 1) {
-        triggerGentleFeedback(
-          `Πρώτα χτύπα παλαμάκια για όλες τις συλλαβές της λέξης «${round.spokenWordEl}»!`
-        );
-        return;
-      }
       if (isCorrect) {
+        // Even if the child clapped physically in the room instead of pressing the syllable button,
+        // celebrate and advance immediately!
+        setClappedCount(round.syllables.length);
+        speakGreek(round.spokenWordEl, settings.voiceEnabled, adaptiveProfile.speechRate);
         advanceRound(getAbsorbedCount());
       } else {
         triggerGentleFeedback(
@@ -335,22 +342,27 @@ export const Activity13SpeechArticulation: React.FC<ActivityRunnerRenderProps> =
         </div>
         <p className="text-base font-bold text-charcoal">{round.promptQuestionEl}</p>
 
-        {/* Interactive Syllable Clapping Boxes */}
+        {/* Interactive Syllable Clapping Boxes (each box is also directly clickable!) */}
         <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
           {round.syllables.map((syl, idx) => {
             const isClapped = idx < clappedCount;
             return (
-              <div
+              <button
                 key={`${syl}-${idx}`}
+                type="button"
                 data-testid={`syllable-box-${idx}`}
-                className={`px-5 py-3 rounded-2xl border-3 font-extrabold text-xl transition-all ${
+                onClick={() => {
+                  speakGreekSyllable(syl, true, adaptiveProfile.speechRate);
+                  setClappedCount((c) => Math.max(c, idx + 1));
+                }}
+                className={`px-5 py-3 rounded-2xl border-3 font-extrabold text-xl transition-all cursor-pointer ${
                   isClapped
                     ? 'bg-sage-dark text-white border-charcoal scale-105'
-                    : 'bg-white text-charcoal border-sand-dark'
+                    : 'bg-white text-charcoal border-sand-dark hover:border-sage'
                 }`}
               >
                 {syl}
-              </div>
+              </button>
             );
           })}
         </div>

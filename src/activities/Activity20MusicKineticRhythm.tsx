@@ -68,6 +68,8 @@ export const Activity20MusicKineticRhythm: React.FC<ActivityRunnerRenderProps> =
   currentRound,
   totalRounds,
   hintLevel,
+  ageBand,
+  adaptiveProfile,
   sessionSeed = 0,
   advanceRound,
   triggerGentleFeedback,
@@ -147,7 +149,9 @@ export const Activity20MusicKineticRhythm: React.FC<ActivityRunnerRenderProps> =
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-2xl mx-auto">
         {(['clap', 'knees', 'rest'] as PercussionMove[]).map((mv) => {
           const meta = MOVE_META[mv];
-          const highlight = hintLevel >= 1 && mv === expectedMove;
+          const highlight =
+            (hintLevel >= 1 || ageBand === '4-5' || adaptiveProfile.autoHintBoost) &&
+            mv === expectedMove;
           return (
             <button
               key={mv}

@@ -11,7 +11,10 @@ import { useApp } from '../context/AppContext';
 import { playCalmTone, speakGreek } from '../utils/soundAndSpeech';
 import { useActivityRunnerMachine } from '../hooks/useActivityRunnerMachine';
 import { evaluateInvisibleScenario } from '../utils/adaptiveScenarioEngine';
-import { computeClinicalStaircaseSnapshot } from '../utils/clinicalAdhdEngine';
+import {
+  computeClinicalStaircaseSnapshot,
+  getAgeAndPerformanceDifficulty,
+} from '../utils/clinicalAdhdEngine';
 
 export interface ActivityRunnerRenderProps {
   phase: RunnerPhase;
@@ -151,6 +154,11 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
       ? 1
       : state.hintLevel;
 
+  const difficultyProfile = useMemo(
+    () => getAgeAndPerformanceDifficulty(ageBand, adaptiveProfile, effectiveHintLevel),
+    [ageBand, adaptiveProfile, effectiveHintLevel]
+  );
+
   // Persist active round checkpoint for seamless page-refresh recovery
   useEffect(() => {
     try {
@@ -216,7 +224,14 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
 
     if (!isFinalRound) {
       playCalmTone('chime', settings.soundEnabled);
-      speakGreek('Μπράβο! Πάμε στο επόμενο βήμα.', settings.voiceEnabled, adaptiveProfile.speechRate);
+      const hasPerRoundSpokenPrompt =
+        activity.id === '08-listen-do' ||
+        activity.id === '13-speech-articulation' ||
+        activity.id === '14-narrative-builder' ||
+        activity.id === '15-auditory-discrimination';
+      if (!hasPerRoundSpokenPrompt) {
+        speakGreek('Μπράβο! Πάμε στο επόμενο βήμα.', settings.voiceEnabled, adaptiveProfile.speechRate);
+      }
     } else {
       playCalmTone('complete', settings.soundEnabled);
       speakGreek(
@@ -391,12 +406,24 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
             ))}
           </div>
 
-          {/* Inner-Speech Self-Coaching Cue (Meichenbaum CBT / Barkley Verbal Self-Regulation) */}
-          <div
-            data-testid="inner-speech-cue-pill"
-            className="inline-flex items-center gap-2 px-3 py-1 rounded-xl bg-sage-surface/70 border border-sage text-xs font-extrabold text-charcoal"
-          >
-            <span>{staircaseSnapshot.innerSpeechCueEl}</span>
+          {/* Inner-Speech Self-Coaching Cue & Live Age/Performance Difficulty Calibration */}
+          <div className="flex flex-wrap items-center gap-2">
+            <div
+              data-testid="inner-speech-cue-pill"
+              className="inline-flex items-center gap-2 px-3 py-1 rounded-xl bg-sage-surface/70 border border-sage text-xs font-extrabold text-charcoal"
+            >
+              <span>{staircaseSnapshot.innerSpeechCueEl}</span>
+            </div>
+
+            <div
+              data-testid="live-difficulty-calibration-bar"
+              data-difficulty-tier={difficultyProfile.tierLevel}
+              className="inline-flex flex-wrap items-center gap-2 px-3 py-1 rounded-xl bg-slate-surface border border-slate text-xs font-extrabold text-charcoal"
+            >
+              <span>🎯 {difficultyProfile.ageTierLabelEl}</span>
+              <span aria-hidden="true">•</span>
+              <span>{difficultyProfile.performanceStateLabelEl}</span>
+            </div>
           </div>
         </div>
 

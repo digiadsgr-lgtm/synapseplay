@@ -106,6 +106,8 @@ export const Activity06SwitchRule: React.FC<ActivityRunnerRenderProps> = ({
   currentRound,
   totalRounds,
   hintLevel,
+  ageBand,
+  adaptiveProfile,
   sessionSeed = 0,
   advanceRound,
   triggerGentleFeedback,
@@ -117,10 +119,31 @@ export const Activity06SwitchRule: React.FC<ActivityRunnerRenderProps> = ({
   );
   const round = activeRounds[(currentRound - 1) % activeRounds.length];
 
-  const visibleOptions =
-    hintLevel === 2
-      ? round.options.filter((o, i) => o.isCorrect || i === 0)
-      : round.options;
+  const visibleOptions = useMemo(() => {
+    if (hintLevel === 2 || ageBand === '4-5' || adaptiveProfile.distractorReductionRatio >= 0.5) {
+      return round.options.filter((o, i) => o.isCorrect || i === 0);
+    }
+    if (ageBand === '8-10' || ageBand === '10-12' || adaptiveProfile.enrichChallenge) {
+      return [
+        ...round.options,
+        {
+          id: `r-extra-${currentRound}`,
+          emoji: round.ruleType === 'color' ? '🎩' : '🍌',
+          labelEl: round.ruleType === 'color' ? 'Μαύρο Καπέλο' : 'Μακρόστενη Μπανάνα',
+          isCorrect: false,
+        },
+      ];
+    }
+    return round.options;
+  }, [
+    round.options,
+    round.ruleType,
+    hintLevel,
+    ageBand,
+    adaptiveProfile.distractorReductionRatio,
+    adaptiveProfile.enrichChallenge,
+    currentRound,
+  ]);
 
   const handleOptionSelect = (isCorrect: boolean, labelEl: string) => {
     runDebounced(() => {
