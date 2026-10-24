@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { SynapsePlayLogoMark } from '../../components/SynapsePlayLogoMark';
+import { STRIPE_CHECKOUT_URLS } from '../../config/monetization.config';
 
 interface AgePathwayItem {
   id: '4-5' | '5-6' | '6-8' | '8-10' | '10-12';
@@ -728,69 +729,118 @@ export const LandingPage: React.FC = () => {
               </ul>
             </div>
 
-            <Link
-              to="/app"
-              data-testid="landing-family-start-btn"
-              className="touch-target w-full py-4 px-6 rounded-2xl bg-[#D97757] text-white font-extrabold text-base text-center flex items-center justify-center gap-2 hover:opacity-95 transition-opacity"
-            >
-              <span>Έναρξη Χρήσης</span>
-              <span aria-hidden="true">→</span>
-            </Link>
-          </div>
+              <div className="space-y-3 pt-2">
+                <Link
+                  to="/app"
+                  data-testid="landing-family-start-btn"
+                  className="touch-target w-full py-3.5 px-6 rounded-2xl bg-[#D97757] text-white font-extrabold text-sm sm:text-base text-center flex items-center justify-center gap-2 hover:opacity-95 transition-opacity"
+                >
+                  <span>Έναρξη Δωρεάν Δοκιμής (Beta)</span>
+                  <span aria-hidden="true">→</span>
+                </Link>
 
-          {/* Plan 2: Therapist & Clinical License (B2B) */}
-          <div
-            data-testid="landing-plan-b2b"
-            className="bg-[#FAF6EE] border-2 border-[#7A9A7B] rounded-3xl p-6 sm:p-8 flex flex-col justify-between gap-6 shadow-sm"
-          >
-            <div className="space-y-4">
-              <div className="flex items-center justify-between gap-2">
-                <span className="px-3 py-1 rounded-full bg-[#7A9A7B]/25 text-[#2C3539] text-xs font-extrabold">
-                  B2B / Κλινική Άδεια
-                </span>
-                <span className="text-3xl" aria-hidden="true">
-                  🏥
-                </span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  <a
+                    href={STRIPE_CHECKOUT_URLS.familyMonthly}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    data-testid="landing-stripe-family-monthly-link"
+                    className="touch-target py-2.5 px-4 rounded-xl bg-white border-2 border-[#4A6B82] text-[#2C3539] font-extrabold text-xs sm:text-sm text-center flex items-center justify-center gap-1.5 hover:bg-[#4A6B82] hover:text-white transition-colors"
+                  >
+                    <span>Family — Μηνιαίο (Stripe)</span>
+                    <span aria-hidden="true">↗️</span>
+                  </a>
+                  <a
+                    href={STRIPE_CHECKOUT_URLS.familyYearly}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    data-testid="landing-stripe-family-yearly-link"
+                    className="touch-target py-2.5 px-4 rounded-xl bg-[#4A6B82] text-white font-extrabold text-xs sm:text-sm text-center flex items-center justify-center gap-1.5 hover:opacity-95 transition-opacity"
+                  >
+                    <span>Family — Ετήσιο (Stripe)</span>
+                    <span aria-hidden="true">↗️</span>
+                  </a>
+                </div>
+
+                <a
+                  href={STRIPE_CHECKOUT_URLS.extraChildProfile}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  data-testid="landing-stripe-extra-profile-link"
+                  className="touch-target w-full py-2.5 px-4 rounded-xl bg-[#EFE8D8] border border-[#2C3539]/25 text-[#2C3539] font-extrabold text-xs sm:text-sm text-center flex items-center justify-center gap-1.5 hover:bg-[#D97757]/20 transition-colors"
+                >
+                  <span>➕ Επιπλέον Προφίλ Παιδιού (Stripe Add-on)</span>
+                  <span aria-hidden="true">↗️</span>
+                </a>
               </div>
-
-              <h3 className="text-2xl font-extrabold text-[#2C3539]">
-                Therapist & Clinical License (B2B)
-              </h3>
-              <p className="text-sm font-bold text-[#4A6B82]">
-                Για Εργοθεραπευτές, Λογοθεραπευτές & Κέντρα Ειδικών Θεραπειών
-              </p>
-
-              <ul className="space-y-2.5 pt-2 text-sm font-bold text-[#2C3539]">
-                <li className="flex items-center gap-2.5">
-                  <span className="text-[#7A9A7B]" aria-hidden="true">
-                    ✔
-                  </span>
-                  <span>Για Εργοθεραπευτές, Λογοθεραπευτές & Κέντρα Ειδικών Θεραπειών</span>
-                </li>
-                <li className="flex items-center gap-2.5">
-                  <span className="text-[#7A9A7B]" aria-hidden="true">
-                    ✔
-                  </span>
-                  <span>Απεριόριστα Προφίλ Παιδιών & Γρήγορος Profile Switcher</span>
-                </li>
-                <li className="flex items-center gap-2.5">
-                  <span className="text-[#7A9A7B]" aria-hidden="true">
-                    ✔
-                  </span>
-                  <span>Εξαγωγή Αναφορών Παρατήρησης για τον Φάκελο του Παιδιού</span>
-                </li>
-              </ul>
             </div>
 
-            <Link
-              to="/parent"
-              data-testid="landing-b2b-contact-btn"
-              className="touch-target w-full py-4 px-6 rounded-2xl bg-[#7A9A7B] text-white font-extrabold text-base text-center flex items-center justify-center gap-2 hover:opacity-95 transition-opacity"
+            {/* Plan 2: Therapist & Clinical License (B2B) */}
+            <div
+              data-testid="landing-plan-b2b"
+              className="bg-[#FAF6EE] border-2 border-[#7A9A7B] rounded-3xl p-6 sm:p-8 flex flex-col justify-between gap-6 shadow-sm"
             >
-              <span>Επικοινωνία / Επαγγελματική Άδεια</span>
-              <span aria-hidden="true">🔑</span>
-            </Link>
-          </div>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="px-3 py-1 rounded-full bg-[#7A9A7B]/25 text-[#2C3539] text-xs font-extrabold">
+                    B2B / Κλινική Άδεια
+                  </span>
+                  <span className="text-3xl" aria-hidden="true">
+                    🏥
+                  </span>
+                </div>
+
+                <h3 className="text-2xl font-extrabold text-[#2C3539]">
+                  SynapsePlay Therapist Pro (Ετήσιο B2B)
+                </h3>
+                <p className="text-sm font-bold text-[#4A6B82]">
+                  Για Εργοθεραπευτές, Λογοθεραπευτές & Κέντρα Ειδικών Θεραπειών
+                </p>
+
+                <ul className="space-y-2.5 pt-2 text-sm font-bold text-[#2C3539]">
+                  <li className="flex items-center gap-2.5">
+                    <span className="text-[#7A9A7B]" aria-hidden="true">
+                      ✔
+                    </span>
+                    <span>Για Εργοθεραπευτές, Λογοθεραπευτές & Κέντρα Ειδικών Θεραπειών</span>
+                  </li>
+                  <li className="flex items-center gap-2.5">
+                    <span className="text-[#7A9A7B]" aria-hidden="true">
+                      ✔
+                    </span>
+                    <span>Απεριόριστα Προφίλ Παιδιών & Γρήγορος Profile Switcher</span>
+                  </li>
+                  <li className="flex items-center gap-2.5">
+                    <span className="text-[#7A9A7B]" aria-hidden="true">
+                      ✔
+                    </span>
+                    <span>Εξαγωγή Αναφορών Παρατήρησης για τον Φάκελο του Παιδιού</span>
+                  </li>
+                </ul>
+              </div>
+
+              <div className="space-y-3 pt-2">
+                <a
+                  href={STRIPE_CHECKOUT_URLS.therapistProYearly}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  data-testid="landing-stripe-b2b-yearly-link"
+                  className="touch-target w-full py-3.5 px-6 rounded-2xl bg-[#7A9A7B] text-white font-extrabold text-sm sm:text-base text-center flex items-center justify-center gap-2 hover:opacity-95 transition-opacity"
+                >
+                  <span>Απόκτηση Therapist Pro — Ετήσιο B2B (Stripe)</span>
+                  <span aria-hidden="true">↗️</span>
+                </a>
+
+                <Link
+                  to="/parent"
+                  data-testid="landing-b2b-contact-btn"
+                  className="touch-target w-full py-2.5 px-5 rounded-xl bg-white border-2 border-[#7A9A7B] text-[#2C3539] font-extrabold text-xs sm:text-sm text-center flex items-center justify-center gap-2 hover:bg-[#7A9A7B]/15 transition-colors"
+                >
+                  <span>Ενεργοποίηση Κωδικού Άδειας / Περιβάλλον Ειδικού</span>
+                  <span aria-hidden="true">🔑</span>
+                </Link>
+              </div>
+            </div>
         </div>
       </section>
 

@@ -1,11 +1,15 @@
 import type { AppSettings, LicenseTier } from '../types/domain';
+import {
+  ENABLE_PAYWALL as CONFIG_ENABLE_PAYWALL,
+  STRIPE_CHECKOUT_URLS as CONFIG_STRIPE_CHECKOUT_URLS,
+} from '../config/monetization.config';
 
 /**
  * Global configuration flag for SynapsePlay monetization & licensing.
  * CURRENT STATE: DEVELOPMENT / TESTING (100% FREE & UNLOCKED)
- * Set `ENABLE_PAYWALL = true` for production release to enforce plan tiers by default.
+ * Set `ENABLE_PAYWALL = true` in `src/config/monetization.config.ts` for production release.
  */
-export const ENABLE_PAYWALL = false;
+export const ENABLE_PAYWALL = CONFIG_ENABLE_PAYWALL;
 
 export const FAMILY_PLAN_MAX_PROFILES = 2;
 
@@ -20,14 +24,7 @@ export const B2B_PLAN_STATUS_LABEL_EL =
 /**
  * External Stripe Hosted Checkout URLs (No embedded payment SDKs inside the app).
  */
-export const STRIPE_CHECKOUT_URLS = {
-  familyPlan:
-    (import.meta.env?.VITE_STRIPE_FAMILY_CHECKOUT_URL as string | undefined) ||
-    'https://buy.stripe.com/synapseplay-family-plan',
-  b2bTherapistPlan:
-    (import.meta.env?.VITE_STRIPE_B2B_CHECKOUT_URL as string | undefined) ||
-    'https://buy.stripe.com/synapseplay-b2b-therapist',
-};
+export const STRIPE_CHECKOUT_URLS = CONFIG_STRIPE_CHECKOUT_URLS;
 
 export interface EffectiveLicenseState {
   effectiveTier: LicenseTier;
@@ -95,6 +92,7 @@ export interface ProfileCreationPermission {
   maxProfiles: number | null;
   noticeEl: string | null;
   upgradeCheckoutUrl: string;
+  extraProfileCheckoutUrl: string;
 }
 
 /**
@@ -113,7 +111,8 @@ export function checkProfileCreationPermission(
       allowed: false,
       maxProfiles: state.maxProfiles,
       noticeEl: FAMILY_PLAN_LIMIT_NOTICE_EL,
-      upgradeCheckoutUrl: STRIPE_CHECKOUT_URLS.b2bTherapistPlan,
+      upgradeCheckoutUrl: STRIPE_CHECKOUT_URLS.extraChildProfile,
+      extraProfileCheckoutUrl: STRIPE_CHECKOUT_URLS.extraChildProfile,
     };
   }
 
@@ -121,7 +120,8 @@ export function checkProfileCreationPermission(
     allowed: true,
     maxProfiles: state.maxProfiles,
     noticeEl: null,
-    upgradeCheckoutUrl: STRIPE_CHECKOUT_URLS.b2bTherapistPlan,
+    upgradeCheckoutUrl: STRIPE_CHECKOUT_URLS.extraChildProfile,
+    extraProfileCheckoutUrl: STRIPE_CHECKOUT_URLS.extraChildProfile,
   };
 }
 

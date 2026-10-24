@@ -157,45 +157,69 @@ export const SubscriptionManagementSection: React.FC = () => {
       {/* External Stripe Hosted Checkout Links (No embedded payment SDKs) */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="p-4 rounded-2xl bg-sand-light border-2 border-sand-dark flex flex-col justify-between gap-3">
-          <div className="space-y-1">
+          <div className="space-y-1.5">
             <h3 className="text-sm font-extrabold text-charcoal">
-              👨‍👩‍👧‍👦 Οικογενειακό Πλάνο (Family Plan)
+              👨‍👩‍👧‍👦 Οικογενειακό Πλάνο (SynapsePlay Family)
             </h3>
             <p className="text-xs text-charcoal-muted">
-              Περιλαμβάνει πλήρη πρόσβαση σε όλες τις δραστηριότητες και έως 2 ανεξάρτητα προφίλ
-              παιδιών στη συσκευή.
+              Πλήρης πρόσβαση σε όλες τις δραστηριότητες και έως 2 ανεξάρτητα προφίλ παιδιών στη
+              συσκευή, με δυνατότητα προσθήκης επιπλέον προφίλ.
             </p>
           </div>
-          <a
-            href={STRIPE_CHECKOUT_URLS.familyPlan}
-            target="_blank"
-            rel="noopener noreferrer"
-            data-testid="stripe-family-checkout-link"
-            className="touch-target px-4 py-2.5 rounded-xl bg-slate text-white font-extrabold text-xs text-center flex items-center justify-center gap-2 hover:bg-slate-dark"
-          >
-            <span>Απόκτηση Οικογενειακού Πλάνου (Stripe)</span>
-            <span aria-hidden="true">↗️</span>
-          </a>
+          <div className="space-y-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <a
+                href={STRIPE_CHECKOUT_URLS.familyMonthly}
+                target="_blank"
+                rel="noopener noreferrer"
+                data-testid="stripe-family-monthly-checkout-link"
+                className="touch-target px-3 py-2.5 rounded-xl bg-white border-2 border-slate text-charcoal font-extrabold text-xs text-center flex items-center justify-center gap-1.5 hover:bg-slate hover:text-white transition-colors"
+              >
+                <span>Family — Μηνιαίο</span>
+                <span aria-hidden="true">↗️</span>
+              </a>
+              <a
+                href={STRIPE_CHECKOUT_URLS.familyYearly}
+                target="_blank"
+                rel="noopener noreferrer"
+                data-testid="stripe-family-checkout-link"
+                className="touch-target px-3 py-2.5 rounded-xl bg-slate text-white font-extrabold text-xs text-center flex items-center justify-center gap-1.5 hover:bg-slate-dark transition-colors"
+              >
+                <span>Family (Ετήσιο)</span>
+                <span aria-hidden="true">↗️</span>
+              </a>
+            </div>
+            <a
+              href={STRIPE_CHECKOUT_URLS.extraChildProfile}
+              target="_blank"
+              rel="noopener noreferrer"
+              data-testid="stripe-extra-profile-checkout-link"
+              className="touch-target w-full px-3 py-2 rounded-xl bg-terracotta-surface/70 border border-terracotta text-charcoal font-extrabold text-xs text-center flex items-center justify-center gap-1.5 hover:bg-terracotta hover:text-white transition-colors"
+            >
+              <span>➕ Επιπλέον Προφίλ Παιδιού (Stripe)</span>
+              <span aria-hidden="true">↗️</span>
+            </a>
+          </div>
         </div>
 
         <div className="p-4 rounded-2xl bg-sage-surface/60 border-2 border-sage flex flex-col justify-between gap-3">
-          <div className="space-y-1">
+          <div className="space-y-1.5">
             <h3 className="text-sm font-extrabold text-charcoal">
-              🏥 Άδεια Κέντρου / Θεραπευτή (B2B / Therapist License)
+              🏥 SynapsePlay Therapist Pro (Ετήσιο B2B)
             </h3>
             <p className="text-xs text-charcoal-muted">
-              Απεριόριστα προφίλ παιδιών ανά συσκευή και γρήγορη «Εναλλαγή Παιδιού» μεταξύ των
-              κλινικών συνεδριών.
+              Επαγγελματική άδεια για Εργοθεραπευτές, Λογοθεραπευτές & Κέντρα ΔΕΠΥ: Απεριόριστα
+              προφίλ παιδιών και γρήγορη «Εναλλαγή Παιδιού» μεταξύ των συνεδριών.
             </p>
           </div>
           <a
-            href={STRIPE_CHECKOUT_URLS.b2bTherapistPlan}
+            href={STRIPE_CHECKOUT_URLS.therapistProYearly}
             target="_blank"
             rel="noopener noreferrer"
             data-testid="stripe-b2b-checkout-link"
-            className="touch-target px-4 py-2.5 rounded-xl bg-sage-dark text-white font-extrabold text-xs text-center flex items-center justify-center gap-2 hover:bg-sage"
+            className="touch-target px-4 py-3 rounded-xl bg-sage-dark text-white font-extrabold text-xs text-center flex items-center justify-center gap-2 hover:bg-sage transition-colors"
           >
-            <span>Απόκτηση Επαγγελματικής Άδειας B2B (Stripe)</span>
+            <span>Απόκτηση Therapist Pro — Ετήσιο B2B (Stripe)</span>
             <span aria-hidden="true">↗️</span>
           </a>
         </div>
