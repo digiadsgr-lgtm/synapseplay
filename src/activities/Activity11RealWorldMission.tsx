@@ -15,7 +15,7 @@ const MISSIONS: MissionConfig[] = [
     titleEl: 'Αποστολή: Το Κουτάλι & το Μολύβι',
     steps: [
       { emoji: '🥄', textEl: 'Βρες ένα κουτάλι ή ένα ασφαλές αντικείμενο στο δωμάτιο.' },
-      { emoji: '✏️', textEl: 'Ακούμπησέ το ήρεμα δίπλα σε ένα μολύβι ή μαρκαδόρο.' },
+      { emoji: '✏️', textEl: 'Ακούμπησέ το ήρεμα δίπλα σε ένα μολύβι ή έναν μαρκαδόρο.' },
     ],
   },
   {
@@ -84,7 +84,7 @@ const MISSIONS: MissionConfig[] = [
   {
     titleEl: 'Αποστολή: Το Φυτό του Σπιτιού',
     steps: [
-      { emoji: '🪴', textEl: 'Πήγαινε κοντά σε μια γλάστρα ή λουλούδι του σπιτιού.' },
+      { emoji: '🪴', textEl: 'Πήγαινε κοντά σε μια γλάστρα ή ένα λουλούδι του σπιτιού.' },
       { emoji: '👀', textEl: 'Παρατήρησε από κοντά τα φύλλα του χωρίς να τα τραβήξεις.' },
     ],
   },
@@ -117,7 +117,7 @@ export const Activity11RealWorldMission: React.FC<ActivityRunnerRenderProps> = (
 
   useEffect(() => {
     setCheckedSteps([false, false]);
-    if (currentRound > 1) {
+    if (currentRound > 1 || sessionSeed > 0) {
       speakGreek(mission.titleEl, settings.voiceEnabled, adaptiveProfile.speechRate);
     }
   }, [currentRound, sessionSeed, mission.titleEl, settings.voiceEnabled, adaptiveProfile.speechRate]);

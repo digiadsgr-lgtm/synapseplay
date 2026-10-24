@@ -155,20 +155,22 @@ export const Activity07MoveFreeze: React.FC<ActivityRunnerRenderProps> = ({
 
     const stepMs = 100;
     const interval = window.setInterval(() => {
-      setFreezeElapsedMs((prev) => {
-        const next = prev + stepMs;
-        if (next >= diff.freezeHoldMs) {
-          window.clearInterval(interval);
-          playCalmTone('complete', settings.soundEnabled);
-          advanceRef.current(absorbedRef.current());
-          return 0;
-        }
-        return next;
-      });
+      setFreezeElapsedMs((prev) => prev + stepMs);
     }, stepMs);
 
     return () => window.clearInterval(interval);
-  }, [runnerPhase, phase.mode, currentRound, diff.freezeHoldMs, settings.soundEnabled]);
+  }, [runnerPhase, phase.mode, currentRound]);
+
+  useEffect(() => {
+    if (runnerPhase === 'PAUSED' || runnerPhase === 'COMPLETED' || phase.mode !== 'freeze') {
+      return;
+    }
+    if (freezeElapsedMs >= diff.freezeHoldMs) {
+      setFreezeElapsedMs(0);
+      playCalmTone('complete', settings.soundEnabled);
+      advanceRef.current(absorbedRef.current());
+    }
+  }, [runnerPhase, phase.mode, freezeElapsedMs, diff.freezeHoldMs, settings.soundEnabled]);
 
   const freezeProgressPct = Math.min(
     100,

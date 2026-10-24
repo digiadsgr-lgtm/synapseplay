@@ -118,7 +118,7 @@ export const ParentDashboardPage: React.FC = () => {
         seatedModeDefault: true,
         reducedMotion: true,
       });
-      setAppliedPresetNotice('✅ Εφαρμόστηκε το πακέτο «🌙 Χαλάρωση Πριν τον Ύπνο»: 10 λεπτά, Μειωμένη Κίνηση & Καθιστή Εκδοχή.');
+      setAppliedPresetNotice('✅ Εφαρμόστηκε το πακέτο «🌙 Χαλάρωση Πριν από τον Ύπνο»: 10 λεπτά, Μειωμένη Κίνηση & Καθιστή Εκδοχή.');
     }
   };
 
@@ -301,7 +301,7 @@ export const ParentDashboardPage: React.FC = () => {
             </div>
             <p className="text-sm font-extrabold text-charcoal">Καθημερινή Σχολική Εστίαση</p>
             <p className="text-xs text-charcoal-muted">
-              Ιδανικό πριν το απογευματινό διάβασμα: 15 λεπτά συγκέντρωσης, μνήμης και αυτορρύθμισης.
+              Ιδανικό πριν από το απογευματινό διάβασμα: 15 λεπτά συγκέντρωσης, μνήμης και αυτορρύθμισης.
             </p>
           </button>
 
@@ -317,7 +317,7 @@ export const ParentDashboardPage: React.FC = () => {
                 10 λεπτά • Χαλάρωση
               </span>
             </div>
-            <p className="text-sm font-extrabold text-charcoal">Χαλάρωση Πριν τον Ύπνο</p>
+            <p className="text-sm font-extrabold text-charcoal">Χαλάρωση Πριν από τον Ύπνο</p>
             <p className="text-xs text-charcoal-muted">
               Μειωμένη κίνηση οθόνης, καθιστή εκδοχή και γρήγορη αποφόρτιση για ήρεμο ύπνο.
             </p>
@@ -401,7 +401,7 @@ export const ParentDashboardPage: React.FC = () => {
 
           <div className="space-y-2">
             <label className="block text-sm font-bold text-charcoal">
-              Προειδοποίηση Πριν τη Λήξη (Λεπτά):
+              Προειδοποίηση Πριν από τη Λήξη (Λεπτά):
             </label>
             <div className="flex flex-wrap gap-2">
               {[2, 5].map((warnMins) => (

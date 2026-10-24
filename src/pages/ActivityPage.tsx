@@ -13,7 +13,7 @@ export const ActivityPage: React.FC = () => {
   }
 
   return (
-    <ActivityRunner activity={activity}>
+    <ActivityRunner key={activity.id} activity={activity}>
       {(runnerProps) => (
         <ActivityDispatcher activityId={activity.id} runnerProps={runnerProps} />
       )}

@@ -187,7 +187,7 @@ export const BeginnerQuickStartModal: React.FC<BeginnerQuickStartModalProps> = (
                 </h3>
               </div>
               <p className="text-xs md:text-sm text-charcoal-muted">
-                Ο πράσινος κύκλος στην κορυφή δείχνει ήρεμα πόση ενέργεια απομένει. 2 λεπτά πριν το
+                Ο πράσινος κύκλος στην κορυφή δείχνει ήρεμα πόση ενέργεια απομένει. 2 λεπτά πριν από το
                 τέλος, η εφαρμογή προειδοποιεί γλυκά το παιδί ώστε να κλείσει την οθόνη μόνο του, με
                 χαμόγελο!
               </p>

@@ -137,26 +137,7 @@ export const Activity09WaitSignal: React.FC<ActivityRunnerRenderProps> = ({
     if (!currentItem.hasStarCue) {
       const tickMs = 100;
       const interval = window.setInterval(() => {
-        setStepElapsedMs((prev) => {
-          const nextElapsed = prev + tickMs;
-          if (nextElapsed >= diff.cptIntervalMs) {
-            window.clearInterval(interval);
-            setStepIndex((idx) => {
-              const nextIdx = Math.min(streamItems.length - 1, idx + 1);
-              if (streamItems[nextIdx]?.hasStarCue) {
-                playCalmTone('soft-step', settings.soundEnabled);
-                speakGreek(
-                  'Χρυσό αστέρι! Πάτησε τώρα!',
-                  settings.voiceEnabled,
-                  adaptiveProfile.speechRate
-                );
-              }
-              return nextIdx;
-            });
-            return 0;
-          }
-          return nextElapsed;
-        });
+        setStepElapsedMs((prev) => prev + tickMs);
       }, tickMs);
       return () => window.clearInterval(interval);
     } else {
@@ -167,10 +148,34 @@ export const Activity09WaitSignal: React.FC<ActivityRunnerRenderProps> = ({
       }, 5500);
       return () => window.clearTimeout(recycleTimer);
     }
+  }, [phase, hintLevel, stepIndex, currentItem.hasStarCue]);
+
+  useEffect(() => {
+    if (
+      phase === 'PAUSED' ||
+      phase === 'COMPLETED' ||
+      hintLevel === 2 ||
+      currentItem.hasStarCue ||
+      stepElapsedMs < diff.cptIntervalMs
+    ) {
+      return;
+    }
+    const nextIdx = Math.min(streamItems.length - 1, stepIndex + 1);
+    setStepElapsedMs(0);
+    setStepIndex(nextIdx);
+    if (streamItems[nextIdx]?.hasStarCue) {
+      playCalmTone('soft-step', settings.soundEnabled);
+      speakGreek(
+        'Χρυσό αστέρι! Πάτησε τώρα!',
+        settings.voiceEnabled,
+        adaptiveProfile.speechRate
+      );
+    }
   }, [
     phase,
     hintLevel,
     stepIndex,
+    stepElapsedMs,
     currentItem.hasStarCue,
     streamItems,
     diff.cptIntervalMs,

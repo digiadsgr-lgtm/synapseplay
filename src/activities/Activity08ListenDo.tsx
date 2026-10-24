@@ -152,19 +152,18 @@ export const Activity08ListenDo: React.FC<ActivityRunnerRenderProps> = ({
   useEffect(() => {
     if (isListeningFinished || phase === 'PAUSED' || phase === 'COMPLETED') return;
     const interval = window.setInterval(() => {
-      setListenProgressMs((prev) => {
-        const next = prev + 100;
-        if (next >= 900) {
-          window.clearInterval(interval);
-          setIsListeningFinished(true);
-          playCalmTone('soft-step', settings.soundEnabled);
-          return 900;
-        }
-        return next;
-      });
+      setListenProgressMs((prev) => prev + 100);
     }, 100);
     return () => window.clearInterval(interval);
-  }, [isListeningFinished, phase, settings.soundEnabled]);
+  }, [isListeningFinished, phase, currentRound]);
+
+  useEffect(() => {
+    if (isListeningFinished || phase === 'PAUSED' || phase === 'COMPLETED') return;
+    if (listenProgressMs >= 900) {
+      setIsListeningFinished(true);
+      playCalmTone('soft-step', settings.soundEnabled);
+    }
+  }, [isListeningFinished, phase, listenProgressMs, settings.soundEnabled]);
 
   const listenPct = Math.min(100, Math.round((listenProgressMs / 900) * 100));
 

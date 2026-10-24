@@ -67,6 +67,7 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
     resumeActivity,
     requestHint: dispatchHint,
     recordGentleNudge,
+    clearFeedback,
     completeRound,
     toggleSeatedMode,
     restartActivity: dispatchRestart,
@@ -82,6 +83,7 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
   const roundStartRef = useRef<number>(Date.now());
   const lastResponseMsRef = useRef<number>(0);
   const loggedCompletionRef = useRef<boolean>(false);
+  const prevActivityIdRef = useRef<string>(activity.id);
   const [selectedStrategy, setSelectedStrategy] = React.useState<string | null>(null);
   const [showParentCoachingTip, setShowParentCoachingTip] = React.useState<boolean>(false);
   const [sessionSeed, setSessionSeed] = React.useState<number>(() => {
@@ -180,6 +182,19 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
       // Ignore storage errors
     }
   }, [storageKey, state.phase, state.currentRound, state.hintLevel]);
+
+  useEffect(() => {
+    if (prevActivityIdRef.current !== activity.id) {
+      prevActivityIdRef.current = activity.id;
+      startTimeRef.current = Date.now();
+      roundStartRef.current = Date.now();
+      lastResponseMsRef.current = 0;
+      loggedCompletionRef.current = false;
+      setSelectedStrategy(null);
+      setShowParentCoachingTip(false);
+      dispatchRestart(activity.totalRounds, settings.seatedModeDefault);
+    }
+  }, [activity.id, activity.totalRounds, settings.seatedModeDefault, dispatchRestart]);
 
   useEffect(() => {
     toggleSeatedMode(settings.seatedModeDefault);
@@ -288,6 +303,8 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
   };
 
   const handleShuffleVariation = () => {
+    roundStartRef.current = Date.now();
+    clearFeedback();
     setSessionSeed((prev) => {
       const next = prev + 1;
       try {
@@ -319,6 +336,7 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
     <main
       className="max-w-5xl mx-auto px-4 py-6 space-y-6"
       data-testid="shared-activity-runner"
+      data-activity-id={activity.id}
       data-runner-phase={state.phase}
       data-age-band={ageBand}
     >

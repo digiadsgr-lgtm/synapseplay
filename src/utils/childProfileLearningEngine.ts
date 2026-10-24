@@ -74,7 +74,7 @@ export const AVATAR_PRESETS: TherapeuticAvatarPreset[] = [
     defaultNameEl: 'Σοφή Χελώνα',
     category: 'animal',
     primaryDomain: 'inhibitoryControl',
-    superpowerTitleEl: 'Ασπίδα Παύσης & Σκέψης Πριν την Πράξη',
+    superpowerTitleEl: 'Ασπίδα Παύσης & Σκέψης Πριν από την Πράξη',
     coachingTipEl: 'Σταματάω για 1 δευτερόλεπτο σαν τη Σοφή Χελώνα, κοιτάζω καλά και μετά πατάω!',
     clinicalRoleEl:
       'Κλασικό κλινικό πρότυπο αναστολής παρόρμησης (Schneider & Robin "Turtle Technique" CBT). Βοηθά στη μείωση βιαστικών λαθών.',

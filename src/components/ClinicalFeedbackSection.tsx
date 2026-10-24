@@ -88,7 +88,7 @@ export const ClinicalFeedbackSection: React.FC = () => {
     if (e) e.preventDefault();
     const trimmed = commentEl.trim();
     if (!trimmed) {
-      setSubmittedNotice('⚠️ Παρακαλώ γράψτε την παρατήρηση ή την πρότασή σας πριν την υποβολή.');
+      setSubmittedNotice('⚠️ Παρακαλώ γράψτε την παρατήρηση ή την πρότασή σας πριν από την υποβολή.');
       return;
     }
 

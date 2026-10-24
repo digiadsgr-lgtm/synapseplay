@@ -201,7 +201,7 @@ export const Activity01VisualSearch: React.FC<ActivityRunnerRenderProps> = ({
   const roundData = activeRounds[(currentRound - 1) % activeRounds.length];
 
   useEffect(() => {
-    if (currentRound > 1) {
+    if (currentRound > 1 || sessionSeed > 0) {
       speakGreek(
         `Ψάχνουμε: ${roundData.target.labelEl}!`,
         settings.voiceEnabled,

@@ -119,18 +119,17 @@ export const Activity10CopyAnimal: React.FC<ActivityRunnerRenderProps> = ({
   useEffect(() => {
     if (phase === 'PAUSED' || phase === 'COMPLETED') return;
     const timer = window.setTimeout(() => {
-      setCountsDone((prev) => {
-        const next = prev + 1;
-        playCalmTone(next >= 3 ? 'complete' : 'soft-step', settings.soundEnabled);
-        if (next === 1) speakGreek('Ένα', settings.voiceEnabled, adaptiveProfile.speechRate);
-        if (next === 2) speakGreek('Δύο', settings.voiceEnabled, adaptiveProfile.speechRate);
-        if (next >= 3) {
-          speakGreek('Τρία! Μπράβο!', settings.voiceEnabled, adaptiveProfile.speechRate);
-          advanceRef.current(absorbedRef.current());
-          return 0;
-        }
-        return next;
-      });
+      const next = countsDone + 1;
+      playCalmTone(next >= 3 ? 'complete' : 'soft-step', settings.soundEnabled);
+      if (next === 1) speakGreek('Ένα', settings.voiceEnabled, adaptiveProfile.speechRate);
+      if (next === 2) speakGreek('Δύο', settings.voiceEnabled, adaptiveProfile.speechRate);
+      if (next >= 3) {
+        speakGreek('Τρία! Μπράβο!', settings.voiceEnabled, adaptiveProfile.speechRate);
+        setCountsDone(0);
+        advanceRef.current(absorbedRef.current());
+      } else {
+        setCountsDone(next);
+      }
     }, 1800);
     return () => window.clearTimeout(timer);
   }, [phase, countsDone, currentRound, settings.soundEnabled, settings.voiceEnabled, adaptiveProfile.speechRate]);

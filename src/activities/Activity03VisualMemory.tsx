@@ -208,27 +208,27 @@ export const Activity03VisualMemory: React.FC<ActivityRunnerRenderProps> = ({
 
     const tickMs = 100;
     const interval = window.setInterval(() => {
-      setObsElapsedMs((prev) => {
-        const next = prev + tickMs;
-        if (next >= diff.memoryObservationMs) {
-          window.clearInterval(interval);
-          setIsHidden(true);
-          playCalmTone('soft-step', settings.soundEnabled);
-          speakGreek(
-            `Πού κρύφτηκε το ${roundData.targetLabelEl};`,
-            settings.voiceEnabled,
-            adaptiveProfile.speechRate
-          );
-          return diff.memoryObservationMs;
-        }
-        return next;
-      });
+      setObsElapsedMs((prev) => prev + tickMs);
     }, tickMs);
 
     return () => window.clearInterval(interval);
+  }, [phase, isHidden, currentRound]);
+
+  useEffect(() => {
+    if (phase === 'PAUSED' || phase === 'COMPLETED' || isHidden) return;
+    if (obsElapsedMs >= diff.memoryObservationMs) {
+      setIsHidden(true);
+      playCalmTone('soft-step', settings.soundEnabled);
+      speakGreek(
+        `Πού κρύφτηκε: ${roundData.targetLabelEl};`,
+        settings.voiceEnabled,
+        adaptiveProfile.speechRate
+      );
+    }
   }, [
     phase,
     isHidden,
+    obsElapsedMs,
     diff.memoryObservationMs,
     roundData.targetLabelEl,
     settings.soundEnabled,

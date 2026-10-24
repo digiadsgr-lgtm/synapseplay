@@ -340,7 +340,7 @@ export const ParentArticlesPage: React.FC = () => {
 
         {/* Free Beta Launch Callout Banner (High-Conversion Parent Magnet) */}
         <section
-          aria-label="Δωρεάν Δοκιμή Πριν την Επίσημη Έναρξη"
+          aria-label="Δωρεάν Δοκιμή Πριν από την Επίσημη Έναρξη"
           data-testid="blog-free-trial-urgency-banner"
           className="bg-[#FAF6EE] border-2 border-[#D97757] rounded-3xl p-5 sm:p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-sm"
         >
@@ -353,7 +353,7 @@ export const ParentArticlesPage: React.FC = () => {
             </h2>
             <p className="text-xs sm:text-sm text-[#2C3539]/85">
               Ανοίξτε την εφαρμογή αμέσως από το τάμπλετ ή τον υπολογιστή σας — χωρίς εγγραφή, χωρίς
-              κάρτα και χωρίς διαφημίσεις— πριν την επίσημη ενεργοποίηση των συνδρομητικών πακέτων.
+              κάρτα και χωρίς διαφημίσεις — πριν από την επίσημη ενεργοποίηση των συνδρομητικών πακέτων.
             </p>
           </div>
           <Link

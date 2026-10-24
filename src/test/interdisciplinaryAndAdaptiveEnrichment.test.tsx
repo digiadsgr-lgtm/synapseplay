@@ -799,4 +799,74 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
     expect(rotateOptionsForSession(opts, 0, 1)).toEqual(['A', 'B', 'C']);
     expect(rotateOptionsForSession(opts, 1, 1)).not.toEqual(['A', 'B', 'C']);
   });
+
+  it('Developer QA Audit: seamlessly transitions to next game via next-activity-in-category-btn and advances timer rounds strictly by 1 under React.StrictMode', () => {
+    vi.useFakeTimers();
+
+    // 1. Game-to-Game Transition inside React.StrictMode: completing Activity 01 and clicking "Επόμενο: Βρες τη Διαφορά"
+    // must reset SharedActivityRunner to ACTIVE_ROUND (Round 1) for Activity 02 instead of remaining stuck on COMPLETED.
+    const { unmount: uTransition } = render(
+      <React.StrictMode>
+        <MemoryRouter initialEntries={['/activity/01-visual-search']}>
+          <App />
+        </MemoryRouter>
+      </React.StrictMode>
+    );
+
+    for (let r = 1; r <= 3; r++) {
+      vi.advanceTimersByTime(450);
+      fireEvent.click(screen.getByTestId('search-item-target'));
+    }
+
+    expect(screen.getByTestId('activity-complete-screen')).toBeInTheDocument();
+    expect(screen.getByTestId('shared-activity-runner')).toHaveAttribute(
+      'data-runner-phase',
+      'COMPLETED'
+    );
+
+    // Click "⏭️ Επόμενο: Βρες τη Διαφορά"
+    fireEvent.click(screen.getByTestId('next-activity-in-category-btn'));
+
+    expect(screen.getByTestId('shared-activity-runner')).toHaveAttribute(
+      'data-activity-id',
+      '02-spot-difference'
+    );
+    expect(screen.getByTestId('shared-activity-runner')).toHaveAttribute(
+      'data-runner-phase',
+      'ACTIVE_ROUND'
+    );
+    expect(screen.getByTestId('activity-02-spot-difference')).toBeInTheDocument();
+    expect(screen.queryByTestId('activity-complete-screen')).not.toBeInTheDocument();
+    uTransition();
+
+    // 2. React.StrictMode Timer Purity: Activity 07 FREEZE hold advances strictly from Round 2 -> Round 3 (never double-firing)
+    const { unmount: uStrictTimer } = render(
+      <React.StrictMode>
+        <MemoryRouter initialEntries={['/activity/07-move-freeze']}>
+          <App />
+        </MemoryRouter>
+      </React.StrictMode>
+    );
+
+    fireEvent.click(screen.getByTestId('signal-card-go'));
+    act(() => {
+      vi.advanceTimersByTime(450);
+    });
+    fireEvent.click(screen.getByTestId('signal-card-go'));
+    expect(screen.getByTestId('signal-card-freeze')).toBeInTheDocument();
+
+    act(() => {
+      vi.advanceTimersByTime(3100);
+    });
+    // Must be on Round 3 (ACTIVE_ROUND), NOT prematurely completed by double-invocation
+    expect(screen.getByTestId('shared-activity-runner')).toHaveAttribute(
+      'data-runner-phase',
+      'ACTIVE_ROUND'
+    );
+    expect(screen.getByTestId('round-pebble-3')).toHaveTextContent('3');
+    uStrictTimer();
+
+    vi.useRealTimers();
+  });
 });
+

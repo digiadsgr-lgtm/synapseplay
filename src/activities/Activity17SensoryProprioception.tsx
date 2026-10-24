@@ -19,9 +19,9 @@ const SENSORY_EXERCISES: ProprioceptiveExercise[] = [
     titleEl: 'Ισομετρική Πίεση Παλαμών (Βαθιά Πίεση / Heavy Work)',
     disciplineTagEl: 'Εργοθεραπεία (Αισθητηριακή Ολοκλήρωση Ayres) & Φυσιατρική',
     standingInstructionEl:
-      'Ένωσε τις παλάμες σου μπροστά στο στήθος και σπρώξε τις σταθερά μεταξύ τους για 3 ήρεμους ρυθμούς!',
+      'Ένωσε τις παλάμες σου μπροστά στο στήθος και πίεσέ τες σταθερά μεταξύ τους για 3 ήρεμους ρυθμούς!',
     seatedInstructionEl:
-      'Καθιστός με τα πέλματα σταθερά στο πάτωμα, ένωσε τις παλάμες και πίεσέ τις απαλά για 3 ρυθμούς!',
+      'Καθιστός με τα πέλματα σταθερά στο πάτωμα, ένωσε τις παλάμες και πίεσέ τες απαλά για 3 ρυθμούς!',
   },
   {
     emoji: '🪑💪',
@@ -100,7 +100,7 @@ const SENSORY_EXERCISES: ProprioceptiveExercise[] = [
     titleEl: 'Αναπνοή της Κοιλιάς (Διαφραγματικός Ρυθμός)',
     disciplineTagEl: 'Παιδοψυχολογία & Παιδοψυχιατρική (Αυτόνομη Ρύθμιση)',
     standingInstructionEl:
-      'Βάλε τις παλάμες στην κοιλιά σου: νιώσε την να φουσκώνει απαλά σαν μπαλόνι στην εισπνοή και να ξεφουσκώνει στην εκπνοή!',
+      'Βάλε τις παλάμες στην κοιλιά σου: νιώσε τη να φουσκώνει απαλά σαν μπαλόνι στην εισπνοή και να ξεφουσκώνει στην εκπνοή!',
     seatedInstructionEl:
       'Καθιστός αναπαυτικά, ακούμπησε τις παλάμες στην κοιλιά και μέτρησε 3 ήρεμες διαφραγματικές ανάσες!',
   },
@@ -156,18 +156,17 @@ export const Activity17SensoryProprioception: React.FC<ActivityRunnerRenderProps
   useEffect(() => {
     if (phase === 'PAUSED' || phase === 'COMPLETED') return;
     const timer = window.setTimeout(() => {
-      setPulsesCompleted((prev) => {
-        const next = prev + 1;
-        playCalmTone(next >= 3 ? 'complete' : 'soft-step', settings.soundEnabled);
-        if (next === 1) speakGreek('Ένα', settings.voiceEnabled, adaptiveProfile.speechRate);
-        if (next === 2) speakGreek('Δύο', settings.voiceEnabled, adaptiveProfile.speechRate);
-        if (next >= 3) {
-          speakGreek('Τρία! Μπράβο!', settings.voiceEnabled, adaptiveProfile.speechRate);
-          advanceRef.current(absorbedRef.current());
-          return 0;
-        }
-        return next;
-      });
+      const next = pulsesCompleted + 1;
+      playCalmTone(next >= 3 ? 'complete' : 'soft-step', settings.soundEnabled);
+      if (next === 1) speakGreek('Ένα', settings.voiceEnabled, adaptiveProfile.speechRate);
+      if (next === 2) speakGreek('Δύο', settings.voiceEnabled, adaptiveProfile.speechRate);
+      if (next >= 3) {
+        speakGreek('Τρία! Μπράβο!', settings.voiceEnabled, adaptiveProfile.speechRate);
+        setPulsesCompleted(0);
+        advanceRef.current(absorbedRef.current());
+      } else {
+        setPulsesCompleted(next);
+      }
     }, 1800);
     return () => window.clearTimeout(timer);
   }, [phase, pulsesCompleted, currentRound, settings.soundEnabled, settings.voiceEnabled, adaptiveProfile.speechRate]);
