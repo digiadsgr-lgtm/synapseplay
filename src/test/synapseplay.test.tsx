@@ -142,7 +142,7 @@ describe('SynapsePlay (FocusEngine 5+) — Full Gate 1 to Gate 5 Verification Su
 
   describe('GATE 4 & 5: Parent Arithmetic Gate, Smooth Landing Engine, and One-Click Data Wipe', () => {
     it('guards Parent Dashboard behind an arithmetic gate and supports Smooth Landing & Data Wipe', async () => {
-      renderWithRouter(['/']);
+      renderWithRouter(['/app']);
 
       fireEvent.click(screen.getByTestId('open-parent-gate-btn'));
       expect(screen.getByTestId('parent-gate-modal')).toBeInTheDocument();

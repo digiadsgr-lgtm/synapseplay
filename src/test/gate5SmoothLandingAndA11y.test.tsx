@@ -6,7 +6,7 @@ import App from '../App';
 import { runPaletteContrastAudit } from '../utils/accessibilityAudit';
 import { setTodayUsageSeconds, wipeAllLocalData } from '../db/database';
 
-function renderAtRoute(route: string = '/') {
+function renderAtRoute(route: string = '/app') {
   return render(
     <MemoryRouter initialEntries={[route]}>
       <App />
@@ -21,7 +21,7 @@ describe('Gate 5 — Module 13 Smooth Landing, WCAG 2.2 AA Audit & Page-Refresh 
 
   it('Module 13 (Smooth Landing): transitions visual ring color and renders 2-minute warning banner & resting avatar overlay without stressful digits', async () => {
     // 1. Normal state (0s elapsed out of 20m = 1200s)
-    const { unmount } = renderAtRoute('/');
+    const { unmount } = renderAtRoute('/app');
     const ring = screen.getByTestId('smooth-landing-ring');
     expect(ring).toHaveTextContent('🌿');
     expect(screen.queryByTestId('smooth-landing-warning-banner')).not.toBeInTheDocument();
@@ -30,7 +30,7 @@ describe('Gate 5 — Module 13 Smooth Landing, WCAG 2.2 AA Audit & Page-Refresh 
 
     // 2. 2-Minute Advance Warning Window (1090s elapsed -> 110s remaining <= 120s warning threshold)
     await setTodayUsageSeconds(1090);
-    const { unmount: unmountWarn } = renderAtRoute('/');
+    const { unmount: unmountWarn } = renderAtRoute('/app');
     await waitFor(() => {
       expect(screen.getByTestId('smooth-landing-warning-banner')).toBeInTheDocument();
     });
@@ -42,7 +42,7 @@ describe('Gate 5 — Module 13 Smooth Landing, WCAG 2.2 AA Audit & Page-Refresh 
 
     // 3. Session Depleted (1200s elapsed -> 0s remaining)
     await setTodayUsageSeconds(1200);
-    renderAtRoute('/');
+    renderAtRoute('/app');
     await waitFor(() => {
       expect(screen.getByTestId('smooth-landing-overlay')).toBeInTheDocument();
     });

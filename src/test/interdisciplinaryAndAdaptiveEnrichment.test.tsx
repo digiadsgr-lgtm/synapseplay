@@ -591,8 +591,10 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
   it('Marketing & Presentation Landing Page (/): renders all 7 required sections, interactive Age Pathways (4-12), and navigates to /app', async () => {
     renderRoute('/');
 
-    // 1. Hero section & Trust Badges
+    // 1. Hero section & Trust Badges (and verify App TopBar is NOT rendered on '/')
     expect(screen.getByTestId('landing-page')).toBeInTheDocument();
+    expect(screen.queryByTestId('nav-home-btn')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('smooth-landing-ring')).not.toBeInTheDocument();
     expect(screen.getByTestId('landing-hero-badge')).toHaveTextContent(
       'Επιστημονικά Τεκμηριωμένη Εξάσκηση Εκτελεστικών Λειτουργιών'
     );

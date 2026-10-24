@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AppProvider, useApp } from './context/AppContext';
 import { TopBar } from './components/TopBar';
 import { BreakPauseModal } from './components/BreakPauseModal';
@@ -12,21 +12,23 @@ import { LandingPage } from './features/landing/LandingPage';
 
 const AppShell: React.FC = () => {
   const { isBreakActive, setBreakActive } = useApp();
+  const location = useLocation();
+  const isLandingRoute = location.pathname === '/';
 
   // Global Escape key listener to toggle Break/Pause cleanly
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
+      if (e.key === 'Escape' && !isLandingRoute) {
         setBreakActive(!isBreakActive);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isBreakActive, setBreakActive]);
+  }, [isBreakActive, setBreakActive, isLandingRoute]);
 
   return (
     <div className="min-h-screen flex flex-col bg-sand text-charcoal">
-      <TopBar />
+      {!isLandingRoute && <TopBar />}
       <div className="flex-1">
         <Routes>
           <Route path="/" element={<LandingPage />} />
@@ -37,8 +39,8 @@ const AppShell: React.FC = () => {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>
-      <BreakPauseModal />
-      <SmoothLandingDepletedOverlay />
+      {!isLandingRoute && <BreakPauseModal />}
+      {!isLandingRoute && <SmoothLandingDepletedOverlay />}
     </div>
   );
 };
