@@ -39,6 +39,7 @@ const AppShell: React.FC = () => {
           <Route path="/" element={<LandingPage />} />
           <Route path="/legal" element={<LegalCompliancePage />} />
           <Route path="/articles" element={<ParentArticlesPage />} />
+          <Route path="/articles/:articleId" element={<ParentArticlesPage />} />
           <Route path="/app" element={<ChildHubPage />} />
           <Route path="/category/:categoryId" element={<CategoryPage />} />
           <Route path="/activity/:activityId" element={<ActivityPage />} />

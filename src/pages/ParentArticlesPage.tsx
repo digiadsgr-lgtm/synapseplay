@@ -1,65 +1,165 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { ADHD_PARENT_AND_B2B_ARTICLES, type AdhdArticlePost } from '../data/adhdParentArticles';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Link, useParams, useNavigate } from 'react-router-dom';
+import {
+  ADHD_PARENT_AND_B2B_ARTICLES,
+  BLOG_SEO_METADATA,
+  type AdhdArticlePost,
+  type AdhdBlogTopicCategory,
+} from '../data/adhdParentArticles';
 import { SynapsePlayLogoMark } from '../components/SynapsePlayLogoMark';
 
+function upsertMetaTag(attrName: 'name' | 'property', attrValue: string, content: string) {
+  if (typeof document === 'undefined') return;
+  let el = document.head.querySelector(`meta[${attrName}="${attrValue}"]`) as HTMLMetaElement | null;
+  if (!el) {
+    el = document.createElement('meta');
+    el.setAttribute(attrName, attrValue);
+    document.head.appendChild(el);
+  }
+  el.setAttribute('content', content);
+}
+
+function upsertCanonicalLink(href: string) {
+  if (typeof document === 'undefined') return;
+  let link = document.head.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
+  if (!link) {
+    link = document.createElement('link');
+    link.setAttribute('rel', 'canonical');
+    document.head.appendChild(link);
+  }
+  link.setAttribute('href', href);
+}
+
 export const ParentArticlesPage: React.FC = () => {
-  const [selectedChannel, setSelectedChannel] = useState<'ALL' | 'FACEBOOK' | 'LINKEDIN'>('ALL');
-  const [copiedId, setCopiedId] = useState<string | null>(null);
+  const { articleId } = useParams<{ articleId?: string }>();
+  const navigate = useNavigate();
+  const [selectedTopic, setSelectedTopic] = useState<'ALL' | AdhdBlogTopicCategory>('ALL');
+  const [searchQuery, setSearchQuery] = useState<string>('');
 
-  const filteredArticles = ADHD_PARENT_AND_B2B_ARTICLES.filter((art) => {
-    if (selectedChannel === 'FACEBOOK') {
-      return art.channel === 'Facebook (Γονείς & Οικογένεια)';
-    }
-    if (selectedChannel === 'LINKEDIN') {
-      return art.channel === 'LinkedIn (Θεραπευτές, Κέντρα & Επενδυτές)';
-    }
-    return true;
-  });
+  const activeSingleArticle = useMemo<AdhdArticlePost | undefined>(
+    () => (articleId ? ADHD_PARENT_AND_B2B_ARTICLES.find((a) => a.id === articleId) : undefined),
+    [articleId]
+  );
 
-  const formatPostWithHashtags = (art: AdhdArticlePost): string => {
-    return `${art.titleEl}\n\n${art.fullSocialPostEl}\n\n${art.hashtags.join(' ')}`;
-  };
-
-  const handleCopyPost = async (art: AdhdArticlePost) => {
-    const text = formatPostWithHashtags(art);
-    try {
-      if (navigator.clipboard?.writeText) {
-        await navigator.clipboard.writeText(text);
+  const filteredArticles = useMemo(() => {
+    return ADHD_PARENT_AND_B2B_ARTICLES.filter((art) => {
+      if (selectedTopic !== 'ALL' && art.topicCategory !== selectedTopic) {
+        return false;
       }
-    } catch {
-      // fallback ignored
-    }
-    setCopiedId(art.id);
-    window.setTimeout(() => {
-      setCopiedId((prev) => (prev === art.id ? null : prev));
-    }, 2500);
-  };
-
-  const handleDownloadCsvForScheduler = () => {
-    const headers = ['Number', 'Channel', 'Title', 'Full_Post_Text', 'Image_Path'];
-    const rows = ADHD_PARENT_AND_B2B_ARTICLES.map((art) => {
-      const fullText = formatPostWithHashtags(art).replace(/"/g, '""');
-      const title = art.titleEl.replace(/"/g, '""');
-      return `"${art.number}","${art.channel}","${title}","${fullText}","${art.imageUrl}"`;
+      if (searchQuery.trim().length > 0) {
+        const q = searchQuery.trim().toLowerCase();
+        return (
+          art.titleEl.toLowerCase().includes(q) ||
+          art.subtitleEl.toLowerCase().includes(q) ||
+          art.badgeEl.toLowerCase().includes(q) ||
+          art.seoKeywords.some((k) => k.toLowerCase().includes(q))
+        );
+      }
+      return true;
     });
-    const csvContent = '\uFEFF' + [headers.join(','), ...rows].join('\r\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'synapseplay-12-social-posts-facebook-linkedin.csv';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  };
+  }, [selectedTopic, searchQuery]);
+
+  // Dynamic SEO Head Tags & Schema.org JSON-LD Structured Data
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    const baseUrl = 'https://synapseplay.vercel.app';
+
+    if (activeSingleArticle) {
+      const canonicalUrl = `${baseUrl}/articles/${activeSingleArticle.id}`;
+      document.title = activeSingleArticle.seoTitleEl;
+      upsertMetaTag('name', 'description', activeSingleArticle.seoMetaDescriptionEl);
+      upsertMetaTag('name', 'keywords', activeSingleArticle.seoKeywords.join(', '));
+      upsertMetaTag('property', 'og:title', activeSingleArticle.seoTitleEl);
+      upsertMetaTag('property', 'og:description', activeSingleArticle.seoMetaDescriptionEl);
+      upsertMetaTag('property', 'og:type', 'article');
+      upsertMetaTag('property', 'og:url', canonicalUrl);
+      upsertMetaTag('property', 'og:image', `${baseUrl}${activeSingleArticle.imageUrl}`);
+      upsertCanonicalLink(canonicalUrl);
+    } else {
+      const canonicalUrl = `${baseUrl}/articles`;
+      document.title = BLOG_SEO_METADATA.blogTitleEl;
+      upsertMetaTag('name', 'description', BLOG_SEO_METADATA.blogMetaDescriptionEl);
+      upsertMetaTag('name', 'keywords', BLOG_SEO_METADATA.blogKeywords.join(', '));
+      upsertMetaTag('property', 'og:title', BLOG_SEO_METADATA.blogTitleEl);
+      upsertMetaTag('property', 'og:description', BLOG_SEO_METADATA.blogMetaDescriptionEl);
+      upsertMetaTag('property', 'og:type', 'website');
+      upsertMetaTag('property', 'og:url', canonicalUrl);
+      upsertMetaTag(
+        'property',
+        'og:image',
+        `${baseUrl}/brand-kit/png/synapseplay-social-cover-dark-1200x630.png`
+      );
+      upsertCanonicalLink(canonicalUrl);
+    }
+  }, [activeSingleArticle]);
+
+  const jsonLdSchema = useMemo(() => {
+    const baseUrl = 'https://synapseplay.vercel.app';
+    if (activeSingleArticle) {
+      return {
+        '@context': 'https://schema.org',
+        '@type': 'BlogPosting',
+        headline: activeSingleArticle.titleEl,
+        alternativeHeadline: activeSingleArticle.subtitleEl,
+        description: activeSingleArticle.seoMetaDescriptionEl,
+        image: `${baseUrl}${activeSingleArticle.imageUrl}`,
+        datePublished: activeSingleArticle.publishedDateISO,
+        dateModified: activeSingleArticle.publishedDateISO,
+        inLanguage: 'el-GR',
+        keywords: activeSingleArticle.seoKeywords.join(', '),
+        author: {
+          '@type': 'Organization',
+          name: activeSingleArticle.authorEl,
+          url: baseUrl,
+        },
+        publisher: {
+          '@type': 'Organization',
+          name: 'SynapsePlay by DIGIADS',
+          url: 'https://digiads.gr',
+        },
+        mainEntityOfPage: {
+          '@type': 'WebPage',
+          '@id': `${baseUrl}/articles/${activeSingleArticle.id}`,
+        },
+      };
+    }
+
+    return {
+      '@context': 'https://schema.org',
+      '@type': 'Blog',
+      name: BLOG_SEO_METADATA.blogHeadlineEl,
+      description: BLOG_SEO_METADATA.blogMetaDescriptionEl,
+      url: `${baseUrl}/articles`,
+      inLanguage: 'el-GR',
+      publisher: {
+        '@type': 'Organization',
+        name: 'SynapsePlay by DIGIADS',
+        url: 'https://digiads.gr',
+      },
+      blogPost: ADHD_PARENT_AND_B2B_ARTICLES.map((art) => ({
+        '@type': 'BlogPosting',
+        headline: art.titleEl,
+        description: art.seoMetaDescriptionEl,
+        url: `${baseUrl}/articles/${art.id}`,
+        datePublished: art.publishedDateISO,
+        image: `${baseUrl}${art.imageUrl}`,
+        keywords: art.seoKeywords.join(', '),
+      })),
+    };
+  }, [activeSingleArticle]);
 
   return (
     <div
       data-testid="parent-articles-page"
       className="min-h-screen bg-[#EFE8D8] text-[#2C3539] font-sans pb-16"
     >
+      {/* Structured Data JSON-LD for Google SEO */}
+      <script
+        type="application/ld+json"
+        data-testid="blog-seo-jsonld"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdSchema) }}
+      />
+
       {/* Top Navigation */}
       <header className="border-b border-[#2C3539]/15 bg-[#FAF6EE] sticky top-0 z-30">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex flex-wrap items-center justify-between gap-4">
@@ -68,248 +168,310 @@ export const ParentArticlesPage: React.FC = () => {
             <div>
               <span className="text-lg font-extrabold text-[#2C3539]">SynapsePlay</span>
               <span className="ml-2 px-2.5 py-0.5 rounded-full bg-[#7A9A7B]/20 text-[#2C3539] text-xs font-extrabold">
-                Άρθρα ΔΕΠΥ &amp; Social Media Hub
+                🧠 Μυαλά που Τρέχουν με Χίλια • Blog ΔΕΠΥ
               </span>
             </div>
           </Link>
 
           <div className="flex flex-wrap items-center gap-2.5">
+            {activeSingleArticle && (
+              <button
+                type="button"
+                data-testid="back-to-all-articles-btn"
+                onClick={() => navigate('/articles')}
+                className="touch-target px-4 py-2 rounded-2xl bg-[#EFE8D8] border border-[#2C3539]/25 text-xs sm:text-sm font-extrabold text-[#2C3539] hover:bg-white"
+              >
+                ← Όλα τα Άρθρα του Blog
+              </button>
+            )}
             <Link
               to="/"
               data-testid="articles-back-home-link"
               className="touch-target px-4 py-2 rounded-2xl bg-white border border-[#2C3539]/20 text-xs sm:text-sm font-extrabold text-[#2C3539] hover:bg-[#EFE8D8]"
             >
-              ← Αρχική Παρουσίαση
+              ← Αρχική Σελίδα
             </Link>
             <Link
               to="/app"
               data-testid="articles-launch-app-link"
               className="touch-target px-5 py-2.5 rounded-2xl bg-[#D97757] text-white text-xs sm:text-sm font-extrabold hover:opacity-95"
             >
-              Είσοδος στην Εφαρμογή →
+              Δωρεάν Είσοδος στην Εφαρμογή →
             </Link>
           </div>
         </div>
       </header>
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-8 space-y-8">
-        {/* Hero & Fast Publishing Guide for Facebook & LinkedIn */}
-        <section className="bg-[#1B2225] text-[#FAF6EE] border-2 border-[#7A9A7B] rounded-3xl p-6 sm:p-8 space-y-6 shadow-md">
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-            <div className="space-y-3 max-w-3xl">
+        {/* SEO Breadcrumb Navigation */}
+        <nav aria-label="Διαδρομή Σελίδας (Breadcrumb)" className="text-xs font-extrabold text-[#4A6B82]">
+          <ol className="flex flex-wrap items-center gap-1.5">
+            <li>
+              <Link to="/" className="hover:underline">
+                Αρχική SynapsePlay
+              </Link>
+            </li>
+            <li aria-hidden="true">›</li>
+            <li>
+              <Link to="/articles" className="hover:underline text-[#2C3539]">
+                Μυαλά που Τρέχουν με Χίλια (Blog ΔΕΠΥ)
+              </Link>
+            </li>
+            {activeSingleArticle && (
+              <>
+                <li aria-hidden="true">›</li>
+                <li className="text-[#5B7B5C] truncate max-w-xs sm:max-w-md">
+                  {activeSingleArticle.titleEl}
+                </li>
+              </>
+            )}
+          </ol>
+        </nav>
+
+        {/* Blog Hero Header */}
+        {!activeSingleArticle && (
+          <section
+            aria-labelledby="adhd-blog-hero-heading"
+            data-testid="adhd-blog-hero"
+            className="bg-[#1B2225] text-[#FAF6EE] border-2 border-[#7A9A7B] rounded-3xl p-6 sm:p-10 space-y-5 shadow-md"
+          >
+            <div className="space-y-3 max-w-4xl">
               <span className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#7A9A7B]/30 border border-[#7A9A7B] text-xs font-extrabold text-[#EFE8D8]">
-                🚀 Έτοιμο Περιεχόμενο Δημοσίευσης (Facebook Γονέων &amp; LinkedIn Θεραπευτών/Επενδυτών)
+                🧠 Το Επίσημο Ιστολόγιο (Blog) Γονέων &amp; Ειδικών για τη ΔΕΠΥ (4–12 ετών)
               </span>
-              <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-[#FAF6EE]">
-                12 Έτοιμα Άρθρα &amp; Συμβουλές ΔΕΠΥ (Κείμενα + Κάρτες 1080×1080 + Μαύρα Εξώφυλλα)
+              <h1
+                id="adhd-blog-hero-heading"
+                className="text-2xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-[#FAF6EE] leading-tight"
+              >
+                «Μυαλά που Τρέχουν με Χίλια» — Το Blog της ΔΕΠΥ
               </h1>
-              <p className="text-sm sm:text-base text-[#EFE8D8]/85 leading-relaxed">
-                Κάθε άρθρο είναι γραμμένο σε απλή, ζεστή γλώσσα χωρίς δυσνόητους ιατρικούς όρους:
-                ξεκινά από μια καθημερινή δυσκολία που ζει κάθε γονέας, δίνει 3 άμεσες πρακτικές
-                συμβουλές (βασισμένες στα πρωτόκολλά μας) και οδηγεί φυσικά στη δωρεάν δοκιμή του{' '}
-                <strong>SynapsePlay</strong>.
+              <p className="text-sm sm:text-lg text-[#EFE8D8]/90 leading-relaxed">
+                Για τα παιδιά που σκέφτονται με την ταχύτητα του φωτός, που δυσκολεύονται να πατήσουν
+                «φρένο» και που χρειάζονται κατανόηση αντί για παρατηρήσεις. Εδώ θα βρείτε πρακτικές,
+                δοκιμασμένες συμβουλές καθημερινότητας —χωρίς ξύλινες ιατρικές ορολογίες— που μπορείτε
+                να εφαρμόσετε σήμερα κιόλας στο σπίτι και στο σχολείο.
               </p>
             </div>
 
-            <div className="flex flex-col gap-2.5 shrink-0">
-              <button
-                type="button"
-                data-testid="download-all-posts-csv-btn"
-                onClick={handleDownloadCsvForScheduler}
-                className="touch-target px-5 py-3 rounded-2xl bg-[#D97757] text-white font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 hover:opacity-95"
-              >
-                <span aria-hidden="true">📥</span>
-                <span>Λήψη Όλων σε CSV (Meta Suite / Buffer)</span>
-              </button>
-              <a
-                href="/brand-kit/png/synapseplay-facebook-cover-dark-1640x624.png"
-                download="synapseplay-facebook-cover-dark-1640x624.png"
-                data-testid="download-fb-dark-cover-btn"
-                className="touch-target px-5 py-2.5 rounded-2xl bg-[#252F33] border border-[#7A9A7B] text-[#FAF6EE] font-extrabold text-xs flex items-center justify-center gap-2 hover:bg-[#7A9A7B] hover:text-white transition-colors"
-              >
-                <span>⬛ Λήψη Μαύρου Εξωφύλλου Facebook (1640×624)</span>
-              </a>
-              <a
-                href="/brand-kit/png/synapseplay-linkedin-cover-dark-1584x396.png"
-                download="synapseplay-linkedin-cover-dark-1584x396.png"
-                data-testid="download-li-dark-cover-btn"
-                className="touch-target px-5 py-2.5 rounded-2xl bg-[#252F33] border border-[#4A6B82] text-[#FAF6EE] font-extrabold text-xs flex items-center justify-center gap-2 hover:bg-[#4A6B82] hover:text-white transition-colors"
-              >
-                <span>⬛ Λήψη Μαύρου Εξωφύλλου LinkedIn (1584×396)</span>
-              </a>
+            {/* Topic Filters & Search Bar */}
+            <div className="pt-4 border-t border-white/10 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+              <div className="flex flex-wrap items-center gap-2" role="tablist" aria-label="Κατηγορίες Άρθρων ΔΕΠΥ">
+                <button
+                  type="button"
+                  data-testid="filter-articles-all"
+                  onClick={() => setSelectedTopic('ALL')}
+                  className={`touch-target px-4 py-2.5 rounded-2xl font-extrabold text-xs sm:text-sm border-2 transition-colors ${
+                    selectedTopic === 'ALL'
+                      ? 'bg-[#7A9A7B] text-white border-[#7A9A7B]'
+                      : 'bg-[#252F33] text-[#FAF6EE] border-white/15 hover:border-[#7A9A7B]'
+                  }`}
+                >
+                  ✨ Όλα τα Θέματα ({ADHD_PARENT_AND_B2B_ARTICLES.length})
+                </button>
+                <button
+                  type="button"
+                  data-testid="filter-articles-home"
+                  onClick={() => setSelectedTopic('home-routine')}
+                  className={`touch-target px-4 py-2.5 rounded-2xl font-extrabold text-xs sm:text-sm border-2 transition-colors ${
+                    selectedTopic === 'home-routine'
+                      ? 'bg-[#7A9A7B] text-white border-[#7A9A7B]'
+                      : 'bg-[#252F33] text-[#FAF6EE] border-white/15 hover:border-[#7A9A7B]'
+                  }`}
+                >
+                  🏠 Ρουτίνα, Οθόνη &amp; Μελέτη (5)
+                </button>
+                <button
+                  type="button"
+                  data-testid="filter-articles-emotion"
+                  onClick={() => setSelectedTopic('emotion-impulse')}
+                  className={`touch-target px-4 py-2.5 rounded-2xl font-extrabold text-xs sm:text-sm border-2 transition-colors ${
+                    selectedTopic === 'emotion-impulse'
+                      ? 'bg-[#D97757] text-white border-[#D97757]'
+                      : 'bg-[#252F33] text-[#FAF6EE] border-white/15 hover:border-[#D97757]'
+                  }`}
+                >
+                  💛 Παρορμητικότητα, Θυμός &amp; Αυτοπεποίθηση (5)
+                </button>
+                <button
+                  type="button"
+                  data-testid="filter-articles-clinical"
+                  onClick={() => setSelectedTopic('clinical-science')}
+                  className={`touch-target px-4 py-2.5 rounded-2xl font-extrabold text-xs sm:text-sm border-2 transition-colors ${
+                    selectedTopic === 'clinical-science'
+                      ? 'bg-[#4A6B82] text-white border-[#4A6B82]'
+                      : 'bg-[#252F33] text-[#FAF6EE] border-white/15 hover:border-[#4A6B82]'
+                  }`}
+                >
+                  🩺 Ειδική Αγωγή &amp; Ήρεμη Τεχνολογία (2)
+                </button>
+              </div>
+
+              <div className="w-full lg:w-72">
+                <label htmlFor="blog-search-input" className="sr-only">
+                  Αναζήτηση άρθρου για τη ΔΕΠΥ
+                </label>
+                <input
+                  id="blog-search-input"
+                  data-testid="blog-search-input"
+                  type="search"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="🔍 Αναζήτηση (π.χ. θυμός, οθόνη, διάβασμα)..."
+                  className="w-full px-4 py-2.5 rounded-2xl bg-[#252F33] border border-white/20 text-xs sm:text-sm font-bold text-[#FAF6EE] placeholder:text-[#EFE8D8]/60"
+                />
+              </div>
             </div>
+          </section>
+        )}
+
+        {/* Single Article View OR Full Blog Feed */}
+        <div className="space-y-8">
+          {(activeSingleArticle ? [activeSingleArticle] : filteredArticles).map((art) => (
+            <article
+              key={art.id}
+              itemScope
+              itemType="https://schema.org/BlogPosting"
+              data-testid={`blog-article-card-${art.number}`}
+              className="bg-[#FAF6EE] border-2 border-[#7A9A7B]/60 rounded-3xl p-6 sm:p-8 shadow-sm grid grid-cols-1 lg:grid-cols-12 gap-6 items-start"
+            >
+              {/* Left Column: Visual Card & Direct Game Launch CTA */}
+              <div className="lg:col-span-4 space-y-4">
+                <Link
+                  to={`/articles/${art.id}`}
+                  className="block rounded-2xl overflow-hidden border-2 border-[#2C3539]/20 shadow-sm bg-[#14191C] hover:opacity-95 transition-opacity"
+                >
+                  <img
+                    itemProp="image"
+                    src={art.imageUrl}
+                    alt={art.titleEl}
+                    loading="lazy"
+                    className="w-full h-auto block"
+                  />
+                </Link>
+
+                {/* Key Takeaways Box (Featured Snippet SEO) */}
+                <div className="p-4 rounded-2xl bg-white border border-[#7A9A7B]/50 space-y-2">
+                  <h3 className="text-xs font-extrabold text-[#5B7B5C] uppercase tracking-wider">
+                    📌 Με μια ματιά — Τα 3 βασικά σημεία:
+                  </h3>
+                  <ul className="space-y-1.5 text-xs text-[#2C3539] font-bold leading-snug">
+                    {art.keyTakeawaysEl.map((point, idx) => (
+                      <li key={idx} className="flex items-start gap-1.5">
+                        <span className="text-[#7A9A7B] shrink-0">✓</span>
+                        <span>{point}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <Link
+                    to={art.relatedActivityRoute}
+                    data-testid={`article-play-cta-${art.number}`}
+                    className="touch-target w-full px-4 py-3 rounded-2xl bg-[#D97757] text-white font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 hover:opacity-95 shadow-sm"
+                  >
+                    <span aria-hidden="true">▶️</span>
+                    <span>{art.relatedActivityLabelEl}</span>
+                  </Link>
+
+                  {!activeSingleArticle && (
+                    <Link
+                      to={`/articles/${art.id}`}
+                      data-testid={`open-single-article-${art.number}`}
+                      className="touch-target w-full px-4 py-2.5 rounded-2xl bg-white border-2 border-[#2C3539]/20 text-[#2C3539] font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 hover:bg-[#EFE8D8]"
+                    >
+                      <span>📖 Προβολή Αυτόνομης Σελίδας Άρθρου</span>
+                    </Link>
+                  )}
+                </div>
+              </div>
+
+              {/* Right Column: Full SEO-Structured Article Body */}
+              <div className="lg:col-span-8 space-y-4">
+                <div className="flex flex-wrap items-center gap-2 text-xs font-extrabold">
+                  <span className="px-3 py-1 rounded-full bg-[#7A9A7B]/20 text-[#2C3539]">
+                    {art.badgeEl}
+                  </span>
+                  <span className="px-3 py-1 rounded-full bg-[#4A6B82]/15 text-[#4A6B82]">
+                    ⏱️ {art.readingTimeMinutes} λεπτά ανάγνωσης
+                  </span>
+                  <time
+                    itemProp="datePublished"
+                    dateTime={art.publishedDateISO}
+                    className="px-2.5 py-1 rounded-full bg-[#EFE8D8] text-[#2C3539]/80"
+                  >
+                    ✍️ {art.authorEl}
+                  </time>
+                </div>
+
+                <h2
+                  itemProp="headline"
+                  className="text-xl sm:text-2xl md:text-3xl font-extrabold text-[#2C3539] leading-snug"
+                >
+                  <Link to={`/articles/${art.id}`} className="hover:text-[#4A6B82] transition-colors">
+                    {art.titleEl}
+                  </Link>
+                </h2>
+
+                <p itemProp="description" className="text-sm sm:text-base font-bold text-[#4A6B82]">
+                  {art.subtitleEl}
+                </p>
+
+                <div
+                  itemProp="articleBody"
+                  className="p-5 sm:p-6 rounded-2xl bg-white border border-[#2C3539]/15 text-sm sm:text-base text-[#2C3539] whitespace-pre-line leading-relaxed font-medium"
+                >
+                  {art.fullSocialPostEl}
+                </div>
+
+                {/* SEO Keywords & Topic Pills */}
+                <div className="pt-1 flex flex-wrap items-center gap-1.5">
+                  <span className="text-xs font-extrabold text-[#2C3539]/70 mr-1">
+                    Θεματικές ΔΕΠΥ:
+                  </span>
+                  {art.seoKeywords.map((kw) => (
+                    <span
+                      key={kw}
+                      className="px-2.5 py-1 rounded-lg bg-[#EFE8D8] text-[#4A6B82] text-xs font-extrabold"
+                    >
+                      {kw}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+
+        {/* Bottom SEO Conversion Banner for Parents & Therapists */}
+        <section
+          aria-label="Δοκιμάστε το SynapsePlay"
+          className="bg-[#FAF6EE] border-2 border-[#4A6B82] rounded-3xl p-6 sm:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 shadow-sm"
+        >
+          <div className="space-y-2 max-w-2xl">
+            <h2 className="text-xl sm:text-2xl font-extrabold text-[#2C3539]">
+              Έτοιμοι να κάνετε τα 5 λεπτά παιχνιδιού την πιο ήρεμη στιγμή της ημέρας;
+            </h2>
+            <p className="text-sm sm:text-base text-[#2C3539]/85">
+              Το <strong>SynapsePlay (FocusEngine 5+)</strong> είναι διαθέσιμο σε ανοιχτή δωρεάν
+              δοκιμή — χωρίς εγγραφή, χωρίς διαφημίσεις και 100% τοπικά στη συσκευή σας.
+            </p>
           </div>
-
-          {/* 3-Step Workflow to Publish All 12 Articles Today */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2 border-t border-white/10 text-xs sm:text-sm">
-            <div className="p-4 rounded-2xl bg-[#252F33] border border-white/10 space-y-1">
-              <div className="font-extrabold text-[#96B897]">
-                Βήμα 1: Εξώφυλλα Facebook &amp; LinkedIn (1 λεπτό)
-              </div>
-              <p className="text-[#EFE8D8]/85">
-                Κατεβάστε τα 2 μαύρα οριζόντια εξώφυλλα από τα κουμπιά δεξιά και ανεβάστε τα στη
-                Σελίδα Facebook (προς Γονείς) και στη Σελίδα/Προφίλ LinkedIn (προς Θεραπευτές &amp;
-                Επενδυτές).
-              </p>
-            </div>
-            <div className="p-4 rounded-2xl bg-[#252F33] border border-white/10 space-y-1">
-              <div className="font-extrabold text-[#96B897]">
-                Βήμα 2: Αντιγραφή με 1 Κλικ + Εικόνα (5 λεπτά)
-              </div>
-              <p className="text-[#EFE8D8]/85">
-                Σε κάθε άρθρο παρακάτω πατήστε <strong>«📋 Αντιγραφή Δημοσίευσης»</strong> και{' '}
-                <strong>«🖼️ Λήψη Εικόνας (1080×1080)»</strong>.
-              </p>
-            </div>
-            <div className="p-4 rounded-2xl bg-[#252F33] border border-white/10 space-y-1">
-              <div className="font-extrabold text-[#96B897]">
-                Βήμα 3: Μαζική Ανάρτηση στο Meta Business Suite
-              </div>
-              <p className="text-[#EFE8D8]/85">
-                Ανοίξτε το δωρεάν <code>business.facebook.com</code> (Planner) και το LinkedIn
-                Schedule: μπορείτε να ανεβάσετε τα πρώτα 3 σήμερα και να προγραμματίσετε τα υπόλοιπα
-                9 αυτόματα!
-              </p>
-            </div>
+          <div className="flex flex-wrap items-center gap-3 shrink-0">
+            <Link
+              to="/app"
+              className="touch-target px-6 py-3.5 rounded-2xl bg-[#D97757] text-white font-extrabold text-sm sm:text-base hover:opacity-95 shadow-sm"
+            >
+              Ξεκινήστε Δωρεάν Τώρα ▶️
+            </Link>
+            <Link
+              to="/"
+              className="touch-target px-5 py-3.5 rounded-2xl bg-white border-2 border-[#4A6B82] text-[#2C3539] font-extrabold text-sm hover:bg-[#EFE8D8]"
+            >
+              Πώς Λειτουργεί η Μέθοδος
+            </Link>
           </div>
         </section>
-
-        {/* Channel Filter Tabs */}
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="flex flex-wrap items-center gap-2">
-            <button
-              type="button"
-              data-testid="filter-articles-all"
-              onClick={() => setSelectedChannel('ALL')}
-              className={`touch-target px-4 py-2.5 rounded-2xl font-extrabold text-xs sm:text-sm border-2 transition-colors ${
-                selectedChannel === 'ALL'
-                  ? 'bg-[#2C3539] text-white border-[#2C3539]'
-                  : 'bg-[#FAF6EE] text-[#2C3539] border-[#2C3539]/20'
-              }`}
-            >
-              Όλα τα Άρθρα ({ADHD_PARENT_AND_B2B_ARTICLES.length})
-            </button>
-            <button
-              type="button"
-              data-testid="filter-articles-facebook"
-              onClick={() => setSelectedChannel('FACEBOOK')}
-              className={`touch-target px-4 py-2.5 rounded-2xl font-extrabold text-xs sm:text-sm border-2 transition-colors ${
-                selectedChannel === 'FACEBOOK'
-                  ? 'bg-[#7A9A7B] text-white border-[#7A9A7B]'
-                  : 'bg-[#FAF6EE] text-[#2C3539] border-[#7A9A7B]'
-              }`}
-            >
-              📘 Facebook — Για Γονείς &amp; ΔΕΠΥ (10)
-            </button>
-            <button
-              type="button"
-              data-testid="filter-articles-linkedin"
-              onClick={() => setSelectedChannel('LINKEDIN')}
-              className={`touch-target px-4 py-2.5 rounded-2xl font-extrabold text-xs sm:text-sm border-2 transition-colors ${
-                selectedChannel === 'LINKEDIN'
-                  ? 'bg-[#4A6B82] text-white border-[#4A6B82]'
-                  : 'bg-[#FAF6EE] text-[#2C3539] border-[#4A6B82]'
-              }`}
-            >
-              💼 LinkedIn — Για Θεραπευτές, Κέντρα &amp; Επενδυτές (2)
-            </button>
-          </div>
-        </div>
-
-        {/* Articles List */}
-        <div className="space-y-6">
-          {filteredArticles.map((art) => {
-            const isCopied = copiedId === art.id;
-            return (
-              <article
-                key={art.id}
-                data-testid={`social-article-card-${art.number}`}
-                className="bg-[#FAF6EE] border-2 border-[#7A9A7B]/60 rounded-3xl p-6 sm:p-8 shadow-sm grid grid-cols-1 lg:grid-cols-12 gap-6 items-start"
-              >
-                {/* Left Column: 1080x1080 Dark Visual Card Preview & Actions */}
-                <div className="lg:col-span-4 space-y-3">
-                  <div className="rounded-2xl overflow-hidden border-2 border-[#2C3539]/20 shadow-sm bg-[#14191C]">
-                    <img
-                      src={art.imageUrl}
-                      alt={art.titleEl}
-                      className="w-full h-auto block"
-                    />
-                  </div>
-
-                  <div className="flex flex-col gap-2">
-                    <button
-                      type="button"
-                      data-testid={`copy-article-btn-${art.number}`}
-                      onClick={() => void handleCopyPost(art)}
-                      className={`touch-target w-full px-4 py-3 rounded-2xl font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 transition-colors ${
-                        isCopied
-                          ? 'bg-[#5B7B5C] text-white'
-                          : 'bg-[#2C3539] text-white hover:bg-[#4A6B82]'
-                      }`}
-                    >
-                      <span aria-hidden="true">{isCopied ? '✔' : '📋'}</span>
-                      <span>
-                        {isCopied
-                          ? 'Αντιγράφηκε στο Πρόχειρο!'
-                          : 'Αντιγραφή Κειμένου Δημοσίευσης'}
-                      </span>
-                    </button>
-
-                    <a
-                      href={art.imageUrl}
-                      download={`synapseplay-post-${art.number}.png`}
-                      data-testid={`download-article-img-${art.number}`}
-                      className="touch-target w-full px-4 py-2.5 rounded-2xl bg-white border-2 border-[#2C3539]/25 text-[#2C3539] font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 hover:bg-[#EFE8D8]"
-                    >
-                      <span aria-hidden="true">🖼️</span>
-                      <span>Λήψη Εικόνας Post (1080×1080 PNG)</span>
-                    </a>
-
-                    <Link
-                      to={art.relatedActivityRoute}
-                      className="touch-target w-full px-4 py-2.5 rounded-2xl bg-[#D97757] text-white font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 hover:opacity-95"
-                    >
-                      <span aria-hidden="true">▶️</span>
-                      <span>{art.relatedActivityLabelEl}</span>
-                    </Link>
-                  </div>
-                </div>
-
-                {/* Right Column: Full Article Copy */}
-                <div className="lg:col-span-8 space-y-4">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="px-3 py-1 rounded-full bg-[#7A9A7B]/20 text-[#2C3539] text-xs font-extrabold">
-                      {art.badgeEl}
-                    </span>
-                    <span className="px-3 py-1 rounded-full bg-[#4A6B82]/15 text-[#4A6B82] text-xs font-extrabold">
-                      {art.channel}
-                    </span>
-                  </div>
-
-                  <h2 className="text-xl sm:text-2xl font-extrabold text-[#2C3539] leading-snug">
-                    {art.titleEl}
-                  </h2>
-                  <p className="text-sm font-bold text-[#4A6B82]">{art.subtitleEl}</p>
-
-                  <div className="p-5 rounded-2xl bg-white border border-[#2C3539]/15 text-sm sm:text-base text-[#2C3539] whitespace-pre-line leading-relaxed font-medium">
-                    {art.fullSocialPostEl}
-                  </div>
-
-                  <div className="flex flex-wrap gap-1.5 pt-1">
-                    {art.hashtags.map((tag) => (
-                      <span
-                        key={tag}
-                        className="px-2.5 py-1 rounded-lg bg-[#EFE8D8] text-[#4A6B82] text-xs font-extrabold"
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </article>
-            );
-          })}
-        </div>
       </main>
     </div>
   );

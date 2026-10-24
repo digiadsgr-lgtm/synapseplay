@@ -213,9 +213,10 @@ export const LandingPage: React.FC = () => {
           <Link
             to="/articles"
             data-testid="landing-nav-articles-link"
-            className="touch-target px-4 py-2 rounded-2xl bg-white/70 border border-[#2C3539]/15 text-xs sm:text-sm font-extrabold text-[#2C3539] hover:bg-white transition-colors flex items-center"
+            className="touch-target px-4 py-2 rounded-2xl bg-white/70 border border-[#2C3539]/15 text-xs sm:text-sm font-extrabold text-[#2C3539] hover:bg-white transition-colors flex items-center gap-1.5"
           >
-            Άρθρα &amp; Συμβουλές ΔΕΠΥ
+            <span aria-hidden="true">🧠</span>
+            <span>Blog ΔΕΠΥ: Μυαλά με Χίλια</span>
           </Link>
           <button
             type="button"
@@ -934,6 +935,13 @@ export const LandingPage: React.FC = () => {
           </div>
 
           <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-5">
+            <Link
+              to="/articles"
+              data-testid="footer-link-blog"
+              className="touch-target px-3 py-1.5 rounded-xl hover:bg-[#EFE8D8] underline underline-offset-4 font-extrabold text-[#5B7B5C]"
+            >
+              🧠 Blog ΔΕΠΥ: Μυαλά με Χίλια
+            </Link>
             <Link
               to="/app"
               data-testid="footer-link-app"

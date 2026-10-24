@@ -205,6 +205,13 @@ describe('SynapsePlay (FocusEngine 5+) — Full Gate 1 to Gate 5 Verification Su
       const coachingBtn = screen.getByTestId('toggle-parent-coaching-tip-btn');
       fireEvent.click(coachingBtn);
       expect(screen.getByTestId('runner-parent-coaching-box')).toBeInTheDocument();
+
+      // 4. SEO Blog (/articles & /articles/:articleId) with "Μυαλά που Τρέχουν με Χίλια" title and no social copy/paste buttons
+      renderWithRouter(['/articles']);
+      expect(screen.getByTestId('adhd-blog-hero')).toHaveTextContent('Μυαλά που Τρέχουν με Χίλια');
+      expect(screen.getByTestId('blog-seo-jsonld')).toBeInTheDocument();
+      expect(screen.queryByTestId('download-all-posts-csv-btn')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('copy-article-btn-01')).not.toBeInTheDocument();
     });
   });
 });
