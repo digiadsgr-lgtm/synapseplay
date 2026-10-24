@@ -24,7 +24,7 @@ const AGE_PATHWAYS: AgePathwayItem[] = [
     stageTitleEl: 'Προσχολική Αισθητηριακή & Κινητική Εστίαση',
     pictogram: '🌱',
     summaryEl: 'Μηδενικό κείμενο, μεγάλα εικονογράμματα, αισθητηριακή γείωση.',
-    sessionSplitEl: "10' Συνολικά: 5' Ταμπλέτα + 3' Κίνηση στον Χώρο + 2' Smooth Landing",
+    sessionSplitEl: "10' Συνολικά: 5' Τάμπλετ (Tablet) + 3' Κίνηση στον Χώρο + 2' Smooth Landing",
     clinicalFocusEl:
       'Ακουστική και εικονογραφική καθοδήγηση χωρίς καμία απαίτηση ανάγνωσης. Μεγάλοι στόχοι αφής και άμεση σύνδεση με το σώμα.',
     sampleActivitiesEl: [
@@ -39,7 +39,7 @@ const AGE_PATHWAYS: AgePathwayItem[] = [
     stageTitleEl: 'Νηπιαγωγείο & Πρώιμη Αυτορρύθμιση',
     pictogram: '🐢',
     summaryEl: 'Ακολουθίες 2 βημάτων, οπτική σάρωση, αντικείμενα.',
-    sessionSplitEl: "12' Συνολικά: 6' Ταμπλέτα + 4' Φυσική Δράση + 2' Smooth Landing",
+    sessionSplitEl: "12' Συνολικά: 6' Τάμπλετ (Tablet) + 4' Φυσική Δράση + 2' Smooth Landing",
     clinicalFocusEl:
       'Οπτική μνήμη 2 βημάτων, ακουστικές εντολές με εικονογράμματα και εκμάθηση αναμονής σήματος.',
     sampleActivitiesEl: [
@@ -54,7 +54,7 @@ const AGE_PATHWAYS: AgePathwayItem[] = [
     stageTitleEl: 'Α΄–Β΄ Δημοτικού & Δόμηση Ρουτίνας',
     pictogram: '🦉',
     summaryEl: 'Σειροθέτηση ρουτινών, ευελιξία κανόνων (χρώμα -> σχήμα).',
-    sessionSplitEl: "15' Συνολικά: 8' Ταμπλέτα + 5' Φυσική Αποστολή + 2' Smooth Landing",
+    sessionSplitEl: "15' Συνολικά: 8' Τάμπλετ (Tablet) + 5' Φυσική Αποστολή + 2' Smooth Landing",
     clinicalFocusEl:
       'Οργάνωση καθημερινών ρουτινών 3 βημάτων, γνωστική ευελιξία (αλλαγή κανόνα) και σύνδεση με πραγματικά αντικείμενα του σπιτιού.',
     sampleActivitiesEl: [
@@ -69,7 +69,7 @@ const AGE_PATHWAYS: AgePathwayItem[] = [
     stageTitleEl: 'Γ΄–Δ΄ Δημοτικού & Εργαζόμενη Μνήμη',
     pictogram: '🦊',
     summaryEl: 'Σύνθετη σειριακή μνήμη, επιλεκτική προσοχή υπό περισπασμό.',
-    sessionSplitEl: "18' Συνολικά: 10' Ταμπλέτα + 5' Κατασκευή/Κίνηση + 3' Smooth Landing",
+    sessionSplitEl: "18' Συνολικά: 10' Τάμπλετ (Tablet) + 5' Κατασκευή/Κίνηση + 3' Smooth Landing",
     clinicalFocusEl:
       'Εργαζόμενη μνήμη 4 στοιχείων, εντοπισμός λεπτομερειών και έλεγχος παρορμητικότητας σε γρήγορη ροή ερεθισμάτων.',
     sampleActivitiesEl: [
@@ -84,7 +84,7 @@ const AGE_PATHWAYS: AgePathwayItem[] = [
     stageTitleEl: 'Ε΄–ΣΤ΄ Δημοτικού & Μεταγνωστική Αυτονομία',
     pictogram: '🐬',
     summaryEl: 'Μεταγνώση, στρατηγικός σχεδιασμός πολλαπλών βημάτων.',
-    sessionSplitEl: "20' Συνολικά: 12' Ταμπλέτα + 5' Φυσική Εφαρμογή + 3' Smooth Landing",
+    sessionSplitEl: "20' Συνολικά: 12' Τάμπλετ (Tablet) + 5' Φυσική Εφαρμογή + 3' Smooth Landing",
     clinicalFocusEl:
       'Αυτοπαρατήρηση στρατηγικής («Τι με βοήθησε σήμερα;»), εσωτερικός λόγος (Inner Speech) και αυτόνομος σχεδιασμός μελέτης.',
     sampleActivitiesEl: [
@@ -267,7 +267,7 @@ export const LandingPage: React.FC = () => {
                 με βουνό και το κλείσιμο της οθόνης φέρνει δάκρυα και ένταση. Γι&apos; αυτό
                 φτιάξαμε ένα ήρεμο καταφύγιο που μιλάει στη γλώσσα του παιδιού: χωρίς «έχασες»,
                 χωρίς φασαρία και χωρίς εθισμό. Λίγα λεπτά έξυπνου παιχνιδιού, λίγη κίνηση στο
-                δωμάτιο, και το παιδί αφήνει μόνο του την ταμπλέτα — ήρεμο, περήφανο και χαρούμενο.
+                δωμάτιο, και το παιδί αφήνει μόνο του το τάμπλετ (Tablet) — ήρεμο, περήφανο και χαρούμενο.
               </p>
 
               {/* Warm Dual-Voice Empathy Callout: Child's Voice + Parent/Specialist Voice */}

@@ -3,7 +3,7 @@ import type { ActivityRunnerRenderProps } from '../components/ActivityRunner';
 import { useDebouncedAction } from '../hooks/useDebouncedAction';
 import { speakGreek } from '../utils/soundAndSpeech';
 import { useApp } from '../context/AppContext';
-import { selectSessionRounds } from '../utils/clinicalAdhdEngine';
+import { rotateOptionsForSession, selectSessionRounds } from '../utils/clinicalAdhdEngine';
 
 interface AuditoryConceptRound {
   conceptBadgeEl: string;
@@ -66,6 +66,60 @@ const AUDITORY_ROUNDS: AuditoryConceptRound[] = [
       { id: 'au6-3', emoji: '🌻', labelEl: 'Λουλούδι', isCorrect: false },
     ],
   },
+  {
+    conceptBadgeEl: 'Ακουστική Διάκριση Ελάχιστων Ζευγών: «Σκάλα» vs «Μπάλα»',
+    spokenInstructionEl: 'Άκου προσεκτικά τη λέξη «σκάλα». Ποια εικόνα δείχνει τη σκάλα και όχι την μπάλα;',
+    options: [
+      { id: 'au7-1', emoji: '🪜', labelEl: 'Σκάλα', isCorrect: true },
+      { id: 'au7-2', emoji: '⚽', labelEl: 'Μπάλα', isCorrect: false },
+      { id: 'au7-3', emoji: '🥛', labelEl: 'Γάλα', isCorrect: false },
+    ],
+  },
+  {
+    conceptBadgeEl: 'Χωρική Έννοια: Κάτω από την ομπρέλα',
+    spokenInstructionEl: 'Διάλεξε την εικόνα όπου το γατάκι κάθεται κάτω από την ομπρέλα!',
+    options: [
+      { id: 'au8-1', emoji: '☂️⬇️🐱', labelEl: 'Κάτω από την ομπρέλα', isCorrect: true },
+      { id: 'au8-2', emoji: '🐱⬆️☂️', labelEl: 'Πάνω από την ομπρέλα', isCorrect: false },
+      { id: 'au8-3', emoji: '☂️➡️🚲', labelEl: 'Μακριά από την ομπρέλα', isCorrect: false },
+    ],
+  },
+  {
+    conceptBadgeEl: 'Ακουστική Διάκριση: «Φύλλο» vs «Μήλο»',
+    spokenInstructionEl: 'Άκου καθαρά τη λέξη «φύλλο». Ποια εικόνα δείχνει το πράσινο φύλλο του δέντρου;',
+    options: [
+      { id: 'au9-1', emoji: '🍎', labelEl: 'Μήλο', isCorrect: false },
+      { id: 'au9-2', emoji: '🍃', labelEl: 'Φύλλο', isCorrect: true },
+      { id: 'au9-3', emoji: '🪵', labelEl: 'Ξύλο', isCorrect: false },
+    ],
+  },
+  {
+    conceptBadgeEl: 'Χρονική Ακολουθία: Πρώτα το Μήλο, μετά η Μπανάνα',
+    spokenInstructionEl: 'Βρες την εικόνα που δείχνει πρώτα το κόκκινο μήλο και μετά την κίτρινη μπανάνα!',
+    options: [
+      { id: 'au10-1', emoji: '🍎 ➡️ 🍌', labelEl: 'Πρώτα Μήλο, μετά Μπανάνα', isCorrect: true },
+      { id: 'au10-2', emoji: '🍌 ➡️ 🍎', labelEl: 'Πρώτα Μπανάνα, μετά Μήλο', isCorrect: false },
+      { id: 'au10-3', emoji: '🍐 ➡️ 🍓', labelEl: 'Αχλάδι και Φράουλα', isCorrect: false },
+    ],
+  },
+  {
+    conceptBadgeEl: 'Ακουστική Διάκριση: «Ψάρι» vs «Ζάρι»',
+    spokenInstructionEl: 'Άκου προσεκτικά τη λέξη «ψάρι». Ποια εικόνα δείχνει το ψάρι της θάλασσας και όχι το ζάρι;',
+    options: [
+      { id: 'au11-1', emoji: '🎲', labelEl: 'Ζάρι', isCorrect: false },
+      { id: 'au11-2', emoji: '🐟', labelEl: 'Ψάρι', isCorrect: true },
+      { id: 'au11-3', emoji: '🌾', labelEl: 'Στάρι', isCorrect: false },
+    ],
+  },
+  {
+    conceptBadgeEl: 'Χωρική Έννοια: Μπροστά από το σπιτάκι',
+    spokenInstructionEl: 'Διάλεξε την εικόνα όπου το ποδήλατο βρίσκεται ακριβώς μπροστά από το σπιτάκι!',
+    options: [
+      { id: 'au12-1', emoji: '🚲🏠', labelEl: 'Μπροστά από το σπιτάκι', isCorrect: true },
+      { id: 'au12-2', emoji: '🏠⬆️☁️', labelEl: 'Πάνω στον ουρανό', isCorrect: false },
+      { id: 'au12-3', emoji: '🌲🌲🌲', labelEl: 'Μέσα στο δάσος', isCorrect: false },
+    ],
+  },
 ];
 
 export const Activity15AuditoryDiscrimination: React.FC<ActivityRunnerRenderProps> = ({
@@ -91,10 +145,13 @@ export const Activity15AuditoryDiscrimination: React.FC<ActivityRunnerRenderProp
     speakGreek(round.spokenInstructionEl, settings.voiceEnabled, adaptiveProfile.speechRate);
   }, [currentRound, sessionSeed, round.spokenInstructionEl, settings.voiceEnabled, adaptiveProfile.speechRate]);
 
-  const visibleOptions =
-    hintLevel === 2 || ageBand === '4-5' || adaptiveProfile.distractorReductionRatio >= 0.5
-      ? round.options.filter((o, i) => o.isCorrect || i === 0)
-      : round.options;
+  const visibleOptions = useMemo(() => {
+    const baseOpts =
+      hintLevel === 2 || ageBand === '4-5' || adaptiveProfile.distractorReductionRatio >= 0.5
+        ? round.options.filter((o, i) => o.isCorrect || i === 0)
+        : round.options;
+    return rotateOptionsForSession(baseOpts, sessionSeed, currentRound);
+  }, [round.options, hintLevel, ageBand, adaptiveProfile.distractorReductionRatio, sessionSeed, currentRound]);
 
   const handleSelect = (isCorrect: boolean, labelEl: string) => {
     runDebounced(() => {

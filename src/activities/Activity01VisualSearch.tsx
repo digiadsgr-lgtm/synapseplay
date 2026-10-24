@@ -1,7 +1,7 @@
 import React, { useMemo, useEffect, useCallback } from 'react';
 import type { ActivityRunnerRenderProps } from '../components/ActivityRunner';
 import { useDebouncedAction } from '../hooks/useDebouncedAction';
-import { selectSessionRounds } from '../utils/clinicalAdhdEngine';
+import { rotateOptionsForSession, selectSessionRounds } from '../utils/clinicalAdhdEngine';
 import { playCalmTone, speakGreek } from '../utils/soundAndSpeech';
 import { useApp } from '../context/AppContext';
 
@@ -114,6 +114,72 @@ const ROUNDS: SearchRoundConfig[] = [
       { id: '9-6', emoji: '🌸', labelEl: 'Άνθος Κερασιάς', isTarget: false },
     ],
   },
+  {
+    target: { emoji: '🦊', labelEl: 'Κόκκινη Αλεπού' },
+    grid: [
+      { id: '10-1', emoji: '🐻', labelEl: 'Αρκουδάκι', isTarget: false },
+      { id: '10-2', emoji: '🦊', labelEl: 'Κόκκινη Αλεπού', isTarget: true },
+      { id: '10-3', emoji: '🐰', labelEl: 'Κουνελάκι', isTarget: false },
+      { id: '10-4', emoji: '🦌', labelEl: 'Ελαφάκι', isTarget: false },
+      { id: '10-5', emoji: '🐿️', labelEl: 'Σκιουράκι', isTarget: false },
+      { id: '10-6', emoji: '🦔', labelEl: 'Σκατζόχοιρος', isTarget: false },
+    ],
+  },
+  {
+    target: { emoji: '🎈', labelEl: 'Κόκκινο Μπαλόνι' },
+    grid: [
+      { id: '11-1', emoji: '🪁', labelEl: 'Χαρταετός', isTarget: false },
+      { id: '11-2', emoji: '🧸', labelEl: 'Αρκουδάκι Παιχνίδι', isTarget: false },
+      { id: '11-3', emoji: '🎨', labelEl: 'Παλέτα Χρωμάτων', isTarget: false },
+      { id: '11-4', emoji: '🎈', labelEl: 'Κόκκινο Μπαλόνι', isTarget: true },
+      { id: '11-5', emoji: '🧩', labelEl: 'Κομμάτι Παζλ', isTarget: false },
+      { id: '11-6', emoji: '🪀', labelEl: 'Γιο-γιο', isTarget: false },
+    ],
+  },
+  {
+    target: { emoji: '🧭', labelEl: 'Πυξίδα Εξερευνητή' },
+    grid: [
+      { id: '12-1', emoji: '🔦', labelEl: 'Φακός', isTarget: false },
+      { id: '12-2', emoji: '⛺', labelEl: 'Σκηνή', isTarget: false },
+      { id: '12-3', emoji: '🧭', labelEl: 'Πυξίδα Εξερευνητή', isTarget: true },
+      { id: '12-4', emoji: '🎒', labelEl: 'Σακίδιο Πλάτης', isTarget: false },
+      { id: '12-5', emoji: '🏔️', labelEl: 'Βουνό', isTarget: false },
+      { id: '12-6', emoji: '🛶', labelEl: 'Κανό', isTarget: false },
+    ],
+  },
+  {
+    target: { emoji: '🎻', labelEl: 'Μελωδικό Βιολί' },
+    grid: [
+      { id: '13-1', emoji: '🥁', labelEl: 'Τύμπανο', isTarget: false },
+      { id: '13-2', emoji: '🎹', labelEl: 'Πιάνο', isTarget: false },
+      { id: '13-3', emoji: '🪈', labelEl: 'Φλογέρα', isTarget: false },
+      { id: '13-4', emoji: '🎻', labelEl: 'Μελωδικό Βιολί', isTarget: true },
+      { id: '13-5', emoji: '🎺', labelEl: 'Τρομπέτα', isTarget: false },
+      { id: '13-6', emoji: '🔔', labelEl: 'Καμπανάκι', isTarget: false },
+    ],
+  },
+  {
+    target: { emoji: '🌈', labelEl: 'Ουράνιο Τόξο' },
+    grid: [
+      { id: '14-1', emoji: '☁️', labelEl: 'Σύννεφο', isTarget: false },
+      { id: '14-2', emoji: '☀️', labelEl: 'Ήλιος', isTarget: false },
+      { id: '14-3', emoji: '🌈', labelEl: 'Ουράνιο Τόξο', isTarget: true },
+      { id: '14-4', emoji: '❄️', labelEl: 'Χιονονιφάδα', isTarget: false },
+      { id: '14-5', emoji: '💧', labelEl: 'Σταγόνα', isTarget: false },
+      { id: '14-6', emoji: '🌙', labelEl: 'Φεγγάρι', isTarget: false },
+    ],
+  },
+  {
+    target: { emoji: '🦢', labelEl: 'Λευκός Κύκνος' },
+    grid: [
+      { id: '15-1', emoji: '🦆', labelEl: 'Παπάκι', isTarget: false },
+      { id: '15-2', emoji: '🦩', labelEl: 'Φλαμίνγκο', isTarget: false },
+      { id: '15-3', emoji: '🕊️', labelEl: 'Περιστέρι', isTarget: false },
+      { id: '15-4', emoji: '🦢', labelEl: 'Λευκός Κύκνος', isTarget: true },
+      { id: '15-5', emoji: '🦜', labelEl: 'Παπαγάλος', isTarget: false },
+      { id: '15-6', emoji: '🦚', labelEl: 'Παγώνι', isTarget: false },
+    ],
+  },
 ];
 
 export const Activity01VisualSearch: React.FC<ActivityRunnerRenderProps> = ({
@@ -152,14 +218,14 @@ export const Activity01VisualSearch: React.FC<ActivityRunnerRenderProps> = ({
     const targetItem = roundData.grid.find((i) => i.isTarget)!;
     const distractors = roundData.grid.filter((i) => !i.isTarget);
 
+    let baseItems = roundData.grid;
     if (hintLevel >= 2 || ageBand === '4-5' || adaptiveProfile.distractorReductionRatio >= 0.5) {
-      return [distractors[0], targetItem, distractors[1]];
+      baseItems = [distractors[0], targetItem, distractors[1]];
+    } else if (ageBand === '5-6' || adaptiveProfile.distractorReductionRatio >= 0.3) {
+      baseItems = [distractors[0], distractors[1], targetItem, distractors[2]];
     }
-    if (ageBand === '5-6' || adaptiveProfile.distractorReductionRatio >= 0.3) {
-      return [distractors[0], distractors[1], targetItem, distractors[2]];
-    }
-    return roundData.grid;
-  }, [roundData, hintLevel, ageBand, adaptiveProfile.distractorReductionRatio]);
+    return rotateOptionsForSession(baseItems, sessionSeed, currentRound);
+  }, [roundData, hintLevel, ageBand, adaptiveProfile.distractorReductionRatio, sessionSeed, currentRound]);
 
   const handleSelect = useCallback(
     (isTarget: boolean, labelEl: string) => {

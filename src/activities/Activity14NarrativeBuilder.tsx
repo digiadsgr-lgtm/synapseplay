@@ -3,7 +3,7 @@ import type { ActivityRunnerRenderProps } from '../components/ActivityRunner';
 import { useDebouncedAction } from '../hooks/useDebouncedAction';
 import { speakGreek } from '../utils/soundAndSpeech';
 import { useApp } from '../context/AppContext';
-import { selectSessionRounds } from '../utils/clinicalAdhdEngine';
+import { rotateOptionsForSession, selectSessionRounds } from '../utils/clinicalAdhdEngine';
 
 interface NarrativePrompt {
   storyGoalEl: string;
@@ -80,6 +80,72 @@ const NARRATIVE_ROUNDS: NarrativePrompt[] = [
     ],
     fullSentenceEl: 'Το παιδί στο ήσυχο υπνοδωμάτιο ακούει ένα παραμύθι και κλείνει ήρεμα τα μάτια!',
   },
+  {
+    storyGoalEl: 'Ιστορία: Το πουλάκι θέλει να φτιάξει μια ζεστή φωλιά. Τι κάνει;',
+    whoCard: { emoji: '🐦', textEl: 'Το Μικρό Πουλάκι' },
+    whereCard: { emoji: '🌳', textEl: 'ψηλά στο κλαδί του δέντρου' },
+    actionOptions: [
+      { id: 'nb7-1', emoji: '🌿', textEl: 'μαζεύει μικρά κλαδάκια και χτίζει τη φωλιά του', isCorrect: true },
+      { id: 'nb7-2', emoji: '🚗', textEl: 'οδηγεί αυτοκίνητο στον αυτοκινητόδρομο', isCorrect: false },
+      { id: 'nb7-3', emoji: '🤿', textEl: 'βουτάει με μάσκα στον βυθό', isCorrect: false },
+    ],
+    fullSentenceEl: 'Το μικρό πουλάκι ψηλά στο κλαδί του δέντρου μαζεύει μικρά κλαδάκια και χτίζει τη φωλιά του!',
+  },
+  {
+    storyGoalEl: 'Ιστορία: Η οικογένεια ετοιμάζει υγιεινή σαλάτα για το μεσημέρι. Τι κάνουν;',
+    whoCard: { emoji: '👨‍👩‍👧', textEl: 'Η Οικογένεια' },
+    whereCard: { emoji: '🥗', textEl: 'στον πάγκο της κουζίνας' },
+    actionOptions: [
+      { id: 'nb8-1', emoji: '🍅', textEl: 'πλένει τις ντομάτες και τα αγγουράκια με νερό', isCorrect: true },
+      { id: 'nb8-2', emoji: '🪁', textEl: 'πετάει χαρταετό στον αέρα', isCorrect: false },
+      { id: 'nb8-3', emoji: '👟', textEl: 'βάζει παπούτσια μέσα στην κατσαρόλα', isCorrect: false },
+    ],
+    fullSentenceEl: 'Η οικογένεια στον πάγκο της κουζίνας πλένει τις ντομάτες και τα αγγουράκια με νερό!',
+  },
+  {
+    storyGoalEl: 'Ιστορία: Χτύπησε το κουδούνι μετά το διάλειμμα στο σχολείο. Τι κάνουν οι μαθητές;',
+    whoCard: { emoji: '🧒👧', textEl: 'Οι Μαθητές' },
+    whereCard: { emoji: '🏫', textEl: 'έξω από την αίθουσα του σχολείου' },
+    actionOptions: [
+      { id: 'nb9-1', emoji: '🚶', textEl: 'μπαίνουν ήρεμα στην τάξη και κάθονται στα θρανία τους', isCorrect: true },
+      { id: 'nb9-2', emoji: '🏊', textEl: 'κολυμπούν στη θάλασσα', isCorrect: false },
+      { id: 'nb9-3', emoji: '⛺', textEl: 'στήνουν σκηνή στο βουνό', isCorrect: false },
+    ],
+    fullSentenceEl: 'Οι μαθητές έξω από την αίθουσα του σχολείου μπαίνουν ήρεμα στην τάξη και κάθονται στα θρανία τους!',
+  },
+  {
+    storyGoalEl: 'Ιστορία: Η μικρή μέλισσα πετάει την άνοιξη στο λιβάδι. Τι ψάχνει;',
+    whoCard: { emoji: '🐝', textEl: 'Η Εργατική Μέλισσα' },
+    whereCard: { emoji: '🌻', textEl: 'πάνω στα ανθισμένα λουλούδια' },
+    actionOptions: [
+      { id: 'nb10-1', emoji: '🍯', textEl: 'μαζεύει γύρη για να φτιάξει γλυκό μέλι', isCorrect: true },
+      { id: 'nb10-2', emoji: '❄️', textEl: 'φτιάχνει χιονάνθρωπο με κασκόλ', isCorrect: false },
+      { id: 'nb10-3', emoji: '📚', textEl: 'δανείζεται βιβλία από τη βιβλιοθήκη', isCorrect: false },
+    ],
+    fullSentenceEl: 'Η εργατική μέλισσα πάνω στα ανθισμένα λουλούδια μαζεύει γύρη για να φτιάξει γλυκό μέλι!',
+  },
+  {
+    storyGoalEl: 'Ιστορία: Έπεσε λίγο νερό πάνω στο τραπέζι. Τι κάνει το παιδί με ψυχραιμία;',
+    whoCard: { emoji: '🧒', textEl: 'Το Ψύχραιμο Παιδί' },
+    whereCard: { emoji: '🪑', textEl: 'στο τραπέζι της τραπεζαρίας' },
+    actionOptions: [
+      { id: 'nb11-1', emoji: '🧽', textEl: 'παίρνει ένα πανάκι και σκουπίζει προσεκτικά το νερό', isCorrect: true },
+      { id: 'nb11-2', emoji: '🎈', textEl: 'φουσκώνει δέκα μπαλόνια', isCorrect: false },
+      { id: 'nb11-3', emoji: '🎺', textEl: 'παίζει τρομπέτα στο μπαλκόνι', isCorrect: false },
+    ],
+    fullSentenceEl: 'Το ψύχραιμο παιδί στο τραπέζι της τραπεζαρίας παίρνει ένα πανάκι και σκουπίζει προσεκτικά το νερό!',
+  },
+  {
+    storyGoalEl: 'Ιστορία: Ο καπετάνιος βλέπει ότι πλησιάζει η νύχτα στη θάλασσα. Τι κάνει;',
+    whoCard: { emoji: '⛵', textEl: 'Ο Καπετάνιος' },
+    whereCard: { emoji: '🌊', textEl: 'κοντά στο ήρεμο λιμάνι' },
+    actionOptions: [
+      { id: 'nb12-1', emoji: '⚓', textEl: 'κατεβάζει τα πανιά και δένει με ασφάλεια το καραβάκι', isCorrect: true },
+      { id: 'nb12-2', emoji: '🌳', textEl: 'σκαρφαλώνει σε μια ψηλή βελανιδιά', isCorrect: false },
+      { id: 'nb12-3', emoji: '🚲', textEl: 'κάνει ποδήλατο στην πλατεία', isCorrect: false },
+    ],
+    fullSentenceEl: 'Ο καπετάνιος κοντά στο ήρεμο λιμάνι κατεβάζει τα πανιά και δένει με ασφάλεια το καραβάκι!',
+  },
 ];
 
 export const Activity14NarrativeBuilder: React.FC<ActivityRunnerRenderProps> = ({
@@ -121,10 +187,13 @@ export const Activity14NarrativeBuilder: React.FC<ActivityRunnerRenderProps> = (
     adaptiveProfile.speechRate,
   ]);
 
-  const visibleActions =
-    hintLevel === 2 || ageBand === '4-5' || adaptiveProfile.distractorReductionRatio >= 0.5
-      ? round.actionOptions.filter((o, i) => o.isCorrect || i === 0)
-      : round.actionOptions;
+  const visibleActions = useMemo(() => {
+    const baseOpts =
+      hintLevel === 2 || ageBand === '4-5' || adaptiveProfile.distractorReductionRatio >= 0.5
+        ? round.actionOptions.filter((o, i) => o.isCorrect || i === 0)
+        : round.actionOptions;
+    return rotateOptionsForSession(baseOpts, sessionSeed, currentRound);
+  }, [round.actionOptions, hintLevel, ageBand, adaptiveProfile.distractorReductionRatio, sessionSeed, currentRound]);
 
   const handleActionPick = (isCorrect: boolean, textEl: string) => {
     runDebounced(() => {

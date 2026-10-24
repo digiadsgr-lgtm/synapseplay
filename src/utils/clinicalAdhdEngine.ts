@@ -228,27 +228,52 @@ export function computeClinicalStaircaseSnapshot(params: {
     Math.min(100, 96 - hintsUsed * 5 - gentleNudges * 5 + completedRounds * 2)
   );
 
-  const innerSpeechMap: Record<AdaptiveScenarioId, string> = {
-    SCENARIO_BALANCED_FLOW: '💭 Εσωτερικός Λόγος: «Κοιτάζω ήρεμα τον στόχο και διαλέγω με σιγουριά!»',
-    SCENARIO_IMPULSIVE_RAPID:
+  const innerSpeechPools: Record<AdaptiveScenarioId, string[]> = {
+    SCENARIO_BALANCED_FLOW: [
+      '💭 Εσωτερικός Λόγος: «Κοιτάζω ήρεμα τον στόχο και διαλέγω με σιγουριά!»',
+      '💭 Εσωτερικός Λόγος: «Παρατηρώ με ηρεμία, βρίσκω το σωστό και προχωρώ!»',
+      '💭 Εσωτερικός Λόγος: «Το μυαλό μου είναι συγκεντρωμένο — κάνω ένα βήμα τη φορά!»',
+    ],
+    SCENARIO_IMPULSIVE_RAPID: [
       '💭 Εσωτερικός Λόγος (Meichenbaum): «Σταματώ τα χέρια — Παίρνω ανάσα — Κοιτάζω — Μετά πατάω!»',
-    SCENARIO_INATTENTIVE_DISTRACTIBLE:
-      '💭 Εσωτερικός Λόγος: «φέρνω τα μάτια μου πίσω στο κέντρο, ένα βήμα τη φορά!»',
-    SCENARIO_FRUSTRATION_RECOVERY:
+      '💭 Εσωτερικός Λόγος (Barkley): «Περιμένω μία ανάσα πριν αγγίξω την οθόνη!»',
+      '💭 Εσωτερικός Λόγος: «Τα μάτια μου ελέγχουν πρώτα, τα δάχτυλά μου ακολουθούν ήρεμα!»',
+    ],
+    SCENARIO_INATTENTIVE_DISTRACTIBLE: [
+      '💭 Εσωτερικός Λόγος: «Φέρνω τα μάτια μου πίσω στο κέντρο, ένα βήμα τη φορά!»',
+      '💭 Εσωτερικός Λόγος: «Αφήνω όσα δεν χρειάζομαι και κοιτάζω μόνο τον στόχο μου!»',
+      '💭 Εσωτερικός Λόγος: «Ξαναβρίσκω τον ρυθμό μου ήρεμα και καθαρά!»',
+    ],
+    SCENARIO_FRUSTRATION_RECOVERY: [
       '💭 Εσωτερικός Λόγος: «Δεν πειράζει αν μπερδευτώ! Κάθε προσπάθεια κάνει το μυαλό μου πιο δυνατό!»',
-    SCENARIO_KINETIC_SEEKING:
+      '💭 Εσωτερικός Λόγος: «Παίρνω μια βαθιά ανάσα — μαθαίνω χωρίς καμία βιασύνη!»',
+      '💭 Εσωτερικός Λόγος: «Είμαι ασφαλής εδώ. Δοκιμάζω ξανά με τον δικό μου ρυθμό!»',
+    ],
+    SCENARIO_KINETIC_SEEKING: [
       '💭 Εσωτερικός Λόγος: «Πατάω σταθερά τα πόδια στο πάτωμα, ισιώνω την πλάτη και συνεχίζω!»',
-    SCENARIO_LANGUAGE_SCAFFOLD:
+      '💭 Εσωτερικός Λόγος: «Το σώμα μου με βοηθά να συγκεντρωθώ — νιώθω τη δύναμή μου!»',
+      '💭 Εσωτερικός Λόγος: «Χαλαρώνω τους ώμους μου και κρατώ σταθερό ρυθμό!»',
+    ],
+    SCENARIO_LANGUAGE_SCAFFOLD: [
       '💭 Εσωτερικός Λόγος: «Ακούω καθαρά κάθε λέξη και τη λέω σιγά-σιγά από μέσα μου!»',
-    SCENARIO_MASTERY_CHALLENGE:
+      '💭 Εσωτερικός Λόγος: «Σπάω τη λέξη σε μικρά κομμάτια και την καταλαβαίνω αμέσως!»',
+      '💭 Εσωτερικός Λόγος: «Ακούω πρώτα όλη την πρόταση και μετά απαντώ!»',
+    ],
+    SCENARIO_MASTERY_CHALLENGE: [
       '💭 Εσωτερικός Λόγος: «Έχω εξαιρετική συγκέντρωση! Είμαι έτοιμος για τη νέα πρόκληση!»',
+      '💭 Εσωτερικός Λόγος: «Σκέφτομαι σαν αληθινός εξερευνητής και βρίσκω τη λύση!»',
+      '💭 Εσωτερικός Λόγος: «Η προσοχή μου είναι δυνατή — μπορώ να λύσω και τα πιο σύνθετα μοτίβα!»',
+    ],
   };
+
+  const scenarioCues = innerSpeechPools[scenarioId];
+  const cueIdx = Math.max(0, variantNumber - 1 + completedRounds) % scenarioCues.length;
 
   return {
     inhibitoryControlPercent,
     attentionalStabilityPercent,
     optimalZoneLabelEl: `Ζώνη Βέλτιστης Πρόκλησης (ZPD ${ageBand} ετών) • Σετ #${variantNumber}`,
-    innerSpeechCueEl: innerSpeechMap[scenarioId],
+    innerSpeechCueEl: scenarioCues[cueIdx],
     clinicalTeamNoteEl:
       inhibitoryControlPercent >= 85
         ? 'Υψηλός αυτοέλεγχος & σταθερός ρυθμός απόκρισης (Barkley EF Target Zone).'
@@ -256,23 +281,78 @@ export function computeClinicalStaircaseSnapshot(params: {
   };
 }
 
+function gcd(a: number, b: number): number {
+  let x = Math.abs(a);
+  let y = Math.abs(b);
+  while (y !== 0) {
+    const t = y;
+    y = x % y;
+    x = t;
+  }
+  return x;
+}
+
 /**
  * Selects `count` items from an expanded clinical activity pool based on `sessionSeed`.
  * - When `sessionSeed === 0`, returns the first `count` items in exact canonical order
  *   so automated unit tests remain 100% deterministic.
  * - When `sessionSeed > 0` (on replay, «Νέα Παραλλαγή» click, or subsequent sessions),
- *   rotates through the entire pool so the child continuously experiences fresh content!
+ *   rotates through the entire pool with cycle-aware coprime strides so the child
+ *   continuously experiences fresh, non-repeating combinations!
  */
 export function selectSessionRounds<T>(pool: T[], count: number, sessionSeed: number = 0): T[] {
   if (pool.length <= count || sessionSeed <= 0) {
     return pool.slice(0, count);
   }
+  const n = pool.length;
+  const cycle = Math.floor((sessionSeed * count) / n);
+  const startOffset = ((sessionSeed * count) + cycle) % n;
+
+  // On first pass through the pool (cycle === 0, including sessionSeed === 1), step by 1
+  // so contiguous round blocks (3..5, 6..8, 9..11) are visited cleanly without overlap.
+  // On subsequent cycles (cycle >= 1), use a coprime stride so new cross-combinations appear!
+  let stride = 1;
+  if (cycle > 0) {
+    const candidateStrides = [5, 7, 11, 13, 3, 2];
+    for (let s = 0; s < candidateStrides.length; s++) {
+      const candidate = candidateStrides[(cycle + s) % candidateStrides.length];
+      if (gcd(candidate, n) === 1) {
+        stride = candidate;
+        break;
+      }
+    }
+  }
+
   const result: T[] = [];
-  // Offset by `sessionSeed * count` and step with a coprime stride so every replay feels brand new
-  const startOffset = (sessionSeed * count) % pool.length;
+  const usedIndices = new Set<number>();
   for (let i = 0; i < count; i++) {
-    const idx = (startOffset + i) % pool.length;
+    let idx = (startOffset + i * stride) % n;
+    while (usedIndices.has(idx)) {
+      idx = (idx + 1) % n;
+    }
+    usedIndices.add(idx);
     result.push(pool[idx]);
   }
   return result;
+}
+
+/**
+ * Deterministically rotates an options/cards array for `sessionSeed > 0` so that the target item
+ * is not always in the same visual position across replays, while keeping `sessionSeed === 0`
+ * 100% unchanged for unit tests.
+ */
+export function rotateOptionsForSession<T>(
+  options: T[],
+  sessionSeed: number = 0,
+  roundIndex: number = 0
+): T[] {
+  if (sessionSeed <= 0 || options.length <= 1) {
+    return options;
+  }
+  const n = options.length;
+  const shift = (sessionSeed * 2 + roundIndex + 1) % n;
+  if (shift === 0) {
+    return [...options].reverse();
+  }
+  return [...options.slice(shift), ...options.slice(0, shift)];
 }

@@ -3,6 +3,7 @@ import type { ActivityRunnerRenderProps } from '../components/ActivityRunner';
 import { useDebouncedAction } from '../hooks/useDebouncedAction';
 import {
   getAgeAndPerformanceDifficulty,
+  rotateOptionsForSession,
   selectSessionRounds,
 } from '../utils/clinicalAdhdEngine';
 
@@ -69,6 +70,42 @@ const SCENES: SceneSlot[][] = [
     { id: 's9-3', leftEmoji: '📚', rightEmoji: '📚', labelEl: 'Παραμύθια', isDifferent: false },
     { id: 's9-4', leftEmoji: '🕰️', rightEmoji: '🕰️', labelEl: 'Ρολόι', isDifferent: false },
   ],
+  [
+    { id: 's10-1', leftEmoji: '🪴', rightEmoji: '🪴', labelEl: 'Γλάστρα', isDifferent: false },
+    { id: 's10-2', leftEmoji: '🌻', rightEmoji: '🌷', labelEl: 'Λουλούδι (Ηλίανθος / Τουλίπα)', isDifferent: true },
+    { id: 's10-3', leftEmoji: '🐝', rightEmoji: '🐝', labelEl: 'Μέλισσα', isDifferent: false },
+    { id: 's10-4', leftEmoji: '🚿', rightEmoji: '🚿', labelEl: 'Ποτιστήρι', isDifferent: false },
+  ],
+  [
+    { id: 's11-1', leftEmoji: '🚂', rightEmoji: '🚂', labelEl: 'Τρενάκι', isDifferent: false },
+    { id: 's11-2', leftEmoji: '🚌', rightEmoji: '🚒', labelEl: 'Όχημα (Λεωφορείο / Πυροσβεστικό)', isDifferent: true },
+    { id: 's11-3', leftEmoji: '🚦', rightEmoji: '🚦', labelEl: 'Φανάρι', isDifferent: false },
+    { id: 's11-4', leftEmoji: '🛣️', rightEmoji: '🛣️', labelEl: 'Δρόμος', isDifferent: false },
+  ],
+  [
+    { id: 's12-1', leftEmoji: '❄️', rightEmoji: '❄️', labelEl: 'Χιονονιφάδα', isDifferent: false },
+    { id: 's12-2', leftEmoji: '⛄', rightEmoji: '⛄', labelEl: 'Χιονάνθρωπος', isDifferent: false },
+    { id: 's12-3', leftEmoji: '🧣', rightEmoji: '🧤', labelEl: 'Ζεστασιά (Κασκόλ / Γάντια)', isDifferent: true },
+    { id: 's12-4', leftEmoji: '🏔️', rightEmoji: '🏔️', labelEl: 'Βουνό', isDifferent: false },
+  ],
+  [
+    { id: 's13-1', leftEmoji: '🎨', rightEmoji: '🎨', labelEl: 'Παλέτα Χρωμάτων', isDifferent: false },
+    { id: 's13-2', leftEmoji: '🖌️', rightEmoji: '✂️', labelEl: 'Εργαλείο (Πινέλο / Ψαλίδι)', isDifferent: true },
+    { id: 's13-3', leftEmoji: '🖼️', rightEmoji: '🖼️', labelEl: 'Κάδρο', isDifferent: false },
+    { id: 's13-4', leftEmoji: '📐', rightEmoji: '📐', labelEl: 'Χάρακας', isDifferent: false },
+  ],
+  [
+    { id: 's14-1', leftEmoji: '🐢', rightEmoji: '🐸', labelEl: 'Λίμνη (Χελώνα / Βατραχάκι)', isDifferent: true },
+    { id: 's14-2', leftEmoji: '🦆', rightEmoji: '🦆', labelEl: 'Παπάκι', isDifferent: false },
+    { id: 's14-3', leftEmoji: '🌿', rightEmoji: '🌿', labelEl: 'Καλάμια', isDifferent: false },
+    { id: 's14-4', leftEmoji: '💧', rightEmoji: '💧', labelEl: 'Νερό', isDifferent: false },
+  ],
+  [
+    { id: 's15-1', leftEmoji: '🥣', rightEmoji: '🥣', labelEl: 'Μπολ Πρωινού', isDifferent: false },
+    { id: 's15-2', leftEmoji: '🥐', rightEmoji: '🥞', labelEl: 'Πρωινό (Κρουασάν / Τηγανίτες)', isDifferent: true },
+    { id: 's15-3', leftEmoji: '🍊', rightEmoji: '🍊', labelEl: 'Πορτοκάλι', isDifferent: false },
+    { id: 's15-4', leftEmoji: '🍯', rightEmoji: '🍯', labelEl: 'Μέλι', isDifferent: false },
+  ],
 ];
 
 export const Activity02SpotDifference: React.FC<ActivityRunnerRenderProps> = ({
@@ -94,21 +131,20 @@ export const Activity02SpotDifference: React.FC<ActivityRunnerRenderProps> = ({
   const slots = activeScenes[(currentRound - 1) % activeScenes.length];
 
   const visibleSlots = useMemo(() => {
+    let baseSlots = slots;
     if (diff.isSimplified) {
-      return slots.filter((s, i) => s.isDifferent || i === 0);
-    }
-    if (ageBand === '5-6') {
-      return slots.slice(0, 3);
-    }
-    if (diff.isAdvancedMastery) {
-      return [
+      baseSlots = slots.filter((s, i) => s.isDifferent || i === 0);
+    } else if (ageBand === '5-6') {
+      baseSlots = slots.slice(0, 3);
+    } else if (diff.isAdvancedMastery) {
+      baseSlots = [
         ...slots,
         { id: `ex1-${currentRound}`, leftEmoji: '☁️', rightEmoji: '☁️', labelEl: 'Σύννεφο', isDifferent: false },
         { id: `ex2-${currentRound}`, leftEmoji: '🍀', rightEmoji: '🍀', labelEl: 'Τριφύλλι', isDifferent: false },
       ];
     }
-    return slots;
-  }, [slots, diff.isSimplified, diff.isAdvancedMastery, ageBand, currentRound]);
+    return rotateOptionsForSession(baseSlots, sessionSeed, currentRound);
+  }, [slots, diff.isSimplified, diff.isAdvancedMastery, ageBand, currentRound, sessionSeed]);
 
   const handleRightCardClick = (slot: SceneSlot) => {
     runDebounced(() => {

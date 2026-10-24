@@ -93,6 +93,51 @@ const ROUTINES: Array<{ titleEl: string; steps: RoutineStep[]; displayOrder: num
     ],
     displayOrder: [2, 1, 3],
   },
+  {
+    titleEl: 'Ρουτίνα: Ετοιμάζομαι για Βροχερή Βόλτα',
+    steps: [
+      { order: 1, emoji: '🧥', labelEl: 'Φοράω το αδιάβροχο μπουφάν μου' },
+      { order: 2, emoji: '👢', labelEl: 'Βάζω τις γαλότσες στα πόδια μου' },
+      { order: 3, emoji: '☂️', labelEl: 'Ανοίγω την ομπρέλα μου έξω από την πόρτα' },
+    ],
+    displayOrder: [3, 1, 2],
+  },
+  {
+    titleEl: 'Ρουτίνα: Ξεκινάω το Απογευματινό Διάβασμα',
+    steps: [
+      { order: 1, emoji: '🧹', labelEl: 'Αδειάζω το γραφείο μου από τα περιττά παιχνίδια' },
+      { order: 2, emoji: '📖', labelEl: 'Ανοίγω το βιβλίο και το τετράδιο της πρώτης άσκησης' },
+      { order: 3, emoji: '✏️', labelEl: 'Γράφω ήρεμα με το μολύβι μου' },
+    ],
+    displayOrder: [2, 3, 1],
+  },
+  {
+    titleEl: 'Ρουτίνα: Φτιάχνω Φυσικό Χυμό Πορτοκάλι',
+    steps: [
+      { order: 1, emoji: '🍊', labelEl: 'Πλένω και κόβω στη μέση τα πορτοκάλια' },
+      { order: 2, emoji: '🥣', labelEl: 'Στύβω τα πορτοκάλια στον στίφτη' },
+      { order: 3, emoji: '🥤', labelEl: 'Αδειάζω τον φρέσκο χυμό στο ποτήρι μου' },
+    ],
+    displayOrder: [3, 1, 2],
+  },
+  {
+    titleEl: 'Ρουτίνα: Φροντίζω το Κατοικίδιό μου',
+    steps: [
+      { order: 1, emoji: '🥣', labelEl: 'Βάζω καθαρό νερό και τροφή στο μπολ του' },
+      { order: 2, emoji: '🐕', labelEl: 'Το ζωάκι τρώει ήρεμα το φαγητό του' },
+      { order: 3, emoji: '🤍', labelEl: 'Το χαϊδεύω απαλά στην πλάτη' },
+    ],
+    displayOrder: [2, 1, 3],
+  },
+  {
+    titleEl: 'Ρουτίνα: Τακτοποιώ τα Τουβλάκια μου',
+    steps: [
+      { order: 1, emoji: '🧱', labelEl: 'Μαζεύω τα τουβλάκια από το χαλί' },
+      { order: 2, emoji: '📦', labelEl: 'Τα βάζω όλα μέσα στο κουτί αποθήκευσης' },
+      { order: 3, emoji: '✨', labelEl: 'Κλείνω το καπάκι και βάζω το κουτί στο ράφι' },
+    ],
+    displayOrder: [3, 2, 1],
+  },
 ];
 
 export const Activity05OrderSteps: React.FC<ActivityRunnerRenderProps> = ({

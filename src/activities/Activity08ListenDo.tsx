@@ -3,7 +3,7 @@ import type { ActivityRunnerRenderProps } from '../components/ActivityRunner';
 import { useDebouncedAction } from '../hooks/useDebouncedAction';
 import { speakGreek, playCalmTone } from '../utils/soundAndSpeech';
 import { useApp } from '../context/AppContext';
-import { selectSessionRounds } from '../utils/clinicalAdhdEngine';
+import { rotateOptionsForSession, selectSessionRounds } from '../utils/clinicalAdhdEngine';
 
 interface ListenRound {
   instructionEl: string;
@@ -58,12 +58,66 @@ const LISTEN_ROUNDS: ListenRound[] = [
     ],
   },
   {
-    instructionEl: 'Άκου όλη την πρόταση με υπομονή, και μετά πάτησε την ξύλινη κιθάρα!',
+    instructionEl: 'Άκου όλη την πρόταση με υπομονή και μετά πάτησε την ξύλινη κιθάρα!',
     pictogramCue: '👂 ⏳ ➡️ 🎸',
     options: [
       { id: 'l6-1', emoji: '🥁', labelEl: 'Τύμπανο', isTarget: false },
       { id: 'l6-2', emoji: '🎹', labelEl: 'Πιάνο', isTarget: false },
       { id: 'l6-3', emoji: '🎸', labelEl: 'Ξύλινη Κιθάρα', isTarget: true },
+    ],
+  },
+  {
+    instructionEl: 'Άκου πρώτα μέχρι το τέλος και μετά διάλεξε τον διαστημικό πύραυλο!',
+    pictogramCue: '👂 ⏳ ➡️ 🚀',
+    options: [
+      { id: 'l7-1', emoji: '🚀', labelEl: 'Διαστημικός Πύραυλος', isTarget: true },
+      { id: 'l7-2', emoji: '🪐', labelEl: 'Πλανήτης', isTarget: false },
+      { id: 'l7-3', emoji: '🌙', labelEl: 'Φεγγάρι', isTarget: false },
+    ],
+  },
+  {
+    instructionEl: 'Κράτα τα δάχτυλά σου ήρεμα, άκου την οδηγία και πάτησε την κόκκινη φράουλα!',
+    pictogramCue: '👂 ⏳ ➡️ 🍓',
+    options: [
+      { id: 'l8-1', emoji: '🍐', labelEl: 'Αχλάδι', isTarget: false },
+      { id: 'l8-2', emoji: '🍓', labelEl: 'Κόκκινη Φράουλα', isTarget: true },
+      { id: 'l8-3', emoji: '🍋', labelEl: 'Λεμόνι', isTarget: false },
+    ],
+  },
+  {
+    instructionEl: 'Περίμενε να ανάψει το πράσινο σήμα και μετά πάτησε την πολύχρωμη πεταλούδα!',
+    pictogramCue: '👂 ⏳ ➡️ 🦋',
+    options: [
+      { id: 'l9-1', emoji: '🐝', labelEl: 'Μέλισσα', isTarget: false },
+      { id: 'l9-2', emoji: '🐞', labelEl: 'Πασχαλίτσα', isTarget: false },
+      { id: 'l9-3', emoji: '🦋', labelEl: 'Πολύχρωμη Πεταλούδα', isTarget: true },
+    ],
+  },
+  {
+    instructionEl: 'Άκου με προσοχή όλη την εντολή και διάλεξε το πράσινο τριφύλλι!',
+    pictogramCue: '👂 ⏳ ➡️ 🍀',
+    options: [
+      { id: 'l10-1', emoji: '🍀', labelEl: 'Πράσινο Τριφύλλι', isTarget: true },
+      { id: 'l10-2', emoji: '🌻', labelEl: 'Ηλίανθος', isTarget: false },
+      { id: 'l10-3', emoji: '🌷', labelEl: 'Τουλίπα', isTarget: false },
+    ],
+  },
+  {
+    instructionEl: 'Πάρε μια ήρεμη ανάσα, περίμενε το σήμα και πάτησε την κόκκινη αλεπού!',
+    pictogramCue: '👂 ⏳ ➡️ 🦊',
+    options: [
+      { id: 'l11-1', emoji: '🐻', labelEl: 'Αρκουδάκι', isTarget: false },
+      { id: 'l11-2', emoji: '🦊', labelEl: 'Κόκκινη Αλεπού', isTarget: true },
+      { id: 'l11-3', emoji: '🐰', labelEl: 'Κουνελάκι', isTarget: false },
+    ],
+  },
+  {
+    instructionEl: 'Άκου ήρεμα μέχρι την τελευταία λέξη και μετά πάτησε την πυξίδα!',
+    pictogramCue: '👂 ⏳ ➡️ 🧭',
+    options: [
+      { id: 'l12-1', emoji: '⛺', labelEl: 'Σκηνή', isTarget: false },
+      { id: 'l12-2', emoji: '🔦', labelEl: 'Φακός', isTarget: false },
+      { id: 'l12-3', emoji: '🧭', labelEl: 'Πυξίδα', isTarget: true },
     ],
   },
 ];
@@ -115,16 +169,16 @@ export const Activity08ListenDo: React.FC<ActivityRunnerRenderProps> = ({
   const listenPct = Math.min(100, Math.round((listenProgressMs / 900) * 100));
 
   const visibleOptions = useMemo(() => {
+    let baseOpts = round.options;
     if (hintLevel === 2 || ageBand === '4-5' || adaptiveProfile.distractorReductionRatio >= 0.5) {
-      return round.options.filter((o, i) => o.isTarget || i === 0);
-    }
-    if (ageBand === '8-10' || ageBand === '10-12' || adaptiveProfile.enrichChallenge) {
-      return [
+      baseOpts = round.options.filter((o, i) => o.isTarget || i === 0);
+    } else if (ageBand === '8-10' || ageBand === '10-12' || adaptiveProfile.enrichChallenge) {
+      baseOpts = [
         ...round.options,
         { id: `l-extra-${currentRound}`, emoji: '🔔', labelEl: 'Καμπανάκι', isTarget: false },
       ];
     }
-    return round.options;
+    return rotateOptionsForSession(baseOpts, sessionSeed, currentRound);
   }, [
     round.options,
     hintLevel,
@@ -132,6 +186,7 @@ export const Activity08ListenDo: React.FC<ActivityRunnerRenderProps> = ({
     adaptiveProfile.distractorReductionRatio,
     adaptiveProfile.enrichChallenge,
     currentRound,
+    sessionSeed,
   ]);
 
   const handleSelect = (isTarget: boolean, labelEl: string) => {

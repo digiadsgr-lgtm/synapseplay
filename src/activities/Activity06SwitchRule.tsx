@@ -1,7 +1,7 @@
 import React, { useMemo, useEffect } from 'react';
 import type { ActivityRunnerRenderProps } from '../components/ActivityRunner';
 import { useDebouncedAction } from '../hooks/useDebouncedAction';
-import { selectSessionRounds } from '../utils/clinicalAdhdEngine';
+import { rotateOptionsForSession, selectSessionRounds } from '../utils/clinicalAdhdEngine';
 import { playCalmTone, speakGreek } from '../utils/soundAndSpeech';
 import { useApp } from '../context/AppContext';
 
@@ -43,7 +43,7 @@ const RULE_ROUNDS: RuleRound[] = [
     targetDescriptionEl: 'Στρογγυλή Μπάλα',
     options: [
       { id: 'r3-1', emoji: '🍊', labelEl: 'Στρογγυλό Πορτοκάλι', isCorrect: true },
-      { id: 'r3-2', emoji: '📐', labelEl: 'Τρίγωνο Χάρακας', isCorrect: false },
+      { id: 'r3-2', emoji: '📐', labelEl: 'Τριγωνικός Χάρακας', isCorrect: false },
       { id: 'r3-3', emoji: '📦', labelEl: 'Τετράγωνο Κουτί', isCorrect: false },
     ],
   },
@@ -102,6 +102,50 @@ const RULE_ROUNDS: RuleRound[] = [
       { id: 'r8-3', emoji: '📦', labelEl: 'Τετράγωνο Κιβώτιο', isCorrect: false },
     ],
   },
+  {
+    ruleType: 'color',
+    ruleTitleEl: '🔄 Αλλαγή Κανόνα! Διαλέγω το ίδιο χρώμα (Πορτοκαλί)',
+    targetEmoji: '🍊',
+    targetDescriptionEl: 'Πορτοκαλί Πορτοκάλι',
+    options: [
+      { id: 'r9-1', emoji: '📘', labelEl: 'Μπλε Βιβλίο', isCorrect: false },
+      { id: 'r9-2', emoji: '🥕', labelEl: 'Πορτοκαλί Καρότο', isCorrect: true },
+      { id: 'r9-3', emoji: '🍀', labelEl: 'Πράσινο Τριφύλλι', isCorrect: false },
+    ],
+  },
+  {
+    ruleType: 'shape',
+    ruleTitleEl: '🔄 Αλλαγή Κανόνα! Διαλέγω το ίδιο σχήμα (Στρογγυλό)',
+    targetEmoji: '🌕',
+    targetDescriptionEl: 'Στρογγυλή Πανσέληνος',
+    options: [
+      { id: 'r10-1', emoji: '⚽', labelEl: 'Στρογγυλή Μπάλα', isCorrect: true },
+      { id: 'r10-2', emoji: '📘', labelEl: 'Τετράγωνο Βιβλίο', isCorrect: false },
+      { id: 'r10-3', emoji: '⛺', labelEl: 'Τριγωνική Σκηνή', isCorrect: false },
+    ],
+  },
+  {
+    ruleType: 'color',
+    ruleTitleEl: '🔄 Αλλαγή Κανόνα! Διαλέγω το ίδιο χρώμα (Πράσινο)',
+    targetEmoji: '🍀',
+    targetDescriptionEl: 'Πράσινο Τριφύλλι',
+    options: [
+      { id: 'r11-1', emoji: '🍓', labelEl: 'Κόκκινη Φράουλα', isCorrect: false },
+      { id: 'r11-2', emoji: '🐢', labelEl: 'Πράσινη Χελώνα', isCorrect: true },
+      { id: 'r11-3', emoji: '🌻', labelEl: 'Κίτρινος Ηλίανθος', isCorrect: false },
+    ],
+  },
+  {
+    ruleType: 'shape',
+    ruleTitleEl: '🔄 Αλλαγή Κανόνα! Διαλέγω το ίδιο σχήμα (Τετράγωνο)',
+    targetEmoji: '🖼️',
+    targetDescriptionEl: 'Τετράγωνο Κάδρο',
+    options: [
+      { id: 'r12-1', emoji: '📦', labelEl: 'Τετράγωνο Κουτί', isCorrect: true },
+      { id: 'r12-2', emoji: '🍊', labelEl: 'Στρογγυλό Πορτοκάλι', isCorrect: false },
+      { id: 'r12-3', emoji: '📐', labelEl: 'Τριγωνικός Χάρακας', isCorrect: false },
+    ],
+  },
 ];
 
 export const Activity06SwitchRule: React.FC<ActivityRunnerRenderProps> = ({
@@ -132,11 +176,11 @@ export const Activity06SwitchRule: React.FC<ActivityRunnerRenderProps> = ({
   }, [currentRound, sessionSeed, round.ruleTitleEl, round.targetDescriptionEl, settings.voiceEnabled, adaptiveProfile.speechRate]);
 
   const visibleOptions = useMemo(() => {
+    let baseOpts = round.options;
     if (hintLevel === 2 || ageBand === '4-5' || adaptiveProfile.distractorReductionRatio >= 0.5) {
-      return round.options.filter((o, i) => o.isCorrect || i === 0);
-    }
-    if (ageBand === '8-10' || ageBand === '10-12' || adaptiveProfile.enrichChallenge) {
-      return [
+      baseOpts = round.options.filter((o, i) => o.isCorrect || i === 0);
+    } else if (ageBand === '8-10' || ageBand === '10-12' || adaptiveProfile.enrichChallenge) {
+      baseOpts = [
         ...round.options,
         {
           id: `r-extra-${currentRound}`,
@@ -146,7 +190,7 @@ export const Activity06SwitchRule: React.FC<ActivityRunnerRenderProps> = ({
         },
       ];
     }
-    return round.options;
+    return rotateOptionsForSession(baseOpts, sessionSeed, currentRound);
   }, [
     round.options,
     round.ruleType,
@@ -155,6 +199,7 @@ export const Activity06SwitchRule: React.FC<ActivityRunnerRenderProps> = ({
     adaptiveProfile.distractorReductionRatio,
     adaptiveProfile.enrichChallenge,
     currentRound,
+    sessionSeed,
   ]);
 
   const handleOptionSelect = (isCorrect: boolean, labelEl: string) => {

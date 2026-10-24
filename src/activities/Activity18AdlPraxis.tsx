@@ -1,7 +1,7 @@
 import React, { useMemo, useEffect } from 'react';
 import type { ActivityRunnerRenderProps } from '../components/ActivityRunner';
 import { useDebouncedAction } from '../hooks/useDebouncedAction';
-import { selectSessionRounds } from '../utils/clinicalAdhdEngine';
+import { rotateOptionsForSession, selectSessionRounds } from '../utils/clinicalAdhdEngine';
 import { playCalmTone, speakGreek } from '../utils/soundAndSpeech';
 import { useApp } from '../context/AppContext';
 
@@ -46,7 +46,7 @@ const PRAXIS_ROUNDS: PraxisScenario[] = [
   {
     titleEl: 'Αυτονομία: Βροχερός Καιρός & Έξοδος από το Σπίτι',
     goalEmoji: '🌧️🧥',
-    questionEl: 'Έξω βρέχει και φυσάει. Τι φοράμε πάνω από τη μπλούζα μας πριν βγούμε;',
+    questionEl: 'Έξω βρέχει και φυσάει. Τι φοράμε πάνω από την μπλούζα μας πριν βγούμε;',
     options: [
       { id: 'px4-1', emoji: '🧥☂️', labelEl: 'Φοράμε το αδιάβροχο μπουφάν μας και παίρνουμε ομπρέλα', isCorrect: true },
       { id: 'px4-2', emoji: '🩳', labelEl: 'Φοράμε καλοκαιρινό μαγιό', isCorrect: false },
@@ -73,6 +73,66 @@ const PRAXIS_ROUNDS: PraxisScenario[] = [
       { id: 'px6-3', emoji: '📚', labelEl: 'Βάζω τα βιβλία μου πάνω στο νερό', isCorrect: false },
     ],
   },
+  {
+    titleEl: 'Αυτονομία: Κουμπώνω το Μπουφάν μου',
+    goalEmoji: '🧥🤲',
+    questionEl: 'Θέλεις να κλείσεις το φερμουάρ στο μπουφάν σου. Πώς συνεργάζονται τα δύο σου χέρια;',
+    options: [
+      { id: 'px7-1', emoji: '🤲⬆️', labelEl: 'Το ένα χέρι κρατάει σταθερά τη βάση και το άλλο τραβάει ήρεμα το φερμουάρ προς τα πάνω', isCorrect: true },
+      { id: 'px7-2', emoji: '💢', labelEl: 'Τραβάω απότομα το μανίκι με δύναμη', isCorrect: false },
+      { id: 'px7-3', emoji: '👟', labelEl: 'Προσπαθώ να το κλείσω με το παπούτσι', isCorrect: false },
+    ],
+  },
+  {
+    titleEl: 'Αυτονομία: Πλένω τα Φρούτα πριν τα Φάω',
+    goalEmoji: '🍎🚰',
+    questionEl: 'Πήρες ένα μήλο από το καλάθι της κουζίνας. Τι κάνουμε πάντα πριν το δαγκώσουμε;',
+    options: [
+      { id: 'px8-1', emoji: '🚰🍎', labelEl: 'Το πλένουμε καλά με καθαρό νερό στη βρύση και το σκουπίζουμε', isCorrect: true },
+      { id: 'px8-2', emoji: '🖍️', labelEl: 'Το βάφουμε με μαρκαδόρους', isCorrect: false },
+      { id: 'px8-3', emoji: '🛋️', labelEl: 'Το κρύβουμε κάτω από τον καναπέ', isCorrect: false },
+    ],
+  },
+  {
+    titleEl: 'Αυτονομία: Αλείφω Βούτυρο ή Μέλι στο Ψωμί',
+    goalEmoji: '🍞🍯',
+    questionEl: 'Θέλεις να αλείψεις μέλι στη φέτα του ψωμιού σου. Πώς χρησιμοποιούμε τα χέρια μας;',
+    options: [
+      { id: 'px9-1', emoji: '🍞🥄', labelEl: 'Το ένα χέρι κρατάει σταθερό το πιάτο/ψωμί και το άλλο απλώνει απαλά το μέλι', isCorrect: true },
+      { id: 'px9-2', emoji: '🌀', labelEl: 'Πετάμε τη φέτα ψηλά στον αέρα', isCorrect: false },
+      { id: 'px9-3', emoji: '📏', labelEl: 'Αλείφουμε με τον σχολικό χάρακα', isCorrect: false },
+    ],
+  },
+  {
+    titleEl: 'Αυτονομία: Ετοιμάζω το Παγούρι μου για το Σχολείο',
+    goalEmoji: '🚰🎒',
+    questionEl: 'Γέμισες το παγούρι σου με νερό. Τι πρέπει να ελέγξεις πριν το βάλεις μέσα στην τσάντα;',
+    options: [
+      { id: 'px10-1', emoji: '🔒💧', labelEl: 'Βιδώνω καλά το καπάκι για να μη βραχούν τα βιβλία μου', isCorrect: true },
+      { id: 'px10-2', emoji: '🔓', labelEl: 'Το βάζω ανοιχτό ανάποδα μέσα στην τσάντα', isCorrect: false },
+      { id: 'px10-3', emoji: '🧊', labelEl: 'Βάζω τα τετράδια μέσα στο παγούρι', isCorrect: false },
+    ],
+  },
+  {
+    titleEl: 'Αυτονομία: Χτενίζω τα Μαλλιά μου το Πρωί',
+    goalEmoji: '🪮🪞',
+    questionEl: 'Ξύπνησες το πρωί και τα μαλλιά σου είναι ανακατεμένα. Ποιο αντικείμενο χρησιμοποιείς μπροστά στον καθρέφτη;',
+    options: [
+      { id: 'px11-1', emoji: '🪮✨', labelEl: 'Κρατάω τη βούρτσα ή τη χτένα και χτενίζω απαλά τα μαλλιά μου', isCorrect: true },
+      { id: 'px11-2', emoji: '🪥', labelEl: 'Χτενίζω τα μαλλιά μου με την οδοντόβουρτσα', isCorrect: false },
+      { id: 'px11-3', emoji: '🥄', labelEl: 'Χρησιμοποιώ το πιρούνι του φαγητού', isCorrect: false },
+    ],
+  },
+  {
+    titleEl: 'Αυτονομία: Κλείνω την Κόλλα Στικ μετά τη Χειροτεχνία',
+    goalEmoji: '🧴📄',
+    questionEl: 'Κόλλησες τις εικόνες στο τετράδιό σου με την κόλλα στικ. Τι κάνεις μόλις τελειώσεις;',
+    options: [
+      { id: 'px12-1', emoji: '🔒✨', labelEl: 'Γυρίζω τη βάση προς τα κάτω και κουμπώνω σφιχτά το καπάκι της κόλλας', isCorrect: true },
+      { id: 'px12-2', emoji: '📖', labelEl: 'Κλείνω το βιβλίο με την ανοιχτή κόλλα μέσα', isCorrect: false },
+      { id: 'px12-3', emoji: '🪑', labelEl: 'Αλείφω κόλλα πάνω στην καρέκλα', isCorrect: false },
+    ],
+  },
 ];
 
 export const Activity18AdlPraxis: React.FC<ActivityRunnerRenderProps> = ({
@@ -97,10 +157,13 @@ export const Activity18AdlPraxis: React.FC<ActivityRunnerRenderProps> = ({
     speakGreek(round.questionEl, settings.voiceEnabled, adaptiveProfile.speechRate);
   }, [currentRound, sessionSeed, round.questionEl, settings.voiceEnabled, adaptiveProfile.speechRate]);
 
-  const visibleOptions =
-    hintLevel === 2 || ageBand === '4-5' || adaptiveProfile.distractorReductionRatio >= 0.5
-      ? round.options.filter((o, i) => o.isCorrect || i === 0)
-      : round.options;
+  const visibleOptions = useMemo(() => {
+    const baseOpts =
+      hintLevel === 2 || ageBand === '4-5' || adaptiveProfile.distractorReductionRatio >= 0.5
+        ? round.options.filter((o, i) => o.isCorrect || i === 0)
+        : round.options;
+    return rotateOptionsForSession(baseOpts, sessionSeed, currentRound);
+  }, [round.options, hintLevel, ageBand, adaptiveProfile.distractorReductionRatio, sessionSeed, currentRound]);
 
   const handleSelect = (isCorrect: boolean, labelEl: string) => {
     runDebounced(() => {

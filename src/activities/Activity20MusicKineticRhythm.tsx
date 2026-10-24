@@ -62,6 +62,36 @@ const RHYTHM_ROUNDS: RhythmPatternRound[] = [
     tempoDescEl: 'Χτύπα Παλαμάκι ➔ Παλαμάκι ➔ και κράτα Μουσική Παύση!',
     pattern: ['clap', 'clap', 'rest'],
   },
+  {
+    tempoTitleEl: 'Ρυθμός: Βήματα στη Βροχή (Andante) 🌧️',
+    tempoDescEl: 'Ακολούθησε το μέτρο: Γόνατα ➔ Γόνατα ➔ Παλαμάκι!',
+    pattern: ['knees', 'knees', 'clap'],
+  },
+  {
+    tempoTitleEl: 'Ρυθμός: Το Εκκρεμές του Ρολογιού 🕰️',
+    tempoDescEl: 'Συγχρόνισε τις κινήσεις: Παλαμάκι ➔ Γόνατα ➔ Παλαμάκι!',
+    pattern: ['clap', 'knees', 'clap'],
+  },
+  {
+    tempoTitleEl: 'Ρυθμός: Πνοή του Ανέμου (Adagio) 🍃',
+    tempoDescEl: 'Ξεκίνα με Μουσική Παύση, χτύπα Παλαμάκι και ολοκλήρωσε στα Γόνατα!',
+    pattern: ['rest', 'clap', 'knees'],
+  },
+  {
+    tempoTitleEl: 'Ρυθμός: Χτύπος της Καρδιάς 💓',
+    tempoDescEl: 'Ακολούθησε τον παλμό: Γόνατα ➔ Γόνατα ➔ Μουσική Παύση!',
+    pattern: ['knees', 'knees', 'rest'],
+  },
+  {
+    tempoTitleEl: 'Ρυθμός: Πρωινό Ξύπνημα Πουλιών 🐦',
+    tempoDescEl: 'Ξεκίνα με Μουσική Παύση, χτύπα Παλαμάκι και ξανά Παλαμάκι!',
+    pattern: ['rest', 'clap', 'clap'],
+  },
+  {
+    tempoTitleEl: 'Ρυθμός: Ορχήστρα Αυτοελέγχου 🎻',
+    tempoDescEl: 'Χτύπα στα Γόνατα, κράτα Μουσική Παύση και ολοκλήρωσε στα Γόνατα!',
+    pattern: ['knees', 'rest', 'knees'],
+  },
 ];
 
 export const Activity20MusicKineticRhythm: React.FC<ActivityRunnerRenderProps> = ({

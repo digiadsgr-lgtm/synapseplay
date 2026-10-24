@@ -35,6 +35,12 @@ const PATTERNS: BlockColor[][] = [
   ['sage', 'sage', 'slate'],
   ['slate', 'slate', 'terracotta'],
   ['terracotta', 'sage', 'terracotta'],
+  ['sage', 'slate', 'terracotta'],
+  ['slate', 'terracotta', 'sage'],
+  ['terracotta', 'slate', 'sage'],
+  ['sage', 'terracotta', 'slate'],
+  ['slate', 'sage', 'slate'],
+  ['terracotta', 'terracotta', 'sage'],
 ];
 
 export const Activity12BuildPattern: React.FC<ActivityRunnerRenderProps> = ({

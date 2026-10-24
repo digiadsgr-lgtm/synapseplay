@@ -29,6 +29,12 @@ const SEQUENCES: string[][] = [
   ['wave', 'leaf'],
   ['star', 'leaf', 'sun'],
   ['sun', 'star', 'wave'],
+  ['leaf', 'sun', 'wave'],
+  ['wave', 'sun', 'leaf'],
+  ['star', 'wave', 'sun'],
+  ['sun', 'leaf', 'star'],
+  ['leaf', 'wave', 'star'],
+  ['star', 'sun', 'leaf'],
 ];
 
 export const Activity04SequenceMemory: React.FC<ActivityRunnerRenderProps> = ({

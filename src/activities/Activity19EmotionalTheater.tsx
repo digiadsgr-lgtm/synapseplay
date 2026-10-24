@@ -1,7 +1,7 @@
 import React, { useMemo, useEffect } from 'react';
 import type { ActivityRunnerRenderProps } from '../components/ActivityRunner';
 import { useDebouncedAction } from '../hooks/useDebouncedAction';
-import { selectSessionRounds } from '../utils/clinicalAdhdEngine';
+import { rotateOptionsForSession, selectSessionRounds } from '../utils/clinicalAdhdEngine';
 import { playCalmTone, speakGreek } from '../utils/soundAndSpeech';
 import { useApp } from '../context/AppContext';
 
@@ -182,6 +182,174 @@ const THEATER_SCENES: TheaterScene[] = [
       },
     ],
   },
+  {
+    sceneEmoji: '🎭🔄',
+    titleEl: 'Σκηνή: Αλλαγή Σχεδίου λόγω Βροχής',
+    storyEl:
+      'Είχατε κανονίσει να πάτε στην παιδική χαρά, αλλά ξαφνικά έπιασε δυνατή βροχή και πρέπει να μείνετε σπίτι.',
+    theatricalPromptEl:
+      'Θεατρική Δράση: Κάνε τους «Χαλαρούς Ώμους» 🤷‍♂️, πάρε βαθιά ανάσα και διάλεξε την ευέλικτη σκέψη:',
+    options: [
+      {
+        id: 'th7-1',
+        emoji: '🏕️🎲',
+        labelEl: '«Κρίμα που βρέχει, αλλά μπορούμε να φτιάξουμε μια ωραία σκηνή με μαξιλάρια στο σαλόνι!»',
+        isCalmSolution: true,
+      },
+      {
+        id: 'th7-2',
+        emoji: '🚪💥',
+        labelEl: 'Χτυπάω την πόρτα με τις γροθιές μου',
+        isCalmSolution: false,
+      },
+      {
+        id: 'th7-3',
+        emoji: '😭',
+        labelEl: 'Φωνάζω ασταμάτητα ότι χάλασε όλη η μέρα',
+        isCalmSolution: false,
+      },
+    ],
+  },
+  {
+    sceneEmoji: '🎭🗣️',
+    titleEl: 'Σκηνή: Θέλω Πολύ να Πω την Ιδέα μου!',
+    storyEl:
+      'Η δασκάλα ή ο γονιός μιλάει και εσένα σου έρχεται μια τέλεια ιδέα που φοβάσαι μήπως την ξεχάσεις!',
+    theatricalPromptEl:
+      'Θεατρικός Ρόλος: «Κλείδωσε» απαλά την ιδέα στην παλάμη σου 🤚 και διάλεξε τι θα κάνεις:',
+    options: [
+      {
+        id: 'th8-1',
+        emoji: '🙋‍♂️💭',
+        labelEl: 'Κρατάω την ιδέα στο μυαλό μου, σηκώνω ήρεμα το χέρι και περιμένω να τελειώσει ο άλλος!',
+        isCalmSolution: true,
+      },
+      {
+        id: 'th8-2',
+        emoji: '📢',
+        labelEl: 'Διακόπτω φωνάζοντας δυνατά πάνω από τους άλλους',
+        isCalmSolution: false,
+      },
+      {
+        id: 'th8-3',
+        emoji: '😤',
+        labelEl: 'Τραβάω το μανίκι του άλλου επίμονα',
+        isCalmSolution: false,
+      },
+    ],
+  },
+  {
+    sceneEmoji: '🎭⚽',
+    titleEl: 'Σκηνή: Κατά Λάθος Σκόνταψε Πάνω μου',
+    storyEl:
+      'Στο διάλειμμα ένας συμμαθητής τρέχει, σκοντάφτει κατά λάθος πάνω σου και σου πέφτει το παγούρι.',
+    theatricalPromptEl:
+      'Θεατρική Έκφραση: Βάλε το χέρι στην καρδιά 💛, πάρε μια ανάσα και σκέψου σαν ντετέκτιβ:',
+    options: [
+      {
+        id: 'th9-1',
+        emoji: '🤝💬',
+        labelEl: 'Καταλαβαίνω ότι έγινε κατά λάθος και λέω ήρεμα: «Δεν πειράζει, πρόσεχε μην χτυπήσεις!»',
+        isCalmSolution: true,
+      },
+      {
+        id: 'th9-2',
+        emoji: '💢',
+        labelEl: 'Τον σπρώχνω πίσω με δύναμη',
+        isCalmSolution: false,
+      },
+      {
+        id: 'th9-3',
+        emoji: '😠',
+        labelEl: 'Πετάω την μπάλα του μακριά',
+        isCalmSolution: false,
+      },
+    ],
+  },
+  {
+    sceneEmoji: '🎭🧸',
+    titleEl: 'Σκηνή: Το Μικρό Αδερφάκι Πήρε το Παιχνίδι μου',
+    storyEl:
+      'Το μικρό σου αδερφάκι ή ένας φίλος πήρε το αγαπημένο σου αυτοκινητάκι χωρίς να σε ρωτήσει.',
+    theatricalPromptEl:
+      'Θεατρικός Ρόλος: Μίλησε με τη «Φωνή του Σοφού Αρχηγού» 🦉 και διάλεξε τη λύση:',
+    options: [
+      {
+        id: 'th10-1',
+        emoji: '🔄🧸',
+        labelEl: 'Του προτείνω ήρεμα: «Με αυτό παίζω τώρα, έλα να σου δώσω αυτό το ωραίο φορτηγό!»',
+        isCalmSolution: true,
+      },
+      {
+        id: 'th10-2',
+        emoji: '✊',
+        labelEl: 'Του το αρπάζω απότομα από τα χέρια',
+        isCalmSolution: false,
+      },
+      {
+        id: 'th10-3',
+        emoji: '😭',
+        labelEl: 'Ουρλιάζω και χτυπάω τα πόδια στο πάτωμα',
+        isCalmSolution: false,
+      },
+    ],
+  },
+  {
+    sceneEmoji: '🎭🧽',
+    titleEl: 'Σκηνή: Έκανα Λάθος στη Ζωγραφιά μου',
+    storyEl:
+      'Ζωγραφίζεις προσεκτικά έναν ήλιο και η γραμμή βγαίνει λίγο έξω από το περίγραμμα.',
+    theatricalPromptEl:
+      'Θεατρική Δράση: Χαμογέλασε δημιουργικά 🎨 και διάλεξε τι θα πεις στον εαυτό σου:',
+    options: [
+      {
+        id: 'th11-1',
+        emoji: '🌈✨',
+        labelEl: '«Κάθε λάθος μπορεί να γίνει μια νέα ιδέα! Θα το κάνω μια μεγάλη φωτεινή ακτίνα!»',
+        isCalmSolution: true,
+      },
+      {
+        id: 'th11-2',
+        emoji: '📄💥',
+        labelEl: 'Σκίζω όλο το μπλοκ ζωγραφικής',
+        isCalmSolution: false,
+      },
+      {
+        id: 'th11-3',
+        emoji: '🖍️',
+        labelEl: 'Πετάω τους μαρκαδόρους κάτω',
+        isCalmSolution: false,
+      },
+    ],
+  },
+  {
+    sceneEmoji: '🎭🌅',
+    titleEl: 'Σκηνή: Ώρα να Κλείσει η Οθόνη (Smooth Landing)',
+    storyEl:
+      'Ο Δακτύλιος Ομαλής Αποσύνδεσης δείχνει ότι το παιχνίδι ολοκληρώθηκε και το ζωάκι πάει για ύπνο.',
+    theatricalPromptEl:
+      'Θεατρική Δράση: Κάνε ένα μεγάλο τέντωμα πρωταθλητή 🙆‍♂️ και διάλεξε πώς κλείνουμε:',
+    options: [
+      {
+        id: 'th12-1',
+        emoji: '🌿💧',
+        labelEl: 'Αφήνω ήρεμα το τάμπλετ, τεντώνομαι και πηγαίνω να πιω μια γουλιά νερό!',
+        isCalmSolution: true,
+      },
+      {
+        id: 'th12-2',
+        emoji: '😤',
+        labelEl: 'Κρύβω τη συσκευή και αρνούμαι να σταματήσω',
+        isCalmSolution: false,
+      },
+      {
+        id: 'th12-3',
+        emoji: '😭',
+        labelEl: 'Φωνάζω και κλαίω δυνατά',
+        isCalmSolution: false,
+      },
+    ],
+  },
 ];
 
 export const Activity19EmotionalTheater: React.FC<ActivityRunnerRenderProps> = ({
@@ -210,10 +378,13 @@ export const Activity19EmotionalTheater: React.FC<ActivityRunnerRenderProps> = (
     );
   }, [currentRound, sessionSeed, scene.titleEl, scene.storyEl, settings.voiceEnabled, adaptiveProfile.speechRate]);
 
-  const visibleOptions =
-    hintLevel === 2 || ageBand === '4-5' || adaptiveProfile.distractorReductionRatio >= 0.5
-      ? scene.options.filter((o, i) => o.isCalmSolution || i === 0)
-      : scene.options;
+  const visibleOptions = useMemo(() => {
+    const baseOpts =
+      hintLevel === 2 || ageBand === '4-5' || adaptiveProfile.distractorReductionRatio >= 0.5
+        ? scene.options.filter((o, i) => o.isCalmSolution || i === 0)
+        : scene.options;
+    return rotateOptionsForSession(baseOpts, sessionSeed, currentRound);
+  }, [scene.options, hintLevel, ageBand, adaptiveProfile.distractorReductionRatio, sessionSeed, currentRound]);
 
   const handleChooseSolution = (isCalmSolution: boolean) => {
     runDebounced(() => {

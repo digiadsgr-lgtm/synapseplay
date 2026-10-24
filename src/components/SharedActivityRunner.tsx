@@ -272,13 +272,33 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
     startTimeRef.current = Date.now();
     roundStartRef.current = Date.now();
     loggedCompletionRef.current = false;
-    setSessionSeed((prev) => prev + 1);
+    setSessionSeed((prev) => {
+      const next = prev + 1;
+      try {
+        if (typeof window !== 'undefined' && import.meta.env.MODE !== 'test') {
+          window.localStorage.setItem(`synapseplay_variety_seed_${activity.id}`, String(next));
+        }
+      } catch {
+        // Ignore storage errors
+      }
+      return next;
+    });
     dispatchRestart(activity.totalRounds, settings.seatedModeDefault);
     speakGreek(activity.voicePromptEl, settings.voiceEnabled, adaptiveProfile.speechRate);
   };
 
   const handleShuffleVariation = () => {
-    setSessionSeed((prev) => prev + 1);
+    setSessionSeed((prev) => {
+      const next = prev + 1;
+      try {
+        if (typeof window !== 'undefined' && import.meta.env.MODE !== 'test') {
+          window.localStorage.setItem(`synapseplay_variety_seed_${activity.id}`, String(next));
+        }
+      } catch {
+        // Ignore storage errors
+      }
+      return next;
+    });
     playCalmTone('soft-step', settings.soundEnabled);
     speakGreek('Φορτώθηκε νέα παραλλαγή δραστηριότητας!', settings.voiceEnabled, adaptiveProfile.speechRate);
   };

@@ -3,6 +3,7 @@ import type { ActivityRunnerRenderProps } from '../components/ActivityRunner';
 import { useDebouncedAction } from '../hooks/useDebouncedAction';
 import {
   getAgeAndPerformanceDifficulty,
+  rotateOptionsForSession,
   selectSessionRounds,
 } from '../utils/clinicalAdhdEngine';
 import { playCalmTone, speakGreek } from '../utils/soundAndSpeech';
@@ -105,6 +106,66 @@ const ROUNDS: Array<{ targetLabelEl: string; targetEmoji: string; cards: MemoryC
       { id: 'm9-4', emoji: '🎹', labelEl: 'Πιάνο', isTarget: false },
     ],
   },
+  {
+    targetLabelEl: 'Κόκκινη Φράουλα',
+    targetEmoji: '🍓',
+    cards: [
+      { id: 'm10-1', emoji: '🍐', labelEl: 'Αχλάδι', isTarget: false },
+      { id: 'm10-2', emoji: '🍓', labelEl: 'Κόκκινη Φράουλα', isTarget: true },
+      { id: 'm10-3', emoji: '🔔', labelEl: 'Καμπανάκι', isTarget: false },
+      { id: 'm10-4', emoji: '⛺', labelEl: 'Σκηνή', isTarget: false },
+    ],
+  },
+  {
+    targetLabelEl: 'Κίτρινος Ήλιος',
+    targetEmoji: '☀️',
+    cards: [
+      { id: 'm11-1', emoji: '🌙', labelEl: 'Φεγγάρι', isTarget: false },
+      { id: 'm11-2', emoji: '☁️', labelEl: 'Σύννεφο', isTarget: false },
+      { id: 'm11-3', emoji: '☀️', labelEl: 'Κίτρινος Ήλιος', isTarget: true },
+      { id: 'm11-4', emoji: '🌈', labelEl: 'Ουράνιο Τόξο', isTarget: false },
+    ],
+  },
+  {
+    targetLabelEl: 'Μικρή Μέλισσα',
+    targetEmoji: '🐝',
+    cards: [
+      { id: 'm12-1', emoji: '🐞', labelEl: 'Πασχαλίτσα', isTarget: false },
+      { id: 'm12-2', emoji: '🐝', labelEl: 'Μικρή Μέλισσα', isTarget: true },
+      { id: 'm12-3', emoji: '🦋', labelEl: 'Πεταλούδα', isTarget: false },
+      { id: 'm12-4', emoji: '🌷', labelEl: 'Τουλίπα', isTarget: false },
+    ],
+  },
+  {
+    targetLabelEl: 'Πράσινος Βάτραχος',
+    targetEmoji: '🐸',
+    cards: [
+      { id: 'm13-1', emoji: '🦆', labelEl: 'Παπάκι', isTarget: false },
+      { id: 'm13-2', emoji: '🐟', labelEl: 'Ψαράκι', isTarget: false },
+      { id: 'm13-3', emoji: '🐸', labelEl: 'Πράσινος Βάτραχος', isTarget: true },
+      { id: 'm13-4', emoji: '🦀', labelEl: 'Καβούρι', isTarget: false },
+    ],
+  },
+  {
+    targetLabelEl: 'Ξύλινο Βιολί',
+    targetEmoji: '🎻',
+    cards: [
+      { id: 'm14-1', emoji: '🎻', labelEl: 'Ξύλινο Βιολί', isTarget: true },
+      { id: 'm14-2', emoji: '🥁', labelEl: 'Τύμπανο', isTarget: false },
+      { id: 'm14-3', emoji: '🎺', labelEl: 'Τρομπέτα', isTarget: false },
+      { id: 'm14-4', emoji: '🪈', labelEl: 'Φλογέρα', isTarget: false },
+    ],
+  },
+  {
+    targetLabelEl: 'Πολύχρωμος Χαρταετός',
+    targetEmoji: '🪁',
+    cards: [
+      { id: 'm15-1', emoji: '🎈', labelEl: 'Μπαλόνι', isTarget: false },
+      { id: 'm15-2', emoji: '🧸', labelEl: 'Αρκουδάκι', isTarget: false },
+      { id: 'm15-3', emoji: '🪁', labelEl: 'Πολύχρωμος Χαρταετός', isTarget: true },
+      { id: 'm15-4', emoji: '⚽', labelEl: 'Μπάλα', isTarget: false },
+    ],
+  },
 ];
 
 export const Activity03VisualMemory: React.FC<ActivityRunnerRenderProps> = ({
@@ -176,17 +237,17 @@ export const Activity03VisualMemory: React.FC<ActivityRunnerRenderProps> = ({
   ]);
 
   const visibleCards = useMemo(() => {
+    let baseCards = roundData.cards;
     if (diff.isSimplified) {
-      return roundData.cards.filter((c, idx) => c.isTarget || idx === 0);
-    }
-    if (diff.isAdvancedMastery) {
-      return [
+      baseCards = roundData.cards.filter((c, idx) => c.isTarget || idx === 0);
+    } else if (diff.isAdvancedMastery) {
+      baseCards = [
         ...roundData.cards,
         { id: `extra-${currentRound}`, emoji: '🧭', labelEl: 'Πυξίδα', isTarget: false },
       ];
     }
-    return roundData.cards;
-  }, [roundData.cards, diff.isSimplified, diff.isAdvancedMastery, currentRound]);
+    return rotateOptionsForSession(baseCards, sessionSeed, currentRound);
+  }, [roundData.cards, diff.isSimplified, diff.isAdvancedMastery, currentRound, sessionSeed]);
 
   const obsRemainingPct = Math.max(
     0,

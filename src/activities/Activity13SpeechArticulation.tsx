@@ -3,7 +3,7 @@ import type { ActivityRunnerRenderProps } from '../components/ActivityRunner';
 import { useDebouncedAction } from '../hooks/useDebouncedAction';
 import { playCalmTone, speakGreek, speakGreekSyllable } from '../utils/soundAndSpeech';
 import { useApp } from '../context/AppContext';
-import { selectSessionRounds } from '../utils/clinicalAdhdEngine';
+import { rotateOptionsForSession, selectSessionRounds } from '../utils/clinicalAdhdEngine';
 
 interface SpeechRound {
   wordEl: string;
@@ -88,6 +88,78 @@ const AGE_SPEECH_ROUNDS: Record<string, SpeechRound[]> = {
         { id: 'sp4-18', emoji: '🐘', labelEl: 'Ελέφαντας', isCorrect: false },
       ],
     },
+    {
+      wordEl: 'Δέ-ντρο',
+      spokenWordEl: 'δέντρο',
+      syllables: ['δέ', 'ντρο'],
+      promptQuestionEl: 'Χτύπα 2 παλαμάκια για τη λέξη «δέντρο» και βρες το πράσινο δέντρο!',
+      targetEmoji: '🌳',
+      options: [
+        { id: 'sp4-19', emoji: '🌳', labelEl: 'Δέντρο (2 συλλαβές)', isCorrect: true },
+        { id: 'sp4-20', emoji: '🌻', labelEl: 'Ηλίανθος', isCorrect: false },
+        { id: 'sp4-21', emoji: '🍄', labelEl: 'Μανιτάρι', isCorrect: false },
+      ],
+    },
+    {
+      wordEl: 'Σπί-τι',
+      spokenWordEl: 'σπίτι',
+      syllables: ['σπί', 'τι'],
+      promptQuestionEl: 'Χτύπα 2 παλαμάκια για τη λέξη «σπίτι» και βρες το σπιτάκι!',
+      targetEmoji: '🏠',
+      options: [
+        { id: 'sp4-22', emoji: '⛺', labelEl: 'Σκηνή', isCorrect: false },
+        { id: 'sp4-23', emoji: '🏠', labelEl: 'Σπίτι (2 συλλαβές)', isCorrect: true },
+        { id: 'sp4-24', emoji: '🏰', labelEl: 'Κάστρο', isCorrect: false },
+      ],
+    },
+    {
+      wordEl: 'Βά-ζο',
+      spokenWordEl: 'βάζο',
+      syllables: ['βά', 'ζο'],
+      promptQuestionEl: 'Χτύπα 2 παλαμάκια για τη λέξη «βάζο» και βρες το βάζο με το λουλούδι!',
+      targetEmoji: '🏺',
+      options: [
+        { id: 'sp4-25', emoji: '🏺', labelEl: 'Βάζο (2 συλλαβές)', isCorrect: true },
+        { id: 'sp4-26', emoji: '🥄', labelEl: 'Κουτάλι', isCorrect: false },
+        { id: 'sp4-27', emoji: '🪑', labelEl: 'Καρέκλα', isCorrect: false },
+      ],
+    },
+    {
+      wordEl: 'Φύλ-λο',
+      spokenWordEl: 'φύλλο',
+      syllables: ['φύλ', 'λο'],
+      promptQuestionEl: 'Χτύπα 2 παλαμάκια για τη λέξη «φύλλο» και βρες το πράσινο φύλλο!',
+      targetEmoji: '🍃',
+      options: [
+        { id: 'sp4-28', emoji: '☁️', labelEl: 'Σύννεφο', isCorrect: false },
+        { id: 'sp4-29', emoji: '🍃', labelEl: 'Φύλλο (2 συλλαβές)', isCorrect: true },
+        { id: 'sp4-30', emoji: '🌈', labelEl: 'Ουράνιο Τόξο', isCorrect: false },
+      ],
+    },
+    {
+      wordEl: 'Ρό-δα',
+      spokenWordEl: 'ρόδα',
+      syllables: ['ρό', 'δα'],
+      promptQuestionEl: 'Χτύπα 2 παλαμάκια για τη λέξη «ρόδα» και βρες τη στρογγυλή ρόδα!',
+      targetEmoji: '🛞',
+      options: [
+        { id: 'sp4-31', emoji: '🛞', labelEl: 'Ρόδα (2 συλλαβές)', isCorrect: true },
+        { id: 'sp4-32', emoji: '⛵', labelEl: 'Καράβι', isCorrect: false },
+        { id: 'sp4-33', emoji: '🚁', labelEl: 'Ελικόπτερο', isCorrect: false },
+      ],
+    },
+    {
+      wordEl: 'Κύ-μα',
+      spokenWordEl: 'κύμα',
+      syllables: ['κύ', 'μα'],
+      promptQuestionEl: 'Χτύπα 2 παλαμάκια για τη λέξη «κύμα» και βρες το μπλε κύμα!',
+      targetEmoji: '🌊',
+      options: [
+        { id: 'sp4-34', emoji: '⛰️', labelEl: 'Βουνό', isCorrect: false },
+        { id: 'sp4-35', emoji: '🌊', labelEl: 'Κύμα (2 συλλαβές)', isCorrect: true },
+        { id: 'sp4-36', emoji: '🌵', labelEl: 'Κάκτος', isCorrect: false },
+      ],
+    },
   ],
   '6-8': [
     {
@@ -160,6 +232,78 @@ const AGE_SPEECH_ROUNDS: Record<string, SpeechRound[]> = {
         { id: 'sp6-16', emoji: '🥁', labelEl: 'Τύμπανο (3 συλλαβές)', isCorrect: true },
         { id: 'sp6-17', emoji: '🔔', labelEl: 'Κουδούνι', isCorrect: false },
         { id: 'sp6-18', emoji: '🏠', labelEl: 'Σπίτι (2 συλλαβές)', isCorrect: false },
+      ],
+    },
+    {
+      wordEl: 'Πυ-ξί-δα',
+      spokenWordEl: 'πυξίδα',
+      syllables: ['πυ', 'ξί', 'δα'],
+      promptQuestionEl: 'Χτύπα τις 3 συλλαβές στη λέξη «πυξίδα» και βρες ποια λέξη αρχίζει επίσης με «π»!',
+      targetEmoji: '🧭',
+      options: [
+        { id: 'sp6-19', emoji: '🚀', labelEl: 'Πύραυλος (Αρχίζει με Π)', isCorrect: true },
+        { id: 'sp6-20', emoji: '⛺', labelEl: 'Σκηνή (Αρχίζει με Σ)', isCorrect: false },
+        { id: 'sp6-21', emoji: '🔦', labelEl: 'Φακός (Αρχίζει με Φ)', isCorrect: false },
+      ],
+    },
+    {
+      wordEl: 'Στα-φύ-λι',
+      spokenWordEl: 'σταφύλι',
+      syllables: ['στα', 'φύ', 'λι'],
+      promptQuestionEl: 'Πες καθαρά το σύμπλεγμα «στ» στη λέξη «σταφύλι» και βρες ποια λέξη έχει επίσης «στ»!',
+      targetEmoji: '🍇',
+      options: [
+        { id: 'sp6-22', emoji: '⭐', labelEl: 'Αστέρι (Περιέχει «στ»)', isCorrect: true },
+        { id: 'sp6-23', emoji: '🍎', labelEl: 'Μήλο', isCorrect: false },
+        { id: 'sp6-24', emoji: '🍌', labelEl: 'Μπανάνα', isCorrect: false },
+      ],
+    },
+    {
+      wordEl: 'Δελ-φί-νι',
+      spokenWordEl: 'δελφίνι',
+      syllables: ['δελ', 'φί', 'νι'],
+      promptQuestionEl: 'Χτύπα τις 3 συλλαβές στη λέξη «δελφίνι» και βρες τι ομοιοκαταληκτεί με το «δελφίνι»!',
+      targetEmoji: '🐬',
+      options: [
+        { id: 'sp6-25', emoji: '🛴', labelEl: 'Πατίνι (Δελφίνι - Πατίνι)', isCorrect: true },
+        { id: 'sp6-26', emoji: '🐳', labelEl: 'Φάλαινα', isCorrect: false },
+        { id: 'sp6-27', emoji: '🦀', labelEl: 'Καβούρι', isCorrect: false },
+      ],
+    },
+    {
+      wordEl: 'Φρά-ου-λα',
+      spokenWordEl: 'φράουλα',
+      syllables: ['φρά', 'ου', 'λα'],
+      promptQuestionEl: 'Πες καθαρά το σύμπλεγμα «φρ» στη λέξη «φράουλα» και βρες ποια λέξη έχει επίσης 3 συλλαβές!',
+      targetEmoji: '🍓',
+      options: [
+        { id: 'sp6-28', emoji: '🍒', labelEl: 'Κεράσι (3 συλλαβές)', isCorrect: true },
+        { id: 'sp6-29', emoji: '🍐', labelEl: 'Αχλάδι', isCorrect: false },
+        { id: 'sp6-30', emoji: '🥝', labelEl: 'Σύκο (2 συλλαβές)', isCorrect: false },
+      ],
+    },
+    {
+      wordEl: 'Κου-τά-λι',
+      spokenWordEl: 'κουτάλι',
+      syllables: ['κου', 'τά', 'λι'],
+      promptQuestionEl: 'Χτύπα τις 3 συλλαβές στη λέξη «κουτάλι» και βρες τι ομοιοκαταληκτεί με το «κουτάλι»!',
+      targetEmoji: '🥄',
+      options: [
+        { id: 'sp6-31', emoji: '🍊', labelEl: 'Πορτοκάλι (Κουτάλι - Πορτοκάλι)', isCorrect: true },
+        { id: 'sp6-32', emoji: '🍽️', labelEl: 'Πιάτο', isCorrect: false },
+        { id: 'sp6-33', emoji: '🥛', labelEl: 'Ποτήρι', isCorrect: false },
+      ],
+    },
+    {
+      wordEl: 'Πλα-νή-της',
+      spokenWordEl: 'πλανήτης',
+      syllables: ['πλα', 'νή', 'της'],
+      promptQuestionEl: 'Πες καθαρά το σύμπλεγμα «πλ» στη λέξη «πλανήτης» και βρες ποια λέξη αρχίζει επίσης με «πλ»!',
+      targetEmoji: '🪐',
+      options: [
+        { id: 'sp6-34', emoji: '🚢', labelEl: 'Πλοίο (Αρχίζει με Πλ)', isCorrect: true },
+        { id: 'sp6-35', emoji: '🌙', labelEl: 'Φεγγάρι', isCorrect: false },
+        { id: 'sp6-36', emoji: '☀️', labelEl: 'Ήλιος', isCorrect: false },
       ],
     },
   ],
@@ -236,6 +380,78 @@ const AGE_SPEECH_ROUNDS: Record<string, SpeechRound[]> = {
         { id: 'sp10-18', emoji: '🛑', labelEl: 'Σταματάω να προσπαθώ', isCorrect: false },
       ],
     },
+    {
+      wordEl: 'Η-λι-ό-λου-στος',
+      spokenWordEl: 'ηλιόλουστος',
+      syllables: ['η', 'λι', 'ό', 'λου', 'στος'],
+      promptQuestionEl: 'Ένωσε τις 5 συλλαβές της σύνθετης λέξης «ηλιόλουστος» και βρες τα δύο συνθετικά της:',
+      targetEmoji: '☀️',
+      options: [
+        { id: 'sp10-19', emoji: '☀️', labelEl: 'Ήλιος + Λούζω', isCorrect: true },
+        { id: 'sp10-20', emoji: '🌧️', labelEl: 'Βροχή + Σύννεφο', isCorrect: false },
+        { id: 'sp10-21', emoji: '🌙', labelEl: 'Νύχτα + Αστέρι', isCorrect: false },
+      ],
+    },
+    {
+      wordEl: 'Πα-ρα-τη-ρη-τι-κός',
+      spokenWordEl: 'παρατηρητικός',
+      syllables: ['πα', 'ρα', 'τη', 'ρη', 'τι', 'κός'],
+      promptQuestionEl: 'Κατάτμησε τη λέξη «παρατηρητικός» και επίλεξε τι σημαίνει:',
+      targetEmoji: '🔍',
+      options: [
+        { id: 'sp10-22', emoji: '🔍', labelEl: 'Αυτός που προσέχει προσεκτικά τις λεπτομέρειες', isCorrect: true },
+        { id: 'sp10-23', emoji: '🙈', labelEl: 'Αυτός που κλείνει τα μάτια', isCorrect: false },
+        { id: 'sp10-24', emoji: '🏃', labelEl: 'Αυτός που τρέχει βιαστικά', isCorrect: false },
+      ],
+    },
+    {
+      wordEl: 'Συ-νερ-γα-σί-α',
+      spokenWordEl: 'συνεργασία',
+      syllables: ['συ', 'νερ', 'γα', 'σί', 'α'],
+      promptQuestionEl: 'Πες καθαρά τη λέξη «συνεργασία» και βρες από ποιες λέξεις αποτελείται:',
+      targetEmoji: '🤝',
+      options: [
+        { id: 'sp10-25', emoji: '🤝', labelEl: 'Συν (Μαζί) + Έργο', isCorrect: true },
+        { id: 'sp10-26', emoji: '🧍', labelEl: 'Μόνος + Παιχνίδι', isCorrect: false },
+        { id: 'sp10-27', emoji: '⏱️', labelEl: 'Ώρα + Σχολείο', isCorrect: false },
+      ],
+    },
+    {
+      wordEl: 'Εν-συν-αί-σθη-ση',
+      spokenWordEl: 'ενσυναίσθηση',
+      syllables: ['εν', 'συν', 'αί', 'σθη', 'ση'],
+      promptQuestionEl: 'Κατάτμησε τη λέξη «ενσυναίσθηση» και βρες την ακριβή της σημασία:',
+      targetEmoji: '💛',
+      options: [
+        { id: 'sp10-28', emoji: '💛', labelEl: 'Καταλαβαίνω πώς νιώθει ο άλλος άνθρωπος', isCorrect: true },
+        { id: 'sp10-29', emoji: '📢', labelEl: 'Μιλάω πιο δυνατά από τους άλλους', isCorrect: false },
+        { id: 'sp10-30', emoji: '🏆', labelEl: 'Κερδίζω πάντα πρώτος στο παιχνίδι', isCorrect: false },
+      ],
+    },
+    {
+      wordEl: 'Τη-λε-σκό-πι-ο',
+      spokenWordEl: 'τηλεσκόπιο',
+      syllables: ['τη', 'λε', 'σκό', 'πι', 'ο'],
+      promptQuestionEl: 'Ένωσε τις 5 συλλαβές της λέξης «τηλεσκόπιο» και επίλεξε τη σημασία της:',
+      targetEmoji: '🔭',
+      options: [
+        { id: 'sp10-31', emoji: '🔭', labelEl: 'Όργανο που βλέπει πολύ μακριά στα αστέρια', isCorrect: true },
+        { id: 'sp10-32', emoji: '🎧', labelEl: 'Ακουστικά για μουσική', isCorrect: false },
+        { id: 'sp10-33', emoji: '🧭', labelEl: 'Ρολόι χειρός', isCorrect: false },
+      ],
+    },
+    {
+      wordEl: 'Με-θο-δι-κό-τη-τα',
+      spokenWordEl: 'μεθοδικότητα',
+      syllables: ['με', 'θο', 'δι', 'κό', 'τη', 'τα'],
+      promptQuestionEl: 'Κατάτμησε τις 6 συλλαβές στη λέξη «μεθοδικότητα» και βρες το νόημά της:',
+      targetEmoji: '📋',
+      options: [
+        { id: 'sp10-34', emoji: '📋', labelEl: 'Προχωρώ με οργανωμένα βήματα και σειρά', isCorrect: true },
+        { id: 'sp10-35', emoji: '🌪️', labelEl: 'Κάνω πολλά πράγματα ανακατεμένα', isCorrect: false },
+        { id: 'sp10-36', emoji: '💤', labelEl: 'Αφήνω τα πάντα για αύριο', isCorrect: false },
+      ],
+    },
   ],
 };
 
@@ -303,10 +519,13 @@ export const Activity13SpeechArticulation: React.FC<ActivityRunnerRenderProps> =
     });
   };
 
-  const visibleOptions =
-    hintLevel === 2 || ageBand === '4-5' || adaptiveProfile.distractorReductionRatio >= 0.5
-      ? round.options.filter((o, i) => o.isCorrect || i === 0)
-      : round.options;
+  const visibleOptions = useMemo(() => {
+    const baseOpts =
+      hintLevel === 2 || ageBand === '4-5' || adaptiveProfile.distractorReductionRatio >= 0.5
+        ? round.options.filter((o, i) => o.isCorrect || i === 0)
+        : round.options;
+    return rotateOptionsForSession(baseOpts, sessionSeed, currentRound);
+  }, [round.options, hintLevel, ageBand, adaptiveProfile.distractorReductionRatio, sessionSeed, currentRound]);
 
   const handleSelectOption = (isCorrect: boolean, labelEl: string) => {
     runDebounced(() => {

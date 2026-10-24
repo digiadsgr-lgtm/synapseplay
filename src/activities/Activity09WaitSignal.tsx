@@ -45,6 +45,36 @@ const STREAM_SETS: SignalItem[][] = [
     { emoji: '🚂', labelEl: 'Τρενάκι (Χωρίς Αστέρι)', hasStarCue: false },
     { emoji: '🌟⛵', labelEl: 'Καραβάκι με Χρυσό Αστέρι!', hasStarCue: true },
   ],
+  [
+    { emoji: '🍎', labelEl: 'Μήλο (Χωρίς Αστέρι)', hasStarCue: false },
+    { emoji: '🍐', labelEl: 'Αχλάδι (Χωρίς Αστέρι)', hasStarCue: false },
+    { emoji: '🌟🍓', labelEl: 'Φράουλα με Χρυσό Αστέρι!', hasStarCue: true },
+  ],
+  [
+    { emoji: '🐝', labelEl: 'Μέλισσα (Χωρίς Αστέρι)', hasStarCue: false },
+    { emoji: '🐞', labelEl: 'Πασχαλίτσα (Χωρίς Αστέρι)', hasStarCue: false },
+    { emoji: '🌟🦋', labelEl: 'Πεταλούδα με Χρυσό Αστέρι!', hasStarCue: true },
+  ],
+  [
+    { emoji: '🐻', labelEl: 'Αρκουδάκι (Χωρίς Αστέρι)', hasStarCue: false },
+    { emoji: '🐰', labelEl: 'Κουνελάκι (Χωρίς Αστέρι)', hasStarCue: false },
+    { emoji: '🌟🦊', labelEl: 'Αλεπού με Χρυσό Αστέρι!', hasStarCue: true },
+  ],
+  [
+    { emoji: '⛺', labelEl: 'Σκηνή (Χωρίς Αστέρι)', hasStarCue: false },
+    { emoji: '🔦', labelEl: 'Φακός (Χωρίς Αστέρι)', hasStarCue: false },
+    { emoji: '🌟🧭', labelEl: 'Πυξίδα με Χρυσό Αστέρι!', hasStarCue: true },
+  ],
+  [
+    { emoji: '🌷', labelEl: 'Τουλίπα (Χωρίς Αστέρι)', hasStarCue: false },
+    { emoji: '🍀', labelEl: 'Τριφύλλι (Χωρίς Αστέρι)', hasStarCue: false },
+    { emoji: '🌟🌻', labelEl: 'Ηλίανθος με Χρυσό Αστέρι!', hasStarCue: true },
+  ],
+  [
+    { emoji: '🪁', labelEl: 'Χαρταετός (Χωρίς Αστέρι)', hasStarCue: false },
+    { emoji: '🧸', labelEl: 'Αρκουδάκι Παιχνίδι (Χωρίς Αστέρι)', hasStarCue: false },
+    { emoji: '🌟🎈', labelEl: 'Μπαλόνι με Χρυσό Αστέρι!', hasStarCue: true },
+  ],
 ];
 
 export const Activity09WaitSignal: React.FC<ActivityRunnerRenderProps> = ({

@@ -9,6 +9,8 @@ import { normalizeGreekForSpeech } from '../utils/soundAndSpeech';
 import {
   CLINICAL_STUDIES_AND_TRIALS,
   getAgeAndPerformanceDifficulty,
+  rotateOptionsForSession,
+  selectSessionRounds,
 } from '../utils/clinicalAdhdEngine';
 import {
   AVATAR_PRESETS,
@@ -759,20 +761,42 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
     });
   });
 
-  it('ADHD Parent & B2B Articles Hub (/articles): renders all 12 ready-to-publish articles, filters by Facebook/LinkedIn, and provides dark covers', async () => {
+  it('ADHD Parent & B2B SEO Blog (/articles): renders all 22 SEO articles, filters by topic category, and verifies philological adaptation («τάμπλετ (Tablet)»)', async () => {
     renderRoute('/articles');
     expect(screen.getByTestId('parent-articles-page')).toBeInTheDocument();
-    expect(screen.getByTestId('social-article-card-01')).toBeInTheDocument();
-    expect(screen.getByTestId('social-article-card-10')).toBeInTheDocument();
-    expect(screen.getByTestId('social-article-card-11')).toBeInTheDocument();
-    expect(screen.getByTestId('social-article-card-12')).toBeInTheDocument();
+    expect(screen.getByTestId('blog-article-card-01')).toBeInTheDocument();
+    expect(screen.getByTestId('blog-article-card-10')).toBeInTheDocument();
+    expect(screen.getByTestId('blog-article-card-11')).toBeInTheDocument();
+    expect(screen.getByTestId('blog-article-card-22')).toBeInTheDocument();
+    expect(document.body.textContent).not.toMatch(/ταμπλέτα/i);
 
-    fireEvent.click(screen.getByTestId('filter-articles-facebook'));
-    expect(screen.getByTestId('social-article-card-01')).toBeInTheDocument();
-    expect(screen.queryByTestId('social-article-card-11')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('filter-articles-home'));
+    expect(screen.getByTestId('blog-article-card-01')).toBeInTheDocument();
+    expect(screen.queryByTestId('blog-article-card-11')).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByTestId('filter-articles-linkedin'));
-    expect(screen.getByTestId('social-article-card-11')).toBeInTheDocument();
-    expect(screen.queryByTestId('social-article-card-01')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('filter-articles-clinical'));
+    expect(screen.getByTestId('blog-article-card-11')).toBeInTheDocument();
+    expect(screen.queryByTestId('blog-article-card-01')).not.toBeInTheDocument();
+  });
+
+  it('Philological Audit & Multi-Specialty Variety Engine: rotates non-repeating rounds and shuffles option positions across sessions', () => {
+    const pool = Array.from({ length: 12 }, (_, i) => `round-${i + 1}`);
+    const s0 = selectSessionRounds(pool, 3, 0);
+    const s1 = selectSessionRounds(pool, 3, 1);
+    const s2 = selectSessionRounds(pool, 3, 2);
+    const s3 = selectSessionRounds(pool, 3, 3);
+    const s4 = selectSessionRounds(pool, 3, 4);
+
+    // First 4 sessions (seeds 0, 1, 2, 3) cover all 12 items in the pool with zero overlap!
+    const combinedFirstCycle = new Set([...s0, ...s1, ...s2, ...s3]);
+    expect(combinedFirstCycle.size).toBe(12);
+
+    // Cycle 2 (seed 4) uses coprime stride so it forms a brand-new combination rather than repeating s0
+    expect(s4).not.toEqual(s0);
+
+    // Option position rotation keeps seed=0 unchanged and shifts positions for seed > 0
+    const opts = ['A', 'B', 'C'];
+    expect(rotateOptionsForSession(opts, 0, 1)).toEqual(['A', 'B', 'C']);
+    expect(rotateOptionsForSession(opts, 1, 1)).not.toEqual(['A', 'B', 'C']);
   });
 });
