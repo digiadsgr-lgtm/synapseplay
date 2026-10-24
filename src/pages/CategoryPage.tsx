@@ -61,9 +61,9 @@ export const CategoryPage: React.FC = () => {
             className="bg-white border-4 border-sand-dark rounded-3xl p-6 flex flex-col justify-between gap-5 shadow-sm"
           >
             <div className="space-y-3">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-2">
                 <span className="px-3 py-1 rounded-full bg-sand font-extrabold text-xs text-charcoal">
-                  Δραστηριότητα {activity.code}
+                  Δραστηριότητα {activity.code} • ~2 λεπτά ({activity.totalRounds} βήματα)
                 </span>
                 <button
                   type="button"
@@ -83,6 +83,15 @@ export const CategoryPage: React.FC = () => {
                 {activity.titleEl}
               </h2>
               <p className="text-sm text-charcoal-muted text-center">{activity.subtitleEl}</p>
+
+              {/* Plain-Language Parent Guidance on Activity Card */}
+              <div
+                data-testid={`activity-parent-benefit-${activity.id}`}
+                className="p-2.5 rounded-xl bg-sage-surface/60 border border-sage text-xs text-charcoal leading-relaxed"
+              >
+                <span className="font-extrabold text-sage-dark">💡 Για τον γονέα: </span>
+                <span>{activity.parentGuidanceEl}</span>
+              </div>
 
               {/* Interdisciplinary Badges & Active Age Adaptation */}
               <div className="flex flex-wrap items-center justify-center gap-1 pt-1">

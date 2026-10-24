@@ -49,6 +49,7 @@ export const ParentDashboardPage: React.FC = () => {
   const [parentNewProfileAge, setParentNewProfileAge] = useState<AgeBandId>('6-8');
   const [parentNewProfileAvatar, setParentNewProfileAvatar] = useState('🦊');
   const [showParentFamilyLimitNotice, setShowParentFamilyLimitNotice] = useState(false);
+  const [appliedPresetNotice, setAppliedPresetNotice] = useState<string | null>(null);
 
   // Enforce accidental-access barrier even on direct URL navigation to /parent
   if (!isParentUnlocked) {
@@ -83,6 +84,42 @@ export const ParentDashboardPage: React.FC = () => {
       sessionLimitMinutes: proto.recommendedTotalMinutes,
       warningWindowMinutes: proto.smoothLandingMinutes,
     });
+  };
+
+  const handleApplySmartPreset = (presetId: 'calm-preschool' | 'school-focus' | 'bedtime-winddown') => {
+    if (presetId === 'calm-preschool') {
+      void updateSettings({
+        ageBand: '4-5',
+        sessionLimitMinutes: 12,
+        warningWindowMinutes: 2,
+        voiceEnabled: true,
+        soundEnabled: true,
+        seatedModeDefault: true,
+        reducedMotion: false,
+      });
+      setAppliedPresetNotice('✅ Εφαρμόστηκε το πακέτο «🌱 Ήρεμο Ξεκίνημα (4–6 ετών)»: 12 λεπτά, Φωνή Ενεργή & Καθιστή Εκδοχή.');
+    } else if (presetId === 'school-focus') {
+      void updateSettings({
+        ageBand: '6-8',
+        sessionLimitMinutes: 15,
+        warningWindowMinutes: 2,
+        voiceEnabled: true,
+        soundEnabled: true,
+        seatedModeDefault: false,
+        reducedMotion: false,
+      });
+      setAppliedPresetNotice('✅ Εφαρμόστηκε το πακέτο «🎒 Καθημερινή Σχολική Εστίαση (6–9 ετών)»: 15 λεπτά, Φωνή & Ήρεμοι Ήχοι Ενεργοί.');
+    } else {
+      void updateSettings({
+        sessionLimitMinutes: 10,
+        warningWindowMinutes: 2,
+        voiceEnabled: true,
+        soundEnabled: true,
+        seatedModeDefault: true,
+        reducedMotion: true,
+      });
+      setAppliedPresetNotice('✅ Εφαρμόστηκε το πακέτο «🌙 Χαλάρωση Πριν τον Ύπνο»: 10 λεπτά, Μειωμένη Κίνηση & Καθιστή Εκδοχή.');
+    }
   };
 
   const handleParentCreateProfile = async (e: React.FormEvent) => {
@@ -185,6 +222,106 @@ export const ParentDashboardPage: React.FC = () => {
             Όλα τα δεδομένα αποθηκεύονται αποκλειστικά τοπικά στη συσκευή σας (IndexedDB) χωρίς
             απομακρυσμένο διακομιστή, αναλυτικά trackers ή διαφημίσεις.
           </p>
+        </div>
+      </section>
+
+      {/* Smart 1-Click Beginner Presets for Parents */}
+      <section
+        aria-label="Έτοιμες Ρυθμίσεις με 1 Κλικ για Αρχάριους Γονείς"
+        data-testid="parent-smart-presets-section"
+        className="bg-white border-2 border-sage rounded-3xl p-6 space-y-4 shadow-sm"
+      >
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <span className="inline-block px-2.5 py-0.5 rounded-full bg-sage-surface border border-sage text-[11px] font-extrabold text-sage-dark mb-1">
+              ⚡ Εύκολη Ρύθμιση για Αρχάριους Γονείς
+            </span>
+            <h2 className="text-xl font-extrabold text-charcoal">
+              Έτοιμα Πακέτα Ρυθμίσεων με 1 Κλικ (Χωρίς ψάξιμο!)
+            </h2>
+            <p className="text-xs md:text-sm text-charcoal-muted">
+              Πατήστε αυτό που σας ταιριάζει τώρα και όλες οι ρυθμίσεις (χρόνος, ηλικία, φωνή, κίνηση)
+              μπαίνουν αυτόματα:
+            </p>
+          </div>
+          <button
+            type="button"
+            data-testid="quick-reset-timer-top-btn"
+            onClick={() => {
+              simulateTimeStateForDemo('normal');
+              setAppliedPresetNotice('✅ Ο σημερινός χρόνος μηδενίστηκε! Το παιδί έχει ξανά πλήρη συνεδρία.');
+            }}
+            className="touch-target px-4 py-2.5 rounded-2xl bg-sage-surface border-2 border-sage text-charcoal font-extrabold text-xs flex items-center gap-1.5 hover:bg-sage hover:text-white"
+          >
+            <span aria-hidden="true">🔄</span>
+            <span>Μηδενισμός Σημερινού Χρόνου</span>
+          </button>
+        </div>
+
+        {appliedPresetNotice && (
+          <div
+            role="status"
+            data-testid="smart-preset-applied-banner"
+            className="p-3.5 rounded-2xl bg-sage-surface border-2 border-sage-dark text-xs md:text-sm font-extrabold text-charcoal"
+          >
+            {appliedPresetNotice}
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <button
+            type="button"
+            data-testid="smart-preset-calm-preschool"
+            onClick={() => handleApplySmartPreset('calm-preschool')}
+            className="touch-target text-left p-4 rounded-2xl bg-sand-light border-2 border-sand-dark hover:border-sage-dark hover:bg-sage-surface/50 transition-all space-y-1.5"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-2xl" aria-hidden="true">🌱</span>
+              <span className="px-2.5 py-0.5 rounded-full bg-white border border-sage text-[11px] font-extrabold text-sage-dark">
+                12 λεπτά • 4–6 ετών
+              </span>
+            </div>
+            <p className="text-sm font-extrabold text-charcoal">Ήρεμο Ξεκίνημα (Προσχολική)</p>
+            <p className="text-xs text-charcoal-muted">
+              Αργή καθαρή φωνή, μεγάλες εικόνες, καθιστή εκδοχή και ήρεμη προειδοποίηση 2 λεπτά πριν.
+            </p>
+          </button>
+
+          <button
+            type="button"
+            data-testid="smart-preset-school-focus"
+            onClick={() => handleApplySmartPreset('school-focus')}
+            className="touch-target text-left p-4 rounded-2xl bg-sand-light border-2 border-sand-dark hover:border-sage-dark hover:bg-sage-surface/50 transition-all space-y-1.5"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-2xl" aria-hidden="true">🎒</span>
+              <span className="px-2.5 py-0.5 rounded-full bg-white border border-slate text-[11px] font-extrabold text-slate-dark">
+                15 λεπτά • 6–9 ετών
+              </span>
+            </div>
+            <p className="text-sm font-extrabold text-charcoal">Καθημερινή Σχολική Εστίαση</p>
+            <p className="text-xs text-charcoal-muted">
+              Ιδανικό πριν το απογευματινό διάβασμα: 15 λεπτά συγκέντρωσης, μνήμης και αυτορρύθμισης.
+            </p>
+          </button>
+
+          <button
+            type="button"
+            data-testid="smart-preset-bedtime-winddown"
+            onClick={() => handleApplySmartPreset('bedtime-winddown')}
+            className="touch-target text-left p-4 rounded-2xl bg-sand-light border-2 border-sand-dark hover:border-sage-dark hover:bg-sage-surface/50 transition-all space-y-1.5"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-2xl" aria-hidden="true">🌙</span>
+              <span className="px-2.5 py-0.5 rounded-full bg-white border border-terracotta text-[11px] font-extrabold text-terracotta-dark">
+                10 λεπτά • Χαλάρωση
+              </span>
+            </div>
+            <p className="text-sm font-extrabold text-charcoal">Χαλάρωση Πριν τον Ύπνο</p>
+            <p className="text-xs text-charcoal-muted">
+              Μειωμένη κίνηση οθόνης, καθιστή εκδοχή και γρήγορη αποφόρτιση για ήρεμο ύπνο.
+            </p>
+          </button>
         </div>
       </section>
 

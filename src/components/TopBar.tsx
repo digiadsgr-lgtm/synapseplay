@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { SmoothLandingRing, SmoothLandingWarningBanner } from './SmoothLandingRing';
 import { ParentGateModal } from './ParentGateModal';
+import { BeginnerQuickStartModal } from './BeginnerQuickStartModal';
 import { SynapsePlayLogoMark } from './SynapsePlayLogoMark';
 
 export const TopBar: React.FC = () => {
@@ -10,6 +11,7 @@ export const TopBar: React.FC = () => {
   const location = useLocation();
   const { setBreakActive, setParentUnlocked } = useApp();
   const [showParentGate, setShowParentGate] = useState(false);
+  const [showBeginnerGuide, setShowBeginnerGuide] = useState(false);
 
   const isParentRoute = location.pathname.startsWith('/parent');
 
@@ -39,8 +41,20 @@ export const TopBar: React.FC = () => {
         {/* Center: Smooth Landing Ring */}
         <SmoothLandingRing />
 
-        {/* Right: Child Break/Pause & Accidental-Access Gated Parent Area */}
-        <div className="flex items-center gap-2.5">
+        {/* Right: Beginner Help, Child Break/Pause & Accidental-Access Gated Parent Area */}
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setShowBeginnerGuide(true)}
+            data-testid="open-beginner-guide-btn"
+            aria-label="Οδηγός Χρήσης για Αρχάριους"
+            title="Πώς λειτουργεί η εφαρμογή σε 3 απλά βήματα"
+            className="touch-target px-3.5 py-2 rounded-2xl bg-sage-surface border-2 border-sage text-charcoal font-extrabold flex items-center gap-1.5 hover:bg-sage hover:text-white transition-colors"
+          >
+            <span className="text-lg" aria-hidden="true">🧭</span>
+            <span className="text-xs md:text-sm">Πώς Λειτουργεί</span>
+          </button>
+
           <button
             type="button"
             onClick={() => setBreakActive(true)}
@@ -86,6 +100,10 @@ export const TopBar: React.FC = () => {
           }}
           onCancel={() => setShowParentGate(false)}
         />
+      )}
+
+      {showBeginnerGuide && (
+        <BeginnerQuickStartModal onClose={() => setShowBeginnerGuide(false)} />
       )}
     </header>
   );

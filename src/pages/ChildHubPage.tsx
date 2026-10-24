@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ACTIVITIES, CATEGORIES, getActivitiesByCategory } from '../data/activitiesCatalog';
-import { AGE_BAND_PROTOCOLS, type AgeBandId } from '../data/ageProtocols';
+import { AGE_BAND_PROTOCOLS, getAgeBandProtocol, type AgeBandId } from '../data/ageProtocols';
 import { useApp } from '../context/AppContext';
 import {
   AVATAR_PRESETS,
@@ -12,11 +12,24 @@ import {
 } from '../utils/childProfileLearningEngine';
 import { MONETIZATION_CONFIG } from '../config/monetization.config';
 import { speakGreek } from '../utils/soundAndSpeech';
+import { BeginnerQuickStartModal } from '../components/BeginnerQuickStartModal';
+
+const EVERYDAY_CATEGORY_BENEFITS_EL: Record<string, string> = {
+  'detective-eyes':
+    '💡 Στην πράξη: Όταν το παιδί αποσπάται εύκολα, χάνει τη σειρά του στο βιβλίο ή δυσκολεύεται να προσέξει λεπτομέρειες και ήχους.',
+  'think-plan':
+    '💡 Στην πράξη: Όταν ξεχνάει τι του είπατε πριν 1 λεπτό, μπερδεύει τη σειρά στις οδηγίες ή δυσκολεύεται να οργανώσει τις σκέψεις του.',
+  'pause-choose':
+    '💡 Στην πράξη: Όταν βιάζεται να απαντήσει, διακόπτει, δυσκολεύεται να περιμένει τη σειρά του ή θυμώνει εύκολα.',
+  'move-build':
+    '💡 Στην πράξη: Όταν έχει έντονη υπερκινητικότητα, χρειάζεται εκτόνωση σώματος ή εξάσκηση σε καθημερινές ρουτίνες (ντύσιμο, τσάντα, αναπνοή).',
+};
 
 export const ChildHubPage: React.FC = () => {
   const navigate = useNavigate();
   const {
     settings,
+    updateSettings,
     profileCreationPermission,
     childProfiles,
     activeProfile,
@@ -28,9 +41,43 @@ export const ChildHubPage: React.FC = () => {
   const [isCreatingProfile, setIsCreatingProfile] = useState<boolean>(false);
   const [isChangingAvatar, setIsChangingAvatar] = useState<boolean>(false);
   const [showFamilyLimitNotice, setShowFamilyLimitNotice] = useState<boolean>(false);
+  const [showBeginnerModal, setShowBeginnerModal] = useState<boolean>(false);
+  const [showQuickStepsBanner, setShowQuickStepsBanner] = useState<boolean>(() => {
+    try {
+      if (typeof window === 'undefined' || !window.localStorage) return true;
+      return window.localStorage.getItem('synapseplay_hide_beginner_banner') !== 'true';
+    } catch {
+      return true;
+    }
+  });
   const [newNickname, setNewNickname] = useState<string>('');
   const [newAvatar, setNewAvatar] = useState<string>('🦄');
   const [newAgeBand, setNewAgeBand] = useState<AgeBandId>('6-8');
+
+  const handleToggleQuickStepsBanner = (visible: boolean) => {
+    setShowQuickStepsBanner(visible);
+    try {
+      if (typeof window !== 'undefined' && window.localStorage) {
+        window.localStorage.setItem('synapseplay_hide_beginner_banner', visible ? 'false' : 'true');
+      }
+    } catch {
+      // Ignore storage errors
+    }
+  };
+
+  const handleQuickAgeBandSelect = (bandId: AgeBandId) => {
+    const proto = getAgeBandProtocol(bandId);
+    void updateSettings({
+      ageBand: bandId,
+      sessionLimitMinutes: proto.recommendedTotalMinutes,
+      warningWindowMinutes: proto.smoothLandingMinutes,
+    });
+    speakGreek(
+      `Ηλικία ${proto.labelEl}. Ο χρόνος και τα παιχνίδια προσαρμόστηκαν αυτόματα!`,
+      settings.voiceEnabled,
+      activeProfile.learnedModel.optimalSpeechRate
+    );
+  };
 
   const recommendation = useMemo(
     () => getPersonalizedActivityRecommendation(activeProfile, ACTIVITIES),
@@ -91,6 +138,90 @@ export const ChildHubPage: React.FC = () => {
 
   return (
     <main className="max-w-5xl mx-auto px-4 py-6 space-y-6" data-testid="child-hub-page">
+      {/* Beginner-Friendly 3-Step Quick Onboarding Strip */}
+      <section
+        aria-label="Γρήγορος Οδηγός για Αρχάριους Γονείς"
+        data-testid="beginner-onboarding-strip"
+        className="bg-sage-surface/80 border-2 border-sage rounded-3xl p-4 md:p-5 space-y-3 shadow-sm"
+      >
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            <span className="text-2xl" aria-hidden="true">👋</span>
+            <div>
+              <h2 className="text-sm md:text-base font-extrabold text-charcoal">
+                Πρώτη φορά εδώ; Πώς λειτουργεί σε 3 απλά βήματα (χωρίς ρυθμίσεις!)
+              </h2>
+              <p className="text-xs text-charcoal-muted">
+                Σχεδιασμένο ώστε κάθε γονιός και παιδί να ξεκινάει αμέσως, σε λιγότερο από 10 δευτερόλεπτα.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              data-testid="hub-open-beginner-modal-btn"
+              onClick={() => setShowBeginnerModal(true)}
+              className="touch-target px-3.5 py-2 rounded-2xl bg-white border-2 border-sage-dark text-charcoal font-extrabold text-xs flex items-center gap-1.5 hover:bg-sage hover:text-white"
+            >
+              <span aria-hidden="true">🧭</span>
+              <span>Αναλυτικός Οδηγός & Ερωτήσεις</span>
+            </button>
+            <button
+              type="button"
+              data-testid="toggle-beginner-strip-btn"
+              onClick={() => handleToggleQuickStepsBanner(!showQuickStepsBanner)}
+              className="touch-target px-3 py-2 rounded-xl bg-white/80 border border-charcoal/20 text-xs font-extrabold text-charcoal hover:bg-white"
+            >
+              {showQuickStepsBanner ? 'Απόκρυψη ▲' : 'Εμφάνιση Βημάτων ▼'}
+            </button>
+          </div>
+        </div>
+
+        {showQuickStepsBanner && (
+          <div
+            data-testid="beginner-steps-cards"
+            className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-1"
+          >
+            <div className="p-3.5 rounded-2xl bg-white border border-sage flex items-start gap-3">
+              <span className="w-7 h-7 rounded-full bg-sage-dark text-white font-extrabold text-xs flex items-center justify-center shrink-0 mt-0.5">
+                1
+              </span>
+              <div className="text-xs space-y-0.5">
+                <p className="font-extrabold text-charcoal">Διαλέξτε Ηλικία (παρακάτω)</p>
+                <p className="text-charcoal-muted">
+                  Πατήστε την ηλικία του παιδιού (π.χ. 6–8 ετών). Ο χρόνος και η δυσκολία ρυθμίζονται αυτόματα!
+                </p>
+              </div>
+            </div>
+
+            <div className="p-3.5 rounded-2xl bg-white border border-sage flex items-start gap-3">
+              <span className="w-7 h-7 rounded-full bg-slate text-white font-extrabold text-xs flex items-center justify-center shrink-0 mt-0.5">
+                2
+              </span>
+              <div className="text-xs space-y-0.5">
+                <p className="font-extrabold text-charcoal">Πατήστε «Παίξε Τώρα» (5 λεπτά)</p>
+                <p className="text-charcoal-muted">
+                  Ξεκινήστε από την <strong>Προσωπική Πρόταση</strong> ή διαλέξτε μία από τις 4 ομάδες παιχνιδιών.
+                </p>
+              </div>
+            </div>
+
+            <div className="p-3.5 rounded-2xl bg-white border border-sage flex items-start gap-3">
+              <span className="w-7 h-7 rounded-full bg-terracotta text-white font-extrabold text-xs flex items-center justify-center shrink-0 mt-0.5">
+                3
+              </span>
+              <div className="text-xs space-y-0.5">
+                <p className="font-extrabold text-charcoal">Ακούστε 🔊 & Κλείστε Ήρεμα</p>
+                <p className="text-charcoal-muted">
+                  Κάθε παιχνίδι έχει φωνητική οδηγία (🔊) και κουμπί <strong>💡 Βοήθεια</strong>. Στο τέλος η οθόνη ξεκουράζεται γλυκά!
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+      </section>
+
       {/* Per-Device Multi-Child Micro-Profile Switcher & Creator */}
       <section
         aria-label="Προφίλ Παιδιών Συσκευής"
@@ -183,6 +314,39 @@ export const ChildHubPage: React.FC = () => {
               </button>
             );
           })}
+        </div>
+
+        {/* 1-Click Direct Age Band Switcher for Beginner Parents */}
+        <div
+          data-testid="hub-quick-age-band-bar"
+          className="pt-2 border-t border-sand-dark flex flex-wrap items-center justify-between gap-2"
+        >
+          <span className="text-xs font-extrabold text-charcoal flex items-center gap-1.5">
+            <span aria-hidden="true">🎂</span>
+            <span>Γρήγορη Επιλογή Ηλικίας Παιδιού (προσαρμόζει αυτόματα δυσκολία &amp; χρόνο):</span>
+          </span>
+          <div className="flex flex-wrap items-center gap-1.5">
+            {AGE_BAND_PROTOCOLS.map((proto) => {
+              const currentAge = settings.ageBand ?? activeProfile.ageBand ?? '6-8';
+              const isSelected = currentAge === proto.id;
+              return (
+                <button
+                  key={proto.id}
+                  type="button"
+                  data-testid={`hub-quick-age-btn-${proto.id}`}
+                  aria-pressed={isSelected}
+                  onClick={() => handleQuickAgeBandSelect(proto.id)}
+                  className={`touch-target px-3 py-1.5 rounded-xl border-2 text-xs font-extrabold transition-all ${
+                    isSelected
+                      ? 'bg-slate text-white border-slate-dark shadow-sm'
+                      : 'bg-sand-light text-charcoal border-sand-dark hover:bg-sand'
+                  }`}
+                >
+                  {proto.labelEl}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {/* Quick Micro-Profile Creator Form */}
@@ -494,6 +658,16 @@ export const ChildHubPage: React.FC = () => {
                   </button>
                 </div>
 
+                {/* Plain-Language Everyday Parent Benefit */}
+                {EVERYDAY_CATEGORY_BENEFITS_EL[category.id] && (
+                  <p
+                    data-testid={`category-everyday-benefit-${category.id}`}
+                    className="p-3 rounded-2xl bg-white/90 border border-charcoal/15 text-xs font-bold text-charcoal leading-relaxed"
+                  >
+                    {EVERYDAY_CATEGORY_BENEFITS_EL[category.id]}
+                  </p>
+                )}
+
                 {/* Activity Mini Pictogram Preview */}
                 <div className="flex flex-wrap items-center gap-2">
                   {activities.map((act) => (
@@ -537,6 +711,9 @@ export const ChildHubPage: React.FC = () => {
           λειτουργία στη συσκευή χωρίς διαφημίσεις ή ιχνηλάτες.
         </p>
       </footer>
+      {showBeginnerModal && (
+        <BeginnerQuickStartModal onClose={() => setShowBeginnerModal(false)} />
+      )}
     </main>
   );
 };

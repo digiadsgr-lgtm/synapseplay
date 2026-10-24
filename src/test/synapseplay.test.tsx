@@ -179,5 +179,32 @@ describe('SynapsePlay (FocusEngine 5+) — Full Gate 1 to Gate 5 Verification Su
         expect(screen.getByTestId('wipe-success-banner')).toBeInTheDocument();
       });
     });
+
+    it('provides Beginner Quick-Start Guide, 1-Click Age Band Switcher, Smart Parent Presets, and In-Game Parent Coaching Tips', async () => {
+      renderWithRouter(['/app']);
+
+      // 1. Beginner Onboarding Strip & Quick Age Switcher on Child Hub
+      expect(screen.getByTestId('beginner-onboarding-strip')).toBeInTheDocument();
+      expect(screen.getByTestId('hub-quick-age-band-bar')).toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId('hub-quick-age-btn-4-5'));
+      await waitFor(() => {
+        expect(screen.getByTestId('hub-quick-age-btn-4-5')).toHaveAttribute('aria-pressed', 'true');
+      });
+
+      // 2. TopBar Beginner Guide Modal
+      fireEvent.click(screen.getByTestId('open-beginner-guide-btn'));
+      expect(screen.getByTestId('beginner-quick-start-modal')).toBeInTheDocument();
+      fireEvent.click(screen.getByTestId('beginner-tab-faq'));
+      expect(screen.getByTestId('beginner-faq-list')).toBeInTheDocument();
+      fireEvent.click(screen.getByTestId('close-beginner-guide-btn'));
+      expect(screen.queryByTestId('beginner-quick-start-modal')).not.toBeInTheDocument();
+
+      // 3. In-Game Parent Coaching Tip
+      renderWithRouter(['/activity/01-visual-search']);
+      const coachingBtn = screen.getByTestId('toggle-parent-coaching-tip-btn');
+      fireEvent.click(coachingBtn);
+      expect(screen.getByTestId('runner-parent-coaching-box')).toBeInTheDocument();
+    });
   });
 });

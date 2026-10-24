@@ -8,6 +8,7 @@ import type {
   SilentAdaptationProfile,
 } from '../types/domain';
 import { useApp } from '../context/AppContext';
+import { getActivitiesByCategory } from '../data/activitiesCatalog';
 import { playCalmTone, speakGreek } from '../utils/soundAndSpeech';
 import { useActivityRunnerMachine } from '../hooks/useActivityRunnerMachine';
 import { evaluateInvisibleScenario } from '../utils/adaptiveScenarioEngine';
@@ -82,6 +83,7 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
   const lastResponseMsRef = useRef<number>(0);
   const loggedCompletionRef = useRef<boolean>(false);
   const [selectedStrategy, setSelectedStrategy] = React.useState<string | null>(null);
+  const [showParentCoachingTip, setShowParentCoachingTip] = React.useState<boolean>(false);
   const [sessionSeed, setSessionSeed] = React.useState<number>(() => {
     try {
       if (typeof window === 'undefined' || import.meta.env.MODE === 'test') {
@@ -286,6 +288,13 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
   const isIntro = state.phase === 'INTRO';
   const ageAdaptationText = activity.ageAdaptationsEl?.[ageBand];
 
+  const nextActivityInCategory = useMemo(() => {
+    const categoryActivities = getActivitiesByCategory(activity.categoryId);
+    const currentIndex = categoryActivities.findIndex((a) => a.id === activity.id);
+    if (currentIndex === -1 || categoryActivities.length <= 1) return null;
+    return categoryActivities[(currentIndex + 1) % categoryActivities.length];
+  }, [activity.categoryId, activity.id]);
+
   return (
     <main
       className="max-w-5xl mx-auto px-4 py-6 space-y-6"
@@ -428,7 +437,33 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
               <span aria-hidden="true">•</span>
               <span>{difficultyProfile.performanceStateLabelEl}</span>
             </div>
+
+            <button
+              type="button"
+              data-testid="toggle-parent-coaching-tip-btn"
+              onClick={() => setShowParentCoachingTip((v) => !v)}
+              aria-expanded={showParentCoachingTip}
+              className="touch-target px-3 py-1.5 rounded-xl bg-sand-light border border-sand-dark text-xs font-extrabold text-charcoal hover:bg-sand flex items-center gap-1"
+            >
+              <span aria-hidden="true">👨‍👩‍👧</span>
+              <span>{showParentCoachingTip ? 'Κλείσιμο Συμβουλής Γονέα' : 'Συμβουλή για τον Γονέα'}</span>
+            </button>
           </div>
+
+          {showParentCoachingTip && (
+            <div
+              data-testid="runner-parent-coaching-box"
+              className="p-3 rounded-2xl bg-sage-surface/70 border border-sage text-xs text-charcoal space-y-1"
+            >
+              <p className="font-extrabold text-sage-dark">
+                👨‍👩‍👧 Πώς να βοηθήσετε το παιδί σε αυτό το παιχνίδι (χωρίς άγχος):
+              </p>
+              <p>{activity.parentGuidanceEl}</p>
+              <p className="text-charcoal-muted">
+                💡 <strong>Πρακτική συμβουλή:</strong> Αφήστε το παιδί να δοκιμάσει με τον δικό του ρυθμό. Αν δυσκολευτεί, δείξτε του το κουμπί <strong>«💡 Βοήθεια»</strong> ή πατήστε <strong>«🔊 Άκου Οδηγία»</strong>.
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Unified Hint Ladder, Variety Shuffle & Seated Mode Controls */}
@@ -597,11 +632,22 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
               <span aria-hidden="true">🔄</span>
               <span>Παίξε Ξανά</span>
             </button>
+            {nextActivityInCategory && (
+              <button
+                type="button"
+                onClick={() => navigate(`/activity/${nextActivityInCategory.id}`)}
+                data-testid="next-activity-in-category-btn"
+                className="touch-target px-7 py-3 rounded-2xl bg-sage-dark text-white font-extrabold text-lg flex items-center gap-2 hover:bg-sage shadow-sm"
+              >
+                <span aria-hidden="true">⏭️</span>
+                <span>Επόμενο: {nextActivityInCategory.titleEl}</span>
+              </button>
+            )}
             <button
               type="button"
               onClick={() => navigate(`/category/${activity.categoryId}`)}
               data-testid="finish-to-category-btn"
-              className="touch-target px-8 py-3 rounded-2xl bg-sage-dark text-white font-extrabold text-lg flex items-center gap-2 hover:bg-sage"
+              className="touch-target px-6 py-3 rounded-2xl bg-slate text-white font-extrabold text-lg flex items-center gap-2 hover:bg-slate-dark"
             >
               <span aria-hidden="true">🏡</span>
               <span>Διάλεξε Άλλο Παιχνίδι</span>
