@@ -8,6 +8,7 @@ import { ChildHubPage } from './pages/ChildHubPage';
 import { CategoryPage } from './pages/CategoryPage';
 import { ActivityPage } from './pages/ActivityPage';
 import { ParentDashboardPage } from './pages/ParentDashboardPage';
+import { LandingPage } from './features/landing/LandingPage';
 
 const AppShell: React.FC = () => {
   const { isBreakActive, setBreakActive } = useApp();
@@ -28,7 +29,8 @@ const AppShell: React.FC = () => {
       <TopBar />
       <div className="flex-1">
         <Routes>
-          <Route path="/" element={<ChildHubPage />} />
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/app" element={<ChildHubPage />} />
           <Route path="/category/:categoryId" element={<CategoryPage />} />
           <Route path="/activity/:activityId" element={<ActivityPage />} />
           <Route path="/parent" element={<ParentDashboardPage />} />

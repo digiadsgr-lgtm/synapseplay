@@ -12,7 +12,7 @@ export const CategoryPage: React.FC = () => {
 
   const category = categoryId ? getCategoryById(categoryId as CategoryId) : undefined;
   if (!category) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/app" replace />;
   }
 
   const activities = getActivitiesByCategory(category.id);
@@ -24,7 +24,7 @@ export const CategoryPage: React.FC = () => {
         <div className="flex items-center gap-4">
           <button
             type="button"
-            onClick={() => navigate('/')}
+            onClick={() => navigate('/app')}
             data-testid="back-to-hub-btn"
             aria-label="Επιστροφή στην Αρχική"
             className="touch-target px-4 py-2 rounded-2xl bg-white border-2 border-slate text-charcoal font-bold flex items-center gap-2 hover:bg-slate-surface"

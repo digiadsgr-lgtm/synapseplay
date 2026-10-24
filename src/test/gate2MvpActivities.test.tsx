@@ -19,7 +19,7 @@ describe('Gate 2 (MVP Milestone) — Child Hub Navigation & Activities 01, 04, 0
   });
 
   it('navigates from Child Hub through Category View into MVP Activity 01 and back', () => {
-    renderApp('/');
+    renderApp('/app');
     expect(screen.getByTestId('child-hub-page')).toBeInTheDocument();
 
     // Open Group A: Detective Eyes

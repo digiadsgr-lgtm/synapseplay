@@ -33,7 +33,7 @@ describe('SynapsePlay (FocusEngine 5+) — Full Gate 1 to Gate 5 Verification Su
       expect(CATEGORIES).toHaveLength(4);
       expect(ACTIVITIES).toHaveLength(20);
 
-      renderWithRouter(['/']);
+      renderWithRouter(['/app']);
       expect(screen.getByTestId('child-hub-page')).toBeInTheDocument();
       const grid = screen.getByTestId('category-cards-grid');
       expect(grid.children).toHaveLength(4);
@@ -43,7 +43,7 @@ describe('SynapsePlay (FocusEngine 5+) — Full Gate 1 to Gate 5 Verification Su
     });
 
     it('supports Break / Pause button and Escape key navigation without losing state', () => {
-      renderWithRouter(['/']);
+      renderWithRouter(['/app']);
       expect(screen.queryByTestId('break-pause-modal')).not.toBeInTheDocument();
 
       fireEvent.click(screen.getByTestId('break-pause-btn'));

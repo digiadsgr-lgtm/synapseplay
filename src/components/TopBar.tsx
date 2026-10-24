@@ -14,7 +14,7 @@ export const TopBar: React.FC = () => {
 
   const handleReturnToChild = () => {
     setParentUnlocked(false);
-    navigate('/');
+    navigate('/app');
   };
 
   return (

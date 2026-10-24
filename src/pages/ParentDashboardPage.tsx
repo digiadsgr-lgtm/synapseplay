@@ -53,7 +53,7 @@ export const ParentDashboardPage: React.FC = () => {
       <main className="max-w-xl mx-auto px-4 py-12" data-testid="parent-locked-barrier">
         <ParentGateModal
           onSuccess={() => setParentUnlocked(true)}
-          onCancel={() => navigate('/')}
+          onCancel={() => navigate('/app')}
         />
       </main>
     );
@@ -67,7 +67,7 @@ export const ParentDashboardPage: React.FC = () => {
 
   const handleExitToChild = () => {
     setParentUnlocked(false);
-    navigate('/');
+    navigate('/app');
   };
 
   const elapsedMinutes = Math.floor(elapsedSeconds / 60);

@@ -9,7 +9,7 @@ export const ActivityPage: React.FC = () => {
   const activity = activityId ? getActivityById(activityId) : undefined;
 
   if (!activity) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/app" replace />;
   }
 
   return (

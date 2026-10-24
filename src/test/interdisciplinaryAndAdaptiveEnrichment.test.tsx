@@ -315,7 +315,7 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
     expect(adoptedScenario.enrichChallenge).toBe(true);
 
     // 2. Integration test: Create a second Child Micro-Profile on the Child Hub and verify isolation
-    renderRoute('/');
+    renderRoute('/app');
     expect(screen.getByTestId('child-profile-switcher')).toBeInTheDocument();
     expect(screen.getByTestId('personalized-recommendation-card')).toBeInTheDocument();
 
@@ -586,5 +586,84 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
     });
 
     unmountParent();
+  });
+
+  it('Marketing & Presentation Landing Page (/): renders all 7 required sections, interactive Age Pathways (4-12), and navigates to /app', async () => {
+    renderRoute('/');
+
+    // 1. Hero section & Trust Badges
+    expect(screen.getByTestId('landing-page')).toBeInTheDocument();
+    expect(screen.getByTestId('landing-hero-badge')).toHaveTextContent(
+      'Επιστημονικά Τεκμηριωμένη Εξάσκηση Εκτελεστικών Λειτουργιών'
+    );
+    expect(screen.getByTestId('landing-hero-headline')).toHaveTextContent(
+      'Από την οθόνη στην πράξη. Βοηθήστε το παιδί σας να συγκεντρώνεται χωρίς οθονικό εθισμό.'
+    );
+    expect(screen.getByTestId('landing-trust-badges')).toHaveTextContent('100% Client-Side & Local');
+    expect(screen.getByTestId('landing-trust-badges')).toHaveTextContent('Χωρίς Διαφημίσεις');
+    expect(screen.getByTestId('landing-trust-badges')).toHaveTextContent('Σχεδιασμένο για Tablet');
+
+    // 2. The Problem We Solve (3 columns)
+    expect(screen.getByTestId('landing-problem-section')).toHaveTextContent(
+      'Όχι άλλο Zombie Scrolling'
+    );
+    expect(screen.getByTestId('landing-problem-section')).toHaveTextContent(
+      'Μηδενική Τιμωρία (No Game Over)'
+    );
+    expect(screen.getByTestId('landing-problem-section')).toHaveTextContent(
+      'Σύνδεση με τον Πραγματικό Χώρο'
+    );
+
+    // 3. The 4 Pillars & Module 13 Smooth Landing Callout
+    expect(screen.getByTestId('landing-pillars-section')).toHaveTextContent(
+      'Ομάδα Α: Detective Eyes'
+    );
+    expect(screen.getByTestId('landing-pillars-section')).toHaveTextContent(
+      'Ομάδα Β: Think & Plan'
+    );
+    expect(screen.getByTestId('landing-pillars-section')).toHaveTextContent(
+      'Ομάδα Γ: Pause & Choose'
+    );
+    expect(screen.getByTestId('landing-pillars-section')).toHaveTextContent(
+      'Ομάδα Δ: Move & Build'
+    );
+    expect(screen.getByTestId('landing-smooth-landing-callout')).toHaveTextContent(
+      'Module 13: Smooth Landing Protocol'
+    );
+
+    // 4. Age-Appropriate Pathways (4-5 to 10-12 interactive tabs)
+    fireEvent.click(screen.getByTestId('landing-age-tab-4-5'));
+    expect(screen.getByTestId('landing-active-age-card')).toHaveTextContent(
+      'Μηδενικό κείμενο, μεγάλα εικονογράμματα, αισθητηριακή γείωση.'
+    );
+    fireEvent.click(screen.getByTestId('landing-age-tab-10-12'));
+    expect(screen.getByTestId('landing-active-age-card')).toHaveTextContent(
+      'Μεταγνώση, στρατηγικός σχεδιασμός πολλαπλών βημάτων.'
+    );
+
+    // 5. Pricing & Licensing Plans + Beta Free Badge
+    expect(screen.getByTestId('landing-beta-free-badge')).toHaveTextContent(
+      'Τρέχουσα Φάση: Δωρεάν Δοκιμαστική Πρόσβαση (Beta) για Όλους!'
+    );
+    expect(screen.getByTestId('landing-plan-family')).toHaveTextContent('Έως 2 Προφίλ Παιδιών');
+    expect(screen.getByTestId('landing-plan-b2b')).toHaveTextContent(
+      'Απεριόριστα Προφίλ Παιδιών & Γρήγορος Profile Switcher'
+    );
+
+    // 6. Privacy & Safety Commitment + 7. Footer
+    expect(screen.getByTestId('landing-privacy-section')).toHaveTextContent('Zero Cloud Tracking');
+    expect(screen.getByTestId('landing-privacy-section')).toHaveTextContent(
+      'Πλήρης Διαγραφή με 1 Κλικ'
+    );
+    expect(screen.getByTestId('landing-privacy-section')).toHaveTextContent(
+      'Επιστημονική Ειλικρίνεια'
+    );
+    expect(screen.getByTestId('landing-footer')).toHaveTextContent('© SynapsePlay — FocusEngine 5+');
+
+    // Clicking Primary Hero CTA ("Δοκιμάστε το Δωρεάν (Beta)") navigates to /app (ChildHubPage)
+    fireEvent.click(screen.getByTestId('hero-primary-cta-btn'));
+    await waitFor(() => {
+      expect(screen.getByTestId('child-hub-page')).toBeInTheDocument();
+    });
   });
 });

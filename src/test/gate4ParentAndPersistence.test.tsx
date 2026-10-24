@@ -39,7 +39,7 @@ describe('Gate 4 — Parent Area, Accidental-Access Gate, IndexedDB Persistence 
   });
 
   it('guarantees zero parental settings are exposed on any child screen (Hub, Category, or Activity)', () => {
-    const childRoutes = ['/', '/category/detective-eyes', '/activity/01-visual-search'];
+    const childRoutes = ['/', '/app', '/category/detective-eyes', '/activity/01-visual-search'];
 
     for (const route of childRoutes) {
       const { unmount } = renderRoute(route);
