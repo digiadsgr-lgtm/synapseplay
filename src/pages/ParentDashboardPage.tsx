@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { ACTIVITIES } from '../data/activitiesCatalog';
 import {
@@ -887,6 +887,41 @@ export const ParentDashboardPage: React.FC = () => {
             </div>
           ))}
         </div>
+      </section>
+
+      {/* GDPR Compliance & DIGIADS Developer Attribution Footer */}
+      <section
+        data-testid="parent-gdpr-footer-section"
+        className="bg-white border-2 border-slate rounded-3xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-xs text-charcoal"
+      >
+        <div className="space-y-1">
+          <p className="font-extrabold text-sm">
+            🛡️ 100% Συμμόρφωση GDPR (ΕΕ 2016/679 &amp; Ν. 4624/2019) • Privacy-by-Design
+          </p>
+          <p className="text-charcoal-muted">
+            Η εφαρμογή <strong>SynapsePlay (FocusEngine 5+)</strong> αναπτύχθηκε και αναπτύσσεται από
+            την{' '}
+            <a
+              href="https://digiads.gr"
+              target="_blank"
+              rel="noopener noreferrer"
+              data-testid="parent-digiads-link"
+              className="font-extrabold text-slate underline underline-offset-2 hover:text-charcoal"
+            >
+              DIGIADS (https://digiads.gr)
+            </a>
+            . Μηδενικά cookies παρακολούθησης • 100% τοπική αποθήκευση στη συσκευή σας.
+          </p>
+        </div>
+
+        <Link
+          to="/legal"
+          data-testid="parent-open-legal-page-link"
+          className="touch-target px-4 py-2.5 rounded-2xl bg-sage-surface border-2 border-sage text-charcoal font-extrabold text-xs flex items-center gap-2 hover:bg-sage hover:text-white shrink-0"
+        >
+          <span>Όροι Χρήσης, Πολιτική Απορρήτου &amp; Κέντρο GDPR</span>
+          <span aria-hidden="true">→</span>
+        </Link>
       </section>
     </main>
   );

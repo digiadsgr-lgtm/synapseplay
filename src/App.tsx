@@ -8,12 +8,13 @@ import { ChildHubPage } from './pages/ChildHubPage';
 import { CategoryPage } from './pages/CategoryPage';
 import { ActivityPage } from './pages/ActivityPage';
 import { ParentDashboardPage } from './pages/ParentDashboardPage';
+import { LegalCompliancePage } from './pages/LegalCompliancePage';
 import { LandingPage } from './features/landing/LandingPage';
 
 const AppShell: React.FC = () => {
   const { isBreakActive, setBreakActive } = useApp();
   const location = useLocation();
-  const isLandingRoute = location.pathname === '/';
+  const isLandingRoute = location.pathname === '/' || location.pathname.startsWith('/legal');
 
   // Global Escape key listener to toggle Break/Pause cleanly
   useEffect(() => {
@@ -32,6 +33,7 @@ const AppShell: React.FC = () => {
       <div className="flex-1">
         <Routes>
           <Route path="/" element={<LandingPage />} />
+          <Route path="/legal" element={<LegalCompliancePage />} />
           <Route path="/app" element={<ChildHubPage />} />
           <Route path="/category/:categoryId" element={<CategoryPage />} />
           <Route path="/activity/:activityId" element={<ActivityPage />} />

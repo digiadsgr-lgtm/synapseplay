@@ -717,4 +717,28 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
       );
     });
   });
+
+  it('GDPR Compliance & Legal Center (/legal): renders DIGIADS attribution, GDPR consent banner, and interactive Right to Erasure', async () => {
+    window.localStorage.removeItem('synapseplay_gdpr_consent_v1');
+    const { unmount } = renderRoute('/');
+
+    expect(screen.getByTestId('footer-digiads-link')).toHaveAttribute('href', 'https://digiads.gr');
+    expect(screen.getByTestId('gdpr-consent-banner')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('gdpr-banner-accept-btn'));
+    expect(screen.queryByTestId('gdpr-consent-banner')).not.toBeInTheDocument();
+    unmount();
+
+    renderRoute('/legal');
+    expect(screen.getByTestId('legal-compliance-page')).toBeInTheDocument();
+    expect(screen.getByTestId('legal-digiads-header-link')).toHaveAttribute(
+      'href',
+      'https://digiads.gr'
+    );
+    expect(screen.getByTestId('gdpr-rights-action-center')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('gdpr-erase-all-data-btn'));
+    await waitFor(() => {
+      expect(screen.getByTestId('gdpr-erase-confirmation')).toBeInTheDocument();
+    });
+  });
 });

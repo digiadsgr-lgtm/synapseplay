@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { SynapsePlayLogoMark } from '../../components/SynapsePlayLogoMark';
+import { GdprConsentBanner } from '../../components/GdprConsentBanner';
 import { STRIPE_CHECKOUT_URLS } from '../../config/monetization.config';
 
 interface AgePathwayItem {
@@ -905,12 +906,27 @@ export const LandingPage: React.FC = () => {
         className="border-t-2 border-[#2C3539]/15 bg-[#FAF6EE] mt-8"
       >
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs sm:text-sm font-bold text-[#2C3539]">
-          <div className="flex items-center gap-2.5">
-            <SynapsePlayLogoMark sizeClassName="w-8 h-8 rounded-xl" />
-            <span>© SynapsePlay — FocusEngine 5+</span>
+          <div className="flex flex-col sm:flex-row items-center gap-2.5 text-center sm:text-left">
+            <div className="flex items-center gap-2.5">
+              <SynapsePlayLogoMark sizeClassName="w-8 h-8 rounded-xl" />
+              <span>© SynapsePlay — FocusEngine 5+</span>
+            </div>
+            <span className="hidden sm:inline text-[#2C3539]/40">•</span>
+            <span className="text-xs font-bold text-[#2C3539]/85">
+              Η εφαρμογή αναπτύχθηκε και αναπτύσσεται από την{' '}
+              <a
+                href="https://digiads.gr"
+                target="_blank"
+                rel="noopener noreferrer"
+                data-testid="footer-digiads-link"
+                className="font-extrabold text-[#4A6B82] underline underline-offset-4 hover:text-[#2C3539]"
+              >
+                DIGIADS (https://digiads.gr)
+              </a>
+            </span>
           </div>
 
-          <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6">
+          <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-5">
             <Link
               to="/app"
               data-testid="footer-link-app"
@@ -925,13 +941,20 @@ export const LandingPage: React.FC = () => {
             >
               Περιβάλλον Γονέα
             </Link>
+            <Link
+              to="/legal"
+              data-testid="footer-link-legal-page"
+              className="touch-target px-3 py-1.5 rounded-xl hover:bg-[#EFE8D8] underline underline-offset-4 text-[#4A6B82] font-extrabold"
+            >
+              Νομικό Κέντρο &amp; GDPR
+            </Link>
             <button
               type="button"
               data-testid="footer-link-terms"
               onClick={() => setShowTermsModal((v) => !v)}
               className="touch-target px-3 py-1.5 rounded-xl hover:bg-[#EFE8D8] underline underline-offset-4"
             >
-              Όροι Χρήσης & Ιδιωτικότητα
+              Όροι Χρήσης &amp; Ιδιωτικότητα
             </button>
           </div>
         </div>
@@ -943,21 +966,42 @@ export const LandingPage: React.FC = () => {
             data-testid="landing-terms-panel"
             className="max-w-6xl mx-auto px-4 sm:px-6 pb-8"
           >
-            <div className="p-5 rounded-2xl bg-[#EFE8D8] border border-[#2C3539]/20 text-xs text-[#2C3539] space-y-2">
-              <p className="font-extrabold">
-                Όροι Χρήσης & Πολιτική Ιδιωτικότητας (Privacy-by-Design):
+            <div className="p-5 rounded-2xl bg-[#EFE8D8] border border-[#2C3539]/20 text-xs text-[#2C3539] space-y-2.5 leading-relaxed">
+              <p className="font-extrabold text-sm">
+                Όροι Χρήσης, Πολιτική Ιδιωτικότητας &amp; Πλήρης Συμμόρφωση GDPR (ΕΕ 2016/679 &amp; Ν. 4624/2019):
               </p>
               <p>
-                Το SynapsePlay (FocusEngine 5+) είναι παιδαγωγικό εργαλείο εξάσκησης εκτελεστικών
-                λειτουργιών και αυτορρύθμισης. Δεν αποτελεί ιατρική συσκευή, διαγνωστικό μέσο ή
-                υποκατάστατο εξατομικευμένης κλινικής θεραπείας. Όλα τα προφίλ και τα στατιστικά
-                αποθηκεύονται αποκλειστικά τοπικά στη συσκευή (IndexedDB) και διαγράφονται ανά πάσα
-                στιγμή με 1 κλικ από το Περιβάλλον Γονέα.
+                <strong>Φορέας Ανάπτυξης &amp; Υπεύθυνος Επεξεργασίας:</strong> Η εφαρμογή{' '}
+                <strong>SynapsePlay (FocusEngine 5+)</strong> αναπτύχθηκε και αναπτύσσεται από την{' '}
+                <a
+                  href="https://digiads.gr"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-extrabold text-[#4A6B82] underline"
+                >
+                  DIGIADS (https://digiads.gr)
+                </a>
+                .
+              </p>
+              <p>
+                <strong>100% Privacy-by-Design (Άρθρα 8, 17, 20 &amp; 25 ΓΚΠΔ):</strong> Το
+                SynapsePlay είναι παιδαγωγικό εργαλείο εξάσκησης εκτελεστικών λειτουργιών και
+                αυτορρύθμισης. Δεν αποτελεί ιατρική συσκευή, διαγνωστικό μέσο ή υποκατάστατο
+                εξατομικευμένης κλινικής θεραπείας. Δεν χρησιμοποιεί διαφημιστικά cookies ή trackers
+                τρίτων. Όλα τα προφίλ και τα στατιστικά αποθηκεύονται αποκλειστικά τοπικά στη
+                συσκευή (IndexedDB) και διαγράφονται ανά πάσα στιγμή με 1 κλικ από το Περιβάλλον
+                Γονέα ή από το{' '}
+                <Link to="/legal" className="font-extrabold text-[#4A6B82] underline">
+                  πλήρες Νομικό Κέντρο &amp; Σελίδα GDPR (/legal)
+                </Link>
+                .
               </p>
             </div>
           </div>
         )}
       </footer>
+
+      <GdprConsentBanner />
     </div>
   );
 };
