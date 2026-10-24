@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { SynapsePlayLogoMark } from '../../components/SynapsePlayLogoMark';
 
 interface AgePathwayItem {
   id: '4-5' | '5-6' | '6-8' | '8-10' | '10-12';
@@ -181,12 +182,7 @@ export const LandingPage: React.FC = () => {
         className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex flex-wrap items-center justify-between gap-4 border-b border-[#2C3539]/10"
       >
         <div className="flex items-center gap-3">
-          <span
-            aria-hidden="true"
-            className="w-11 h-11 rounded-2xl bg-[#7A9A7B] text-white flex items-center justify-center text-2xl shadow-sm"
-          >
-            🌱
-          </span>
+          <SynapsePlayLogoMark sizeClassName="w-12 h-12" />
           <div>
             <span className="text-lg md:text-xl font-extrabold tracking-tight text-[#2C3539]">
               SynapsePlay
@@ -230,32 +226,41 @@ export const LandingPage: React.FC = () => {
         className="max-w-6xl mx-auto px-4 sm:px-6 pt-10 pb-14 md:py-16"
       >
         <div className="bg-[#FAF6EE] border-2 border-[#7A9A7B] rounded-3xl p-6 sm:p-10 md:p-12 shadow-sm space-y-8">
-          <div className="max-w-3xl space-y-5">
-            <span
-              data-testid="landing-hero-badge"
-              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#7A9A7B]/20 border border-[#7A9A7B] text-xs sm:text-sm font-extrabold text-[#2C3539]"
-            >
-              <span aria-hidden="true">🧠</span>
-              <span>Επιστημονικά Τεκμηριωμένη Εξάσκηση Εκτελεστικών Λειτουργιών</span>
-            </span>
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
+            <div className="max-w-3xl space-y-5">
+              <span
+                data-testid="landing-hero-badge"
+                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#7A9A7B]/20 border border-[#7A9A7B] text-xs sm:text-sm font-extrabold text-[#2C3539]"
+              >
+                <span aria-hidden="true">🧠</span>
+                <span>Επιστημονικά Τεκμηριωμένη Εξάσκηση Εκτελεστικών Λειτουργιών</span>
+              </span>
 
-            <h1
-              id="landing-hero-heading"
-              data-testid="landing-hero-headline"
-              className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-[#2C3539] leading-tight tracking-tight"
-            >
-              Από την οθόνη στην πράξη. Βοηθήστε το παιδί σας να συγκεντρώνεται χωρίς οθονικό
-              εθισμό.
-            </h1>
+              <h1
+                id="landing-hero-heading"
+                data-testid="landing-hero-headline"
+                className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-[#2C3539] leading-tight tracking-tight"
+              >
+                Από την οθόνη στην πράξη. Βοηθήστε το παιδί σας να συγκεντρώνεται χωρίς οθονικό
+                εθισμό.
+              </h1>
 
-            <p
-              data-testid="landing-hero-subtitle"
-              className="text-base sm:text-lg md:text-xl text-[#2C3539]/85 leading-relaxed font-medium"
-            >
-              Μια ήρεμη, ψηφιακή γέφυρα για παιδιά 4–12 ετών (με έμφαση στη ΔΕΠΥ). Εξάσκηση
-              παρατηρητικότητας, μνήμης και αυτορρύθμισης με μηδενική ματαίωση και ομαλή επιστροφή
-              στον φυσικό κόσμο.
-            </p>
+              <p
+                data-testid="landing-hero-subtitle"
+                className="text-base sm:text-lg md:text-xl text-[#2C3539]/85 leading-relaxed font-medium"
+              >
+                Μια ήρεμη, ψηφιακή γέφυρα για παιδιά 4–12 ετών (με έμφαση στη ΔΕΠΥ). Εξάσκηση
+                παρατηρητικότητας, μνήμης και αυτορρύθμισης με μηδενική ματαίωση και ομαλή επιστροφή
+                στον φυσικό κόσμο.
+              </p>
+            </div>
+
+            <div className="hidden md:flex flex-col items-center justify-center shrink-0 p-4 rounded-3xl bg-[#EFE8D8]/70 border border-[#7A9A7B]/30">
+              <SynapsePlayLogoMark sizeClassName="w-36 h-36 rounded-3xl" />
+              <span className="mt-2.5 text-xs font-extrabold text-[#4A6B82] tracking-tight">
+                SynapsePlay • FocusEngine 5+
+              </span>
+            </div>
           </div>
 
           {/* Call to Action (CTA) Buttons */}
@@ -823,8 +828,8 @@ export const LandingPage: React.FC = () => {
         className="border-t-2 border-[#2C3539]/15 bg-[#FAF6EE] mt-8"
       >
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs sm:text-sm font-bold text-[#2C3539]">
-          <div className="flex items-center gap-2">
-            <span aria-hidden="true">🌱</span>
+          <div className="flex items-center gap-2.5">
+            <SynapsePlayLogoMark sizeClassName="w-8 h-8 rounded-xl" />
             <span>© SynapsePlay — FocusEngine 5+</span>
           </div>
 

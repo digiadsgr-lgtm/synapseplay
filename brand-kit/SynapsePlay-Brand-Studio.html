@@ -196,7 +196,7 @@
   <div class="container">
     <header>
       <div class="brand-title">
-        <div class="badge-icon">🌱</div>
+        <img src="png/favicon-512x512.png" alt="SynapsePlay Logo" style="width:56px;height:56px;border-radius:16px;box-shadow:0 6px 16px rgba(44,53,57,0.12);" />
         <div>
           <h1>SynapsePlay — Brand &amp; Social Media Kit</h1>
           <p class="subtitle">FocusEngine 5+ • Επίσημα Λογότυπα, Εικονίδια Προφίλ, Εξώφυλλα &amp; Social Templates</p>
@@ -360,12 +360,12 @@
           <p class="asset-desc">${asset.desc}</p>
         </div>
         <div class="preview-box">
-          <img src="${asset.svgFile}" alt="${asset.title}" id="img-${asset.id}" crossorigin="anonymous" />
+          <img src="png/${asset.pngName}" alt="${asset.title}" id="img-${asset.id}" />
         </div>
         <div class="actions">
-          <button class="btn-secondary" onclick="exportSvgToPng('${asset.svgFile}', '${asset.pngName}', ${asset.w}, ${asset.h})">
+          <a class="btn-secondary" href="png/${asset.pngName}" download="${asset.pngName}">
             ⬇️ Λήψη PNG (${asset.dims})
-          </button>
+          </a>
           <a class="btn-outline" href="${asset.svgFile}" download>
             📐 Λήψη Vector SVG
           </a>

@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { SmoothLandingRing, SmoothLandingWarningBanner } from './SmoothLandingRing';
 import { ParentGateModal } from './ParentGateModal';
+import { SynapsePlayLogoMark } from './SynapsePlayLogoMark';
 
 export const TopBar: React.FC = () => {
   const navigate = useNavigate();
@@ -28,9 +29,9 @@ export const TopBar: React.FC = () => {
             onClick={handleReturnToChild}
             data-testid="nav-home-btn"
             aria-label="Αρχική Οθόνη Παιδιού"
-            className="touch-target px-4 py-2 rounded-2xl bg-sage-surface border-2 border-sage text-charcoal font-extrabold flex items-center gap-2 hover:bg-sage hover:text-white transition-colors"
+            className="touch-target px-4 py-2 rounded-2xl bg-sage-surface border-2 border-sage text-charcoal font-extrabold flex items-center gap-2.5 hover:bg-sage hover:text-white transition-colors"
           >
-            <span className="text-2xl" aria-hidden="true">🌱</span>
+            <SynapsePlayLogoMark sizeClassName="w-9 h-9 rounded-xl" />
             <span className="text-base md:text-lg">SynapsePlay</span>
           </button>
         </div>
