@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import type { ActivityRunnerRenderProps } from '../components/ActivityRunner';
 import { useDebouncedAction } from '../hooks/useDebouncedAction';
 import { playCalmTone } from '../utils/soundAndSpeech';
@@ -65,6 +65,7 @@ const RHYTHM_ROUNDS: RhythmPatternRound[] = [
 ];
 
 export const Activity20MusicKineticRhythm: React.FC<ActivityRunnerRenderProps> = ({
+  phase,
   currentRound,
   totalRounds,
   hintLevel,
@@ -82,17 +83,50 @@ export const Activity20MusicKineticRhythm: React.FC<ActivityRunnerRenderProps> =
   );
   const round = activeRounds[(currentRound - 1) % activeRounds.length];
   const [stepIdx, setStepIdx] = useState<number>(0);
+  const [restSilenceMs, setRestSilenceMs] = useState<number>(0);
+  const advanceRef = useRef(advanceRound);
+  advanceRef.current = advanceRound;
+  const absorbedRef = useRef(getAbsorbedCount);
+  absorbedRef.current = getAbsorbedCount;
 
   useEffect(() => {
     setStepIdx(hintLevel === 2 ? round.pattern.length - 1 : 0);
+    setRestSilenceMs(0);
   }, [currentRound, hintLevel, round.pattern.length, sessionSeed]);
 
   const expectedMove = round.pattern[stepIdx];
+
+  // Genuine Musical Rest (Silence): automatically advances after 1600ms of not tapping clap/knees
+  useEffect(() => {
+    if (expectedMove !== 'rest' || phase === 'PAUSED' || phase === 'COMPLETED') {
+      setRestSilenceMs(0);
+      return;
+    }
+    const timer = window.setTimeout(() => {
+      const next = restSilenceMs + 100;
+      if (next >= 1600) {
+        playCalmTone('soft-step', settings.soundEnabled);
+        setRestSilenceMs(0);
+        if (stepIdx + 1 >= round.pattern.length) {
+          setStepIdx(0);
+          advanceRef.current(absorbedRef.current());
+        } else {
+          setStepIdx((s) => s + 1);
+        }
+      } else {
+        setRestSilenceMs(next);
+      }
+    }, 100);
+    return () => window.clearTimeout(timer);
+  }, [expectedMove, phase, restSilenceMs, stepIdx, round.pattern.length, settings.soundEnabled]);
+
+  const restPct = Math.min(100, Math.round((restSilenceMs / 1600) * 100));
 
   const handleMovePress = (move: PercussionMove) => {
     runDebounced(() => {
       if (move === expectedMove) {
         playCalmTone(move === 'rest' ? 'soft-step' : 'pulse', settings.soundEnabled);
+        setRestSilenceMs(0);
         if (stepIdx + 1 >= round.pattern.length) {
           setStepIdx(0);
           advanceRound(getAbsorbedCount());
@@ -100,6 +134,9 @@ export const Activity20MusicKineticRhythm: React.FC<ActivityRunnerRenderProps> =
           setStepIdx((s) => s + 1);
         }
       } else {
+        if (expectedMove === 'rest') {
+          setRestSilenceMs(0);
+        }
         const expectedLabel = MOVE_META[expectedMove].labelEl;
         triggerGentleFeedback(
           `Κοίτα την παρτιτούρα του Μαέστρου: στον χρόνο ${stepIdx + 1} έχουμε «${expectedLabel}»!`
@@ -143,6 +180,22 @@ export const Activity20MusicKineticRhythm: React.FC<ActivityRunnerRenderProps> =
             );
           })}
         </div>
+
+        {/* Live Musical Rest (Silence) Meter */}
+        {expectedMove === 'rest' && (
+          <div className="max-w-sm mx-auto pt-2 space-y-1">
+            <div className="flex justify-between text-xs font-extrabold text-terracotta-dark px-1">
+              <span>🤫 Κράτα Μουσική Σιωπή (προχωράει αυτόματα)...</span>
+              <span>{restPct}%</span>
+            </div>
+            <div className="w-full h-3 bg-sand-light rounded-full overflow-hidden border border-terracotta-dark">
+              <div
+                className="h-full bg-terracotta-dark transition-all duration-100"
+                style={{ width: `${restPct}%` }}
+              />
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Body Percussion Controls */}

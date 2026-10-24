@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import type { ActivityRunnerRenderProps } from '../components/ActivityRunner';
 import { useDebouncedAction } from '../hooks/useDebouncedAction';
+import { playCalmTone, speakGreek } from '../utils/soundAndSpeech';
+import { useApp } from '../context/AppContext';
 import { selectSessionRounds } from '../utils/clinicalAdhdEngine';
 
 interface ProprioceptiveExercise {
@@ -79,6 +81,7 @@ export const Activity17SensoryProprioception: React.FC<ActivityRunnerRenderProps
   sessionSeed = 0,
   advanceRound,
 }) => {
+  const { settings } = useApp();
   const { runDebounced, getAbsorbedCount } = useDebouncedAction();
   const activeExercises = useMemo(
     () => selectSessionRounds(SENSORY_EXERCISES, totalRounds, sessionSeed),
@@ -101,7 +104,11 @@ export const Activity17SensoryProprioception: React.FC<ActivityRunnerRenderProps
     const timer = window.setTimeout(() => {
       setPulsesCompleted((prev) => {
         const next = prev + 1;
+        playCalmTone(next >= 3 ? 'complete' : 'soft-step', settings.soundEnabled);
+        if (next === 1) speakGreek('Ένα', settings.voiceEnabled, adaptiveProfile.speechRate);
+        if (next === 2) speakGreek('Δύο', settings.voiceEnabled, adaptiveProfile.speechRate);
         if (next >= 3) {
+          speakGreek('Τρία! Μπράβο!', settings.voiceEnabled, adaptiveProfile.speechRate);
           advanceRef.current(absorbedRef.current());
           return 0;
         }
@@ -109,11 +116,12 @@ export const Activity17SensoryProprioception: React.FC<ActivityRunnerRenderProps
       });
     }, 1800);
     return () => window.clearTimeout(timer);
-  }, [phase, pulsesCompleted, currentRound]);
+  }, [phase, pulsesCompleted, currentRound, settings.soundEnabled, settings.voiceEnabled, adaptiveProfile.speechRate]);
 
   const handleProprioceptivePulse = () => {
     runDebounced(() => {
       const next = pulsesCompleted + 1;
+      playCalmTone(next >= 3 ? 'complete' : 'soft-step', settings.soundEnabled);
       if (next >= 3) {
         setPulsesCompleted(0);
         advanceRound(getAbsorbedCount());
@@ -122,6 +130,8 @@ export const Activity17SensoryProprioception: React.FC<ActivityRunnerRenderProps
       }
     });
   };
+
+  const holdPct = Math.min(100, Math.round((pulsesCompleted / 3) * 100));
 
   return (
     <div className="space-y-6 text-center max-w-2xl mx-auto" data-testid="activity-17-sensory-proprioception">
@@ -137,9 +147,18 @@ export const Activity17SensoryProprioception: React.FC<ActivityRunnerRenderProps
         <p className="text-lg font-bold text-charcoal" data-testid="proprioception-instruction">
           {seatedMode ? item.seatedInstructionEl : item.standingInstructionEl}
         </p>
-        <p className="text-xs font-extrabold text-slate-dark">
-          ⏱️ Κράτα τη σταθερή πίεση — ο μετρητής προχωράει αυτόματα ({pulsesCompleted} / 3)
-        </p>
+        <div className="max-w-xs mx-auto pt-2 space-y-1">
+          <div className="flex justify-between text-xs font-extrabold text-slate-dark px-1">
+            <span>⏱️ Σταθερή πίεση ({pulsesCompleted} / 3)</span>
+            <span>{holdPct}%</span>
+          </div>
+          <div className="w-full h-3 bg-white rounded-full overflow-hidden border border-slate-dark">
+            <div
+              className="h-full bg-slate-dark transition-all duration-300"
+              style={{ width: `${holdPct}%` }}
+            />
+          </div>
+        </div>
       </div>
 
       <button

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import type { ActivityRunnerRenderProps } from '../components/ActivityRunner';
 import { useDebouncedAction } from '../hooks/useDebouncedAction';
-import { speakGreek } from '../utils/soundAndSpeech';
+import { speakGreek, playCalmTone } from '../utils/soundAndSpeech';
 import { useApp } from '../context/AppContext';
 import { selectSessionRounds } from '../utils/clinicalAdhdEngine';
 
@@ -69,6 +69,7 @@ const LISTEN_ROUNDS: ListenRound[] = [
 ];
 
 export const Activity08ListenDo: React.FC<ActivityRunnerRenderProps> = ({
+  phase,
   currentRound,
   totalRounds,
   hintLevel,
@@ -86,15 +87,32 @@ export const Activity08ListenDo: React.FC<ActivityRunnerRenderProps> = ({
   );
   const round = activeRounds[(currentRound - 1) % activeRounds.length];
   const [isListeningFinished, setIsListeningFinished] = useState<boolean>(false);
+  const [listenProgressMs, setListenProgressMs] = useState<number>(0);
 
   useEffect(() => {
     setIsListeningFinished(false);
+    setListenProgressMs(0);
     speakGreek(round.instructionEl, settings.voiceEnabled, adaptiveProfile.speechRate);
-    const timer = window.setTimeout(() => {
-      setIsListeningFinished(true);
-    }, 900);
-    return () => window.clearTimeout(timer);
   }, [currentRound, sessionSeed, round.instructionEl, settings.voiceEnabled, adaptiveProfile.speechRate]);
+
+  useEffect(() => {
+    if (isListeningFinished || phase === 'PAUSED' || phase === 'COMPLETED') return;
+    const interval = window.setInterval(() => {
+      setListenProgressMs((prev) => {
+        const next = prev + 100;
+        if (next >= 900) {
+          window.clearInterval(interval);
+          setIsListeningFinished(true);
+          playCalmTone('soft-step', settings.soundEnabled);
+          return 900;
+        }
+        return next;
+      });
+    }, 100);
+    return () => window.clearInterval(interval);
+  }, [isListeningFinished, phase, settings.soundEnabled]);
+
+  const listenPct = Math.min(100, Math.round((listenProgressMs / 900) * 100));
 
   const visibleOptions = useMemo(() => {
     if (hintLevel === 2 || ageBand === '4-5' || adaptiveProfile.distractorReductionRatio >= 0.5) {
@@ -143,23 +161,25 @@ export const Activity08ListenDo: React.FC<ActivityRunnerRenderProps> = ({
         }`}
       >
         <div className="text-3xl font-extrabold" aria-hidden="true">
-          {round.pictogramCue}
+          {isListeningFinished ? round.pictogramCue : '👂 ⏳ ➡️ ❓'}
         </div>
-        <p className="text-lg font-extrabold text-charcoal">{round.instructionEl}</p>
+        <p className="text-lg font-extrabold text-charcoal">
+          {isListeningFinished
+            ? round.instructionEl
+            : 'Άκου προσεκτικά την οδηγία μέχρι να ολοκληρωθεί...'}
+        </p>
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border-2 border-charcoal/20 text-sm font-extrabold">
-          <span>{isListeningFinished ? '🟢 Τώρα Διάλεξε!' : '⏳ Άκου / Δες πρώτα...'}</span>
+          <span>{isListeningFinished ? '🟢 Τώρα Διάλεξε!' : '⏳ Άκου πρώτα με ήρεμα χέρια...'}</span>
         </div>
 
         {!isListeningFinished && (
-          <div className="pt-2">
-            <button
-              type="button"
-              data-testid="listen-ready-override-btn"
-              onClick={() => setIsListeningFinished(true)}
-              className="touch-target px-4 py-2 rounded-xl bg-white border-2 border-slate text-xs font-bold text-charcoal"
-            >
-              Άκουσα την οδηγία — Είμαι έτοιμος!
-            </button>
+          <div className="max-w-xs mx-auto pt-2 space-y-1">
+            <div className="w-full h-2.5 bg-white rounded-full overflow-hidden border border-slate">
+              <div
+                className="h-full bg-slate transition-all duration-100"
+                style={{ width: `${listenPct}%` }}
+              />
+            </div>
           </div>
         )}
       </div>
@@ -173,9 +193,11 @@ export const Activity08ListenDo: React.FC<ActivityRunnerRenderProps> = ({
               type="button"
               data-testid={opt.isTarget ? 'listen-do-target' : `listen-do-opt-${opt.id}`}
               onClick={() => handleSelect(opt.isTarget, opt.labelEl)}
-              className={`touch-target min-h-[120px] p-5 rounded-3xl border-4 flex flex-col items-center justify-center gap-2 ${
-                highlight
-                  ? 'bg-sage-surface border-sage-dark ring-4 ring-sage/40'
+              className={`touch-target min-h-[120px] p-5 rounded-3xl border-4 flex flex-col items-center justify-center gap-2 transition-all ${
+                !isListeningFinished
+                  ? 'bg-sand-light border-sand-dark opacity-70'
+                  : highlight
+                  ? 'bg-sage-surface border-sage-dark ring-4 ring-sage/40 scale-105'
                   : 'bg-white border-sand-dark hover:border-slate'
               }`}
             >

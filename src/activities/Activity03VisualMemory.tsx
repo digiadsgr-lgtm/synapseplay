@@ -5,7 +5,7 @@ import {
   getAgeAndPerformanceDifficulty,
   selectSessionRounds,
 } from '../utils/clinicalAdhdEngine';
-import { playCalmTone } from '../utils/soundAndSpeech';
+import { playCalmTone, speakGreek } from '../utils/soundAndSpeech';
 import { useApp } from '../context/AppContext';
 
 interface MemoryCard {
@@ -131,20 +131,49 @@ export const Activity03VisualMemory: React.FC<ActivityRunnerRenderProps> = ({
   );
   const roundData = activeRounds[(currentRound - 1) % activeRounds.length];
   const [isHidden, setIsHidden] = useState<boolean>(false);
+  const [obsElapsedMs, setObsElapsedMs] = useState<number>(0);
+  const [peekCardId, setPeekCardId] = useState<string | null>(null);
 
   useEffect(() => {
     setIsHidden(false);
+    setObsElapsedMs(0);
+    setPeekCardId(null);
   }, [currentRound, sessionSeed]);
 
-  // Automatic Observation Countdown: cards automatically flip face-down after the age-calibrated observation window
+  // Automatic Observation Countdown: cards stay face-up while the child memorizes all positions,
+  // then automatically flip face-down and announce the target to find!
   useEffect(() => {
     if (phase === 'PAUSED' || phase === 'COMPLETED' || isHidden) return;
-    const timer = window.setTimeout(() => {
-      setIsHidden(true);
-      playCalmTone('soft-step', settings.soundEnabled);
-    }, diff.memoryObservationMs);
-    return () => window.clearTimeout(timer);
-  }, [phase, isHidden, diff.memoryObservationMs, settings.soundEnabled]);
+
+    const tickMs = 100;
+    const interval = window.setInterval(() => {
+      setObsElapsedMs((prev) => {
+        const next = prev + tickMs;
+        if (next >= diff.memoryObservationMs) {
+          window.clearInterval(interval);
+          setIsHidden(true);
+          playCalmTone('soft-step', settings.soundEnabled);
+          speakGreek(
+            `Πού κρύφτηκε το ${roundData.targetLabelEl};`,
+            settings.voiceEnabled,
+            adaptiveProfile.speechRate
+          );
+          return diff.memoryObservationMs;
+        }
+        return next;
+      });
+    }, tickMs);
+
+    return () => window.clearInterval(interval);
+  }, [
+    phase,
+    isHidden,
+    diff.memoryObservationMs,
+    roundData.targetLabelEl,
+    settings.soundEnabled,
+    settings.voiceEnabled,
+    adaptiveProfile.speechRate,
+  ]);
 
   const visibleCards = useMemo(() => {
     if (diff.isSimplified) {
@@ -159,19 +188,33 @@ export const Activity03VisualMemory: React.FC<ActivityRunnerRenderProps> = ({
     return roundData.cards;
   }, [roundData.cards, diff.isSimplified, diff.isAdvancedMastery, currentRound]);
 
+  const obsRemainingPct = Math.max(
+    0,
+    Math.round(((diff.memoryObservationMs - obsElapsedMs) / Math.max(1000, diff.memoryObservationMs)) * 100)
+  );
+
+  // Show the target name ONLY after the cards are flipped face-down (or if in simplified/hint mode),
+  // so the child genuinely memorizes all cards during the observation phase!
+  const revealTargetPrompt = isHidden || diff.isSimplified || hintLevel >= 1;
+
   const handleCardPick = (card: MemoryCard) => {
     runDebounced(() => {
       if (!isHidden) {
-        setIsHidden(true);
-        playCalmTone('soft-step', settings.soundEnabled);
+        triggerGentleFeedback(
+          'Κοίτα πρώτα όλες τις κάρτες! Σε λίγα δευτερόλεπτα γυρίζουν ανάποδα για να βρεις πού κρύφτηκε ο στόχος!'
+        );
         return;
       }
       if (card.isTarget) {
+        playCalmTone('complete', settings.soundEnabled);
         advanceRound(getAbsorbedCount());
       } else {
+        // Flip the wrong card briefly face-up so the child sees what was there, then flip all back for a fresh look
+        setPeekCardId(card.id);
         setIsHidden(false);
+        setObsElapsedMs(0);
         triggerGentleFeedback(
-          `Εκεί ήταν «${card.labelEl}». Δες ξανά τις κάρτες — θα γυρίσουν αυτόματα σε λίγο!`
+          `Εκεί ήταν «${card.labelEl}». Δες ξανά τις κάρτες προσεκτικά — θα γυρίσουν αυτόματα σε λίγο!`
         );
       }
     });
@@ -179,34 +222,69 @@ export const Activity03VisualMemory: React.FC<ActivityRunnerRenderProps> = ({
 
   return (
     <div className="space-y-6 text-center" data-testid="activity-03-visual-memory">
-      <div className="p-4 rounded-2xl bg-slate-surface border-2 border-slate flex flex-wrap items-center justify-between gap-4">
-        <div className="flex flex-wrap items-center gap-3 text-left">
-          <span className="text-lg font-extrabold text-charcoal">Θυμήσου πού βρίσκεται:</span>
-          <span className="px-4 py-2 rounded-xl bg-white border-2 border-slate font-extrabold text-lg flex items-center gap-2">
-            <span className="text-2xl" aria-hidden="true">{roundData.targetEmoji}</span>
-            <span>{roundData.targetLabelEl}</span>
-          </span>
-          <span className="text-xs font-bold text-slate-dark">
-            {isHidden
-              ? '👉 Τώρα πάτησε την κάρτα όπου κρύβεται!'
-              : `⏳ Οι κάρτες κρύβονται αυτόματα σε ${(diff.memoryObservationMs / 1000).toFixed(1)} δευτ.`}
-          </span>
+      <div className="p-5 rounded-3xl bg-slate-surface border-2 border-slate space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex flex-wrap items-center gap-3 text-left">
+            {revealTargetPrompt ? (
+              <>
+                <span className="text-lg font-extrabold text-charcoal">
+                  {isHidden ? 'Βρες πού κρύφτηκε:' : 'Θυμήσου πού βρίσκεται:'}
+                </span>
+                <span className="px-4 py-2 rounded-xl bg-white border-2 border-slate font-extrabold text-lg flex items-center gap-2 shadow-sm">
+                  <span className="text-2xl" aria-hidden="true">{roundData.targetEmoji}</span>
+                  <span>{roundData.targetLabelEl}</span>
+                </span>
+              </>
+            ) : (
+              <div className="flex items-center gap-3">
+                <span className="text-3xl" aria-hidden="true">👀🧠</span>
+                <div>
+                  <p className="text-base md:text-lg font-extrabold text-charcoal">
+                    Απομνημόνευσε ΟΛΕΣ τις κάρτες και τις θέσεις τους!
+                  </p>
+                  <p className="text-xs font-bold text-slate-dark">
+                    Μόλις γυρίσουν ανάποδα θα σου αποκαλύψουμε ποια εικόνα ψάχνουμε!
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <button
+            type="button"
+            data-testid="toggle-hide-cards-btn"
+            onClick={() => {
+              setIsHidden((h) => !h);
+              setObsElapsedMs(0);
+            }}
+            className="touch-target px-4 py-2 rounded-2xl bg-white border-2 border-slate text-charcoal text-xs font-extrabold flex items-center gap-1.5 hover:bg-sand"
+          >
+            <span aria-hidden="true">{isHidden ? '👀' : '🙈'}</span>
+            <span>{isHidden ? 'Δείξε ξανά για λίγο' : 'Είμαι Έτοιμος — Κρύψε Τώρα'}</span>
+          </button>
         </div>
 
-        <button
-          type="button"
-          data-testid="toggle-hide-cards-btn"
-          onClick={() => setIsHidden((h) => !h)}
-          className="touch-target px-5 py-2.5 rounded-2xl bg-sage-dark text-white font-extrabold flex items-center gap-2 hover:bg-sage"
-        >
-          <span aria-hidden="true">{isHidden ? '👀' : '🙈'}</span>
-          <span>{isHidden ? 'Δείξε λίγο τις Κάρτες' : 'Κρύψε τις Κάρτες Τώρα'}</span>
-        </button>
+        {/* Live Observation Countdown Bar */}
+        {!isHidden && (
+          <div className="space-y-1">
+            <div className="flex justify-between text-xs font-extrabold text-slate-dark">
+              <span>⏳ Χρόνος Παρατήρησης Καρτών</span>
+              <span>{((diff.memoryObservationMs - obsElapsedMs) / 1000).toFixed(1)} δευτ.</span>
+            </div>
+            <div className="w-full h-3 rounded-full bg-white border border-slate overflow-hidden">
+              <div
+                className="h-full bg-sage-dark transition-all duration-100 rounded-full"
+                style={{ width: `${obsRemainingPct}%` }}
+              />
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-2xl mx-auto">
         {visibleCards.map((card) => {
           const highlight = isHidden && diff.isGuided && hintLevel >= 1 && card.isTarget;
+          const isPeeking = peekCardId === card.id && !isHidden;
           return (
             <button
               key={card.id}
@@ -214,18 +292,20 @@ export const Activity03VisualMemory: React.FC<ActivityRunnerRenderProps> = ({
               data-testid={card.isTarget ? 'memory-card-target' : `memory-card-${card.id}`}
               onClick={() => handleCardPick(card)}
               aria-label={isHidden ? 'Κρυμμένη κάρτα' : card.labelEl}
-              className={`touch-target min-h-[120px] p-5 rounded-3xl border-4 flex flex-col items-center justify-center gap-2 transition-all ${
+              className={`touch-target min-h-[128px] p-5 rounded-3xl border-4 flex flex-col items-center justify-center gap-2 transition-all ${
                 highlight
-                  ? 'bg-sage-surface border-sage-dark ring-4 ring-sage/40'
+                  ? 'bg-sage-surface border-sage-dark ring-4 ring-sage/40 scale-105'
                   : isHidden
-                  ? 'bg-slate text-white border-slate-dark hover:bg-slate-light'
+                  ? 'bg-slate text-white border-slate-dark hover:bg-slate-light cursor-pointer'
+                  : isPeeking
+                  ? 'bg-terracotta-surface border-terracotta-dark text-charcoal'
                   : 'bg-white border-sand-dark text-charcoal'
               }`}
             >
-              <span className="text-5xl" aria-hidden="true">
+              <span className="text-5xl select-none" aria-hidden="true">
                 {isHidden ? '❓' : card.emoji}
               </span>
-              <span className="text-sm font-bold">
+              <span className="text-sm font-extrabold">
                 {isHidden ? 'Πού ήταν;' : card.labelEl}
               </span>
             </button>

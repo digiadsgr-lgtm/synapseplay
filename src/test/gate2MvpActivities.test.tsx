@@ -1,6 +1,6 @@
 import React from 'react';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import App from '../App';
 import { wipeAllLocalData } from '../db/database';
@@ -142,9 +142,13 @@ describe('Gate 2 (MVP Milestone) — Child Hub Navigation & Activities 01, 04, 0
     fireEvent.click(screen.getByTestId('hint-ladder-btn'));
     expect(screen.queryByTestId('move-freeze-go-btn')).not.toBeInTheDocument();
 
-    // Confirming Freeze advances to Round 3 (GO phase)
-    vi.advanceTimersByTime(450);
-    fireEvent.click(screen.getByTestId('move-freeze-stop-btn'));
+    // Holding still (not touching the screen) fills the Statue Stillness Meter and advances automatically to Round 3 (GO phase)
+    expect(screen.getByTestId('freeze-stillness-meter')).toBeInTheDocument();
+    for (let tick = 0; tick < 35; tick++) {
+      act(() => {
+        vi.advanceTimersByTime(100);
+      });
+    }
     expect(screen.getByTestId('signal-card-go')).toBeInTheDocument();
 
     // Complete Round 3 -> Completed

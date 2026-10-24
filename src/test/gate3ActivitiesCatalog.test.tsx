@@ -119,11 +119,13 @@ describe('Gate 3 — Remaining 8 Activities (02, 03, 05, 06, 08, 09, 10, 12) & F
     fireEvent.click(screen.getByTestId('listen-do-target'));
     expect(screen.getByTestId('gentle-feedback-banner')).toHaveTextContent('Περίμενε μια στιγμή');
 
-    // Complete 3 rounds after waiting 950ms for instruction completion
+    // Complete 3 rounds after waiting 950ms for instruction completion (100ms progress ticks)
     for (let r = 1; r <= 3; r++) {
-      act(() => {
-        vi.advanceTimersByTime(1000);
-      });
+      for (let tick = 0; tick < 10; tick++) {
+        act(() => {
+          vi.advanceTimersByTime(100);
+        });
+      }
       expect(screen.getByTestId('listen-status-ready')).toBeInTheDocument();
       fireEvent.click(screen.getByTestId('listen-do-target'));
     }
@@ -141,11 +143,12 @@ describe('Gate 3 — Remaining 8 Activities (02, 03, 05, 06, 08, 09, 10, 12) & F
     fireEvent.click(screen.getByTestId('wait-signal-tap-btn'));
     expect(screen.getByTestId('gentle-feedback-banner')).toHaveTextContent('Χρυσό Αστέρι');
 
-    // Advance stream twice to reach Star cue in Round 1
-    vi.advanceTimersByTime(450);
-    fireEvent.click(screen.getByTestId('wait-signal-next-btn'));
-    vi.advanceTimersByTime(450);
-    fireEvent.click(screen.getByTestId('wait-signal-next-btn'));
+    // Stream advances automatically past non-cue items to reach Star cue in Round 1
+    for (let tick = 0; tick < 60; tick++) {
+      act(() => {
+        vi.advanceTimersByTime(100);
+      });
+    }
     expect(screen.getByTestId('signal-stage-ready')).toBeInTheDocument();
 
     vi.advanceTimersByTime(450);

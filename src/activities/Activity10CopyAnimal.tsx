@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import type { ActivityRunnerRenderProps } from '../components/ActivityRunner';
 import { useDebouncedAction } from '../hooks/useDebouncedAction';
+import { playCalmTone, speakGreek } from '../utils/soundAndSpeech';
+import { useApp } from '../context/AppContext';
 import { selectSessionRounds } from '../utils/clinicalAdhdEngine';
 
 interface AnimalPose {
@@ -60,6 +62,7 @@ export const Activity10CopyAnimal: React.FC<ActivityRunnerRenderProps> = ({
   sessionSeed = 0,
   advanceRound,
 }) => {
+  const { settings } = useApp();
   const { runDebounced, getAbsorbedCount } = useDebouncedAction();
   const activePoses = useMemo(
     () => selectSessionRounds(ANIMAL_POSES, totalRounds, sessionSeed),
@@ -82,7 +85,11 @@ export const Activity10CopyAnimal: React.FC<ActivityRunnerRenderProps> = ({
     const timer = window.setTimeout(() => {
       setCountsDone((prev) => {
         const next = prev + 1;
+        playCalmTone(next >= 3 ? 'complete' : 'soft-step', settings.soundEnabled);
+        if (next === 1) speakGreek('Ένα', settings.voiceEnabled, adaptiveProfile.speechRate);
+        if (next === 2) speakGreek('Δύο', settings.voiceEnabled, adaptiveProfile.speechRate);
         if (next >= 3) {
+          speakGreek('Τρία! Μπράβο!', settings.voiceEnabled, adaptiveProfile.speechRate);
           advanceRef.current(absorbedRef.current());
           return 0;
         }
@@ -90,11 +97,12 @@ export const Activity10CopyAnimal: React.FC<ActivityRunnerRenderProps> = ({
       });
     }, 1800);
     return () => window.clearTimeout(timer);
-  }, [phase, countsDone, currentRound]);
+  }, [phase, countsDone, currentRound, settings.soundEnabled, settings.voiceEnabled, adaptiveProfile.speechRate]);
 
   const handleCountTap = () => {
     runDebounced(() => {
       const next = countsDone + 1;
+      playCalmTone(next >= 3 ? 'complete' : 'soft-step', settings.soundEnabled);
       if (next >= 3) {
         setCountsDone(0);
         advanceRound(getAbsorbedCount());
@@ -103,6 +111,8 @@ export const Activity10CopyAnimal: React.FC<ActivityRunnerRenderProps> = ({
       }
     });
   };
+
+  const holdPct = Math.min(100, Math.round((countsDone / 3) * 100));
 
   return (
     <div className="space-y-6 text-center max-w-xl mx-auto" data-testid="activity-10-copy-animal">
@@ -118,9 +128,18 @@ export const Activity10CopyAnimal: React.FC<ActivityRunnerRenderProps> = ({
         <p className="text-lg font-bold text-charcoal" data-testid="animal-pose-prompt">
           {seatedMode ? pose.seatedPromptEl : pose.standingPromptEl}
         </p>
-        <p className="text-xs font-extrabold text-sage-dark">
-          ⏱️ Ο αυτόματος μετρητής μετράει 3 ήρεμους ρυθμούς όσο κρατάς τη στάση ({countsDone} / 3)
-        </p>
+        <div className="max-w-xs mx-auto pt-2 space-y-1">
+          <div className="flex justify-between text-xs font-extrabold text-sage-dark px-1">
+            <span>⏱️ Κράτα τη στάση ({countsDone} / 3)</span>
+            <span>{holdPct}%</span>
+          </div>
+          <div className="w-full h-3 bg-white rounded-full overflow-hidden border border-sage-dark">
+            <div
+              className="h-full bg-sage-dark transition-all duration-300"
+              style={{ width: `${holdPct}%` }}
+            />
+          </div>
+        </div>
       </div>
 
       <div className="space-y-3">

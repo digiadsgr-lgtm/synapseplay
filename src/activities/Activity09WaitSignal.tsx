@@ -5,7 +5,7 @@ import {
   getAgeAndPerformanceDifficulty,
   selectSessionRounds,
 } from '../utils/clinicalAdhdEngine';
-import { playCalmTone } from '../utils/soundAndSpeech';
+import { playCalmTone, speakGreek } from '../utils/soundAndSpeech';
 import { useApp } from '../context/AppContext';
 
 interface SignalItem {
@@ -71,10 +71,7 @@ export const Activity09WaitSignal: React.FC<ActivityRunnerRenderProps> = ({
   );
   const baseStream = activeSets[(currentRound - 1) % activeSets.length];
 
-  // Calibrate stream length by age band & live performance:
-  // - 4-5 years: shorter wait (1 non-star item + 1 star target)
-  // - 6-8 years: standard wait (2 non-star items + 1 star target)
-  // - 8-10 / 10-12 or Mastery: extended vigilance (3 non-star items + 1 star target)
+  // Calibrate stream length by age band & live performance
   const streamItems = useMemo(() => {
     if (ageBand === '4-5' && hintLevel < 2) {
       return baseStream.slice(1);
@@ -89,8 +86,10 @@ export const Activity09WaitSignal: React.FC<ActivityRunnerRenderProps> = ({
   }, [baseStream, ageBand, hintLevel, diff.isAdvancedMastery]);
 
   const [stepIndex, setStepIndex] = useState<number>(0);
+  const [stepElapsedMs, setStepElapsedMs] = useState<number>(0);
 
   useEffect(() => {
+    setStepElapsedMs(0);
     if (hintLevel === 2) {
       setStepIndex(streamItems.length - 1);
     } else {
@@ -100,22 +99,43 @@ export const Activity09WaitSignal: React.FC<ActivityRunnerRenderProps> = ({
 
   const currentItem = streamItems[stepIndex % streamItems.length] ?? streamItems[0];
 
-  // Automatic Continuous Performance Task (CPT) stream progression!
-  // Objects appear automatically on screen so the child never has to manually click "Next Object".
+  // 100% Automatic Continuous Performance Task (CPT) stream progression!
+  // Objects appear automatically on screen with a live progress bar; no manual "Next" button required.
   useEffect(() => {
     if (phase === 'PAUSED' || phase === 'COMPLETED' || hintLevel === 2) return;
 
     if (!currentItem.hasStarCue) {
-      const timer = window.setTimeout(() => {
-        setStepIndex((prev) => {
-          const next = Math.min(streamItems.length - 1, prev + 1);
-          if (streamItems[next]?.hasStarCue) {
-            playCalmTone('soft-step', settings.soundEnabled);
+      const tickMs = 100;
+      const interval = window.setInterval(() => {
+        setStepElapsedMs((prev) => {
+          const nextElapsed = prev + tickMs;
+          if (nextElapsed >= diff.cptIntervalMs) {
+            window.clearInterval(interval);
+            setStepIndex((idx) => {
+              const nextIdx = Math.min(streamItems.length - 1, idx + 1);
+              if (streamItems[nextIdx]?.hasStarCue) {
+                playCalmTone('soft-step', settings.soundEnabled);
+                speakGreek(
+                  'Χρυσό αστέρι! Πάτησε τώρα!',
+                  settings.voiceEnabled,
+                  adaptiveProfile.speechRate
+                );
+              }
+              return nextIdx;
+            });
+            return 0;
           }
-          return next;
+          return nextElapsed;
         });
-      }, diff.cptIntervalMs);
-      return () => window.clearTimeout(timer);
+      }, tickMs);
+      return () => window.clearInterval(interval);
+    } else {
+      // If the child doesn't tap the Golden Star within 5.5s, loop the stream smoothly so it stays alive
+      const recycleTimer = window.setTimeout(() => {
+        setStepElapsedMs(0);
+        setStepIndex(0);
+      }, 5500);
+      return () => window.clearTimeout(recycleTimer);
     }
   }, [
     phase,
@@ -125,108 +145,102 @@ export const Activity09WaitSignal: React.FC<ActivityRunnerRenderProps> = ({
     streamItems,
     diff.cptIntervalMs,
     settings.soundEnabled,
+    settings.voiceEnabled,
+    adaptiveProfile.speechRate,
   ]);
+
+  const streamProgressPct = currentItem.hasStarCue
+    ? 100
+    : Math.min(100, Math.round((stepElapsedMs / Math.max(800, diff.cptIntervalMs)) * 100));
 
   const handleTapTarget = () => {
     runDebounced(() => {
       if (currentItem.hasStarCue) {
+        playCalmTone('complete', settings.soundEnabled);
         advanceRound(getAbsorbedCount());
       } else {
+        // Reset current non-star wait timer slightly and remind child to wait for the Golden Star
+        setStepElapsedMs(0);
         triggerGentleFeedback(
-          'Περίμενε λίγο ακόμα! Αυτό δεν έχει το Χρυσό Αστέρι 🌟 — το επόμενο αντικείμενο έρχεται αυτόματα!'
+          `Ώπα! Το «${currentItem.labelEl}» δεν έχει το Χρυσό Αστέρι 🌟 — κράτα τα χεράκια ήρεμα μέχρι να εμφανιστεί το αστέρι!`
         );
       }
     });
   };
 
-  const handleWaitNext = () => {
-    runDebounced(() => {
-      setStepIndex((prev) => Math.min(streamItems.length - 1, prev + 1));
-    });
-  };
-
   return (
     <div className="space-y-6 text-center max-w-xl mx-auto" data-testid="activity-09-wait-signal">
-      <div className="p-4 rounded-2xl bg-slate-surface border-2 border-slate space-y-2">
+      <div className="p-4 rounded-2xl bg-slate-surface border-2 border-slate space-y-2.5">
         <p className="font-extrabold text-charcoal text-lg">
-          Κανόνας: Περιμένω ήρεμα καθώς αλλάζουν οι εικόνες και πατάω ΜΟΝΟ όταν εμφανιστεί το Χρυσό Αστέρι 🌟!
+          Κανόνας: Κοιτάζω τις εικόνες που αλλάζουν μόνες τους και πατάω ΜΟΝΟ όταν εμφανιστεί το Χρυσό Αστέρι 🌟!
         </p>
-        <div className="flex items-center justify-center gap-2 text-xs font-bold text-slate-dark">
-          <span>
-            {currentItem.hasStarCue
-              ? '🌟 Εμφανίστηκε το Χρυσό Αστέρι! Πάτησε την κάρτα ή το κουμπί τώρα!'
-              : `⏳ Τα αντικείμενα εναλλάσσονται αυτόματα (${(diff.cptIntervalMs / 1000).toFixed(1)} δευτ.)...`}
-          </span>
-        </div>
-        {/* Visual Stream Step Dots */}
-        <div className="flex items-center justify-center gap-2 pt-1">
-          {streamItems.map((item, idx) => (
-            <span
-              key={`${item.labelEl}-${idx}`}
-              className={`px-3 py-1 rounded-full text-xs font-extrabold border transition-all ${
-                idx === stepIndex
-                  ? item.hasStarCue
-                    ? 'bg-sage-dark text-white border-charcoal scale-110'
-                    : 'bg-slate text-white border-slate-dark'
-                  : idx < stepIndex
-                  ? 'bg-sage-surface text-charcoal border-sage'
-                  : 'bg-white text-charcoal-muted border-sand-dark'
-              }`}
-            >
-              {item.hasStarCue ? '🌟 Σήμα!' : `Εικόνα ${idx + 1}`}
+
+        {/* Live Automatic Stream Progress Bar */}
+        <div className="max-w-md mx-auto space-y-1">
+          <div className="flex items-center justify-between text-xs font-extrabold text-slate-dark">
+            <span>
+              {currentItem.hasStarCue
+                ? '🌟 ΤΟ ΧΡΥΣΟ ΑΣΤΕΡΙ ΕΜΦΑΝΙΣΤΗΚΕ! ΠΑΤΑ ΤΩΡΑ!'
+                : '⏳ Η επόμενη εικόνα έρχεται αυτόματα... (Μην πατήσεις!)'}
             </span>
-          ))}
+            <span>
+              Εικόνα {stepIndex + 1}/{streamItems.length}
+            </span>
+          </div>
+          <div className="w-full h-3 rounded-full bg-white border border-slate overflow-hidden">
+            <div
+              className={`h-full transition-all duration-100 rounded-full ${
+                currentItem.hasStarCue ? 'bg-sage-dark' : 'bg-slate'
+              }`}
+              style={{ width: `${streamProgressPct}%` }}
+            />
+          </div>
         </div>
       </div>
 
-      {/* Interactive Central Stage — Child can tap directly on the object card OR the button below */}
+      {/* Interactive Central Stage — Objects glide automatically on screen */}
       <button
         type="button"
         onClick={handleTapTarget}
         data-testid={currentItem.hasStarCue ? 'signal-stage-ready' : 'signal-stage-waiting'}
-        className={`w-full p-8 rounded-3xl border-4 space-y-3 transition-all cursor-pointer ${
+        className={`touch-target w-full p-8 rounded-3xl border-4 space-y-3 transition-all cursor-pointer ${
           currentItem.hasStarCue
-            ? 'bg-sage-surface border-sage-dark ring-4 ring-sage/40 scale-[1.02]'
-            : 'bg-white border-sand-dark hover:border-slate'
+            ? 'bg-sage-surface border-sage-dark ring-4 ring-sage/40 scale-[1.02] shadow-md'
+            : 'bg-white border-sand-dark'
         }`}
       >
-        <div className="text-6xl" aria-hidden="true">{currentItem.emoji}</div>
+        <div className="text-7xl select-none" aria-hidden="true">
+          {currentItem.emoji}
+        </div>
         <h2 className="text-xl font-extrabold text-charcoal">{currentItem.labelEl}</h2>
-        <p className="text-xs font-bold text-charcoal-muted">
+        <p className="text-sm font-extrabold text-charcoal-muted">
           {currentItem.hasStarCue
-            ? '👉 Πάτησε εδώ ή στο κουμπί «Επιλογή Τώρα!»'
-            : '🤫 Κράτα τα χέρια ήρεμα... περιμένουμε το 🌟'}
+            ? '🟢 Πάτησε την εικόνα ή το πράσινο κουμπί ΤΩΡΑ!'
+            : '🤫 Δεν έχει Χρυσό Αστέρι — περιμένουμε ήρεμα...'}
         </p>
       </button>
 
-      <div className="flex flex-wrap items-center justify-center gap-4">
+      {/* Single Target Action Button */}
+      <div className="flex items-center justify-center">
         <button
           type="button"
           data-testid="wait-signal-tap-btn"
           onClick={handleTapTarget}
-          className={`touch-target px-8 py-4 rounded-2xl border-4 font-extrabold text-lg flex items-center gap-2 ${
-            currentItem.hasStarCue && hintLevel >= 1
-              ? 'bg-sage-dark text-white border-charcoal ring-4 ring-sage/40'
-              : currentItem.hasStarCue
-              ? 'bg-sage text-white border-sage-dark hover:bg-sage-dark'
-              : 'bg-white border-sand-dark text-charcoal hover:bg-sand'
+          className={`touch-target min-w-[260px] px-8 py-4 rounded-3xl border-4 font-extrabold text-lg flex items-center justify-center gap-2.5 transition-all ${
+            currentItem.hasStarCue
+              ? 'bg-sage-dark text-white border-charcoal ring-4 ring-sage/40 scale-105'
+              : 'bg-sand-light border-sand-dark text-charcoal-muted opacity-80'
           }`}
         >
-          <span aria-hidden="true">🌟</span>
-          <span>Επιλογή Τώρα!</span>
+          <span className="text-2xl" aria-hidden="true">
+            {currentItem.hasStarCue ? '🌟' : '✋'}
+          </span>
+          <span>
+            {currentItem.hasStarCue
+              ? 'Είδα το Χρυσό Αστέρι — Πάτα Τώρα!'
+              : 'Περίμενε το Χρυσό Αστέρι...'}
+          </span>
         </button>
-
-        {!currentItem.hasStarCue && (
-          <button
-            type="button"
-            data-testid="wait-signal-next-btn"
-            onClick={handleWaitNext}
-            className="touch-target px-5 py-3 rounded-2xl bg-sand border-2 border-sand-dark text-charcoal font-bold text-sm flex items-center gap-2 hover:bg-slate-surface"
-          >
-            <span aria-hidden="true">⏭️</span>
-            <span>Άμεσο Επόμενο</span>
-          </button>
-        )}
       </div>
     </div>
   );

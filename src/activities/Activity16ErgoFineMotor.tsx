@@ -106,20 +106,30 @@ export const Activity16ErgoFineMotor: React.FC<ActivityRunnerRenderProps> = ({
   );
   const exercise = activeExercises[(currentRound - 1) % activeExercises.length];
   const [tracedStep, setTracedStep] = useState<number>(0);
+  const [isPointerDragging, setIsPointerDragging] = useState<boolean>(false);
 
   useEffect(() => {
     setTracedStep(hintLevel === 2 ? 2 : 0);
+    setIsPointerDragging(false);
   }, [currentRound, hintLevel, sessionSeed]);
 
   const nextExpectedStep = tracedStep + 1;
+  const tracePct = Math.min(
+    100,
+    Math.round((tracedStep / Math.max(1, exercise.waypoints.length)) * 100)
+  );
 
   const handleWaypointTap = (stepNum: number) => {
     runDebounced(() => {
       if (stepNum <= tracedStep) return;
       if (stepNum === nextExpectedStep) {
-        playCalmTone('soft-step', settings.soundEnabled);
+        playCalmTone(
+          stepNum >= exercise.waypoints.length ? 'complete' : 'soft-step',
+          settings.soundEnabled
+        );
         if (stepNum >= exercise.waypoints.length) {
           setTracedStep(0);
+          setIsPointerDragging(false);
           advanceRound(getAbsorbedCount());
         } else {
           setTracedStep(stepNum);
@@ -145,7 +155,24 @@ export const Activity16ErgoFineMotor: React.FC<ActivityRunnerRenderProps> = ({
       </div>
 
       {/* Left-to-Right Graphomotor Tracing Track */}
-      <div className="p-6 rounded-3xl bg-white border-2 border-sand-dark">
+      <div
+        className="p-6 rounded-3xl bg-white border-2 border-sand-dark space-y-4 select-none"
+        onPointerUp={() => setIsPointerDragging(false)}
+        onPointerLeave={() => setIsPointerDragging(false)}
+      >
+        <div className="max-w-md mx-auto space-y-1">
+          <div className="flex justify-between text-xs font-extrabold text-sage-dark px-1">
+            <span>✏️ Διαδρομή Ιχνηλάτησης (Αριστερά ➔ Δεξιά)</span>
+            <span>{tracePct}%</span>
+          </div>
+          <div className="w-full h-3 bg-sand-light rounded-full overflow-hidden border border-sand-dark">
+            <div
+              className="h-full bg-sage transition-all duration-200"
+              style={{ width: `${tracePct}%` }}
+            />
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center">
           {exercise.waypoints.map((wp) => {
             const isCompletedStep = wp.step <= tracedStep;
@@ -159,11 +186,19 @@ export const Activity16ErgoFineMotor: React.FC<ActivityRunnerRenderProps> = ({
                 type="button"
                 data-testid={`fine-motor-waypoint-${wp.step}`}
                 onClick={() => handleWaypointTap(wp.step)}
+                onPointerDown={() => {
+                  setIsPointerDragging(true);
+                }}
+                onPointerEnter={() => {
+                  if (isPointerDragging && wp.step === nextExpectedStep) {
+                    handleWaypointTap(wp.step);
+                  }
+                }}
                 className={`touch-target min-h-[120px] p-5 rounded-3xl border-4 flex flex-col items-center justify-center gap-2 transition-all ${
                   isCompletedStep
                     ? 'bg-sage text-white border-sage-dark'
                     : highlight
-                    ? 'bg-sage-surface border-sage-dark ring-4 ring-sage/40'
+                    ? 'bg-sage-surface border-sage-dark ring-4 ring-sage/40 scale-105'
                     : isNextStep
                     ? 'bg-slate-surface border-slate text-charcoal'
                     : 'bg-sand-light border-sand-dark text-charcoal-muted'
