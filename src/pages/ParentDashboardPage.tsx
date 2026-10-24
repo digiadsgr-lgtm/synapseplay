@@ -14,8 +14,10 @@ import { CLINICAL_STUDIES_AND_TRIALS } from '../utils/clinicalAdhdEngine';
 import {
   AVATAR_PRESETS,
   DOMAIN_LABELS_EL,
+  evaluateChildAvatarProgress,
   type ClinicalDomainKey,
 } from '../utils/childProfileLearningEngine';
+import { getActiveGreekVoiceLabel, speakGreek } from '../utils/soundAndSpeech';
 import { ParentGateModal } from '../components/ParentGateModal';
 import { ClinicalFeedbackSection } from '../components/ClinicalFeedbackSection';
 import { SubscriptionManagementSection } from '../components/SubscriptionManagementSection';
@@ -377,6 +379,37 @@ export const ParentDashboardPage: React.FC = () => {
                 {settings.seatedModeDefault ? 'ΝΑΙ' : 'ΟΧΙ'}
               </span>
             </button>
+
+            {/* Greek Speech Synthesis Engine Diagnostics & Audition */}
+            <div
+              data-testid="parent-voice-diagnostics-box"
+              className="p-3.5 rounded-2xl bg-sage-surface/70 border border-sage space-y-2 text-xs text-charcoal"
+            >
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <p className="font-extrabold">
+                    🎙️ Ελληνική Μηχανή Φωνητικής Προσωδίας (Neural TTS):
+                  </p>
+                  <p className="text-charcoal-muted">
+                    Ενεργή φωνή: <strong>{getActiveGreekVoiceLabel()}</strong>
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  data-testid="parent-test-greek-voice-btn"
+                  onClick={() =>
+                    speakGreek(
+                      'Καλημέρα! Η κότα, το καράβι και ο φωτεινός μονόκερος παίζουν ήρεμα με συγκέντρωση!',
+                      true,
+                      activeProfile.learnedModel.optimalSpeechRate
+                    )
+                  }
+                  className="px-3 py-1.5 rounded-xl bg-white border border-sage-dark font-extrabold text-charcoal hover:bg-sage hover:text-white"
+                >
+                  🔊 Δοκιμή Καθαρής Εκφώνησης
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -500,6 +533,7 @@ export const ParentDashboardPage: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {childProfiles.map((prof) => {
             const isSelected = prof.id === activeProfile.id;
+            const avatarEval = evaluateChildAvatarProgress(prof);
             const masteryEntries = Object.entries(prof.learnedModel.domainMastery) as Array<
               [ClinicalDomainKey, number]
             >;
@@ -517,17 +551,20 @@ export const ParentDashboardPage: React.FC = () => {
                   <div className="flex items-center gap-3">
                     <span className="text-4xl" aria-hidden="true">{prof.avatarEmoji}</span>
                     <div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex flex-wrap items-center gap-2">
                         <h3 className="text-lg font-extrabold text-charcoal">{prof.nickname}</h3>
                         {isSelected && (
                           <span className="px-2 py-0.5 rounded-full bg-sage text-white text-[10px] font-extrabold">
                             Ενεργό
                           </span>
                         )}
+                        <span className="px-2 py-0.5 rounded-full bg-white border border-sage text-[10px] font-extrabold text-sage-dark">
+                          {avatarEval.evolutionBadgeEmoji} {avatarEval.evolutionTitleEl}
+                        </span>
                       </div>
                       <p className="text-xs font-bold text-slate-dark">
                         Ηλικία {prof.ageBand} ετών • {prof.learnedModel.totalSessionsCompleted}{' '}
-                        ολοκληρωμένες συνεδρίες
+                        ολοκληρωμένες συνεδρίες • Δείκτης Εξέλιξης: {avatarEval.overallMasteryPct}%
                       </p>
                     </div>
                   </div>
@@ -557,6 +594,17 @@ export const ParentDashboardPage: React.FC = () => {
                 <p className="text-xs font-bold text-charcoal bg-white p-2.5 rounded-xl border border-sand-dark">
                   🧭 {prof.learnedModel.adaptationSummaryEl}
                 </p>
+
+                {/* Clinical Avatar Companion Assessment & ADHD Progress Insight */}
+                <div
+                  data-testid={`parent-avatar-clinical-eval-${prof.id}`}
+                  className="p-2.5 rounded-xl bg-white/90 border border-sage text-[11px] text-charcoal space-y-1"
+                >
+                  <p className="font-extrabold text-sage-dark">
+                    {avatarEval.avatar.emoji} Θεραπευτικός Συνοδοιπόρος: {avatarEval.avatar.defaultNameEl} ({avatarEval.avatar.superpowerTitleEl})
+                  </p>
+                  <p className="text-charcoal-muted">{avatarEval.clinicalAssessmentEl}</p>
+                </div>
 
                 {/* 6 Clinical Domain Mastery Progress Bars */}
                 <div className="space-y-1.5 pt-1">

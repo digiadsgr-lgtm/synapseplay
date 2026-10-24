@@ -37,6 +37,7 @@ const GREEK_UPPERCASE_LEXICON: Record<string, string> = {
   ΗΡΕΜΟΣ: 'ήρεμος',
   ΠΟΔΙ: 'πόδι',
   ΡΟΔΙ: 'ρόδι',
+  ΡΟΔΟ: 'ρόδο',
   ΠΕΤΡΑ: 'πέτρα',
   ΦΕΤΡΑ: 'φέτρα',
   ΚΑΣΤΡΟ: 'κάστρο',
@@ -45,6 +46,16 @@ const GREEK_UPPERCASE_LEXICON: Record<string, string> = {
   ΦΡΕΝΟ: 'φρένο',
   ΨΑΡΙ: 'ψάρι',
   ΦΑΡΙ: 'φάρι',
+  ΛΕΜΟΝΙ: 'λεμόνι',
+  ΜΠΑΛΟΝΙ: 'μπαλόνι',
+  ΤΡΕΝΑΚΙ: 'τρενάκι',
+  ΤΡΙΦΥΛΛΙ: 'τριφύλλι',
+  ΚΙΘΑΡΑ: 'κιθάρα',
+  ΤΥΜΠΑΝΟ: 'τύμπανο',
+  ΠΕΤΑΛΟΥΔΑ: 'πεταλούδα',
+  ΒΙΒΛΙΟΘΗΚΗ: 'βιβλιοθήκη',
+  ΑΥΤΟΡΡΥΘΜΙΣΗ: 'αυτορρύθμιση',
+  ΔΕΠΥ: 'Δέπυ',
 
   // Spatial & Prepositional concepts
   ΜΕΣΑ: 'μέσα',
@@ -59,6 +70,10 @@ const GREEK_UPPERCASE_LEXICON: Record<string, string> = {
   ΔΕΞΙΑ: 'δεξιά',
   ΠΡΙΝ: 'πριν',
   ΜΕΤΑ: 'μετά',
+  ΠΟΙΟΣ: 'ποιος',
+  ΠΟΥ: 'πού',
+  ΤΙ: 'τι',
+  ΚΑΝΕΙ: 'κάνει',
 
   // Executive function & Rule switching terms
   ΚΑΝΟΝΑΣ: 'κανόνας',
@@ -76,7 +91,14 @@ const GREEK_UPPERCASE_LEXICON: Record<string, string> = {
   ΣΗΜΑ: 'σήμα',
   ΚΙΝΗΣΗ: 'κίνηση',
   ΠΑΓΩΣΕ: 'πάγωσε',
+  ΑΚΙΝΗΤΟ: 'ακίνητο',
+  ΑΓΑΛΜΑ: 'άγαλμα',
   ΣΤΟΠ: 'στοπ',
+  ΠΑΤΑ: 'πάτα',
+  ΠΑΤΗΣΕΙΣ: 'πατήσεις',
+  ΕΜΦΑΝΙΣΤΗΚΕ: 'εμφανίστηκε',
+  ΧΡΥΣΟ: 'χρυσό',
+  ΟΛΕΣ: 'όλες',
   ΞΑΝΑ: 'ξανά',
   ΜΗΝ: 'μην',
   ΜΟΝΟ: 'μόνο',
@@ -84,6 +106,10 @@ const GREEK_UPPERCASE_LEXICON: Record<string, string> = {
   ΤΩΡΑ: 'τώρα',
   ΝΑΙ: 'ναι',
   ΟΧΙ: 'όχι',
+  ΕΝΕΡΓΗ: 'ενεργή',
+  ΑΝΕΝΕΡΓΗ: 'ανενεργή',
+  ΕΝΕΡΓΟΙ: 'ενεργοί',
+  ΑΝΕΝΕΡΓΟΙ: 'ανενεργοί',
 
   // Colors & Common targets
   ΠΡΑΣΙΝΟ: 'πράσινο',
@@ -100,10 +126,11 @@ const GREEK_UPPERCASE_LEXICON: Record<string, string> = {
   ΒΑΤΡΑΧΑΚΙ: 'βατραχάκι',
   ΗΛΙΑΝΘΟΣ: 'ηλίανθος',
   ΛΟΥΛΟΥΔΙ: 'λουλούδι',
+  ΜΟΝΟΚΕΡΟΣ: 'μονόκερος',
+  ΔΡΑΚΟΣ: 'δράκος',
 
   // Rhythm & Music-Kinetic terms
-  ΤΑ: 'ταα',
-  ΤΙ: 'τι',
+  ΤΑ: 'τάα',
   ΠΑΥΣΗ: 'παύση',
 };
 
@@ -112,50 +139,110 @@ const GREEK_UPPERCASE_LEXICON: Record<string, string> = {
  * speaks a natural open Greek syllable rather than spelling out letters (e.g. Τ-Α).
  */
 const SINGLE_SYLLABLE_PHONETIC_MAP: Record<string, string> = {
-  ΜΠΑ: 'μπά',
-  ΛΑ: 'λά',
-  ΓΑ: 'γά',
-  ΤΑ: 'τά',
-  ΠΑ: 'πά',
-  ΠΙ: 'πί',
-  ΚΟ: 'κό',
-  ΠΟ: 'πό',
-  ΡΟ: 'ρό',
-  ΔΙ: 'δί',
-  ΧΕ: 'χέ',
-  ΛΩ: 'λώ',
-  ΝΑ: 'νά',
-  ΚΑ: 'κά',
-  ΡΑ: 'ρά',
-  ΒΙ: 'βί',
-  ΘΑ: 'θά',
-  ΣΣΑ: 'σά',
-  ΣΑ: 'σά',
-  ΔΗ: 'δή',
-  ΤΟ: 'τό',
-  Ε: 'έ',
-  ΛΕ: 'λέ',
-  ΦΑ: 'φά',
+  ΜΠΑ: 'μπάα',
+  ΜΠΆ: 'μπάα',
+  ΛΑ: 'λάα',
+  ΛΆ: 'λάα',
+  ΓΑ: 'γάα',
+  ΓΆ: 'γάα',
+  ΤΑ: 'τάα',
+  ΤΆ: 'τάα',
+  ΠΑ: 'πάα',
+  ΠΆ: 'πάα',
+  ΠΙ: 'πίι',
+  ΠΊ: 'πίι',
+  ΚΟ: 'κόο',
+  ΚΌ: 'κόο',
+  ΠΟ: 'πόο',
+  ΠΌ: 'πόο',
+  ΡΟ: 'ρόο',
+  ΡΌ: 'ρόο',
+  ΔΙ: 'δίι',
+  ΔΊ: 'δίι',
+  ΜΗ: 'μήη',
+  ΜΉ: 'μήη',
+  ΛΟ: 'λόο',
+  ΛΌ: 'λόο',
+  ΨΑ: 'ψάα',
+  ΨΆ: 'ψάα',
+  ΡΙ: 'ρίι',
+  ΡΊ: 'ρίι',
+  ΧΕ: 'χέε',
+  ΧΈ: 'χέε',
+  ΛΩ: 'λώω',
+  ΛΏ: 'λώω',
+  ΝΑ: 'νάα',
+  ΝΆ: 'νάα',
+  ΚΑ: 'κάα',
+  ΚΆ: 'κάα',
+  ΡΑ: 'ράα',
+  ΡΆ: 'ράα',
+  ΒΙ: 'βίι',
+  ΒΊ: 'βίι',
+  ΘΑ: 'θάα',
+  ΘΆ: 'θάα',
+  ΣΣΑ: 'σάα',
+  ΣΑ: 'σάα',
+  ΣΆ: 'σάα',
+  ΛΕ: 'λέε',
+  ΛΈ: 'λέε',
+  ΜΟ: 'μόο',
+  ΜΌ: 'μόο',
+  ΝΙ: 'νίι',
+  ΝΊ: 'νίι',
+  ΤΡΕ: 'τρέε',
+  ΤΡΈ: 'τρέε',
+  ΚΙ: 'κίι',
+  ΚΊ: 'κίι',
+  ΔΗ: 'δήη',
+  ΔΉ: 'δήη',
+  ΤΟ: 'τόο',
+  ΤΌ: 'τόο',
+  Ε: 'έε',
+  Έ: 'έε',
+  ΦΑ: 'φάα',
+  ΦΆ: 'φάα',
   ΝΤΑΣ: 'ντάς',
-  ΣΥ: 'σύ',
-  ΓΚΕ: 'γκέ',
-  ΝΤΡΩ: 'ντρώ',
-  ΣΗ: 'σή',
-  ΤΡΕ: 'τρέ',
-  ΝΟ: 'νό',
-  ΦΡΕ: 'φρέ',
+  ΣΥ: 'σύυ',
+  ΣΎ: 'σύυ',
+  ΓΚΕ: 'γκέε',
+  ΓΚΈ: 'γκέε',
+  ΝΤΡΩ: 'ντρώω',
+  ΝΤΡΏ: 'ντρώω',
+  ΣΗ: 'σήη',
+  ΣΉ: 'σήη',
+  ΠΕ: 'πέε',
+  ΠΈ: 'πέε',
+  ΛΟΥ: 'λού',
+  ΛΟΎ: 'λού',
+  ΔΑ: 'δάα',
+  ΔΆ: 'δάα',
+  ΒΛΙ: 'βλίι',
+  ΒΛΊ: 'βλίι',
+  Ο: 'όο',
+  Ό: 'όο',
+  ΘΗ: 'θήη',
+  ΘΉ: 'θήη',
+  ΚΗ: 'κήη',
+  ΚΉ: 'κήη',
+  ΑΥ: 'άφ',
+  ΡΡΥ: 'ρύυ',
+  ΡΡΎ: 'ρύυ',
+  ΘΜΙ: 'θμίι',
+  ΘΜΊ: 'θμίι',
+  ΝΟ: 'νόο',
+  ΝΌ: 'νόο',
+  ΦΡΕ: 'φρέε',
   ΚΑΣ: 'κάς',
-  ΤΡΟ: 'τρό',
-  ΠΕ: 'πέ',
-  ΤΡΑ: 'τρά',
-  Η: 'ή',
+  ΤΡΟ: 'τρόο',
+  ΤΡΑ: 'τράα',
+  Η: 'ήη',
   ΛΙΟΣ: 'λιος',
-  ΜΕ: 'μέ',
-  ΛΙ: 'λί',
-  ΣΠΙ: 'σπί',
-  ΤΙ: 'τί',
-  ΜΟ: 'μό',
-  ΛΥ: 'λύ',
+  ΜΕ: 'μέε',
+  ΛΙ: 'λίι',
+  ΣΠΙ: 'σπίι',
+  ΤΙ: 'τίι',
+  ΛΥ: 'λύυ',
 };
 
 /**
@@ -301,7 +388,7 @@ export function normalizeGreekForSpeech(rawText: string): string {
     ' '
   );
 
-  // 2. Replace English cue tags that confuse Greek TTS
+  // 2. Replace English cue tags, abbreviations, number ranges, and slash fractions that confuse Greek TTS
   text = text
     .replace(/\(GO\)/gi, '')
     .replace(/\(STOP\)/gi, '')
@@ -311,7 +398,18 @@ export function normalizeGreekForSpeech(rawText: string): string {
     .replace(/\bAndante\b/gi, 'ήρεμος βηματισμός')
     .replace(/\bOrff\b/gi, 'Ορφ')
     .replace(/\bDalcroze\b/gi, 'Νταλκρόζ')
-    .replace(/\bLEGO\b/gi, 'λέγκο');
+    .replace(/\bLEGO\b/gi, 'λέγκο')
+    .replace(/π\.χ\./gi, 'για παράδειγμα')
+    .replace(/κ\.λπ\./gi, 'και λοιπά')
+    .replace(/κ\.ά\./gi, 'και άλλα')
+    .replace(/δευτ\./gi, 'δευτερόλεπτα')
+    .replace(/(\d+)\s*[–-]\s*(\d+)\s*ετών/g, '$1 έως $2 ετών')
+    .replace(/(\d+)\s*\/\s*(\d+)/g, '$1 από $2')
+    .replace(/\s+\/\s+/g, ' ή ')
+    .replace(/\(Αρχίζει με ([Α-Ωα-ω]{1,3})\)/g, (_, ph: string) => {
+      const spoken = PHONEME_SLASH_MAP[ph] ?? PHONEME_SLASH_MAP[ph.toUpperCase()] ?? ph;
+      return `, αρχίζει με τη φωνούλα ${spoken}`;
+    });
 
   // 3. Replace known hyphenated/spaced syllable words (e.g. «ΚΟ - ΤΑ» -> «κότα»)
   for (const [pattern, spoken] of Object.entries(HYPHENATED_WORD_MAP)) {
@@ -387,6 +485,24 @@ export function normalizeGreekForSpeech(rawText: string): string {
   return text;
 }
 
+let cachedGreekVoice: SpeechSynthesisVoice | null = null;
+let voiceListenerRegistered = false;
+
+function ensureVoiceChangeListener(): void {
+  if (voiceListenerRegistered || typeof window === 'undefined' || !('speechSynthesis' in window)) {
+    return;
+  }
+  voiceListenerRegistered = true;
+  try {
+    window.speechSynthesis.addEventListener?.('voiceschanged', () => {
+      cachedGreekVoice = null;
+      selectBestGreekVoice();
+    });
+  } catch {
+    // Ignore if addEventListener is not supported on speechSynthesis
+  }
+}
+
 /**
  * Selects the highest-quality Greek voice available on the browser/OS.
  * Prioritizes Neural/Natural voices (Athina, Nestoras, Google Ελληνικά, Melina).
@@ -394,23 +510,47 @@ export function normalizeGreekForSpeech(rawText: string): string {
 export function selectBestGreekVoice(): SpeechSynthesisVoice | null {
   try {
     if (typeof window === 'undefined' || !('speechSynthesis' in window)) return null;
+    ensureVoiceChangeListener();
+    if (cachedGreekVoice) return cachedGreekVoice;
+
     const voices = window.speechSynthesis.getVoices?.() ?? [];
     if (!voices.length) return null;
 
     const greekVoices = voices.filter(
-      (v) => v.lang.toLowerCase().startsWith('el') || v.name.toLowerCase().includes('greek')
+      (v) => v.lang.toLowerCase().startsWith('el') || v.name.toLowerCase().includes('greek') || v.name.includes('Ελληνικά')
     );
     if (!greekVoices.length) return null;
 
-    const priorityKeywords = ['natural', 'neural', 'athina', 'nestoras', 'google', 'melina', 'stefanos'];
+    const priorityKeywords = [
+      'athina online (natural)',
+      'nestoras online (natural)',
+      'natural',
+      'neural',
+      'athina',
+      'nestoras',
+      'google',
+      'melina',
+      'nikos',
+      'stefanos',
+    ];
     for (const kw of priorityKeywords) {
       const match = greekVoices.find((v) => v.name.toLowerCase().includes(kw));
-      if (match) return match;
+      if (match) {
+        cachedGreekVoice = match;
+        return match;
+      }
     }
+    cachedGreekVoice = greekVoices[0];
     return greekVoices[0];
   } catch {
     return null;
   }
+}
+
+export function getActiveGreekVoiceLabel(): string {
+  const v = selectBestGreekVoice();
+  if (!v) return 'Αυτόματη Ελληνική Φωνή Συστήματος (el-GR)';
+  return `${v.name} (${v.lang})`;
 }
 
 /**
@@ -426,15 +566,21 @@ export function speakGreek(text: string, enabled: boolean = true, rate: number =
     if (!normalizedText) return;
 
     window.speechSynthesis.cancel();
+    // Workaround for Chromium Web Speech API bug where speechSynthesis can remain paused
+    if (window.speechSynthesis.paused) {
+      window.speechSynthesis.resume();
+    }
+
     const utterance = new SpeechSynthesisUtterance(normalizedText);
     utterance.lang = 'el-GR';
     const bestVoice = selectBestGreekVoice();
     if (bestVoice) {
       utterance.voice = bestVoice;
     }
-    // Calibrated Polyvagal prosody: calm rate (0.85 - 0.96) and warm pitch (1.02)
+    // Calibrated Polyvagal prosody: calm rate (0.82 - 1.02) and warm natural pitch (1.0)
     utterance.rate = Math.max(0.8, Math.min(1.05, rate));
-    utterance.pitch = 1.02;
+    utterance.pitch = 1.0;
+    utterance.volume = 1.0;
     window.speechSynthesis.speak(utterance);
   } catch {
     // Silent fallback — visual pictograms are always shown alongside speech

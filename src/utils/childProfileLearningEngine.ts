@@ -47,16 +47,265 @@ export const DOMAIN_LABELS_EL: Record<ClinicalDomainKey, { labelEl: string; emoj
   emotionalRegulation: { labelEl: 'Συναισθηματική & Ρυθμική Αυτορρύθμιση', emoji: '🎭' },
 };
 
-export const AVATAR_PRESETS: Array<{ emoji: string; defaultNameEl: string }> = [
-  { emoji: '🐨', defaultNameEl: 'Ήρεμο Κοάλα' },
-  { emoji: '🐢', defaultNameEl: 'Σοφή Χελώνα' },
-  { emoji: '🦉', defaultNameEl: 'Μικρή Κουκουβάγια' },
-  { emoji: '🐬', defaultNameEl: 'Χαρούμενο Δελφίνι' },
-  { emoji: '🦊', defaultNameEl: 'Έξυπνη Αλεπού' },
-  { emoji: '🦋', defaultNameEl: 'Πολύχρωμη Πεταλούδα' },
-  { emoji: '🦁', defaultNameEl: 'Θαρραλέο Λιονταράκι' },
-  { emoji: '🚀', defaultNameEl: 'Μικρός Αστροναύτης' },
+export interface TherapeuticAvatarPreset {
+  emoji: string;
+  defaultNameEl: string;
+  category: 'animal' | 'fantasy';
+  primaryDomain: ClinicalDomainKey;
+  superpowerTitleEl: string;
+  coachingTipEl: string;
+  clinicalRoleEl: string;
+}
+
+export const AVATAR_PRESETS: TherapeuticAvatarPreset[] = [
+  // Beloved Animals
+  {
+    emoji: '🐨',
+    defaultNameEl: 'Ήρεμο Κοάλα',
+    category: 'animal',
+    primaryDomain: 'emotionalRegulation',
+    superpowerTitleEl: 'Αγκαλιά Γείωσης & Βαθιάς Ηρεμίας',
+    coachingTipEl: 'Παίρνω μια ζεστή ανάσα σαν το Κοάλα και κρατάω το σώμα μου ήρεμο και σταθερό!',
+    clinicalRoleEl:
+      'Ενισχύει την ιδιοδεκτική γείωση και τη μείωση υπερδιέγερσης (Polyvagal Regulation). Ιδανικό για παιδιά με κινητική ανησυχία.',
+  },
+  {
+    emoji: '🐢',
+    defaultNameEl: 'Σοφή Χελώνα',
+    category: 'animal',
+    primaryDomain: 'inhibitoryControl',
+    superpowerTitleEl: 'Ασπίδα Παύσης & Σκέψης Πριν την Πράξη',
+    coachingTipEl: 'Σταματάω για 1 δευτερόλεπτο σαν τη Σοφή Χελώνα, κοιτάζω καλά και μετά πατάω!',
+    clinicalRoleEl:
+      'Κλασικό κλινικό πρότυπο αναστολής παρόρμησης (Schneider & Robin "Turtle Technique" CBT). Βοηθά στη μείωση βιαστικών λαθών.',
+  },
+  {
+    emoji: '🦉',
+    defaultNameEl: 'Μικρή Κουκουβάγια',
+    category: 'animal',
+    primaryDomain: 'visualAttention',
+    superpowerTitleEl: 'Μάτια Ντετέκτιβ & Καθαρή Ακρόαση',
+    coachingTipEl: 'Ανοίγω τα μάτια και τα αυτιά της Κουκουβάγιας για να βρω τη σωστή λεπτομέρεια!',
+    clinicalRoleEl:
+      'Ενισχύει την επιλεκτική οπτική σάρωση και την ακουστική προσοχή σε παιδιά με ΔΕΠΥ Απρόσεκτου Τύπου.',
+  },
+  {
+    emoji: '🐬',
+    defaultNameEl: 'Χαρούμενο Δελφίνι',
+    category: 'animal',
+    primaryDomain: 'speechLanguage',
+    superpowerTitleEl: 'Ρυθμικό Κύμα Λόγου & Επικοινωνίας',
+    coachingTipEl: 'Ακολουθώ τον ρυθμό του Δελφινιού και ενώνω καθαρά τις συλλαβές και τις λέξεις!',
+    clinicalRoleEl:
+      'Υποστηρίζει τον φωνολογικό ρυθμό, την ακουστική μνήμη και την ομαλή ροή λόγου.',
+  },
+  {
+    emoji: '🦊',
+    defaultNameEl: 'Έξυπνη Αλεπού',
+    category: 'animal',
+    primaryDomain: 'workingMemory',
+    superpowerTitleEl: 'Ευέλικτη Σκέψη & Αλλαγή Κανόνα',
+    coachingTipEl: 'Όταν αλλάζει ο κανόνας, η Έξυπνη Αλεπού προσαρμόζεται αμέσως με χαμόγελο!',
+    clinicalRoleEl:
+      'Ενισχύει τη γνωστική ευελιξία (Set-Shifting) και την εργαζόμενη μνήμη στις μεταβάσεις κανόνων.',
+  },
+  {
+    emoji: '🦋',
+    defaultNameEl: 'Πολύχρωμη Πεταλούδα',
+    category: 'animal',
+    primaryDomain: 'motorPraxis',
+    superpowerTitleEl: 'Απαλό Άγγιγμα & Λεπτή Κινητικότητα',
+    coachingTipEl: 'Ακουμπάω την οθόνη απαλά και με ακρίβεια, όπως τα φτερά της Πεταλούδας!',
+    clinicalRoleEl:
+      'Καλλιεργεί τον οπτικοκινητικό συντονισμό και τον έλεγχο πίεσης δακτύλων (Εργοθεραπεία).',
+  },
+  {
+    emoji: '🦁',
+    defaultNameEl: 'Θαρραλέο Λιονταράκι',
+    category: 'animal',
+    primaryDomain: 'emotionalRegulation',
+    superpowerTitleEl: 'Ήρεμη Δύναμη & Αυτοπεποίθηση',
+    coachingTipEl: 'Ακόμα κι αν κάτι φαίνεται δύσκολο, το Θαρραλέο Λιονταράκι δοκιμάζει ξανά ήρεμα!',
+    clinicalRoleEl:
+      'Ενισχύει την ανοχή στη ματαίωση και τη συναισθηματική ανθεκτικότητα (Resilience).',
+  },
+  {
+    emoji: '🐶',
+    defaultNameEl: 'Πιστό Κουταβάκι',
+    category: 'animal',
+    primaryDomain: 'motorPraxis',
+    superpowerTitleEl: 'Οργάνωση Ρουτίνας & Συνεργασία',
+    coachingTipEl: 'Βάζω τα βήματα στη σειρά, ένα-ένα, όπως το Πιστό Κουταβάκι στις αποστολές!',
+    clinicalRoleEl:
+      'Υποστηρίζει την οργάνωση καθημερινών ρουτινών (ADL Praxis) και την ολοκλήρωση βημάτων.',
+  },
+  {
+    emoji: '🐰',
+    defaultNameEl: 'Γρήγορο Κουνελάκι Ρυθμού',
+    category: 'animal',
+    primaryDomain: 'inhibitoryControl',
+    superpowerTitleEl: 'Ρυθμικά Άλματα & Φρένο Ακριβείας',
+    coachingTipEl: 'Κινούμαι στον ρυθμό και πατάω φρένο ακριβώς στο κόκκινο σήμα!',
+    clinicalRoleEl:
+      'Βοηθά το παιδί να μετατρέπει την υπερκινητικότητα σε ελεγχόμενη ρυθμική κίνηση με αναστολή (Go/No-Go).',
+  },
+  {
+    emoji: '🐼',
+    defaultNameEl: 'Γαλήνιο Πάντα',
+    category: 'animal',
+    primaryDomain: 'emotionalRegulation',
+    superpowerTitleEl: 'Ισορροπία Μπαμπού & Εσωτερική Γαλήνη',
+    coachingTipEl: 'Κρατάω την ισορροπία μου σαν το Γαλήνιο Πάντα και αναπνέω αργά!',
+    clinicalRoleEl:
+      'Υποστηρίζει τη στασική σταθερότητα, τη συναισθηματική αυτορρύθμιση και την ήρεμη εστίαση.',
+  },
+
+  // Fantasy & Heroic Characters (Unicorns, Dragons, Fairies, Wizards, Superheroes, Space)
+  {
+    emoji: '🦄',
+    defaultNameEl: 'Φωτεινός Μονόκερος',
+    category: 'fantasy',
+    primaryDomain: 'visualAttention',
+    superpowerTitleEl: 'Μαγική Ακτίνα Εστίασης & Παρατήρησης',
+    coachingTipEl: 'Το φωτεινό κέρατο του Μονόκερου δείχνει μία-μία τις κρυμμένες λεπτομέρειες!',
+    clinicalRoleEl:
+      'Μετατρέπει τη διάσπαση προσοχής σε κατευθυνόμενη «ακτίνα εστίασης» (Spotlight Attention). Ιδιαίτερα αγαπητό προφίλ κινητοποίησης.',
+  },
+  {
+    emoji: '🐉',
+    defaultNameEl: 'Ήρεμος Δράκος της Ανάσας',
+    category: 'fantasy',
+    primaryDomain: 'inhibitoryControl',
+    superpowerTitleEl: 'Αργή Εκπνοή & Έλεγχος Παρόρμησης',
+    coachingTipEl: 'Ο Ήρεμος Δράκος βγάζει αργά τον αέρα από το στόμα και περιμένει το πράσινο σήμα!',
+    clinicalRoleEl:
+      'Συνδέει την αναπνευστική αυτορρύθμιση (Dragon Breath CBT) με τον έλεγχο της παρορμητικότητας και του θυμού.',
+  },
+  {
+    emoji: '🧚',
+    defaultNameEl: 'Νεράιδα της Αρμονίας',
+    category: 'fantasy',
+    primaryDomain: 'emotionalRegulation',
+    superpowerTitleEl: 'Μαγική Σκόνη Ρυθμού & Ενσυναίσθησης',
+    coachingTipEl: 'Με το ραβδάκι της Αρμονίας βρίσκω πάντα την πιο ήρεμη και φιλική λύση!',
+    clinicalRoleEl:
+      'Ενισχύει την κοινωνική αντίληψη, τη θεατρική ενσυναίσθηση και τη μουσικοκινητική αρμονία.',
+  },
+  {
+    emoji: '🧙‍♂️',
+    defaultNameEl: 'Σοφός Μάγος της Μνήμης',
+    category: 'fantasy',
+    primaryDomain: 'workingMemory',
+    superpowerTitleEl: 'Κρύσταλλος Απομνημόνευσης & Σχεδιασμού',
+    coachingTipEl: 'Κρατάω τις εικόνες στο μυαλό μου σαν μυστικό ξόρκι μνήμης!',
+    clinicalRoleEl:
+      'Ενδυναμώνει την οπτικοχωρική και ακουστική εργαζόμενη μνήμη (Baddeley Working Memory) μέσω νοερής επανάληψης.',
+  },
+  {
+    emoji: '🦸‍♀️',
+    defaultNameEl: 'Σούπερ Ηρωίδα της Προσοχής',
+    category: 'fantasy',
+    primaryDomain: 'visualAttention',
+    superpowerTitleEl: 'Ασπίδα Συγκέντρωσης χωρίς Περισπασμούς',
+    coachingTipEl: 'Ενεργοποιώ την Ασπίδα Προσοχής και ολοκληρώνω τον στόχο μου βήμα-βήμα!',
+    clinicalRoleEl:
+      'Ενισχύει την αυτοαποτελεσματικότητα (Self-Efficacy) και την προστασία από εξωτερικούς περισπασμούς.',
+  },
+  {
+    emoji: '🚀',
+    defaultNameEl: 'Μικρός Αστροναύτης',
+    category: 'fantasy',
+    primaryDomain: 'workingMemory',
+    superpowerTitleEl: 'Πυξίδα Αποστολών & Οργάνωσης',
+    coachingTipEl: 'Ελέγχω τα όργανα του διαστημοπλοίου: 1, 2, 3 — όλα στη σωστή σειρά!',
+    clinicalRoleEl:
+      'Προάγει τον εκτελεστικό σχεδιασμό (Executive Planning) και τον έλεγχο λίστας βημάτων (Checklist Mastery).',
+  },
 ];
+
+export function getAvatarCompanionMetadata(emoji: string): TherapeuticAvatarPreset {
+  return (
+    AVATAR_PRESETS.find((p) => p.emoji === emoji) ??
+    AVATAR_PRESETS.find((p) => p.emoji === '🦄') ??
+    AVATAR_PRESETS[0]
+  );
+}
+
+export interface AvatarClinicalProgressEvaluation {
+  avatar: TherapeuticAvatarPreset;
+  evolutionLevel: 1 | 2 | 3 | 4;
+  evolutionTitleEl: string;
+  evolutionBadgeEmoji: string;
+  overallMasteryPct: number;
+  strongestDomainKey: ClinicalDomainKey;
+  strongestDomainLabelEl: string;
+  growthTargetDomainKey: ClinicalDomainKey;
+  growthTargetDomainLabelEl: string;
+  childEncouragementEl: string;
+  clinicalAssessmentEl: string;
+}
+
+export function evaluateChildAvatarProgress(
+  profile: ChildMicroProfile
+): AvatarClinicalProgressEvaluation {
+  const avatar = getAvatarCompanionMetadata(profile.avatarEmoji);
+  const sessions = profile.learnedModel.totalSessionsCompleted;
+  const masteryValues = Object.values(profile.learnedModel.domainMastery);
+  const avgMastery =
+    masteryValues.reduce((sum, val) => sum + val, 0) / Math.max(1, masteryValues.length);
+  const overallMasteryPct = Math.round(avgMastery * 100);
+
+  const entries = Object.entries(profile.learnedModel.domainMastery) as Array<
+    [ClinicalDomainKey, number]
+  >;
+  const sortedDesc = [...entries].sort((a, b) => b[1] - a[1]);
+  const strongestDomainKey = sortedDesc[0][0];
+  const growthTargetDomainKey = sortedDesc[sortedDesc.length - 1][0];
+
+  const strongestDomainLabelEl = DOMAIN_LABELS_EL[strongestDomainKey].labelEl;
+  const growthTargetDomainLabelEl = DOMAIN_LABELS_EL[growthTargetDomainKey].labelEl;
+
+  let evolutionLevel: 1 | 2 | 3 | 4 = 1;
+  let evolutionTitleEl = 'Επίπεδο 1: Μικρός Εξερευνητής Ηρεμίας';
+  let evolutionBadgeEmoji = '🌱';
+
+  if (sessions >= 10 || (sessions >= 6 && overallMasteryPct >= 75)) {
+    evolutionLevel = 4;
+    evolutionTitleEl = 'Επίπεδο 4: Πρωταθλητής Συγκέντρωσης & Αυτορρύθμισης';
+    evolutionBadgeEmoji = '👑';
+  } else if (sessions >= 6 || (sessions >= 3 && overallMasteryPct >= 65)) {
+    evolutionLevel = 3;
+    evolutionTitleEl = 'Επίπεδο 3: Φύλακας της Προσοχής';
+    evolutionBadgeEmoji = '🌟';
+  } else if (sessions >= 2) {
+    evolutionLevel = 2;
+    evolutionTitleEl = 'Επίπεδο 2: Μαθητευόμενος της Εστίασης';
+    evolutionBadgeEmoji = '✨';
+  }
+
+  const childEncouragementEl = `${avatar.emoji} ${avatar.superpowerTitleEl}: «${avatar.coachingTipEl}»`;
+
+  const clinicalAssessmentEl =
+    sessions === 0
+      ? `Ο συνοδοιπόρος «${avatar.defaultNameEl}» (${avatar.emoji}) ενεργοποιεί τον τομέα «${DOMAIN_LABELS_EL[avatar.primaryDomain].labelEl}». ${avatar.clinicalRoleEl}`
+      : `Συνολικός Δείκτης Εξέλιξης ΔΕΠΥ: ${overallMasteryPct}% (${evolutionTitleEl}). Ισχυρότερη επίδοση: «${strongestDomainLabelEl}» (${Math.round(
+          sortedDesc[0][1] * 100
+        )}%). Επόμενος θεραπευτικός στόχος ενδυνάμωσης με τον συνοδοιπόρο «${avatar.defaultNameEl}»: «${growthTargetDomainLabelEl}».`;
+
+  return {
+    avatar,
+    evolutionLevel,
+    evolutionTitleEl,
+    evolutionBadgeEmoji,
+    overallMasteryPct,
+    strongestDomainKey,
+    strongestDomainLabelEl,
+    growthTargetDomainKey,
+    growthTargetDomainLabelEl,
+    childEncouragementEl,
+    clinicalAssessmentEl,
+  };
+}
 
 /**
  * Maps each of the 20 activities to its primary clinical learning domain(s).

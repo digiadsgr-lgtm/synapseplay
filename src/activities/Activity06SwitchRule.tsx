@@ -1,7 +1,9 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import type { ActivityRunnerRenderProps } from '../components/ActivityRunner';
 import { useDebouncedAction } from '../hooks/useDebouncedAction';
 import { selectSessionRounds } from '../utils/clinicalAdhdEngine';
+import { playCalmTone, speakGreek } from '../utils/soundAndSpeech';
+import { useApp } from '../context/AppContext';
 
 interface RuleRound {
   ruleType: 'color' | 'shape';
@@ -112,12 +114,22 @@ export const Activity06SwitchRule: React.FC<ActivityRunnerRenderProps> = ({
   advanceRound,
   triggerGentleFeedback,
 }) => {
+  const { settings } = useApp();
   const { runDebounced, getAbsorbedCount } = useDebouncedAction();
   const activeRounds = useMemo(
     () => selectSessionRounds(RULE_ROUNDS, totalRounds, sessionSeed),
     [totalRounds, sessionSeed]
   );
   const round = activeRounds[(currentRound - 1) % activeRounds.length];
+
+  // Announce the active sorting rule aloud on every round so rule switches (Color <-> Shape) are crystal clear
+  useEffect(() => {
+    speakGreek(
+      `${round.ruleTitleEl}. ${round.targetDescriptionEl}`,
+      settings.voiceEnabled,
+      adaptiveProfile.speechRate
+    );
+  }, [currentRound, sessionSeed, round.ruleTitleEl, round.targetDescriptionEl, settings.voiceEnabled, adaptiveProfile.speechRate]);
 
   const visibleOptions = useMemo(() => {
     if (hintLevel === 2 || ageBand === '4-5' || adaptiveProfile.distractorReductionRatio >= 0.5) {
@@ -148,6 +160,7 @@ export const Activity06SwitchRule: React.FC<ActivityRunnerRenderProps> = ({
   const handleOptionSelect = (isCorrect: boolean, labelEl: string) => {
     runDebounced(() => {
       if (isCorrect) {
+        playCalmTone('complete', settings.soundEnabled);
         advanceRound(getAbsorbedCount());
       } else {
         triggerGentleFeedback(

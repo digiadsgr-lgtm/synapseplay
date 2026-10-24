@@ -2,6 +2,8 @@ import React, { useState, useEffect, useMemo } from 'react';
 import type { ActivityRunnerRenderProps } from '../components/ActivityRunner';
 import { useDebouncedAction } from '../hooks/useDebouncedAction';
 import { selectSessionRounds } from '../utils/clinicalAdhdEngine';
+import { playCalmTone, speakGreek } from '../utils/soundAndSpeech';
+import { useApp } from '../context/AppContext';
 
 type BlockColor = 'sage' | 'slate' | 'terracotta';
 
@@ -45,6 +47,7 @@ export const Activity12BuildPattern: React.FC<ActivityRunnerRenderProps> = ({
   advanceRound,
   triggerGentleFeedback,
 }) => {
+  const { settings } = useApp();
   const { runDebounced, getAbsorbedCount } = useDebouncedAction();
   const activePatterns = useMemo(
     () => selectSessionRounds(PATTERNS, totalRounds, sessionSeed),
@@ -83,8 +86,15 @@ export const Activity12BuildPattern: React.FC<ActivityRunnerRenderProps> = ({
       if (color === nextExpectedColor) {
         const next = [...builtBlocks, color];
         setBuiltBlocks(next);
+        const placedBlock = PALETTE.find((b) => b.id === color);
         if (next.length === targetPattern.length) {
+          playCalmTone('complete', settings.soundEnabled);
           advanceRound(getAbsorbedCount());
+        } else {
+          playCalmTone('soft-step', settings.soundEnabled);
+          if (placedBlock) {
+            speakGreek(placedBlock.labelEl, settings.voiceEnabled, adaptiveProfile.speechRate);
+          }
         }
       } else {
         const expectedBlock = PALETTE.find((b) => b.id === nextExpectedColor)!;
@@ -97,6 +107,7 @@ export const Activity12BuildPattern: React.FC<ActivityRunnerRenderProps> = ({
 
   const handlePhysicalComplete = () => {
     runDebounced(() => {
+      playCalmTone('complete', settings.soundEnabled);
       advanceRound(getAbsorbedCount());
     });
   };

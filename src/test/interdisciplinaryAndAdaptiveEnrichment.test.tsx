@@ -11,7 +11,9 @@ import {
   getAgeAndPerformanceDifficulty,
 } from '../utils/clinicalAdhdEngine';
 import {
+  AVATAR_PRESETS,
   createDefaultChildProfile,
+  evaluateChildAvatarProgress,
   trainChildProfileOnActivityCompletion,
 } from '../utils/childProfileLearningEngine';
 import {
@@ -666,6 +668,53 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
     fireEvent.click(screen.getByTestId('hero-primary-cta-btn'));
     await waitFor(() => {
       expect(screen.getByTestId('child-hub-page')).toBeInTheDocument();
+    });
+  });
+
+  it('Therapeutic Companion Avatars (Unicorns, Dragons, Animals) & Clinical Progress Evaluation: empowers child and evaluates ADHD domain growth', async () => {
+    expect(AVATAR_PRESETS.length).toBeGreaterThanOrEqual(16);
+    expect(AVATAR_PRESETS.some((p) => p.emoji === '🦄' && p.category === 'fantasy')).toBe(true);
+    expect(AVATAR_PRESETS.some((p) => p.emoji === '🐉' && p.category === 'fantasy')).toBe(true);
+
+    // Verify speech normalization for abbreviations, phoneme hints, and ratios
+    expect(normalizeGreekForSpeech('Χταπόδι (Αρχίζει με Χ) σε 3 δευτ. (1/2)')).toContain(
+      'αρχίζει με τη φωνούλα χου'
+    );
+    expect(normalizeGreekForSpeech('Χταπόδι (Αρχίζει με Χ) σε 3 δευτ. (1/2)')).toContain(
+      'δευτερόλεπτα'
+    );
+    expect(normalizeGreekForSpeech('Χταπόδι (Αρχίζει με Χ) σε 3 δευτ. (1/2)')).toContain(
+      '1 από 2'
+    );
+
+    // Evaluate avatar evolution across sessions
+    let profile = createDefaultChildProfile('6-8');
+    profile = { ...profile, avatarEmoji: '🦄', nickname: 'Μικρός Μονόκερος' };
+    const initialEval = evaluateChildAvatarProgress(profile);
+    expect(initialEval.evolutionLevel).toBe(1);
+    expect(initialEval.avatar.defaultNameEl).toBe('Φωτεινός Μονόκερος');
+
+    for (let i = 0; i < 6; i++) {
+      profile = trainChildProfileOnActivityCompletion(profile, {
+        activityId: '01-visual-search',
+        hintsUsed: 0,
+        impulsiveTapsAbsorbed: 0,
+        durationSeconds: 35,
+      });
+    }
+    const advancedEval = evaluateChildAvatarProgress(profile);
+    expect(advancedEval.evolutionLevel).toBeGreaterThanOrEqual(3);
+    expect(advancedEval.clinicalAssessmentEl).toContain('Συνολικός Δείκτης Εξέλιξης ΔΕΠΥ');
+
+    // Interactive Companion Avatar Picker on Child Hub
+    renderRoute('/app');
+    fireEvent.click(screen.getByTestId('toggle-avatar-companion-picker-btn'));
+    expect(screen.getByTestId('companion-avatar-picker-panel')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('switch-avatar-btn-🦄'));
+    await waitFor(() => {
+      expect(screen.getByTestId('companion-superpower-banner')).toHaveTextContent(
+        'Μαγική Ακτίνα Εστίασης'
+      );
     });
   });
 });

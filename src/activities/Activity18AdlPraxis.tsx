@@ -1,7 +1,9 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import type { ActivityRunnerRenderProps } from '../components/ActivityRunner';
 import { useDebouncedAction } from '../hooks/useDebouncedAction';
 import { selectSessionRounds } from '../utils/clinicalAdhdEngine';
+import { playCalmTone, speakGreek } from '../utils/soundAndSpeech';
+import { useApp } from '../context/AppContext';
 
 interface PraxisScenario {
   titleEl: string;
@@ -83,12 +85,17 @@ export const Activity18AdlPraxis: React.FC<ActivityRunnerRenderProps> = ({
   advanceRound,
   triggerGentleFeedback,
 }) => {
+  const { settings } = useApp();
   const { runDebounced, getAbsorbedCount } = useDebouncedAction();
   const activeRounds = useMemo(
     () => selectSessionRounds(PRAXIS_ROUNDS, totalRounds, sessionSeed),
     [totalRounds, sessionSeed]
   );
   const round = activeRounds[(currentRound - 1) % activeRounds.length];
+
+  useEffect(() => {
+    speakGreek(round.questionEl, settings.voiceEnabled, adaptiveProfile.speechRate);
+  }, [currentRound, sessionSeed, round.questionEl, settings.voiceEnabled, adaptiveProfile.speechRate]);
 
   const visibleOptions =
     hintLevel === 2 || ageBand === '4-5' || adaptiveProfile.distractorReductionRatio >= 0.5
@@ -98,6 +105,7 @@ export const Activity18AdlPraxis: React.FC<ActivityRunnerRenderProps> = ({
   const handleSelect = (isCorrect: boolean, labelEl: string) => {
     runDebounced(() => {
       if (isCorrect) {
+        playCalmTone('complete', settings.soundEnabled);
         advanceRound(getAbsorbedCount());
       } else {
         triggerGentleFeedback(

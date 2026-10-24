@@ -2,6 +2,8 @@ import React, { useState, useEffect, useMemo } from 'react';
 import type { ActivityRunnerRenderProps } from '../components/ActivityRunner';
 import { useDebouncedAction } from '../hooks/useDebouncedAction';
 import { selectSessionRounds } from '../utils/clinicalAdhdEngine';
+import { playCalmTone, speakGreek } from '../utils/soundAndSpeech';
+import { useApp } from '../context/AppContext';
 
 interface MissionConfig {
   titleEl: string;
@@ -62,6 +64,7 @@ export const Activity11RealWorldMission: React.FC<ActivityRunnerRenderProps> = (
   sessionSeed = 0,
   advanceRound,
 }) => {
+  const { settings } = useApp();
   const { runDebounced, getAbsorbedCount } = useDebouncedAction();
   const activeMissions = useMemo(
     () => selectSessionRounds(MISSIONS, totalRounds, sessionSeed),
@@ -72,13 +75,20 @@ export const Activity11RealWorldMission: React.FC<ActivityRunnerRenderProps> = (
 
   useEffect(() => {
     setCheckedSteps([false, false]);
-  }, [currentRound, sessionSeed]);
+    if (currentRound > 1) {
+      speakGreek(mission.titleEl, settings.voiceEnabled, adaptiveProfile.speechRate);
+    }
+  }, [currentRound, sessionSeed, mission.titleEl, settings.voiceEnabled, adaptiveProfile.speechRate]);
 
   const toggleStep = (index: number) => {
     runDebounced(() => {
       const next = [...checkedSteps];
       next[index] = !next[index];
       setCheckedSteps(next);
+      if (next[index]) {
+        playCalmTone('soft-step', settings.soundEnabled);
+        speakGreek(mission.steps[index].textEl, settings.voiceEnabled, adaptiveProfile.speechRate);
+      }
     });
   };
 
@@ -86,6 +96,7 @@ export const Activity11RealWorldMission: React.FC<ActivityRunnerRenderProps> = (
 
   const handleCompleteMission = () => {
     runDebounced(() => {
+      playCalmTone('complete', settings.soundEnabled);
       advanceRound(getAbsorbedCount());
     });
   };

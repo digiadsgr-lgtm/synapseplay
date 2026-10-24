@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import type { ActivityRunnerRenderProps } from '../components/ActivityRunner';
 import { useDebouncedAction } from '../hooks/useDebouncedAction';
-import { playCalmTone } from '../utils/soundAndSpeech';
+import { playCalmTone, speakGreek } from '../utils/soundAndSpeech';
 import { useApp } from '../context/AppContext';
 import { selectSessionRounds } from '../utils/clinicalAdhdEngine';
 
@@ -81,9 +81,13 @@ export const Activity04SequenceMemory: React.FC<ActivityRunnerRenderProps> = ({
     setUserProgress([]);
 
     targetSequence.forEach((tileId, idx) => {
+      const tileObj = TILES.find((t) => t.id === tileId);
       const tOn = window.setTimeout(() => {
         setActiveFlashId(tileId);
         playCalmTone('soft-step', settings.soundEnabled);
+        if (tileObj) {
+          speakGreek(tileObj.labelEl, settings.voiceEnabled, adaptiveProfile.speechRate);
+        }
       }, idx * 450 + 100);
 
       const tOff = window.setTimeout(() => {
@@ -95,7 +99,7 @@ export const Activity04SequenceMemory: React.FC<ActivityRunnerRenderProps> = ({
 
       timersRef.current.push(tOn, tOff);
     });
-  }, [targetSequence, settings.soundEnabled, clearDemoTimers]);
+  }, [targetSequence, settings.soundEnabled, settings.voiceEnabled, adaptiveProfile.speechRate, clearDemoTimers]);
 
   useEffect(() => {
     setUserProgress([]);

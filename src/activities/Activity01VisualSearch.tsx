@@ -2,6 +2,8 @@ import React, { useMemo, useEffect, useCallback } from 'react';
 import type { ActivityRunnerRenderProps } from '../components/ActivityRunner';
 import { useDebouncedAction } from '../hooks/useDebouncedAction';
 import { selectSessionRounds } from '../utils/clinicalAdhdEngine';
+import { playCalmTone, speakGreek } from '../utils/soundAndSpeech';
+import { useApp } from '../context/AppContext';
 
 interface SearchRoundConfig {
   target: { emoji: string; labelEl: string };
@@ -124,12 +126,23 @@ export const Activity01VisualSearch: React.FC<ActivityRunnerRenderProps> = ({
   advanceRound,
   triggerGentleFeedback,
 }) => {
+  const { settings } = useApp();
   const { runDebounced, getAbsorbedCount } = useDebouncedAction();
   const activeRounds = useMemo(
     () => selectSessionRounds(ROUNDS, totalRounds, sessionSeed),
     [totalRounds, sessionSeed]
   );
   const roundData = activeRounds[(currentRound - 1) % activeRounds.length];
+
+  useEffect(() => {
+    if (currentRound > 1) {
+      speakGreek(
+        `Ψάχνουμε: ${roundData.target.labelEl}!`,
+        settings.voiceEnabled,
+        adaptiveProfile.speechRate
+      );
+    }
+  }, [currentRound, sessionSeed, roundData.target.labelEl, settings.voiceEnabled, adaptiveProfile.speechRate]);
 
   // Age-graded & Invisible Adaptive Scenario distractor scaling:
   // - Hint Level 2 or Age 4-5: 3 items (2 distractors + 1 target)
@@ -152,6 +165,7 @@ export const Activity01VisualSearch: React.FC<ActivityRunnerRenderProps> = ({
     (isTarget: boolean, labelEl: string) => {
       runDebounced(() => {
         if (isTarget) {
+          playCalmTone('complete', settings.soundEnabled);
           advanceRound(getAbsorbedCount());
         } else {
           triggerGentleFeedback(
@@ -160,7 +174,7 @@ export const Activity01VisualSearch: React.FC<ActivityRunnerRenderProps> = ({
         }
       });
     },
-    [runDebounced, advanceRound, getAbsorbedCount, triggerGentleFeedback, roundData.target.labelEl]
+    [runDebounced, advanceRound, getAbsorbedCount, triggerGentleFeedback, roundData.target.labelEl, settings.soundEnabled]
   );
 
   // Keyboard number-key support (1-8) in addition to standard Tab/Enter/Space
@@ -179,15 +193,24 @@ export const Activity01VisualSearch: React.FC<ActivityRunnerRenderProps> = ({
   return (
     <div className="space-y-6" data-testid="activity-01-visual-search">
       {/* Target Display Card */}
-      <div className="p-5 rounded-3xl bg-slate-surface border-2 border-slate flex items-center justify-center gap-4">
+      <div className="p-5 rounded-3xl bg-slate-surface border-2 border-slate flex flex-wrap items-center justify-center gap-4">
         <span className="text-lg font-extrabold text-charcoal">Στόχος Αναζήτησης:</span>
-        <div
+        <button
+          type="button"
           data-testid="visual-search-target-badge"
-          className="px-5 py-3 rounded-2xl bg-white border-2 border-slate flex items-center gap-3 shadow-sm"
+          onClick={() =>
+            speakGreek(
+              `Ψάχνουμε: ${roundData.target.labelEl}`,
+              true,
+              adaptiveProfile.speechRate
+            )
+          }
+          className="touch-target px-5 py-3 rounded-2xl bg-white border-2 border-slate flex items-center gap-3 shadow-sm hover:bg-sand-light cursor-pointer"
         >
           <span className="text-4xl" aria-hidden="true">{roundData.target.emoji}</span>
           <span className="text-xl font-extrabold text-charcoal">{roundData.target.labelEl}</span>
-        </div>
+          <span className="text-lg" aria-hidden="true">🔊</span>
+        </button>
       </div>
 
       {/* Calibrated Search Grid */}

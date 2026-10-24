@@ -52,6 +52,7 @@ interface AppContextValue {
     avatarEmoji: string;
     ageBand: AgeBandId;
   }) => Promise<ChildMicroProfile | null>;
+  updateProfileAvatar: (profileId: string, avatarEmoji: string) => Promise<void>;
   deleteChildProfile: (profileId: string) => Promise<void>;
   recordStrategyPreference: (strategyId: 'time' | 'example' | 'retry') => Promise<void>;
   elapsedSeconds: number;
@@ -262,6 +263,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     [childProfiles.length, settings]
   );
 
+  const updateProfileAvatar = useCallback(
+    async (profileId: string, avatarEmoji: string) => {
+      const target = childProfiles.find((p) => p.id === profileId);
+      if (!target) return;
+      const updated: ChildMicroProfile = {
+        ...target,
+        avatarEmoji,
+      };
+      setChildProfiles((prev) => prev.map((p) => (p.id === profileId ? updated : p)));
+      const updatedList = await saveChildProfile(updated);
+      setChildProfiles(updatedList);
+    },
+    [childProfiles]
+  );
+
   const deleteChildProfile = useCallback(
     async (profileId: string) => {
       if (childProfiles.length <= 1) return;
@@ -399,6 +415,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         activeProfile,
         switchChildProfile,
         createChildProfile,
+        updateProfileAvatar,
         deleteChildProfile,
         recordStrategyPreference,
         elapsedSeconds,

@@ -1,7 +1,9 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import type { ActivityRunnerRenderProps } from '../components/ActivityRunner';
 import { useDebouncedAction } from '../hooks/useDebouncedAction';
 import { selectSessionRounds } from '../utils/clinicalAdhdEngine';
+import { playCalmTone, speakGreek } from '../utils/soundAndSpeech';
+import { useApp } from '../context/AppContext';
 
 interface TheaterScene {
   sceneEmoji: string;
@@ -192,12 +194,21 @@ export const Activity19EmotionalTheater: React.FC<ActivityRunnerRenderProps> = (
   advanceRound,
   triggerGentleFeedback,
 }) => {
+  const { settings } = useApp();
   const { runDebounced, getAbsorbedCount } = useDebouncedAction();
   const activeScenes = useMemo(
     () => selectSessionRounds(THEATER_SCENES, totalRounds, sessionSeed),
     [totalRounds, sessionSeed]
   );
   const scene = activeScenes[(currentRound - 1) % activeScenes.length];
+
+  useEffect(() => {
+    speakGreek(
+      `${scene.titleEl}. ${scene.storyEl}`,
+      settings.voiceEnabled,
+      adaptiveProfile.speechRate
+    );
+  }, [currentRound, sessionSeed, scene.titleEl, scene.storyEl, settings.voiceEnabled, adaptiveProfile.speechRate]);
 
   const visibleOptions =
     hintLevel === 2 || ageBand === '4-5' || adaptiveProfile.distractorReductionRatio >= 0.5
@@ -207,6 +218,7 @@ export const Activity19EmotionalTheater: React.FC<ActivityRunnerRenderProps> = (
   const handleChooseSolution = (isCalmSolution: boolean) => {
     runDebounced(() => {
       if (isCalmSolution) {
+        playCalmTone('complete', settings.soundEnabled);
         advanceRound(getAbsorbedCount());
       } else {
         triggerGentleFeedback(

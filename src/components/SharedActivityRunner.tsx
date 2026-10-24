@@ -225,10 +225,14 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
     if (!isFinalRound) {
       playCalmTone('chime', settings.soundEnabled);
       const hasPerRoundSpokenPrompt =
+        activity.id === '06-switch-rule' ||
+        activity.id === '07-move-freeze' ||
         activity.id === '08-listen-do' ||
         activity.id === '13-speech-articulation' ||
         activity.id === '14-narrative-builder' ||
-        activity.id === '15-auditory-discrimination';
+        activity.id === '15-auditory-discrimination' ||
+        activity.id === '18-adl-praxis' ||
+        activity.id === '19-emotional-theater';
       if (!hasPerRoundSpokenPrompt) {
         speakGreek('Μπράβο! Πάμε στο επόμενο βήμα.', settings.voiceEnabled, adaptiveProfile.speechRate);
       }

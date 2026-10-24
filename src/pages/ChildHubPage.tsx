@@ -5,6 +5,9 @@ import { AGE_BAND_PROTOCOLS, type AgeBandId } from '../data/ageProtocols';
 import { useApp } from '../context/AppContext';
 import {
   AVATAR_PRESETS,
+  DOMAIN_LABELS_EL,
+  evaluateChildAvatarProgress,
+  getAvatarCompanionMetadata,
   getPersonalizedActivityRecommendation,
 } from '../utils/childProfileLearningEngine';
 import { speakGreek } from '../utils/soundAndSpeech';
@@ -18,17 +21,28 @@ export const ChildHubPage: React.FC = () => {
     activeProfile,
     switchChildProfile,
     createChildProfile,
+    updateProfileAvatar,
   } = useApp();
 
   const [isCreatingProfile, setIsCreatingProfile] = useState<boolean>(false);
+  const [isChangingAvatar, setIsChangingAvatar] = useState<boolean>(false);
   const [showFamilyLimitNotice, setShowFamilyLimitNotice] = useState<boolean>(false);
   const [newNickname, setNewNickname] = useState<string>('');
-  const [newAvatar, setNewAvatar] = useState<string>('🐢');
+  const [newAvatar, setNewAvatar] = useState<string>('🦄');
   const [newAgeBand, setNewAgeBand] = useState<AgeBandId>('6-8');
 
   const recommendation = useMemo(
     () => getPersonalizedActivityRecommendation(activeProfile, ACTIVITIES),
     [activeProfile]
+  );
+
+  const avatarEvaluation = useMemo(
+    () => evaluateChildAvatarProgress(activeProfile),
+    [activeProfile]
+  );
+  const selectedNewAvatarMeta = useMemo(
+    () => getAvatarCompanionMetadata(newAvatar),
+    [newAvatar]
   );
 
   const handleCategorySelect = (categoryId: string, voicePromptEl: string) => {
@@ -171,9 +185,9 @@ export const ChildHubPage: React.FC = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {/* Step 1: Avatar */}
-              <div className="space-y-1.5">
+              <div className="space-y-2 md:col-span-2">
                 <label className="block text-xs font-extrabold text-charcoal">
-                  1. Διάλεξε Εικονίδιο-Φίλο:
+                  1. Διάλεξε Θεραπευτικό Συνοδοιπόρο (Αγαπημένα Ζώα & Φανταστικοί Χαρακτήρες):
                 </label>
                 <div className="flex flex-wrap gap-1.5">
                   {AVATAR_PRESETS.map((preset) => (
@@ -181,60 +195,76 @@ export const ChildHubPage: React.FC = () => {
                       key={preset.emoji}
                       type="button"
                       data-testid={`avatar-preset-${preset.emoji}`}
-                      onClick={() => setNewAvatar(preset.emoji)}
-                      className={`w-11 h-11 rounded-xl border-2 text-2xl flex items-center justify-center ${
+                      title={`${preset.defaultNameEl} — ${preset.superpowerTitleEl}`}
+                      onClick={() => {
+                        setNewAvatar(preset.emoji);
+                        speakGreek(
+                          `${preset.defaultNameEl}. ${preset.coachingTipEl}`,
+                          settings.voiceEnabled,
+                          activeProfile.learnedModel.optimalSpeechRate
+                        );
+                      }}
+                      className={`w-11 h-11 rounded-xl border-2 text-2xl flex items-center justify-center transition-transform ${
                         newAvatar === preset.emoji
-                          ? 'bg-sage text-white border-charcoal'
-                          : 'bg-white border-sand-dark'
+                          ? 'bg-sage text-white border-charcoal scale-110 shadow-sm'
+                          : 'bg-white border-sand-dark hover:border-slate'
                       }`}
                     >
                       {preset.emoji}
                     </button>
                   ))}
                 </div>
+                <div className="p-2.5 rounded-xl bg-white border border-sage text-xs text-charcoal space-y-0.5">
+                  <p className="font-extrabold text-sage-dark">
+                    {selectedNewAvatarMeta.emoji} {selectedNewAvatarMeta.defaultNameEl} •{' '}
+                    {selectedNewAvatarMeta.superpowerTitleEl}
+                  </p>
+                  <p className="text-charcoal-muted">{selectedNewAvatarMeta.coachingTipEl}</p>
+                </div>
               </div>
 
-              {/* Step 2: Nickname */}
-              <div className="space-y-1.5">
-                <label
-                  htmlFor="new-profile-name-input"
-                  className="block text-xs font-extrabold text-charcoal"
-                >
-                  2. Όνομα ή Ψευδώνυμο:
-                </label>
-                <input
-                  id="new-profile-name-input"
-                  data-testid="new-profile-name-input"
-                  type="text"
-                  maxLength={24}
-                  value={newNickname}
-                  onChange={(e) => setNewNickname(e.target.value)}
-                  placeholder="π.χ. Άρης ή Μικρή Κουκουβάγια"
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-white border-2 border-slate text-sm font-bold text-charcoal"
-                />
-              </div>
+              {/* Step 2 & 3: Nickname & Age Band */}
+              <div className="space-y-3">
+                <div className="space-y-1.5">
+                  <label
+                    htmlFor="new-profile-name-input"
+                    className="block text-xs font-extrabold text-charcoal"
+                  >
+                    2. Όνομα ή Ψευδώνυμο:
+                  </label>
+                  <input
+                    id="new-profile-name-input"
+                    data-testid="new-profile-name-input"
+                    type="text"
+                    maxLength={24}
+                    value={newNickname}
+                    onChange={(e) => setNewNickname(e.target.value)}
+                    placeholder={`π.χ. Άρης ή ${selectedNewAvatarMeta.defaultNameEl}`}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white border-2 border-slate text-sm font-bold text-charcoal"
+                  />
+                </div>
 
-              {/* Step 3: Age Band */}
-              <div className="space-y-1.5">
-                <label className="block text-xs font-extrabold text-charcoal">
-                  3. Ηλικιακή Ομάδα:
-                </label>
-                <div className="flex flex-wrap gap-1.5">
-                  {AGE_BAND_PROTOCOLS.map((b) => (
-                    <button
-                      key={b.id}
-                      type="button"
-                      data-testid={`new-profile-age-${b.id}`}
-                      onClick={() => setNewAgeBand(b.id)}
-                      className={`px-3 py-2 rounded-xl border-2 text-xs font-extrabold ${
-                        newAgeBand === b.id
-                          ? 'bg-slate text-white border-slate-dark'
-                          : 'bg-white text-charcoal border-sand-dark'
-                      }`}
-                    >
-                      {b.labelEl}
-                    </button>
-                  ))}
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-extrabold text-charcoal">
+                    3. Ηλικιακή Ομάδα:
+                  </label>
+                  <div className="flex flex-wrap gap-1.5">
+                    {AGE_BAND_PROTOCOLS.map((b) => (
+                      <button
+                        key={b.id}
+                        type="button"
+                        data-testid={`new-profile-age-${b.id}`}
+                        onClick={() => setNewAgeBand(b.id)}
+                        className={`px-3 py-2 rounded-xl border-2 text-xs font-extrabold ${
+                          newAgeBand === b.id
+                            ? 'bg-slate text-white border-slate-dark'
+                            : 'bg-white text-charcoal border-sand-dark'
+                        }`}
+                      >
+                        {b.labelEl}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
@@ -260,15 +290,44 @@ export const ChildHubPage: React.FC = () => {
       >
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-2xl bg-sage-surface border-2 border-sage flex items-center justify-center text-4xl shrink-0">
-              {activeProfile.avatarEmoji}
-            </div>
+            <button
+              type="button"
+              data-testid="toggle-avatar-companion-picker-btn"
+              onClick={() => setIsChangingAvatar((v) => !v)}
+              title="Πάτησε για να αλλάξεις τον Θεραπευτικό Συνοδοιπόρο σου!"
+              className="touch-target w-20 h-20 rounded-3xl bg-sage-surface border-3 border-sage flex flex-col items-center justify-center shrink-0 hover:scale-105 transition-transform shadow-sm"
+            >
+              <span className="text-4xl leading-none" aria-hidden="true">
+                {activeProfile.avatarEmoji}
+              </span>
+              <span className="text-[10px] font-extrabold text-sage-dark mt-1">
+                Αλλαγή ✨
+              </span>
+            </button>
             <div>
+              <div className="flex flex-wrap items-center gap-2 mb-1">
+                <span
+                  data-testid="companion-evolution-badge"
+                  className="inline-flex items-center gap-1 px-3 py-0.5 rounded-full bg-white border border-sage text-xs font-extrabold text-sage-dark"
+                >
+                  <span>{avatarEvaluation.evolutionBadgeEmoji}</span>
+                  <span>{avatarEvaluation.evolutionTitleEl}</span>
+                </span>
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-slate-surface border border-slate text-xs font-extrabold text-charcoal">
+                  <span>Δείκτης Εστίασης: {avatarEvaluation.overallMasteryPct}%</span>
+                </span>
+              </div>
               <h1 id="hub-welcome-heading" className="text-2xl md:text-3xl font-extrabold text-charcoal">
                 Γεια σου, {activeProfile.nickname}! Τι θέλεις να παίξουμε σήμερα;
               </h1>
               <p className="text-sm font-bold text-slate-dark" data-testid="active-profile-adaptation-summary">
                 🧠 {activeProfile.learnedModel.adaptationSummaryEl}
+              </p>
+              <p
+                className="text-xs font-extrabold text-sage-dark mt-1"
+                data-testid="companion-superpower-banner"
+              >
+                {avatarEvaluation.childEncouragementEl}
               </p>
             </div>
           </div>
@@ -277,7 +336,7 @@ export const ChildHubPage: React.FC = () => {
             type="button"
             onClick={() =>
               speakGreek(
-                `Γεια σου, ${activeProfile.nickname}! Διάλεξε μία από τις τέσσερις ομάδες παιχνιδιών για να ξεκινήσουμε.`,
+                `Γεια σου, ${activeProfile.nickname}! ${avatarEvaluation.avatar.coachingTipEl} Διάλεξε μία από τις τέσσερις ομάδες παιχνιδιών για να ξεκινήσουμε.`,
                 true,
                 activeProfile.learnedModel.optimalSpeechRate
               )
@@ -290,6 +349,64 @@ export const ChildHubPage: React.FC = () => {
             <span>Άκου</span>
           </button>
         </div>
+
+        {/* Interactive Companion Picker & ADHD Superpower Explorer */}
+        {isChangingAvatar && (
+          <div
+            data-testid="companion-avatar-picker-panel"
+            className="p-4 rounded-2xl bg-white border-2 border-sage space-y-3"
+          >
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-extrabold text-charcoal">
+                🦄 Διάλεξε τον Αγαπημένο σου Συνοδοιπόρο Εστίασης (Ζώα & Φανταστικοί Ήρωες):
+              </h2>
+              <button
+                type="button"
+                onClick={() => setIsChangingAvatar(false)}
+                className="px-3 py-1 rounded-xl bg-sand text-xs font-extrabold text-charcoal"
+              >
+                Έτοιμο ✓
+              </button>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-8 gap-2">
+              {AVATAR_PRESETS.map((preset) => {
+                const isCurrent = activeProfile.avatarEmoji === preset.emoji;
+                return (
+                  <button
+                    key={preset.emoji}
+                    type="button"
+                    data-testid={`switch-avatar-btn-${preset.emoji}`}
+                    onClick={() => {
+                      void updateProfileAvatar(activeProfile.id, preset.emoji);
+                      speakGreek(
+                        `${preset.defaultNameEl}! ${preset.coachingTipEl}`,
+                        settings.voiceEnabled,
+                        activeProfile.learnedModel.optimalSpeechRate
+                      );
+                    }}
+                    className={`p-2.5 rounded-2xl border-2 flex flex-col items-center text-center gap-1 transition-all ${
+                      isCurrent
+                        ? 'bg-sage-surface border-charcoal ring-2 ring-sage scale-105'
+                        : 'bg-sand-light border-sand-dark hover:bg-white'
+                    }`}
+                  >
+                    <span className="text-3xl" aria-hidden="true">
+                      {preset.emoji}
+                    </span>
+                    <span className="text-[11px] font-extrabold text-charcoal leading-tight">
+                      {preset.defaultNameEl}
+                    </span>
+                    <span className="text-[9px] font-bold text-slate-dark leading-tight">
+                      {DOMAIN_LABELS_EL[preset.primaryDomain].emoji}{' '}
+                      {preset.category === 'fantasy' ? 'Φαντασία' : 'Ζωάκι'}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* Personalized Activity Recommendation from Child's Continual Learning Model */}
         <div

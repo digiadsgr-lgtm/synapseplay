@@ -2,6 +2,8 @@ import React, { useState, useEffect, useMemo } from 'react';
 import type { ActivityRunnerRenderProps } from '../components/ActivityRunner';
 import { useDebouncedAction } from '../hooks/useDebouncedAction';
 import { selectSessionRounds } from '../utils/clinicalAdhdEngine';
+import { playCalmTone, speakGreek } from '../utils/soundAndSpeech';
+import { useApp } from '../context/AppContext';
 
 interface RoutineStep {
   order: number;
@@ -103,6 +105,7 @@ export const Activity05OrderSteps: React.FC<ActivityRunnerRenderProps> = ({
   advanceRound,
   triggerGentleFeedback,
 }) => {
+  const { settings } = useApp();
   const { runDebounced, getAbsorbedCount } = useDebouncedAction();
   const activeRoutines = useMemo(
     () => selectSessionRounds(ROUTINES, totalRounds, sessionSeed),
@@ -113,7 +116,10 @@ export const Activity05OrderSteps: React.FC<ActivityRunnerRenderProps> = ({
 
   useEffect(() => {
     setSelectedOrders([]);
-  }, [currentRound, sessionSeed]);
+    if (currentRound > 1) {
+      speakGreek(routine.titleEl, settings.voiceEnabled, adaptiveProfile.speechRate);
+    }
+  }, [currentRound, sessionSeed, routine.titleEl, settings.voiceEnabled, adaptiveProfile.speechRate]);
 
   const nextExpectedOrder = selectedOrders.length + 1;
 
@@ -125,7 +131,11 @@ export const Activity05OrderSteps: React.FC<ActivityRunnerRenderProps> = ({
         const updated = [...selectedOrders, step.order];
         setSelectedOrders(updated);
         if (updated.length === routine.steps.length) {
+          playCalmTone('complete', settings.soundEnabled);
           advanceRound(getAbsorbedCount());
+        } else {
+          playCalmTone('soft-step', settings.soundEnabled);
+          speakGreek(step.labelEl, settings.voiceEnabled, adaptiveProfile.speechRate);
         }
       } else {
         triggerGentleFeedback(
