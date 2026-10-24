@@ -13,6 +13,7 @@ export const ChildHubPage: React.FC = () => {
   const navigate = useNavigate();
   const {
     settings,
+    profileCreationPermission,
     childProfiles,
     activeProfile,
     switchChildProfile,
@@ -20,6 +21,7 @@ export const ChildHubPage: React.FC = () => {
   } = useApp();
 
   const [isCreatingProfile, setIsCreatingProfile] = useState<boolean>(false);
+  const [showFamilyLimitNotice, setShowFamilyLimitNotice] = useState<boolean>(false);
   const [newNickname, setNewNickname] = useState<string>('');
   const [newAvatar, setNewAvatar] = useState<string>('🐢');
   const [newAgeBand, setNewAgeBand] = useState<AgeBandId>('6-8');
@@ -34,8 +36,22 @@ export const ChildHubPage: React.FC = () => {
     navigate(`/category/${categoryId}`);
   };
 
+  const handleToggleCreateProfile = () => {
+    if (!isCreatingProfile && !profileCreationPermission.allowed) {
+      setShowFamilyLimitNotice(true);
+      return;
+    }
+    setShowFamilyLimitNotice(false);
+    setIsCreatingProfile((v) => !v);
+  };
+
   const handleCreateProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!profileCreationPermission.allowed) {
+      setShowFamilyLimitNotice(true);
+      setIsCreatingProfile(false);
+      return;
+    }
     const presetName =
       AVATAR_PRESETS.find((p) => p.emoji === newAvatar)?.defaultNameEl ?? 'Μικρός Εξερευνητής';
     const created = await createChildProfile({
@@ -43,8 +59,14 @@ export const ChildHubPage: React.FC = () => {
       avatarEmoji: newAvatar,
       ageBand: newAgeBand,
     });
+    if (!created) {
+      setShowFamilyLimitNotice(true);
+      setIsCreatingProfile(false);
+      return;
+    }
     setNewNickname('');
     setIsCreatingProfile(false);
+    setShowFamilyLimitNotice(false);
     speakGreek(
       `Καλώς ήρθες, ${created.nickname}! Το προσωπικό σου προφίλ είναι έτοιμο.`,
       settings.voiceEnabled,
@@ -76,13 +98,36 @@ export const ChildHubPage: React.FC = () => {
           <button
             type="button"
             data-testid="open-create-profile-btn"
-            onClick={() => setIsCreatingProfile((v) => !v)}
+            onClick={handleToggleCreateProfile}
             className="touch-target px-4 py-2 rounded-2xl bg-sage-surface border-2 border-sage text-charcoal font-extrabold text-sm flex items-center gap-1.5 hover:bg-sage hover:text-white"
           >
             <span aria-hidden="true">{isCreatingProfile ? '✖️' : '➕'}</span>
             <span>{isCreatingProfile ? 'Κλείσιμο' : 'Νέο Προφίλ Παιδιού'}</span>
           </button>
         </div>
+
+        {/* Friendly Notice ONLY when Family Plan is active/simulated and 3rd profile is attempted */}
+        {showFamilyLimitNotice && !profileCreationPermission.allowed && (
+          <div
+            role="status"
+            data-testid="family-plan-limit-notice"
+            className="p-4 rounded-2xl bg-sand-light border-2 border-terracotta flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+          >
+            <p className="text-sm font-extrabold text-charcoal">
+              {profileCreationPermission.noticeEl}
+            </p>
+            <a
+              href={profileCreationPermission.upgradeCheckoutUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              data-testid="family-limit-stripe-upgrade-link"
+              className="touch-target px-5 py-2.5 rounded-2xl bg-sage-dark text-white font-extrabold text-xs flex items-center gap-2 hover:bg-sage shrink-0"
+            >
+              <span>Αναβάθμιση Πλάνου (Stripe)</span>
+              <span aria-hidden="true">↗️</span>
+            </a>
+          </div>
+        )}
 
         {/* Profile Selector Pills */}
         <div className="flex flex-wrap items-center gap-2.5">

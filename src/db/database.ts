@@ -18,6 +18,8 @@ export const DEFAULT_SETTINGS: AppSettings = {
   voiceEnabled: true,
   reducedMotion: false,
   seatedModeDefault: false,
+  licenseTier: 'dev-unlocked',
+  licenseKey: '',
 };
 
 export class SynapsePlayDatabase extends Dexie {

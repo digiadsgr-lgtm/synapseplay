@@ -27,12 +27,23 @@ import {
   createInitialLearningModel,
   trainChildProfileOnActivityCompletion,
 } from '../utils/childProfileLearningEngine';
+import {
+  checkProfileCreationPermission,
+  resolveEffectiveLicenseState,
+  validateAndParseLicenseKey,
+  type EffectiveLicenseState,
+  type LicenseKeyValidationResult,
+  type ProfileCreationPermission,
+} from '../utils/licensingEngine';
 import { getAgeBandProtocol } from '../data/ageProtocols';
 import { playCalmTone, speakGreek } from '../utils/soundAndSpeech';
 
 interface AppContextValue {
   settings: AppSettings;
   updateSettings: (partial: Partial<AppSettings>) => Promise<void>;
+  licenseState: EffectiveLicenseState;
+  profileCreationPermission: ProfileCreationPermission;
+  activateLicenseKey: (rawKey: string) => Promise<LicenseKeyValidationResult>;
   childProfiles: ChildMicroProfile[];
   activeProfile: ChildMicroProfile;
   switchChildProfile: (profileId: string) => Promise<void>;
@@ -40,7 +51,7 @@ interface AppContextValue {
     nickname: string;
     avatarEmoji: string;
     ageBand: AgeBandId;
-  }) => Promise<ChildMicroProfile>;
+  }) => Promise<ChildMicroProfile | null>;
   deleteChildProfile: (profileId: string) => Promise<void>;
   recordStrategyPreference: (strategyId: 'time' | 'example' | 'retry') => Promise<void>;
   elapsedSeconds: number;
@@ -176,6 +187,30 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     [activeProfile]
   );
 
+  const licenseState = useMemo(
+    () => resolveEffectiveLicenseState(settings),
+    [settings.licenseTier, settings.licenseKey]
+  );
+
+  const profileCreationPermission = useMemo(
+    () => checkProfileCreationPermission(childProfiles.length, settings),
+    [childProfiles.length, settings.licenseTier, settings.licenseKey]
+  );
+
+  const activateLicenseKey = useCallback(
+    async (rawKey: string): Promise<LicenseKeyValidationResult> => {
+      const result = validateAndParseLicenseKey(rawKey);
+      if (result.valid && result.tier) {
+        await updateSettings({
+          licenseTier: result.tier,
+          licenseKey: result.normalizedKey,
+        });
+      }
+      return result;
+    },
+    [updateSettings]
+  );
+
   const switchChildProfile = useCallback(
     async (profileId: string) => {
       const target = childProfiles.find((p) => p.id === profileId);
@@ -195,6 +230,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const createChildProfile = useCallback(
     async (params: { nickname: string; avatarEmoji: string; ageBand: AgeBandId }) => {
+      const perm = checkProfileCreationPermission(childProfiles.length, settings);
+      if (!perm.allowed) {
+        return null;
+      }
+
       const cleanName = params.nickname.trim() || 'Μικρός Εξερευνητής';
       const newProfile: ChildMicroProfile = {
         id: `child-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
@@ -219,7 +259,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setSettings(nextSettings);
       return newProfile;
     },
-    []
+    [childProfiles.length, settings]
   );
 
   const deleteChildProfile = useCallback(
@@ -352,6 +392,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       value={{
         settings,
         updateSettings,
+        licenseState,
+        profileCreationPermission,
+        activateLicenseKey,
         childProfiles,
         activeProfile,
         switchChildProfile,

@@ -134,6 +134,8 @@ export interface ActivitySessionLog {
   childNickname?: string;
 }
 
+export type LicenseTier = 'dev-unlocked' | 'family' | 'b2b';
+
 export interface AppSettings {
   id: string; // always 'default'
   activeChildProfileId?: string; // default 'child-default'
@@ -144,6 +146,8 @@ export interface AppSettings {
   voiceEnabled: boolean;
   reducedMotion: boolean;
   seatedModeDefault: boolean;
+  licenseTier?: LicenseTier; // default 'dev-unlocked' when ENABLE_PAYWALL = false
+  licenseKey?: string;
 }
 
 export interface DailyUsageRecord {

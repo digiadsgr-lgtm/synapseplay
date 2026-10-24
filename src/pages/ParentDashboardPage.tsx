@@ -12,20 +12,25 @@ import { INTERDISCIPLINARY_PROTOCOLS } from '../data/interdisciplinaryProtocols'
 import { ADAPTIVE_SCENARIO_CATALOG } from '../utils/adaptiveScenarioEngine';
 import { CLINICAL_STUDIES_AND_TRIALS } from '../utils/clinicalAdhdEngine';
 import {
+  AVATAR_PRESETS,
   DOMAIN_LABELS_EL,
   type ClinicalDomainKey,
 } from '../utils/childProfileLearningEngine';
 import { ParentGateModal } from '../components/ParentGateModal';
 import { ClinicalFeedbackSection } from '../components/ClinicalFeedbackSection';
+import { SubscriptionManagementSection } from '../components/SubscriptionManagementSection';
 
 export const ParentDashboardPage: React.FC = () => {
   const navigate = useNavigate();
   const {
     settings,
     updateSettings,
+    licenseState,
+    profileCreationPermission,
     childProfiles,
     activeProfile,
     switchChildProfile,
+    createChildProfile,
     deleteChildProfile,
     sessionLogs,
     wipeAllData,
@@ -37,6 +42,10 @@ export const ParentDashboardPage: React.FC = () => {
 
   const [confirmWipe, setConfirmWipe] = useState(false);
   const [wipeDoneMessage, setWipeDoneMessage] = useState(false);
+  const [parentNewProfileName, setParentNewProfileName] = useState('');
+  const [parentNewProfileAge, setParentNewProfileAge] = useState<AgeBandId>('6-8');
+  const [parentNewProfileAvatar, setParentNewProfileAvatar] = useState('🦊');
+  const [showParentFamilyLimitNotice, setShowParentFamilyLimitNotice] = useState(false);
 
   // Enforce accidental-access barrier even on direct URL navigation to /parent
   if (!isParentUnlocked) {
@@ -73,6 +82,28 @@ export const ParentDashboardPage: React.FC = () => {
     });
   };
 
+  const handleParentCreateProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!profileCreationPermission.allowed) {
+      setShowParentFamilyLimitNotice(true);
+      return;
+    }
+    const presetName =
+      AVATAR_PRESETS.find((p) => p.emoji === parentNewProfileAvatar)?.defaultNameEl ??
+      'Μικρός Εξερευνητής';
+    const created = await createChildProfile({
+      nickname: parentNewProfileName.trim() || presetName,
+      avatarEmoji: parentNewProfileAvatar,
+      ageBand: parentNewProfileAge,
+    });
+    if (!created) {
+      setShowParentFamilyLimitNotice(true);
+      return;
+    }
+    setParentNewProfileName('');
+    setShowParentFamilyLimitNotice(false);
+  };
+
   return (
     <main className="max-w-5xl mx-auto px-4 py-6 space-y-8" data-testid="parent-dashboard-page">
       {/* Header & Non-Medical Notice */}
@@ -97,6 +128,46 @@ export const ParentDashboardPage: React.FC = () => {
             <span>Επιστροφή στο Περιβάλλον Παιδιού</span>
           </button>
         </div>
+
+        {/* B2B / Therapist Quick Profile Switcher ("Εναλλαγή Παιδιού") between Clinical Sessions */}
+        {licenseState.showTherapistQuickSwitcher && (
+          <div
+            data-testid="therapist-quick-profile-switcher"
+            className="p-4 rounded-2xl bg-sage-surface border-2 border-sage-dark flex flex-wrap items-center justify-between gap-3"
+          >
+            <div className="flex items-center gap-2">
+              <span className="text-2xl" aria-hidden="true">🏥</span>
+              <div>
+                <p className="text-xs md:text-sm font-extrabold text-charcoal">
+                  Εναλλαγή Παιδιού (Κλινική Συνεδρία B2B / Θεραπευτή)
+                </p>
+                <p className="text-[11px] text-charcoal-muted">
+                  Ενεργό Παιδί: <strong>{activeProfile.nickname}</strong> ({activeProfile.ageBand}{' '}
+                  ετών)
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <label htmlFor="therapist-quick-switcher-select" className="text-xs font-extrabold text-charcoal">
+                Εναλλαγή Παιδιού:
+              </label>
+              <select
+                id="therapist-quick-switcher-select"
+                data-testid="therapist-quick-switcher-select"
+                value={activeProfile.id}
+                onChange={(e) => void switchChildProfile(e.target.value)}
+                className="px-3.5 py-2 rounded-xl bg-white border-2 border-sage-dark text-xs font-extrabold text-charcoal"
+              >
+                {childProfiles.map((prof) => (
+                  <option key={prof.id} value={prof.id}>
+                    {prof.avatarEmoji} {prof.nickname} ({prof.ageBand} ετών)
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        )}
 
         <div className="p-4 rounded-2xl bg-slate-surface border border-slate text-xs md:text-sm text-charcoal space-y-1">
           <p className="font-extrabold">
@@ -310,6 +381,9 @@ export const ParentDashboardPage: React.FC = () => {
         </div>
       </section>
 
+      {/* Subscription & Licensing Management Section ("Διαχείριση Συνδρομής") */}
+      <SubscriptionManagementSection />
+
       {/* Clinical & Parent Evaluation, Observations & Suggestions Hub */}
       <ClinicalFeedbackSection />
 
@@ -318,16 +392,110 @@ export const ParentDashboardPage: React.FC = () => {
         data-testid="child-profiles-learning-section"
         className="bg-white border-2 border-sage rounded-3xl p-6 space-y-5"
       >
-        <div>
-          <h2 className="text-xl font-extrabold text-charcoal">
-            👤 Μικρά Προφίλ Παιδιών & Αυτο-Εκπαιδευόμενο Μοντέλο Προσαρμογής ({childProfiles.length})
-          </h2>
-          <p className="text-sm text-charcoal-muted">
-            Κάθε παιδί στη συσκευή διαθέτει ανεξάρτητο τοπικό προφίλ που εκπαιδεύεται αυτόματα (EMA
-            Continual Learning) από τις ολοκληρωμένες συνεδρίες, τις βοήθειες και τον ρυθμό
-            απόκρισής του:
-          </p>
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <h2 className="text-xl font-extrabold text-charcoal">
+              👤 Μικρά Προφίλ Παιδιών & Αυτο-Εκπαιδευόμενο Μοντέλο Προσαρμογής ({childProfiles.length})
+            </h2>
+            <p className="text-sm text-charcoal-muted">
+              Κάθε παιδί στη συσκευή διαθέτει ανεξάρτητο τοπικό προφίλ που εκπαιδεύεται αυτόματα (EMA
+              Continual Learning) από τις ολοκληρωμένες συνεδρίες, τις βοήθειες και τον ρυθμό
+              απόκρισής του:
+            </p>
+          </div>
         </div>
+
+        {/* Create Child Profile directly inside Parent/Therapist Area */}
+        <form
+          onSubmit={(e) => void handleParentCreateProfile(e)}
+          data-testid="parent-create-profile-form"
+          className="p-4 rounded-2xl bg-sand-light border border-sand-dark flex flex-wrap items-end gap-3"
+        >
+          <div className="space-y-1">
+            <label htmlFor="parent-new-profile-avatar" className="block text-xs font-extrabold text-charcoal">
+              Εικονίδιο:
+            </label>
+            <select
+              id="parent-new-profile-avatar"
+              value={parentNewProfileAvatar}
+              onChange={(e) => setParentNewProfileAvatar(e.target.value)}
+              className="px-3 py-2 rounded-xl bg-white border border-slate text-sm font-bold text-charcoal"
+            >
+              {AVATAR_PRESETS.map((p) => (
+                <option key={p.emoji} value={p.emoji}>
+                  {p.emoji} {p.defaultNameEl}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="flex-1 min-w-[180px] space-y-1">
+            <label htmlFor="parent-new-profile-name" className="block text-xs font-extrabold text-charcoal">
+              Όνομα / Ψευδώνυμο Παιδιού:
+            </label>
+            <input
+              id="parent-new-profile-name"
+              data-testid="parent-new-profile-name-input"
+              type="text"
+              maxLength={24}
+              value={parentNewProfileName}
+              onChange={(e) => setParentNewProfileName(e.target.value)}
+              placeholder="π.χ. Νικόλας"
+              className="w-full px-3.5 py-2 rounded-xl bg-white border border-slate text-sm font-bold text-charcoal"
+            />
+          </div>
+
+          <div className="space-y-1">
+            <label htmlFor="parent-new-profile-age" className="block text-xs font-extrabold text-charcoal">
+              Ηλικία:
+            </label>
+            <select
+              id="parent-new-profile-age"
+              data-testid="parent-new-profile-age-select"
+              value={parentNewProfileAge}
+              onChange={(e) => setParentNewProfileAge(e.target.value as AgeBandId)}
+              className="px-3 py-2 rounded-xl bg-white border border-slate text-sm font-bold text-charcoal"
+            >
+              {AGE_BAND_PROTOCOLS.map((b) => (
+                <option key={b.id} value={b.id}>
+                  {b.labelEl}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <button
+            type="submit"
+            data-testid="parent-create-profile-btn"
+            className="touch-target px-5 py-2 rounded-xl bg-sage-dark text-white font-extrabold text-xs hover:bg-sage"
+          >
+            ➕ Προσθήκη Προφίλ Παιδιού
+          </button>
+        </form>
+
+        {/* Friendly Notice when Family Plan 2-profile limit is reached */}
+        {(showParentFamilyLimitNotice || !profileCreationPermission.allowed) &&
+          !profileCreationPermission.allowed && (
+            <div
+              role="status"
+              data-testid="parent-family-plan-limit-notice"
+              className="p-4 rounded-2xl bg-terracotta-surface/60 border-2 border-terracotta flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+            >
+              <p className="text-sm font-extrabold text-charcoal">
+                {profileCreationPermission.noticeEl}
+              </p>
+              <a
+                href={profileCreationPermission.upgradeCheckoutUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                data-testid="parent-family-limit-stripe-upgrade-link"
+                className="touch-target px-5 py-2.5 rounded-2xl bg-sage-dark text-white font-extrabold text-xs flex items-center gap-2 hover:bg-sage shrink-0"
+              >
+                <span>Αναβάθμιση Πλάνου (Stripe)</span>
+                <span aria-hidden="true">↗️</span>
+              </a>
+            </div>
+          )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {childProfiles.map((prof) => {

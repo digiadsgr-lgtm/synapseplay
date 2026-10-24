@@ -14,6 +14,13 @@ import {
   createDefaultChildProfile,
   trainChildProfileOnActivityCompletion,
 } from '../utils/childProfileLearningEngine';
+import {
+  ENABLE_PAYWALL,
+  FAMILY_PLAN_LIMIT_NOTICE_EL,
+  checkProfileCreationPermission,
+  resolveEffectiveLicenseState,
+  validateAndParseLicenseKey,
+} from '../utils/licensingEngine';
 import { formatFeedbackReportText } from '../components/ClinicalFeedbackSection';
 import { saveSettings, wipeAllLocalData } from '../db/database';
 
@@ -488,5 +495,96 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
     ]);
     expect(reportText).toContain('Πρότυπο Κέντρο ΔΕΠΥ Αθήνας');
     expect(reportText).toContain('Δοκιμή αναφοράς Κέντρου ΔΕΠΥ.');
+  });
+
+  it('License & Profiles Architecture: 100% Free & Unlocked in Dev Mode, 2-Profile Limit in Family Mode, and Unlimited Profiles + Quick Switcher in B2B Mode', async () => {
+    // 1. Default Development Mode: ENABLE_PAYWALL is false, unlimited profiles, zero paywall prompts
+    expect(ENABLE_PAYWALL).toBe(false);
+    const defaultLicense = resolveEffectiveLicenseState({ licenseTier: 'dev-unlocked' });
+    expect(defaultLicense.isDevUnlocked).toBe(true);
+    expect(defaultLicense.statusLabelEl).toBe('Δοκιμαστική Έκδοση - Όλα Ξεκλείδωτα');
+    expect(checkProfileCreationPermission(5, { licenseTier: 'dev-unlocked' }).allowed).toBe(true);
+
+    // 2. Unit-test Family Plan (when ENABLE_PAYWALL = true or Family License Key active)
+    const familyPermAt1 = checkProfileCreationPermission(1, { licenseTier: 'family' });
+    expect(familyPermAt1.allowed).toBe(true);
+    const familyPermAt2 = checkProfileCreationPermission(2, { licenseTier: 'family' });
+    expect(familyPermAt2.allowed).toBe(false);
+    expect(familyPermAt2.noticeEl).toBe(FAMILY_PLAN_LIMIT_NOTICE_EL);
+
+    // 3. Unit-test B2B / Therapist License
+    const b2bKeyRes = validateAndParseLicenseKey('B2B-CLINIC-2026');
+    expect(b2bKeyRes.valid).toBe(true);
+    expect(b2bKeyRes.tier).toBe('b2b');
+    expect(checkProfileCreationPermission(10, { licenseTier: 'b2b' }).allowed).toBe(true);
+
+    // 4. Integration test in Parent Area ("Διαχείριση Συνδρομής") and Child Hub
+    const { unmount: unmountParent } = renderRoute('/parent');
+    fireEvent.click(screen.getByTestId('parent-gate-option-15'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('subscription-management-section')).toBeInTheDocument();
+    });
+
+    // Verify default status is "Δοκιμαστική Έκδοση - Όλα Ξεκλείδωτα"
+    expect(screen.getByTestId('subscription-current-status')).toHaveTextContent(
+      'Δοκιμαστική Έκδοση - Όλα Ξεκλείδωτα'
+    );
+    expect(screen.getByTestId('stripe-family-checkout-link')).toHaveAttribute(
+      'href',
+      expect.stringContaining('https://buy.stripe.com/')
+    );
+    expect(screen.getByTestId('stripe-b2b-checkout-link')).toHaveAttribute(
+      'href',
+      expect.stringContaining('https://buy.stripe.com/')
+    );
+
+    // Activate Family mode via "Κωδικός Ενεργοποίησης" input
+    fireEvent.change(screen.getByTestId('license-key-input'), {
+      target: { value: 'FAMILY-2026' },
+    });
+    fireEvent.click(screen.getByTestId('activate-license-key-btn'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('subscription-current-status')).toHaveTextContent(
+        'Οικογενειακό Πλάνο'
+      );
+    });
+
+    // Create 2nd profile in Parent Area (allowed, total = 2)
+    fireEvent.change(screen.getByTestId('parent-new-profile-name-input'), {
+      target: { value: 'Δεύτερο Παιδί' },
+    });
+    fireEvent.click(screen.getByTestId('parent-create-profile-btn'));
+
+    // Now at 2 profiles under Family Plan -> friendly notice is displayed for 3rd profile!
+    await waitFor(() => {
+      expect(screen.getByTestId('parent-family-plan-limit-notice')).toHaveTextContent(
+        'Το οικογενειακό πλάνο περιλαμβάνει έως 2 προφίλ παιδιών. Για επιπλέον προφίλ απαιτείται αναβάθμιση.'
+      );
+    });
+    expect(screen.getByTestId('parent-family-limit-stripe-upgrade-link')).toBeInTheDocument();
+
+    // Activate B2B / Therapist License via "Κωδικός Ενεργοποίησης" -> unlocks 3+ profiles & Quick Switcher
+    fireEvent.change(screen.getByTestId('license-key-input'), {
+      target: { value: 'B2B-CLINIC-2026' },
+    });
+    fireEvent.click(screen.getByTestId('activate-license-key-btn'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('therapist-quick-profile-switcher')).toBeInTheDocument();
+    });
+
+    // Create 3rd profile under B2B mode -> succeeds without any limitation!
+    fireEvent.change(screen.getByTestId('parent-new-profile-name-input'), {
+      target: { value: 'Τρίτο Παιδί Κλινικής' },
+    });
+    fireEvent.click(screen.getByTestId('parent-create-profile-btn'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('therapist-quick-switcher-select').children.length).toBe(3);
+    });
+
+    unmountParent();
   });
 });
