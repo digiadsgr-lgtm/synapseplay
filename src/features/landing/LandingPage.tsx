@@ -210,6 +210,13 @@ export const LandingPage: React.FC = () => {
           >
             Πλάνα & Κέντρα ΔΕΠΥ
           </button>
+          <Link
+            to="/articles"
+            data-testid="landing-nav-articles-link"
+            className="touch-target px-4 py-2 rounded-2xl bg-white/70 border border-[#2C3539]/15 text-xs sm:text-sm font-extrabold text-[#2C3539] hover:bg-white transition-colors flex items-center"
+          >
+            Άρθρα &amp; Συμβουλές ΔΕΠΥ
+          </Link>
           <button
             type="button"
             data-testid="landing-nav-launch-app-btn"

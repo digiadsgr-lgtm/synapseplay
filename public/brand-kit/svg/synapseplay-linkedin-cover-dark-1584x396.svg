@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1584 396" width="1584" height="396">
+  <defs>
+    <linearGradient id="liDarkBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#12171A" />
+      <stop offset="60%" stop-color="#1C2427" />
+      <stop offset="100%" stop-color="#232E33" />
+    </linearGradient>
+    <linearGradient id="liSageBadge" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#86A787" />
+      <stop offset="100%" stop-color="#688B69" />
+    </linearGradient>
+  </defs>
+
+  <!-- Deep Matte Black-Charcoal Background for LinkedIn -->
+  <rect width="1584" height="396" fill="url(#liDarkBg)" />
+  <rect x="28" y="24" width="1528" height="348" rx="28" fill="#192023" stroke="#7A9A7B" stroke-width="2.5" stroke-opacity="0.45" />
+
+  <!-- Shifted right of x=340 so LinkedIn's bottom-left profile avatar never covers text -->
+  <g transform="translate(360, 58)">
+    <rect x="0" y="0" width="660" height="38" rx="19" fill="#7A9A7B" fill-opacity="0.22" stroke="#7A9A7B" stroke-width="1.5" />
+    <text x="330" y="25" text-anchor="middle" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="16" font-weight="800" fill="#EFE8D8">
+      🧠 Digital Therapeutics &amp; Executive Function Platform (4–12 ετών) • by DIGIADS
+    </text>
+
+    <text x="0" y="114" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="68" font-weight="900" fill="#FAF6EE" letter-spacing="-1.5">
+      SynapsePlay
+    </text>
+    <rect x="425" y="68" width="195" height="44" rx="22" fill="#4A6B82" fill-opacity="0.4" stroke="#86A787" stroke-width="1.5" />
+    <text x="522" y="97" text-anchor="middle" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="21" font-weight="800" fill="#EFE8D8">
+      FocusEngine 5+
+    </text>
+
+    <text x="0" y="168" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="25" font-weight="800" fill="#86A787">
+      Επιστημονικό Εργαλείο Εξάσκησης ΔΕΠΥ για Κέντρα Ειδικών Θεραπειών &amp; Οικογένειες
+    </text>
+
+    <g transform="translate(0, 204)">
+      <rect x="0" y="0" width="275" height="46" rx="23" fill="#252F33" stroke="#7A9A7B" stroke-width="1.5" />
+      <text x="137" y="29" text-anchor="middle" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="17" font-weight="800" fill="#FAF6EE">
+        🏥 B2B Therapist Pro License
+      </text>
+
+      <rect x="290" y="0" width="295" height="46" rx="23" fill="#252F33" stroke="#4A6B82" stroke-width="1.5" />
+      <text x="437" y="29" text-anchor="middle" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="17" font-weight="800" fill="#FAF6EE">
+        🔬 8 Διεπιστημονικά Πρωτόκολλα
+      </text>
+
+      <rect x="600" y="0" width="275" height="46" rx="23" fill="#D97757" />
+      <text x="737" y="29" text-anchor="middle" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="17" font-weight="800" fill="#FFFFFF">
+        🔒 100% GDPR Local-First
+      </text>
+    </g>
+  </g>
+
+  <!-- Right Emblem Badge -->
+  <g transform="translate(1285, 78)">
+    <rect width="240" height="240" rx="58" fill="url(#liSageBadge)" stroke="#EFE8D8" stroke-width="2.5" stroke-opacity="0.3" />
+    <circle cx="120" cy="120" r="92" fill="none" stroke="#EFE8D8" stroke-width="5.5" opacity="0.45" />
+    <g transform="translate(120, 136)">
+      <path d="M 0 74 L 0 -12" fill="none" stroke="#EFE8D8" stroke-width="11" stroke-linecap="round" />
+      <path d="M 5 74 L 5 -12" fill="none" stroke="#3B596A" stroke-width="8" stroke-linecap="round" />
+      <path d="M -2 15 C -12 -38, -70 -58, -80 -15 C -66 35, -20 35, -2 15 Z" fill="#EFE8D8" />
+      <path d="M 4 4 C 14 -54, 74 -70, 84 -24 C 70 28, 20 24, 4 4 Z" fill="#EFE8D8" />
+      <circle cx="0" cy="-76" r="10" fill="#E0A98B" />
+      <circle cx="-30" cy="-56" r="10" fill="#D97757" />
+      <circle cx="30" cy="-56" r="10" fill="#EFE8D8" />
+      <circle cx="0" cy="-36" r="10" fill="#D97757" />
+    </g>
+  </g>
+</svg>

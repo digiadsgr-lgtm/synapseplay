@@ -758,4 +758,21 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
       expect(screen.getByTestId('gdpr-erase-confirmation')).toBeInTheDocument();
     });
   });
+
+  it('ADHD Parent & B2B Articles Hub (/articles): renders all 12 ready-to-publish articles, filters by Facebook/LinkedIn, and provides dark covers', async () => {
+    renderRoute('/articles');
+    expect(screen.getByTestId('parent-articles-page')).toBeInTheDocument();
+    expect(screen.getByTestId('social-article-card-01')).toBeInTheDocument();
+    expect(screen.getByTestId('social-article-card-10')).toBeInTheDocument();
+    expect(screen.getByTestId('social-article-card-11')).toBeInTheDocument();
+    expect(screen.getByTestId('social-article-card-12')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('filter-articles-facebook'));
+    expect(screen.getByTestId('social-article-card-01')).toBeInTheDocument();
+    expect(screen.queryByTestId('social-article-card-11')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('filter-articles-linkedin'));
+    expect(screen.getByTestId('social-article-card-11')).toBeInTheDocument();
+    expect(screen.queryByTestId('social-article-card-01')).not.toBeInTheDocument();
+  });
 });

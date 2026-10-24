@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1640 624" width="1640" height="624">
+  <defs>
+    <linearGradient id="fbDarkBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#14191C" />
+      <stop offset="55%" stop-color="#1D2528" />
+      <stop offset="100%" stop-color="#253034" />
+    </linearGradient>
+    <linearGradient id="fbSageBadge" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#86A787" />
+      <stop offset="100%" stop-color="#688B69" />
+    </linearGradient>
+  </defs>
+
+  <!-- Deep Matte Black-Charcoal Background -->
+  <rect width="1640" height="624" fill="url(#fbDarkBg)" />
+
+  <!-- Subtle Calm Ambient Glows -->
+  <circle cx="1320" cy="312" r="420" fill="#7A9A7B" opacity="0.08" />
+  <circle cx="300" cy="120" r="320" fill="#4A6B82" opacity="0.07" />
+
+  <!-- Safe-Zone Inner Frame (Mobile + Desktop safe on Facebook) -->
+  <rect x="64" y="48" width="1512" height="528" rx="40" fill="#1B2225" stroke="#7A9A7B" stroke-width="3" stroke-opacity="0.45" />
+
+  <!-- Left Content (Parents & ADHD Focus) -->
+  <g transform="translate(120, 102)">
+    <rect x="0" y="0" width="590" height="46" rx="23" fill="#7A9A7B" fill-opacity="0.22" stroke="#7A9A7B" stroke-width="1.5" />
+    <text x="295" y="30" text-anchor="middle" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="19" font-weight="800" fill="#EFE8D8">
+      🌱 Για Γονείς &amp; Παιδιά 4–12 ετών με ΔΕΠΥ • Χωρίς Οθονικό Εθισμό
+    </text>
+
+    <text x="0" y="138" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="84" font-weight="900" fill="#FAF6EE" letter-spacing="-2">
+      SynapsePlay
+    </text>
+    <rect x="515" y="84" width="215" height="50" rx="25" fill="#4A6B82" fill-opacity="0.35" stroke="#86A787" stroke-width="1.5" />
+    <text x="622" y="117" text-anchor="middle" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="24" font-weight="800" fill="#EFE8D8">
+      FocusEngine 5+
+    </text>
+
+    <text x="0" y="210" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="34" font-weight="800" fill="#86A787">
+      «Μαμά, το μυαλό μου τρέχει γρήγορα!»
+    </text>
+    <text x="0" y="256" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="25" font-weight="600" fill="#EFE8D8" opacity="0.9">
+      Έλα να παίξουμε λίγο μαζί, να πάρουμε μια ανάσα και να βρούμε τον ρυθμό μας.
+    </text>
+
+    <!-- 3 Parent Value Pills -->
+    <g transform="translate(0, 298)">
+      <rect x="0" y="0" width="290" height="54" rx="27" fill="#252F33" stroke="#7A9A7B" stroke-width="2" />
+      <text x="145" y="34" text-anchor="middle" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="20" font-weight="800" fill="#FAF6EE">
+        🌿 Ήρεμο Κλείσιμο Οθόνης
+      </text>
+
+      <rect x="308" y="0" width="260" height="54" rx="27" fill="#252F33" stroke="#4A6B82" stroke-width="2" />
+      <text x="438" y="34" text-anchor="middle" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="20" font-weight="800" fill="#FAF6EE">
+        🛡️ Χωρίς «Έχασες»
+      </text>
+
+      <rect x="586" y="0" width="320" height="54" rx="27" fill="#D97757" />
+      <text x="746" y="34" text-anchor="middle" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="20" font-weight="800" fill="#FFFFFF">
+        🏃 Παιχνίδι + Κίνηση στον Χώρο
+      </text>
+    </g>
+  </g>
+
+  <!-- Right: Signature Organic Sprout & Synapse Emblem -->
+  <g transform="translate(1190, 142)">
+    <rect width="310" height="310" rx="76" fill="url(#fbSageBadge)" stroke="#EFE8D8" stroke-width="3" stroke-opacity="0.3" />
+    <circle cx="155" cy="155" r="118" fill="none" stroke="#EFE8D8" stroke-width="7" opacity="0.45" />
+    <g transform="translate(155, 175)">
+      <path d="M 0 95 L 0 -15" fill="none" stroke="#EFE8D8" stroke-width="14" stroke-linecap="round" />
+      <path d="M 6 95 L 6 -15" fill="none" stroke="#3B596A" stroke-width="10" stroke-linecap="round" />
+      <path d="M -2 20 C -15 -50, -90 -75, -102 -20 C -85 45, -25 45, -2 20 Z" fill="#EFE8D8" />
+      <path d="M -10 14 Q -52 -12 -78 -20" fill="none" stroke="#3B596A" stroke-width="8" stroke-linecap="round" />
+      <path d="M 4 5 C 18 -70, 95 -90, 108 -30 C 90 35, 25 30, 4 5 Z" fill="#EFE8D8" />
+      <path d="M 12 -2 Q 55 -28 82 -35" fill="none" stroke="#3B596A" stroke-width="8" stroke-linecap="round" />
+      <!-- 4-node Diamond Neural Constellation -->
+      <line x1="0" y1="-98" x2="-38" y2="-72" stroke="#EFE8D8" stroke-width="4" />
+      <line x1="0" y1="-98" x2="38" y2="-72" stroke="#EFE8D8" stroke-width="4" />
+      <line x1="-38" y1="-72" x2="0" y2="-46" stroke="#D97757" stroke-width="4" />
+      <line x1="38" y1="-72" x2="0" y2="-46" stroke="#EFE8D8" stroke-width="4" />
+      <line x1="0" y1="-98" x2="0" y2="-46" stroke="#EFE8D8" stroke-width="4" />
+      <circle cx="0" cy="-98" r="13" fill="#E0A98B" />
+      <circle cx="-38" cy="-72" r="13" fill="#D97757" />
+      <circle cx="38" cy="-72" r="13" fill="#EFE8D8" />
+      <circle cx="0" cy="-46" r="13" fill="#D97757" />
+    </g>
+  </g>
+</svg>
