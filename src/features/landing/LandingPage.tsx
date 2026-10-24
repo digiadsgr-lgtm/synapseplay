@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { SynapsePlayLogoMark } from '../../components/SynapsePlayLogoMark';
 import { GdprConsentBanner } from '../../components/GdprConsentBanner';
 import { MONETIZATION_CONFIG } from '../../config/monetization.config';
+import { ADHD_PARENT_AND_B2B_ARTICLES } from '../../data/adhdParentArticles';
+import { ADHD_SEO_FAQ_ITEMS } from '../../utils/seoEngine';
 
 interface AgePathwayItem {
   id: '4-5' | '5-6' | '6-8' | '8-10' | '10-12';
@@ -904,6 +906,117 @@ export const LandingPage: React.FC = () => {
                 Εργαλείο εξάσκησης, όχι ιατρική διάγνωση ή υποκατάστατο θεραπείας.
               </p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 6B. FEATURED ADHD BLOG SECTION (Internal Linking & Content Authority) */}
+      <section
+        id="blog-preview"
+        aria-labelledby="landing-blog-preview-heading"
+        data-testid="landing-blog-preview-section"
+        className="max-w-6xl mx-auto px-4 sm:px-6 py-10"
+      >
+        <div className="bg-[#FAF6EE] border-2 border-[#7A9A7B] rounded-3xl p-6 sm:p-10 space-y-6">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <div className="space-y-2 max-w-3xl">
+              <span className="inline-block px-3.5 py-1 rounded-full bg-[#7A9A7B]/20 text-[#2C3539] text-xs font-extrabold">
+                🧠 «Μυαλά που Τρέχουν με Χίλια» • Το Blog της ΔΕΠΥ
+              </span>
+              <h2
+                id="landing-blog-preview-heading"
+                className="text-2xl sm:text-3xl font-extrabold text-[#2C3539]"
+              >
+                Πρακτικές Λύσεις Καθημερινότητας για Γονείς &amp; Ειδικούς Θεραπευτές
+              </h2>
+              <p className="text-sm sm:text-base text-[#2C3539]/85">
+                Διαβάστε τους οδηγούς μας για το κλείσιμο της οθόνης χωρίς εκρήξεις, την πρωινή
+                ρουτίνα, την παρορμητικότητα, τη διαχείριση θυμού και τη σχολική μελέτη:
+              </p>
+            </div>
+            <Link
+              to="/articles"
+              data-testid="landing-view-all-articles-btn"
+              className="touch-target px-5 py-3 rounded-2xl bg-[#2C3539] text-white font-extrabold text-xs sm:text-sm inline-flex items-center gap-2 hover:bg-[#4A6B82] shrink-0"
+            >
+              <span>Όλα τα 12 Άρθρα ΔΕΠΥ</span>
+              <span aria-hidden="true">→</span>
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            {ADHD_PARENT_AND_B2B_ARTICLES.slice(0, 6).map((art) => (
+              <article
+                key={art.id}
+                className="p-5 rounded-2xl bg-[#EFE8D8]/75 border border-[#2C3539]/15 flex flex-col justify-between gap-4"
+              >
+                <div className="space-y-2">
+                  <span className="inline-block px-2.5 py-0.5 rounded-full bg-white text-[#5B7B5C] text-[11px] font-extrabold border border-[#7A9A7B]/40">
+                    {art.badgeEl}
+                  </span>
+                  <h3 className="text-base font-extrabold text-[#2C3539] leading-snug">
+                    <Link
+                      to={`/articles/${art.id}`}
+                      className="hover:text-[#4A6B82] transition-colors"
+                    >
+                      {art.titleEl}
+                    </Link>
+                  </h3>
+                  <p className="text-xs text-[#2C3539]/80 leading-relaxed">{art.subtitleEl}</p>
+                </div>
+
+                <Link
+                  to={`/articles/${art.id}`}
+                  data-testid={`landing-blog-card-link-${art.number}`}
+                  className="touch-target px-4 py-2 rounded-xl bg-white border border-[#2C3539]/20 text-xs font-extrabold text-[#2C3539] inline-flex items-center justify-between hover:bg-[#FAF6EE]"
+                >
+                  <span>Διαβάστε το άρθρο ({art.readingTimeMinutes}&apos;)</span>
+                  <span aria-hidden="true">→</span>
+                </Link>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 6C. SEMANTIC ADHD FAQ SECTION (Rich Snippet Schema.org FAQPage) */}
+      <section
+        id="faq"
+        aria-labelledby="landing-faq-heading"
+        data-testid="landing-seo-faq-section"
+        className="max-w-6xl mx-auto px-4 sm:px-6 py-8"
+      >
+        <div className="bg-[#FAF6EE] border-2 border-[#4A6B82] rounded-3xl p-6 sm:p-10 space-y-6">
+          <div className="space-y-2 max-w-3xl">
+            <span className="inline-block px-3.5 py-1 rounded-full bg-[#4A6B82]/15 text-[#4A6B82] text-xs font-extrabold">
+              ❓ Συχνές Ερωτήσεις (FAQ) • Γονείς, Εκπαιδευτικοί &amp; Θεραπευτές
+            </span>
+            <h2
+              id="landing-faq-heading"
+              className="text-2xl sm:text-3xl font-extrabold text-[#2C3539]"
+            >
+              Απαντήσεις στις πιο συχνές απορίες για τη ΔΕΠΥ και το SynapsePlay
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {ADHD_SEO_FAQ_ITEMS.map((faq, idx) => (
+              <div
+                key={idx}
+                data-testid={`landing-faq-item-${idx}`}
+                className="p-5 rounded-2xl bg-white border border-[#2C3539]/15 space-y-2"
+              >
+                <span className="inline-block px-2.5 py-0.5 rounded-lg bg-[#EFE8D8] text-[#4A6B82] text-[11px] font-extrabold">
+                  {faq.categoryEl}
+                </span>
+                <h3 className="text-sm sm:text-base font-extrabold text-[#2C3539]">
+                  {faq.questionEl}
+                </h3>
+                <p className="text-xs sm:text-sm text-[#2C3539]/85 leading-relaxed">
+                  {faq.answerEl}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
       </section>

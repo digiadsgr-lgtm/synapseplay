@@ -4,6 +4,7 @@ import { AppProvider, useApp } from './context/AppContext';
 import { TopBar } from './components/TopBar';
 import { BreakPauseModal } from './components/BreakPauseModal';
 import { SmoothLandingDepletedOverlay } from './components/SmoothLandingRing';
+import { SeoHeadManager } from './components/SeoHeadManager';
 import { ChildHubPage } from './pages/ChildHubPage';
 import { CategoryPage } from './pages/CategoryPage';
 import { ActivityPage } from './pages/ActivityPage';
@@ -33,6 +34,7 @@ const AppShell: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-sand text-charcoal">
+      <SeoHeadManager />
       {!isLandingRoute && <TopBar />}
       <div className="flex-1">
         <Routes>

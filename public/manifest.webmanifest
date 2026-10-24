@@ -1,0 +1,24 @@
+{
+  "name": "SynapsePlay (FocusEngine 5+) — Παιχνίδια Προσοχής & Αυτορρύθμισης ΔΕΠΥ",
+  "short_name": "SynapsePlay",
+  "description": "Ήρεμη, παιδαγωγική εξάσκηση προσοχής, μνήμης και αυτορρύθμισης για παιδιά 4–12 ετών με ΔΕΠΥ.",
+  "lang": "el-GR",
+  "start_url": "/app",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#EFE8D8",
+  "theme_color": "#7A9A7B",
+  "icons": [
+    {
+      "src": "/brand-kit/png/favicon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/brand-kit/png/synapseplay-icon-1024x1024.png",
+      "sizes": "1024x1024",
+      "type": "image/png"
+    }
+  ]
+}

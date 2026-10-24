@@ -412,7 +412,7 @@ export const ADHD_PARENT_AND_B2B_ARTICLES: AdhdArticlePost[] = [
     publishedDateISO: '2026-10-24',
     authorEl: 'Διεπιστημονική Ομάδα SynapsePlay (Εργοθεραπεία)',
     imageUrl: '/brand-kit/png/posts/post-09.png',
-    relatedActivityRoute: '/activity/16-fine-motor-tap',
+    relatedActivityRoute: '/activity/16-ergo-fine-motor',
     relatedActivityLabelEl: 'Δοκιμάστε τη «Λεπτή Κινητικότητα» στο SynapsePlay',
     keyTakeawaysEl: [
       'Η άρνηση για γράψιμο συχνά κρύβει κόπωση στη λεπτή κινητικότητα και στον οπτικοκινητικό συντονισμό.',
