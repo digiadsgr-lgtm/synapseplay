@@ -645,13 +645,29 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
       'Μεταγνώση, στρατηγικός σχεδιασμός πολλαπλών βημάτων.'
     );
 
-    // 5. Pricing & Licensing Plans + Beta Free Badge
+    // 5. Pricing & Licensing Plans + Beta Free Badge + All 4 Live Stripe Checkout URLs
     expect(screen.getByTestId('landing-beta-free-badge')).toHaveTextContent(
       'Τρέχουσα Φάση: Δωρεάν Δοκιμαστική Πρόσβαση (Beta) για Όλους!'
     );
     expect(screen.getByTestId('landing-plan-family')).toHaveTextContent('Έως 2 Προφίλ Παιδιών');
     expect(screen.getByTestId('landing-plan-b2b')).toHaveTextContent(
       'Απεριόριστα Προφίλ Παιδιών & Γρήγορος Profile Switcher'
+    );
+    expect(screen.getByTestId('landing-stripe-family-monthly-link')).toHaveAttribute(
+      'href',
+      'https://buy.stripe.com/aFa00jbdT03t5bHgeg63K02'
+    );
+    expect(screen.getByTestId('landing-stripe-family-yearly-link')).toHaveAttribute(
+      'href',
+      'https://buy.stripe.com/dRm8wP6XD17xdId8LO63K03'
+    );
+    expect(screen.getByTestId('landing-stripe-extra-profile-link')).toHaveAttribute(
+      'href',
+      'https://buy.stripe.com/eVq28req5cQfgUp2nq63K01'
+    );
+    expect(screen.getByTestId('landing-stripe-b2b-yearly-link')).toHaveAttribute(
+      'href',
+      'https://buy.stripe.com/4gM00jgydcQf7jP7HK63K00'
     );
 
     // 6. Privacy & Safety Commitment + 7. Footer

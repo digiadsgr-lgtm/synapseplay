@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { ENABLE_PAYWALL, STRIPE_CHECKOUT_URLS } from '../utils/licensingEngine';
+import { MONETIZATION_CONFIG } from '../config/monetization.config';
 
 export const SubscriptionManagementSection: React.FC = () => {
   const { settings, licenseState, childProfiles, activateLicenseKey } = useApp();
@@ -73,7 +73,9 @@ export const SubscriptionManagementSection: React.FC = () => {
         <div className="font-bold text-charcoal-muted">
           Paywall Mode:{' '}
           <span className="text-charcoal font-extrabold">
-            {ENABLE_PAYWALL ? 'PRODUCTION (Ενεργό)' : 'DEVELOPMENT (100% Δωρεάν & Ξεκλείδωτο)'}
+            {MONETIZATION_CONFIG.isMonetizationEnabled
+              ? 'PRODUCTION (Ενεργό)'
+              : 'DEVELOPMENT (100% Δωρεάν & Ξεκλείδωτο)'}
           </span>
         </div>
       </div>
@@ -163,40 +165,41 @@ export const SubscriptionManagementSection: React.FC = () => {
             </h3>
             <p className="text-xs text-charcoal-muted">
               Πλήρης πρόσβαση σε όλες τις δραστηριότητες και έως 2 ανεξάρτητα προφίλ παιδιών στη
-              συσκευή, με δυνατότητα προσθήκης επιπλέον προφίλ.
+              συσκευή (4,99€ / μήνα ή 39,99€ / έτος), με δυνατότητα προσθήκης επιπλέον προφίλ (1,99€
+              / μήνα).
             </p>
           </div>
           <div className="space-y-2">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <a
-                href={STRIPE_CHECKOUT_URLS.familyMonthly}
+                href={MONETIZATION_CONFIG.checkoutUrls.familyMonthly}
                 target="_blank"
                 rel="noopener noreferrer"
                 data-testid="stripe-family-monthly-checkout-link"
                 className="touch-target px-3 py-2.5 rounded-xl bg-white border-2 border-slate text-charcoal font-extrabold text-xs text-center flex items-center justify-center gap-1.5 hover:bg-slate hover:text-white transition-colors"
               >
-                <span>Family — Μηνιαίο</span>
+                <span>Εγγραφή στο Οικογενειακό — Μηνιαίο (4,99€)</span>
                 <span aria-hidden="true">↗️</span>
               </a>
               <a
-                href={STRIPE_CHECKOUT_URLS.familyYearly}
+                href={MONETIZATION_CONFIG.checkoutUrls.familyAnnual}
                 target="_blank"
                 rel="noopener noreferrer"
                 data-testid="stripe-family-checkout-link"
                 className="touch-target px-3 py-2.5 rounded-xl bg-slate text-white font-extrabold text-xs text-center flex items-center justify-center gap-1.5 hover:bg-slate-dark transition-colors"
               >
-                <span>Family (Ετήσιο)</span>
+                <span>Εγγραφή στο Οικογενειακό — Ετήσιο (39,99€)</span>
                 <span aria-hidden="true">↗️</span>
               </a>
             </div>
             <a
-              href={STRIPE_CHECKOUT_URLS.extraChildProfile}
+              href={MONETIZATION_CONFIG.checkoutUrls.extraChildMonthly}
               target="_blank"
               rel="noopener noreferrer"
               data-testid="stripe-extra-profile-checkout-link"
               className="touch-target w-full px-3 py-2 rounded-xl bg-terracotta-surface/70 border border-terracotta text-charcoal font-extrabold text-xs text-center flex items-center justify-center gap-1.5 hover:bg-terracotta hover:text-white transition-colors"
             >
-              <span>➕ Επιπλέον Προφίλ Παιδιού (Stripe)</span>
+              <span>➕ Επιπλέον Προφίλ Παιδιού (1,99€ / μήνα)</span>
               <span aria-hidden="true">↗️</span>
             </a>
           </div>
@@ -205,21 +208,21 @@ export const SubscriptionManagementSection: React.FC = () => {
         <div className="p-4 rounded-2xl bg-sage-surface/60 border-2 border-sage flex flex-col justify-between gap-3">
           <div className="space-y-1.5">
             <h3 className="text-sm font-extrabold text-charcoal">
-              🏥 SynapsePlay Therapist Pro (Ετήσιο B2B)
+              🏥 SynapsePlay Therapist Pro — Ετήσιο B2B (299,00€ / έτος)
             </h3>
             <p className="text-xs text-charcoal-muted">
-              Επαγγελματική άδεια για Εργοθεραπευτές, Λογοθεραπευτές & Κέντρα ΔΕΠΥ: Απεριόριστα
+              Επαγγελματική άδεια για Εργοθεραπευτές, Λογοθεραπευτές &amp; Κέντρα ΔΕΠΥ: Απεριόριστα
               προφίλ παιδιών και γρήγορη «Εναλλαγή Παιδιού» μεταξύ των συνεδριών.
             </p>
           </div>
           <a
-            href={STRIPE_CHECKOUT_URLS.therapistProYearly}
+            href={MONETIZATION_CONFIG.checkoutUrls.therapistAnnual}
             target="_blank"
             rel="noopener noreferrer"
             data-testid="stripe-b2b-checkout-link"
             className="touch-target px-4 py-3 rounded-xl bg-sage-dark text-white font-extrabold text-xs text-center flex items-center justify-center gap-2 hover:bg-sage transition-colors"
           >
-            <span>Απόκτηση Therapist Pro — Ετήσιο B2B (Stripe)</span>
+            <span>Απόκτηση Άδειας Θεραπευτή (B2B — 299,00€ / έτος)</span>
             <span aria-hidden="true">↗️</span>
           </a>
         </div>

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { SynapsePlayLogoMark } from '../../components/SynapsePlayLogoMark';
 import { GdprConsentBanner } from '../../components/GdprConsentBanner';
-import { STRIPE_CHECKOUT_URLS } from '../../config/monetization.config';
+import { MONETIZATION_CONFIG } from '../../config/monetization.config';
 
 interface AgePathwayItem {
   id: '4-5' | '5-6' | '6-8' | '8-10' | '10-12';
@@ -742,35 +742,35 @@ export const LandingPage: React.FC = () => {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                   <a
-                    href={STRIPE_CHECKOUT_URLS.familyMonthly}
+                    href={MONETIZATION_CONFIG.checkoutUrls.familyMonthly}
                     target="_blank"
                     rel="noopener noreferrer"
                     data-testid="landing-stripe-family-monthly-link"
                     className="touch-target py-2.5 px-4 rounded-xl bg-white border-2 border-[#4A6B82] text-[#2C3539] font-extrabold text-xs sm:text-sm text-center flex items-center justify-center gap-1.5 hover:bg-[#4A6B82] hover:text-white transition-colors"
                   >
-                    <span>Family — Μηνιαίο (Stripe)</span>
+                    <span>Εγγραφή στο Οικογενειακό — Μηνιαίο (4,99€)</span>
                     <span aria-hidden="true">↗️</span>
                   </a>
                   <a
-                    href={STRIPE_CHECKOUT_URLS.familyYearly}
+                    href={MONETIZATION_CONFIG.checkoutUrls.familyAnnual}
                     target="_blank"
                     rel="noopener noreferrer"
                     data-testid="landing-stripe-family-yearly-link"
                     className="touch-target py-2.5 px-4 rounded-xl bg-[#4A6B82] text-white font-extrabold text-xs sm:text-sm text-center flex items-center justify-center gap-1.5 hover:opacity-95 transition-opacity"
                   >
-                    <span>Family — Ετήσιο (Stripe)</span>
+                    <span>Εγγραφή στο Οικογενειακό — Ετήσιο (39,99€)</span>
                     <span aria-hidden="true">↗️</span>
                   </a>
                 </div>
 
                 <a
-                  href={STRIPE_CHECKOUT_URLS.extraChildProfile}
+                  href={MONETIZATION_CONFIG.checkoutUrls.extraChildMonthly}
                   target="_blank"
                   rel="noopener noreferrer"
                   data-testid="landing-stripe-extra-profile-link"
                   className="touch-target w-full py-2.5 px-4 rounded-xl bg-[#EFE8D8] border border-[#2C3539]/25 text-[#2C3539] font-extrabold text-xs sm:text-sm text-center flex items-center justify-center gap-1.5 hover:bg-[#D97757]/20 transition-colors"
                 >
-                  <span>➕ Επιπλέον Προφίλ Παιδιού (Stripe Add-on)</span>
+                  <span>➕ Επιπλέον Προφίλ Παιδιού (1,99€ / μήνα)</span>
                   <span aria-hidden="true">↗️</span>
                 </a>
               </div>
@@ -795,7 +795,7 @@ export const LandingPage: React.FC = () => {
                   SynapsePlay Therapist Pro (Ετήσιο B2B)
                 </h3>
                 <p className="text-sm font-bold text-[#4A6B82]">
-                  Για Εργοθεραπευτές, Λογοθεραπευτές & Κέντρα Ειδικών Θεραπειών
+                  Για Εργοθεραπευτές, Λογοθεραπευτές & Κέντρα Ειδικών Θεραπειών • 299,00€ / έτος
                 </p>
 
                 <ul className="space-y-2.5 pt-2 text-sm font-bold text-[#2C3539]">
@@ -822,13 +822,13 @@ export const LandingPage: React.FC = () => {
 
               <div className="space-y-3 pt-2">
                 <a
-                  href={STRIPE_CHECKOUT_URLS.therapistProYearly}
+                  href={MONETIZATION_CONFIG.checkoutUrls.therapistAnnual}
                   target="_blank"
                   rel="noopener noreferrer"
                   data-testid="landing-stripe-b2b-yearly-link"
                   className="touch-target w-full py-3.5 px-6 rounded-2xl bg-[#7A9A7B] text-white font-extrabold text-sm sm:text-base text-center flex items-center justify-center gap-2 hover:opacity-95 transition-opacity"
                 >
-                  <span>Απόκτηση Therapist Pro — Ετήσιο B2B (Stripe)</span>
+                  <span>Απόκτηση Άδειας Θεραπευτή B2B (299,00€ / έτος)</span>
                   <span aria-hidden="true">↗️</span>
                 </a>
 

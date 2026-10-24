@@ -10,7 +10,7 @@ import {
   getAvatarCompanionMetadata,
   getPersonalizedActivityRecommendation,
 } from '../utils/childProfileLearningEngine';
-import { STRIPE_CHECKOUT_URLS } from '../config/monetization.config';
+import { MONETIZATION_CONFIG } from '../config/monetization.config';
 import { speakGreek } from '../utils/soundAndSpeech';
 
 export const ChildHubPage: React.FC = () => {
@@ -133,23 +133,23 @@ export const ChildHubPage: React.FC = () => {
             </p>
             <div className="flex flex-wrap items-center gap-2 shrink-0">
               <a
-                href={STRIPE_CHECKOUT_URLS.extraChildProfile}
+                href={MONETIZATION_CONFIG.checkoutUrls.extraChildMonthly}
                 target="_blank"
                 rel="noopener noreferrer"
                 data-testid="family-limit-stripe-upgrade-link"
                 className="touch-target px-4 py-2.5 rounded-2xl bg-terracotta text-white font-extrabold text-xs flex items-center gap-1.5 hover:opacity-95"
               >
-                <span>➕ Επιπλέον Προφίλ Παιδιού (Stripe)</span>
+                <span>➕ Επιπλέον Προφίλ Παιδιού (1,99€ / μήνα)</span>
                 <span aria-hidden="true">↗️</span>
               </a>
               <a
-                href={STRIPE_CHECKOUT_URLS.therapistProYearly}
+                href={MONETIZATION_CONFIG.checkoutUrls.therapistAnnual}
                 target="_blank"
                 rel="noopener noreferrer"
                 data-testid="family-limit-stripe-b2b-link"
                 className="touch-target px-4 py-2.5 rounded-2xl bg-sage-dark text-white font-extrabold text-xs flex items-center gap-1.5 hover:bg-sage"
               >
-                <span>🏥 Therapist Pro B2B</span>
+                <span>🏥 Άδεια Θεραπευτή B2B</span>
                 <span aria-hidden="true">↗️</span>
               </a>
             </div>
