@@ -59,6 +59,19 @@ export const ParentArticlesPage: React.FC = () => {
     });
   }, [selectedTopic, searchQuery]);
 
+  const homeRoutineCount = useMemo(
+    () => ADHD_PARENT_AND_B2B_ARTICLES.filter((a) => a.topicCategory === 'home-routine').length,
+    []
+  );
+  const emotionImpulseCount = useMemo(
+    () => ADHD_PARENT_AND_B2B_ARTICLES.filter((a) => a.topicCategory === 'emotion-impulse').length,
+    []
+  );
+  const clinicalScienceCount = useMemo(
+    () => ADHD_PARENT_AND_B2B_ARTICLES.filter((a) => a.topicCategory === 'clinical-science').length,
+    []
+  );
+
   // Dynamic SEO Head Tags & Schema.org JSON-LD Structured Data
   useEffect(() => {
     if (typeof document === 'undefined') return;
@@ -278,7 +291,7 @@ export const ParentArticlesPage: React.FC = () => {
                       : 'bg-[#252F33] text-[#FAF6EE] border-white/15 hover:border-[#7A9A7B]'
                   }`}
                 >
-                  🏠 Ρουτίνα, Οθόνη &amp; Μελέτη (5)
+                  🏠 Ρουτίνα, Οθόνη &amp; Μελέτη ({homeRoutineCount})
                 </button>
                 <button
                   type="button"
@@ -290,7 +303,7 @@ export const ParentArticlesPage: React.FC = () => {
                       : 'bg-[#252F33] text-[#FAF6EE] border-white/15 hover:border-[#D97757]'
                   }`}
                 >
-                  💛 Παρορμητικότητα, Θυμός &amp; Αυτοπεποίθηση (5)
+                  💛 Παρορμητικότητα, Θυμός &amp; Γονείς ({emotionImpulseCount})
                 </button>
                 <button
                   type="button"
@@ -302,7 +315,7 @@ export const ParentArticlesPage: React.FC = () => {
                       : 'bg-[#252F33] text-[#FAF6EE] border-white/15 hover:border-[#4A6B82]'
                   }`}
                 >
-                  🩺 Ειδική Αγωγή &amp; Ήρεμη Τεχνολογία (2)
+                  🩺 Ειδική Αγωγή, Νηπιαγωγείο &amp; Έρευνα ({clinicalScienceCount})
                 </button>
               </div>
 
@@ -323,6 +336,34 @@ export const ParentArticlesPage: React.FC = () => {
             </div>
           </section>
         )}
+
+        {/* Free Beta Launch Callout Banner (High-Conversion Parent Magnet) */}
+        <section
+          aria-label="Δωρεάν Δοκιμή Πριν την Επίσημη Έναρξη"
+          data-testid="blog-free-trial-urgency-banner"
+          className="bg-[#FAF6EE] border-2 border-[#D97757] rounded-3xl p-5 sm:p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-sm"
+        >
+          <div className="space-y-1 max-w-3xl">
+            <span className="inline-block px-3 py-0.5 rounded-full bg-[#D97757]/15 text-[#D97757] text-xs font-extrabold">
+              🎁 Ανοιχτή Δωρεάν Πρόσβαση (Beta) για Λίγες Ημέρες Ακόμα!
+            </span>
+            <h2 className="text-base sm:text-lg font-extrabold text-[#2C3539]">
+              Δοκιμάστε σήμερα 100% Δωρεάν και τα 20 παιχνίδια ΔΕΠΥ με το παιδί σας!
+            </h2>
+            <p className="text-xs sm:text-sm text-[#2C3539]/85">
+              Ανοίξτε την εφαρμογή αμέσως από το τάμπλετ ή τον υπολογιστή σας — χωρίς εγγραφή, χωρίς
+              κάρτα και χωρίς διαφημίσεις— πριν την επίσημη ενεργοποίηση των συνδρομητικών πακέτων.
+            </p>
+          </div>
+          <Link
+            to="/app"
+            data-testid="blog-banner-try-free-btn"
+            className="touch-target px-6 py-3.5 rounded-2xl bg-[#D97757] text-white font-extrabold text-xs sm:text-sm flex items-center gap-2 hover:opacity-95 shrink-0 shadow-sm"
+          >
+            <span aria-hidden="true">▶️</span>
+            <span>Δοκιμάστε την Εφαρμογή Δωρεάν Τώρα</span>
+          </Link>
+        </section>
 
         {/* Single Article View OR Full Blog Feed */}
         <div className="space-y-8">

@@ -939,7 +939,7 @@ export const LandingPage: React.FC = () => {
               data-testid="landing-view-all-articles-btn"
               className="touch-target px-5 py-3 rounded-2xl bg-[#2C3539] text-white font-extrabold text-xs sm:text-sm inline-flex items-center gap-2 hover:bg-[#4A6B82] shrink-0"
             >
-              <span>Όλα τα 12 Άρθρα ΔΕΠΥ</span>
+              <span>Όλα τα {ADHD_PARENT_AND_B2B_ARTICLES.length} Άρθρα ΔΕΠΥ</span>
               <span aria-hidden="true">→</span>
             </Link>
           </div>
