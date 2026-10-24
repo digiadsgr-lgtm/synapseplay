@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <linearGradient id="covSageGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#86A787" />
+      <stop offset="100%" stop-color="#6B8E6C" />
+    </linearGradient>
+    <filter id="covShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="14" stdDeviation="20" flood-color="#2C3539" flood-opacity="0.1" />
+    </filter>
+  </defs>
+
+  <!-- Warm Sand Background -->
+  <rect width="1200" height="630" fill="#EFE8D8" />
+
+  <!-- Decorative Calm Concentric Circles on Right -->
+  <circle cx="1050" cy="315" r="390" fill="#7A9A7B" opacity="0.08" />
+  <circle cx="1050" cy="315" r="280" fill="#4A6B82" opacity="0.07" />
+
+  <!-- Main Inner Presentation Card -->
+  <rect x="48" y="44" width="1104" height="542" rx="44" fill="#FAF6EE" stroke="#7A9A7B" stroke-width="4" filter="url(#covShadow)" />
+
+  <!-- Left Content Column -->
+  <g transform="translate(96, 92)">
+    <!-- Top Pill Badge -->
+    <rect x="0" y="0" width="540" height="46" rx="23" fill="#7A9A7B" fill-opacity="0.2" stroke="#7A9A7B" stroke-width="1.5" />
+    <text x="270" y="30" text-anchor="middle" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-size="19" font-weight="800" fill="#2C3539">
+      🧠 Επιστημονικά Τεκμηριωμένη Εξάσκηση ΔΕΠΥ (4–12 ετών)
+    </text>
+
+    <!-- Brand Title Lockup -->
+    <text x="0" y="136" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-size="78" font-weight="900" fill="#2C3539" letter-spacing="-1.8">
+      SynapsePlay
+    </text>
+    <rect x="468" y="84" width="196" height="48" rx="24" fill="#4A6B82" fill-opacity="0.16" />
+    <text x="566" y="116" text-anchor="middle" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-size="23" font-weight="800" fill="#4A6B82">
+      FocusEngine 5+
+    </text>
+
+    <!-- Tagline Headline -->
+    <text x="0" y="205" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-size="34" font-weight="800" fill="#4A6B82">
+      Από την οθόνη στην πράξη.
+    </text>
+    <text x="0" y="250" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-size="26" font-weight="600" fill="#2C3539" opacity="0.88">
+      Συγκέντρωση, μνήμη &amp; αυτορρύθμιση χωρίς οθονικό εθισμό.
+    </text>
+
+    <!-- 3 Feature Cards Row -->
+    <g transform="translate(0, 295)">
+      <rect x="0" y="0" width="215" height="92" rx="22" fill="#EFE8D8" stroke="#7A9A7B" stroke-width="2" />
+      <text x="20" y="38" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-size="21" font-weight="800" fill="#2C3539">🌱 Smooth Landing</text>
+      <text x="20" y="66" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-size="16" font-weight="600" fill="#4A6B82">Ομαλή αποσύνδεση</text>
+
+      <rect x="232" y="0" width="225" height="92" rx="22" fill="#EFE8D8" stroke="#4A6B82" stroke-width="2" />
+      <text x="252" y="38" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-size="21" font-weight="800" fill="#2C3539">🛡️ Χωρίς Ποινές</text>
+      <text x="252" y="66" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-size="16" font-weight="600" fill="#4A6B82">Μηδενική ματαίωση</text>
+
+      <rect x="474" y="0" width="235" height="92" rx="22" fill="#EFE8D8" stroke="#D97757" stroke-width="2" />
+      <text x="494" y="38" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-size="21" font-weight="800" fill="#2C3539">🏃 20 Δραστηριότητες</text>
+      <text x="494" y="66" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-size="16" font-weight="600" fill="#4A6B82">Ταμπλέτα + Κίνηση</text>
+    </g>
+
+    <!-- Bottom CTA Pill -->
+    <rect x="0" y="408" width="380" height="44" rx="22" fill="#D97757" />
+    <text x="190" y="437" text-anchor="middle" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-size="20" font-weight="800" fill="#FFFFFF">
+      Για Οικογένειες &amp; Κέντρα Ειδικής Αγωγής
+    </text>
+  </g>
+
+  <!-- Right Column: Large Signature Sprout Badge -->
+  <g transform="translate(855, 165)">
+    <rect width="240" height="240" rx="60" fill="url(#covSageGrad)" filter="url(#covShadow)" />
+    <circle cx="120" cy="120" r="90" fill="none" stroke="#FAF6EE" stroke-width="5" opacity="0.24" />
+    <path d="M 120 30 A 90 90 0 1 1 42 165" fill="none" stroke="#FAF6EE" stroke-width="7" stroke-linecap="round" opacity="0.75" />
+    <g transform="translate(120, 130)">
+      <path d="M -32 46 Q 0 36 32 46" fill="none" stroke="#EFE8D8" stroke-width="7" stroke-linecap="round" opacity="0.9" />
+      <path d="M 0 42 L 0 -24" fill="none" stroke="#FAF6EE" stroke-width="10" stroke-linecap="round" />
+      <path d="M 0 8 C -5 -28, -58 -45, -68 -15 C -58 22, -15 22, 0 8 Z" fill="#FAF6EE" />
+      <path d="M 0 -8 C 7 -48, 64 -62, 72 -28 C 62 12, 15 8, 0 -8 Z" fill="#FFFFFF" />
+      <circle cx="0" cy="-55" r="9" fill="#D97757" stroke="#FAF6EE" stroke-width="3" />
+      <circle cx="-24" cy="-43" r="4.5" fill="#FAF6EE" />
+      <circle cx="26" cy="-58" r="4.5" fill="#FAF6EE" />
+    </g>
+    <!-- Companion Avatars Row under Logo -->
+    <rect x="-15" y="262" width="270" height="52" rx="26" fill="#EFE8D8" stroke="#7A9A7B" stroke-width="2" />
+    <text x="120" y="297" text-anchor="middle" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-size="26">
+      🐨 🦄 🦉 🐬 🦊 🐉
+    </text>
+  </g>
+</svg>

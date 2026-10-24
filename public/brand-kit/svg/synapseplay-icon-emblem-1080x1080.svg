@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1080" width="1080" height="1080">
+  <defs>
+    <linearGradient id="sageLeaf" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#88A989" />
+      <stop offset="100%" stop-color="#5B7B5C" />
+    </linearGradient>
+    <linearGradient id="slateLeaf" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#5B7F99" />
+      <stop offset="100%" stop-color="#4A6B82" />
+    </linearGradient>
+    <filter id="cardDrop" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="14" stdDeviation="20" flood-color="#2C3539" flood-opacity="0.1" />
+    </filter>
+  </defs>
+
+  <!-- Warm Sand Card Background -->
+  <rect width="1080" height="1080" rx="180" fill="#FAF6EE" />
+  <rect x="36" y="36" width="1008" height="1008" rx="150" fill="#EFE8D8" stroke="#7A9A7B" stroke-width="6" stroke-opacity="0.35" />
+
+  <!-- White Inner Circle Medallion -->
+  <circle cx="540" cy="480" r="320" fill="#FAF6EE" filter="url(#cardDrop)" />
+
+  <!-- Dual-Tone Smooth Landing Ring (Sage + Slate + Terracotta) -->
+  <circle cx="540" cy="480" r="275" fill="none" stroke="#EFE8D8" stroke-width="20" />
+  <path d="M 540 205 A 275 275 0 1 1 290 595" fill="none" stroke="#7A9A7B" stroke-width="20" stroke-linecap="round" />
+  <path d="M 290 595 A 275 275 0 0 1 540 205" fill="none" stroke="#4A6B82" stroke-width="20" stroke-linecap="round" stroke-dasharray="36 28" opacity="0.65" />
+
+  <!-- Botanical + Synapse Emblem inside Medallion -->
+  <g transform="translate(540, 505)">
+    <!-- Grounding Base -->
+    <path d="M -85 115 Q 0 85 85 115" fill="none" stroke="#4A6B82" stroke-width="16" stroke-linecap="round" />
+
+    <!-- Central Stem -->
+    <path d="M 0 100 L 0 -65" fill="none" stroke="#2C3539" stroke-width="22" stroke-linecap="round" />
+
+    <!-- Left Leaf (Soft Sage - Body & Grounding) -->
+    <path d="M 0 20 C -15 -75, -155 -120, -185 -38 C -155 55, -40 55, 0 20 Z" fill="url(#sageLeaf)" />
+    <path d="M -12 12 Q -85 -18 -135 -30" fill="none" stroke="#FAF6EE" stroke-width="9" stroke-linecap="round" opacity="0.8" />
+
+    <!-- Right Leaf (Slate Blue - Cognition & Executive Focus) -->
+    <path d="M 0 -22 C 18 -130, 170 -165, 195 -75 C 165 30, 40 22, 0 -22 Z" fill="url(#slateLeaf)" />
+    <path d="M 12 -28 Q 95 -68 145 -74" fill="none" stroke="#FAF6EE" stroke-width="9" stroke-linecap="round" opacity="0.8" />
+
+    <!-- Neural Synapse Trio (Soft Terracotta) -->
+    <circle cx="0" cy="-150" r="24" fill="#D97757" />
+    <circle cx="-68" cy="-118" r="13" fill="#7A9A7B" />
+    <circle cx="72" cy="-158" r="13" fill="#4A6B82" />
+    <line x1="-50" y1="-126" x2="-22" y2="-140" stroke="#2C3539" stroke-width="6" stroke-linecap="round" opacity="0.45" />
+    <line x1="24" y1="-153" x2="54" y2="-156" stroke="#2C3539" stroke-width="6" stroke-linecap="round" opacity="0.45" />
+  </g>
+
+  <!-- Wordmark Lockup at Bottom of Emblem Card -->
+  <text x="540" y="900" text-anchor="middle" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="76" font-weight="900" fill="#2C3539" letter-spacing="-1.5">
+    SynapsePlay
+  </text>
+  <rect x="370" y="932" width="340" height="54" rx="27" fill="#4A6B82" fill-opacity="0.15" />
+  <text x="540" y="968" text-anchor="middle" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="28" font-weight="800" fill="#4A6B82" letter-spacing="0.5">
+    FocusEngine 5+ • ΔΕΠΥ
+  </text>
+</svg>

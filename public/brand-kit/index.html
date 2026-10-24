@@ -1,0 +1,415 @@
+<!doctype html>
+<html lang="el">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SynapsePlay — Brand & Social Media Kit Studio</title>
+  <style>
+    :root {
+      --sage: #7A9A7B;
+      --sage-dark: #5B7B5C;
+      --sand: #EFE8D8;
+      --sand-light: #FAF6EE;
+      --slate: #4A6B82;
+      --charcoal: #2C3539;
+      --terracotta: #D97757;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--sand);
+      color: var(--charcoal);
+      line-height: 1.5;
+      padding: 32px 20px 64px;
+    }
+    .container {
+      max-width: 1180px;
+      margin: 0 auto;
+    }
+    header {
+      background: var(--sand-light);
+      border: 2px solid var(--sage);
+      border-radius: 28px;
+      padding: 28px 32px;
+      margin-bottom: 32px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+    .brand-title {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .badge-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 18px;
+      background: var(--sage);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 30px;
+      box-shadow: 0 6px 16px rgba(44,53,57,0.12);
+    }
+    h1 {
+      margin: 0;
+      font-size: 26px;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+    }
+    .subtitle {
+      margin: 4px 0 0;
+      font-size: 14px;
+      color: var(--slate);
+      font-weight: 700;
+    }
+    .btn-primary {
+      background: var(--terracotta);
+      color: #fff;
+      border: none;
+      border-radius: 16px;
+      padding: 14px 24px;
+      font-size: 15px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .btn-primary:hover { opacity: 0.92; }
+    .btn-secondary {
+      background: var(--sage);
+      color: #fff;
+      border: none;
+      border-radius: 14px;
+      padding: 10px 16px;
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-outline {
+      background: #fff;
+      color: var(--charcoal);
+      border: 2px solid rgba(44,53,57,0.2);
+      border-radius: 14px;
+      padding: 9px 15px;
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .palette-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 36px;
+    }
+    .color-card {
+      background: var(--sand-light);
+      border-radius: 20px;
+      padding: 14px;
+      border: 2px solid rgba(44,53,57,0.1);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .swatch {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      border: 2px solid rgba(0,0,0,0.08);
+      flex-shrink: 0;
+    }
+    .assets-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 24px;
+    }
+    .asset-card {
+      background: var(--sand-light);
+      border: 2px solid rgba(122,154,123,0.45);
+      border-radius: 24px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .preview-box {
+      background: repeating-conic-gradient(#e6decb 0% 25%, #f4efe4 0% 50%) 50% / 24px 24px;
+      border-radius: 18px;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 220px;
+      overflow: hidden;
+      border: 1px solid rgba(44,53,57,0.1);
+    }
+    .preview-box img {
+      max-width: 100%;
+      max-height: 240px;
+      height: auto;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(44,53,57,0.08);
+    }
+    .meta-tag {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 99px;
+      font-size: 11px;
+      font-weight: 800;
+      background: rgba(74,107,130,0.15);
+      color: var(--slate);
+      margin-bottom: 6px;
+    }
+    .asset-title {
+      margin: 0 0 4px;
+      font-size: 18px;
+      font-weight: 900;
+    }
+    .asset-desc {
+      margin: 0;
+      font-size: 13px;
+      color: #4A5559;
+    }
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding-top: 8px;
+      border-top: 1px solid rgba(44,53,57,0.1);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="brand-title">
+        <div class="badge-icon">🌱</div>
+        <div>
+          <h1>SynapsePlay — Brand &amp; Social Media Kit</h1>
+          <p class="subtitle">FocusEngine 5+ • Επίσημα Λογότυπα, Εικονίδια Προφίλ, Εξώφυλλα &amp; Social Templates</p>
+        </div>
+      </div>
+      <button class="btn-primary" onclick="downloadAllPngs()">
+        ⬇️ Λήψη Όλων σε Υψηλή Ανάλυση (PNG)
+      </button>
+    </header>
+
+    <h2 style="font-size:20px; font-weight:900; margin-bottom:14px;">🎨 Επίσημη Χρωματική Παλέτα (Calm Clinical Design)</h2>
+    <div class="palette-grid">
+      <div class="color-card">
+        <div class="swatch" style="background:#7A9A7B;"></div>
+        <div>
+          <div style="font-weight:900; font-size:14px;">Soft Sage</div>
+          <div style="font-size:13px; color:#4A6B82; font-weight:800;">#7A9A7B</div>
+          <div style="font-size:11px;">Κύριο Χρώμα Ηρεμίας &amp; Ανάπτυξης</div>
+        </div>
+      </div>
+      <div class="color-card">
+        <div class="swatch" style="background:#EFE8D8;"></div>
+        <div>
+          <div style="font-weight:900; font-size:14px;">Warm Sand</div>
+          <div style="font-size:13px; color:#4A6B82; font-weight:800;">#EFE8D8</div>
+          <div style="font-size:11px;">Ξεκούραστο Φόντο Χωρίς Αντανάκλαση</div>
+        </div>
+      </div>
+      <div class="color-card">
+        <div class="swatch" style="background:#4A6B82;"></div>
+        <div>
+          <div style="font-weight:900; font-size:14px;">Slate Blue</div>
+          <div style="font-size:13px; color:#4A6B82; font-weight:800;">#4A6B82</div>
+          <div style="font-size:11px;">Εκτελεστικές Λειτουργίες &amp; Εστίαση</div>
+        </div>
+      </div>
+      <div class="color-card">
+        <div class="swatch" style="background:#2C3539;"></div>
+        <div>
+          <div style="font-weight:900; font-size:14px;">Muted Charcoal</div>
+          <div style="font-size:13px; color:#4A6B82; font-weight:800;">#2C3539</div>
+          <div style="font-size:11px;">Τυπογραφία Υψηλής Αναγνωσιμότητας</div>
+        </div>
+      </div>
+      <div class="color-card">
+        <div class="swatch" style="background:#D97757;"></div>
+        <div>
+          <div style="font-weight:900; font-size:14px;">Soft Terracotta</div>
+          <div style="font-size:13px; color:#4A6B82; font-weight:800;">#D97757</div>
+          <div style="font-size:11px;">Σημεία Δράσης &amp; Νευρωνική Σύναψη</div>
+        </div>
+      </div>
+    </div>
+
+    <h2 style="font-size:20px; font-weight:900; margin-bottom:14px;">📦 Αρχεία Λογοτύπων &amp; Social Media</h2>
+    <div class="assets-grid" id="assetsGrid"></div>
+  </div>
+
+  <script>
+    const ASSETS = [
+      {
+        id: 'classic-icon',
+        title: '1. Κλασικό Λογότυπο Εφαρμογής (App Badge)',
+        dims: '1080 × 1080 px',
+        desc: 'Το αγαπημένο σήμα της εφαρμογής: Soft Sage πλαίσιο με το βλαστάρι, τον δακτύλιο Smooth Landing και τη νευρωνική σύναψη σε Warm Sand φόντο.',
+        svgFile: 'svg/synapseplay-icon-classic-1080x1080.svg',
+        pngName: 'synapseplay-icon-classic-1080x1080.png',
+        w: 1080,
+        h: 1080
+      },
+      {
+        id: 'social-avatar',
+        title: '2. Εικόνα Προφίλ Social Media (Circle-Safe)',
+        dims: '1080 × 1080 px',
+        desc: 'Ειδικά σχεδιασμένο με πλήρες Soft Sage φόντο ώστε να εφαρμόζει τέλεια μέσα στον κύκλο προφίλ σε Instagram, TikTok, Facebook, LinkedIn & YouTube.',
+        svgFile: 'svg/synapseplay-icon-social-avatar-1080x1080.svg',
+        pngName: 'synapseplay-icon-social-avatar-1080x1080.png',
+        w: 1080,
+        h: 1080
+      },
+      {
+        id: 'emblem-icon',
+        title: '3. Εμβληματικό Σήμα με Τίτλο (Nature & Synapse)',
+        dims: '1080 × 1080 px',
+        desc: 'Συνδυάζει το φύλλο γείωσης (Sage), το φύλλο γνωστικής εστίασης (Slate), τον δακτύλιο Smooth Landing και το όνομα SynapsePlay.',
+        svgFile: 'svg/synapseplay-icon-emblem-1080x1080.svg',
+        pngName: 'synapseplay-icon-emblem-1080x1080.png',
+        w: 1080,
+        h: 1080
+      },
+      {
+        id: 'horiz-light',
+        title: '4. Οριζόντιο Λογότυπο (Warm Sand Light)',
+        dims: '1400 × 420 px',
+        desc: 'Το πλήρες οριζόντιο λογότυπο όπως εμφανίζεται στην κεφαλίδα, με το σήμα FocusEngine 5+ και τους 3 πυλώνες.',
+        svgFile: 'svg/synapseplay-logo-horizontal-light.svg',
+        pngName: 'synapseplay-logo-horizontal-light-1400x420.png',
+        w: 1400,
+        h: 420
+      },
+      {
+        id: 'horiz-transparent',
+        title: '5. Οριζόντιο Λογότυπο (Διάφανο Φόντο)',
+        dims: '1400 × 420 px',
+        desc: 'Με 100% διάφανο φόντο (Transparent PNG/SVG) για τοποθέτηση πάνω σε παρουσιάσεις, έγγραφα, τιμολόγια ή βίντεο.',
+        svgFile: 'svg/synapseplay-logo-horizontal-transparent.svg',
+        pngName: 'synapseplay-logo-horizontal-transparent-1400x420.png',
+        w: 1400,
+        h: 420
+      },
+      {
+        id: 'horiz-dark',
+        title: '6. Οριζόντιο Λογότυπο (Dark Mode)',
+        dims: '1400 × 420 px',
+        desc: 'Έκδοση σε σκούρο φόντο Muted Charcoal (#2C3539) για σκοτεινά θέματα και παρουσιάσεις.',
+        svgFile: 'svg/synapseplay-logo-horizontal-dark.svg',
+        pngName: 'synapseplay-logo-horizontal-dark-1400x420.png',
+        w: 1400,
+        h: 420
+      },
+      {
+        id: 'social-cover',
+        title: '7. Εξώφυλλο Facebook / LinkedIn & OpenGraph',
+        dims: '1200 × 630 px',
+        desc: 'Έτοιμο banner εξωφύλλου και προεπισκόπησης συνδέσμου (link preview) με το κεντρικό μήνυμα και τους θεραπευτικούς συνοδούς.',
+        svgFile: 'svg/synapseplay-social-cover-1200x630.svg',
+        pngName: 'synapseplay-social-cover-1200x630.png',
+        w: 1200,
+        h: 630
+      },
+      {
+        id: 'ig-post',
+        title: '8. Τετράγωνο Post (Instagram / Facebook)',
+        dims: '1080 × 1080 px',
+        desc: 'Έτοιμη κάρτα παρουσίασης του SynapsePlay για ανάρτηση σε Instagram, Facebook και LinkedIn.',
+        svgFile: 'svg/synapseplay-instagram-post-1080x1080.svg',
+        pngName: 'synapseplay-instagram-post-1080x1080.png',
+        w: 1080,
+        h: 1080
+      },
+      {
+        id: 'ig-story',
+        title: '9. Κάθετο Story / Reels / TikTok Cover',
+        dims: '1080 × 1920 px',
+        desc: 'Κάθετη κάρτα 9:16 για Instagram Stories, Reels και TikTok παρουσιάσεις.',
+        svgFile: 'svg/synapseplay-story-1080x1920.svg',
+        pngName: 'synapseplay-story-1080x1920.png',
+        w: 1080,
+        h: 1920
+      }
+    ];
+
+    const grid = document.getElementById('assetsGrid');
+    ASSETS.forEach((asset) => {
+      const card = document.createElement('div');
+      card.className = 'asset-card';
+      card.innerHTML = `
+        <div>
+          <span class="meta-tag">${asset.dims}</span>
+          <h3 class="asset-title">${asset.title}</h3>
+          <p class="asset-desc">${asset.desc}</p>
+        </div>
+        <div class="preview-box">
+          <img src="${asset.svgFile}" alt="${asset.title}" id="img-${asset.id}" crossorigin="anonymous" />
+        </div>
+        <div class="actions">
+          <button class="btn-secondary" onclick="exportSvgToPng('${asset.svgFile}', '${asset.pngName}', ${asset.w}, ${asset.h})">
+            ⬇️ Λήψη PNG (${asset.dims})
+          </button>
+          <a class="btn-outline" href="${asset.svgFile}" download>
+            📐 Λήψη Vector SVG
+          </a>
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+
+    async function exportSvgToPng(svgUrl, pngFilename, width, height) {
+      try {
+        const res = await fetch(svgUrl);
+        const svgText = await res.text();
+        const svgBlob = new Blob([svgText], { type: 'image/svg+xml;charset=utf-8' });
+        const url = URL.createObjectURL(svgBlob);
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          URL.revokeObjectURL(url);
+          canvas.toBlob((blob) => {
+            const link = document.createElement('a');
+            link.download = pngFilename;
+            link.href = URL.createObjectURL(blob);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+          }, 'image/png');
+        };
+        img.src = url;
+      } catch (err) {
+        alert('Για απευθείας λήψη PNG, χρησιμοποιήστε τον φάκελο png/ ή ανοίξτε από το /brand-kit/index.html.');
+      }
+    }
+
+    async function downloadAllPngs() {
+      for (let i = 0; i < ASSETS.length; i++) {
+        const a = ASSETS[i];
+        await exportSvgToPng(a.svgFile, a.pngName, a.w, a.h);
+        await new Promise((r) => setTimeout(r, 350));
+      }
+    }
+  </script>
+</body>
+</html>

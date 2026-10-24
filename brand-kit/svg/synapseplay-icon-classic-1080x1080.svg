@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1080" width="1080" height="1080">
+  <defs>
+    <linearGradient id="sageGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#86A787" />
+      <stop offset="100%" stop-color="#6B8E6C" />
+    </linearGradient>
+    <linearGradient id="leafLeft" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FAF6EE" />
+      <stop offset="100%" stop-color="#EFE8D8" />
+    </linearGradient>
+    <linearGradient id="leafRight" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="100%" stop-color="#EBF1EB" />
+    </linearGradient>
+    <filter id="softShadow" x="-10%" y="-10%" width="120%" height="125%">
+      <feDropShadow dx="0" dy="18" stdDeviation="24" flood-color="#2C3539" flood-opacity="0.14" />
+    </filter>
+  </defs>
+
+  <!-- Warm Sand Background -->
+  <rect width="1080" height="1080" rx="180" fill="#EFE8D8" />
+
+  <!-- Subtle Outer Calm Focus Ring -->
+  <circle cx="540" cy="540" r="440" fill="none" stroke="#7A9A7B" stroke-width="6" stroke-dasharray="18 14" opacity="0.35" />
+
+  <!-- Signature Rounded-2XL Soft Sage Container -->
+  <rect x="170" y="170" width="740" height="740" rx="185" fill="url(#sageGrad)" filter="url(#softShadow)" />
+  <rect x="194" y="194" width="692" height="692" rx="165" fill="none" stroke="#FAF6EE" stroke-width="4" opacity="0.28" />
+
+  <!-- Smooth Landing Inner Ring inside the Badge -->
+  <circle cx="540" cy="540" r="275" fill="none" stroke="#FAF6EE" stroke-width="10" opacity="0.22" />
+  <path d="M 540 265 A 275 275 0 1 1 295 665" fill="none" stroke="#FAF6EE" stroke-width="14" stroke-linecap="round" opacity="0.65" />
+
+  <!-- Organic Sprout & Neural Synapse Icon -->
+  <g transform="translate(540, 565)">
+    <!-- Grounding Root Arc -->
+    <path d="M -95 145 Q 0 115 95 145" fill="none" stroke="#EFE8D8" stroke-width="18" stroke-linecap="round" opacity="0.85" />
+
+    <!-- Central Stem -->
+    <path d="M 0 130 L 0 -65" fill="none" stroke="#FAF6EE" stroke-width="26" stroke-linecap="round" />
+
+    <!-- Left Organic Leaf (Growth & Calm) -->
+    <path d="M 0 25 C -15 -85, -175 -135, -205 -45 C -175 65, -45 65, 0 25 Z" fill="url(#leafLeft)" />
+    <!-- Left Leaf Vein -->
+    <path d="M -12 18 Q -95 -20 -150 -35" fill="none" stroke="#7A9A7B" stroke-width="10" stroke-linecap="round" opacity="0.65" />
+
+    <!-- Right Organic Leaf (Executive Function & Focus) -->
+    <path d="M 0 -25 C 20 -145, 190 -185, 215 -85 C 185 35, 45 25, 0 -25 Z" fill="url(#leafRight)" />
+    <!-- Right Leaf Vein -->
+    <path d="M 12 -30 Q 105 -75 160 -82" fill="none" stroke="#7A9A7B" stroke-width="10" stroke-linecap="round" opacity="0.65" />
+
+    <!-- Terracotta Neural Synapse Spark at the Crown -->
+    <circle cx="0" cy="-165" r="24" fill="#D97757" stroke="#FAF6EE" stroke-width="8" />
+    <circle cx="-72" cy="-130" r="12" fill="#FAF6EE" opacity="0.9" />
+    <circle cx="78" cy="-175" r="12" fill="#FAF6EE" opacity="0.9" />
+    <!-- Synapse Connection Lines -->
+    <line x1="-55" y1="-138" x2="-22" y2="-155" stroke="#FAF6EE" stroke-width="5" stroke-linecap="round" opacity="0.75" />
+    <line x1="23" y1="-168" x2="62" y2="-173" stroke="#FAF6EE" stroke-width="5" stroke-linecap="round" opacity="0.75" />
+  </g>
+</svg>

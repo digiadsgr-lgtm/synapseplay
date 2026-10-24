@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 420" width="1400" height="420">
+  <defs>
+    <linearGradient id="hSageGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#86A787" />
+      <stop offset="100%" stop-color="#6B8E6C" />
+    </linearGradient>
+    <filter id="hBadgeShadow" x="-10%" y="-10%" width="125%" height="125%">
+      <feDropShadow dx="0" dy="10" stdDeviation="14" flood-color="#2C3539" flood-opacity="0.12" />
+    </filter>
+  </defs>
+
+  <!-- Warm Sand Background -->
+  <rect width="1400" height="420" rx="64" fill="#EFE8D8" />
+  <rect x="16" y="16" width="1368" height="388" rx="52" fill="none" stroke="#7A9A7B" stroke-width="4" stroke-opacity="0.3" />
+
+  <!-- Left: Signature Sage Rounded-2XL Badge (Matches App Header) -->
+  <g transform="translate(76, 66)">
+    <rect width="288" height="288" rx="72" fill="url(#hSageGrad)" filter="url(#hBadgeShadow)" />
+    <rect x="10" y="10" width="268" height="268" rx="64" fill="none" stroke="#FAF6EE" stroke-width="3" opacity="0.28" />
+    <!-- Smooth Landing Arc -->
+    <circle cx="144" cy="144" r="108" fill="none" stroke="#FAF6EE" stroke-width="5" opacity="0.22" />
+    <path d="M 144 36 A 108 108 0 1 1 50 198" fill="none" stroke="#FAF6EE" stroke-width="7" stroke-linecap="round" opacity="0.7" />
+    <!-- Sprout & Synapse Icon -->
+    <g transform="translate(144, 156)">
+      <path d="M -38 56 Q 0 44 38 56" fill="none" stroke="#EFE8D8" stroke-width="8" stroke-linecap="round" opacity="0.9" />
+      <path d="M 0 50 L 0 -28" fill="none" stroke="#FAF6EE" stroke-width="11" stroke-linecap="round" />
+      <path d="M 0 10 C -6 -34, -70 -54, -82 -18 C -70 26, -18 26, 0 10 Z" fill="#FAF6EE" />
+      <path d="M -5 7 Q -38 -8 -60 -14" fill="none" stroke="#7A9A7B" stroke-width="4.5" stroke-linecap="round" opacity="0.65" />
+      <path d="M 0 -10 C 8 -58, 76 -74, 86 -34 C 74 14, 18 10, 0 -10 Z" fill="#FFFFFF" />
+      <path d="M 5 -12 Q 42 -30 64 -33" fill="none" stroke="#7A9A7B" stroke-width="4.5" stroke-linecap="round" opacity="0.65" />
+      <circle cx="0" cy="-66" r="10" fill="#D97757" stroke="#FAF6EE" stroke-width="3.5" />
+      <circle cx="-28" cy="-52" r="5" fill="#FAF6EE" />
+      <circle cx="31" cy="-70" r="5" fill="#FAF6EE" />
+    </g>
+  </g>
+
+  <!-- Right: Wordmark & FocusEngine 5+ Badge -->
+  <g transform="translate(410, 0)">
+    <text x="0" y="198" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="112" font-weight="900" fill="#2C3539" letter-spacing="-2.5">
+      SynapsePlay
+    </text>
+
+    <!-- FocusEngine 5+ Pill (Exact Header Match) -->
+    <rect x="655" y="118" width="256" height="62" rx="31" fill="#4A6B82" fill-opacity="0.16" stroke="#4A6B82" stroke-width="2" stroke-opacity="0.35" />
+    <text x="783" y="159" text-anchor="middle" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="30" font-weight="800" fill="#4A6B82">
+      FocusEngine 5+
+    </text>
+
+    <!-- Subtitle -->
+    <text x="4" y="268" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="34" font-weight="700" fill="#4A6B82">
+      Εξάσκηση Προσοχής, Μνήμης &amp; Αυτορρύθμισης (4–12 ετών)
+    </text>
+
+    <!-- 3 Calm Accent Pills -->
+    <g transform="translate(4, 296)">
+      <rect x="0" y="0" width="230" height="44" rx="22" fill="#7A9A7B" fill-opacity="0.2" />
+      <text x="115" y="29" text-anchor="middle" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-size="21" font-weight="800" fill="#2C3539">
+        🌱 Smooth Landing
+      </text>
+
+      <rect x="248" y="0" width="265" height="44" rx="22" fill="#4A6B82" fill-opacity="0.15" />
+      <text x="380" y="29" text-anchor="middle" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-size="21" font-weight="800" fill="#2C3539">
+        🧠 Μηδενική Ματαίωση
+      </text>
+
+      <rect x="531" y="0" width="285" height="44" rx="22" fill="#D97757" fill-opacity="0.18" />
+      <text x="673" y="29" text-anchor="middle" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-size="21" font-weight="800" fill="#2C3539">
+        🏃 Από την Οθόνη στην Πράξη
+      </text>
+    </g>
+  </g>
+</svg>

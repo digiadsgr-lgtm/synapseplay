@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1080" width="1080" height="1080">
+  <defs>
+    <radialGradient id="socialBg" cx="50%" cy="42%" r="65%">
+      <stop offset="0%" stop-color="#88A989" />
+      <stop offset="100%" stop-color="#688B69" />
+    </radialGradient>
+    <linearGradient id="creamLeaf" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="100%" stop-color="#EFE8D8" />
+    </linearGradient>
+  </defs>
+
+  <!-- Full-bleed Soft Sage background safe for circular masks (Instagram, TikTok, Facebook, LinkedIn) -->
+  <rect width="1080" height="1080" fill="url(#socialBg)" />
+
+  <!-- Circular Crop Safe Zone Focus Ring (r=380 fits well inside 1080 circle) -->
+  <circle cx="540" cy="540" r="420" fill="none" stroke="#FAF6EE" stroke-width="6" opacity="0.18" />
+  <circle cx="540" cy="540" r="350" fill="none" stroke="#FAF6EE" stroke-width="12" opacity="0.22" />
+  <path d="M 540 190 A 350 350 0 1 1 236 714" fill="none" stroke="#FAF6EE" stroke-width="18" stroke-linecap="round" opacity="0.75" />
+
+  <!-- Organic Sprout & Neural Synapse Centered for Circle Avatar -->
+  <g transform="translate(540, 560)">
+    <!-- Grounding Arc -->
+    <path d="M -110 155 Q 0 120 110 155" fill="none" stroke="#EFE8D8" stroke-width="20" stroke-linecap="round" opacity="0.9" />
+
+    <!-- Central Stem -->
+    <path d="M 0 138 L 0 -75" fill="none" stroke="#FAF6EE" stroke-width="30" stroke-linecap="round" />
+
+    <!-- Left Leaf -->
+    <path d="M 0 30 C -18 -95, -195 -150, -230 -50 C -195 75, -50 75, 0 30 Z" fill="url(#creamLeaf)" />
+    <path d="M -14 20 Q -105 -22 -170 -40" fill="none" stroke="#688B69" stroke-width="12" stroke-linecap="round" opacity="0.65" />
+
+    <!-- Right Leaf -->
+    <path d="M 0 -28 C 22 -160, 215 -205, 242 -95 C 210 40, 50 30, 0 -28 Z" fill="#FFFFFF" />
+    <path d="M 14 -34 Q 118 -85 182 -92" fill="none" stroke="#688B69" stroke-width="12" stroke-linecap="round" opacity="0.65" />
+
+    <!-- Neural Synapse Nodes -->
+    <circle cx="0" cy="-185" r="28" fill="#D97757" stroke="#FAF6EE" stroke-width="9" />
+    <circle cx="-84" cy="-145" r="14" fill="#FAF6EE" />
+    <circle cx="90" cy="-195" r="14" fill="#FAF6EE" />
+    <line x1="-65" y1="-154" x2="-26" y2="-173" stroke="#FAF6EE" stroke-width="6" stroke-linecap="round" opacity="0.85" />
+    <line x1="27" y1="-188" x2="72" y2="-193" stroke="#FAF6EE" stroke-width="6" stroke-linecap="round" opacity="0.85" />
+  </g>
+</svg>
