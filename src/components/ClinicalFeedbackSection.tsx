@@ -7,6 +7,7 @@ import type {
   ObservationCategory,
   ReviewerRole,
 } from '../types/domain';
+import { sendFeedbackSilentlyToOwner } from '../utils/feedbackCloudRelay';
 
 const ROLE_OPTIONS: Array<{ value: ReviewerRole; labelEl: string }> = [
   { value: 'parent', labelEl: '👨‍👩‍👧 Γονέας / Κηδεμόνας' },
@@ -71,6 +72,7 @@ export const ClinicalFeedbackSection: React.FC = () => {
   const [commentEl, setCommentEl] = useState<string>('');
   const [submittedNotice, setSubmittedNotice] = useState<string | null>(null);
   const [copiedNotice, setCopiedNotice] = useState<boolean>(false);
+  const [isSendingCloud, setIsSendingCloud] = useState<boolean>(false);
 
   const scopeOptions = [
     { value: 'general', labelEl: '🌐 Γενική Λειτουργία & Περιβάλλον Εφαρμογής' },
@@ -93,7 +95,7 @@ export const ClinicalFeedbackSection: React.FC = () => {
     const roleMeta = ROLE_OPTIONS.find((r) => r.value === reviewerRole) ?? ROLE_OPTIONS[0];
     const scopeMeta = scopeOptions.find((s) => s.value === targetScope) ?? scopeOptions[0];
 
-    await submitFeedbackEntry({
+    const payload = {
       reviewerRole,
       reviewerRoleLabelEl: roleMeta.labelEl,
       reviewerNameOrCenter: reviewerNameOrCenter.trim() || 'Ανώνυμος Αξιολογητής',
@@ -105,12 +107,43 @@ export const ClinicalFeedbackSection: React.FC = () => {
       clinicalAppropriatenessScore: clinicalScore,
       observationCategory,
       commentEl: trimmed,
-    });
+    };
 
+    await submitFeedbackEntry(payload);
     setCommentEl('');
-    setSubmittedNotice(
-      '✅ Η παρατήρηση καταγράφηκε με επιτυχία! Μπορείτε να προσθέσετε κι άλλες ή να πατήσετε «Αντιγραφή / Εξαγωγή Αναφοράς» για αποστολή.'
-    );
+    setIsSendingCloud(true);
+    setSubmittedNotice('⏳ Καταγράφηκε και αποστέλλεται αυτόματα στην ομάδα ανάπτυξης...');
+
+    const relayResult = await sendFeedbackSilentlyToOwner(payload);
+    setIsSendingCloud(false);
+
+    if (relayResult.delivered) {
+      setSubmittedNotice(
+        '✅ Η παρατήρησή σας καταγράφηκε και εστάλη αυτόματα στην ομάδα ανάπτυξης του SynapsePlay! Σας ευχαριστούμε!'
+      );
+    } else {
+      setSubmittedNotice(
+        '✅ Η παρατήρηση αποθηκεύτηκε στη συσκευή! Μόλις συνδεθείτε στο διαδίκτυο, πατήστε «Αποστολή Συγκεντρωτικής Αναφοράς».'
+      );
+    }
+  };
+
+  const handleSendBatchSilently = async () => {
+    if (feedbackEntries.length === 0) return;
+    setIsSendingCloud(true);
+    const reportText = formatFeedbackReportText(feedbackEntries);
+    const latest = feedbackEntries[0];
+    const res = await sendFeedbackSilentlyToOwner(latest, reportText);
+    setIsSendingCloud(false);
+    if (res.delivered) {
+      setSubmittedNotice(
+        `✅ Όλες οι παρατηρήσεις (${feedbackEntries.length}) εστάλησαν αυτόματα στην ομάδα ανάπτυξης!`
+      );
+    } else {
+      setSubmittedNotice(
+        '⚠️ Δεν ήταν δυνατή η άμεση δικτυακή αποστολή αυτή τη στιγμή. Μπορείτε να πατήσετε «Λήψη Αρχείου Αναφοράς» ή «Αντιγραφή».'
+      );
+    }
   };
 
   const handleCopyReport = async () => {
@@ -143,10 +176,6 @@ export const ClinicalFeedbackSection: React.FC = () => {
     }
   };
 
-  const mailtoHref = `mailto:?subject=${encodeURIComponent(
-    'SynapsePlay — Κλινική Αξιολόγηση & Παρατηρήσεις Βελτίωσης'
-  )}&body=${encodeURIComponent(formatFeedbackReportText(feedbackEntries))}`;
-
   return (
     <section
       data-testid="parent-feedback-evaluation-section"
@@ -163,8 +192,8 @@ export const ClinicalFeedbackSection: React.FC = () => {
           <p className="text-sm text-charcoal-muted max-w-3xl">
             Ειδικός χώρος για <strong>Θεραπευτές Κέντρων ΔΕΠΥ</strong> (Εργοθεραπευτές,
             Λογοθεραπευτές, Παιδοψυχολόγους, Ειδικούς Παιδαγωγούς) και <strong>Γονείς</strong>.
-            Καταγράψτε οποιαδήποτε παρατήρηση από τη δοκιμή των παιχνιδιών με τα παιδιά ώστε να
-            βελτιώνουμε συνεχώς την εφαρμογή.
+            Καταγράψτε οποιαδήποτε παρατήρηση από τη δοκιμή των παιχνιδιών με τα παιδιά — κάθε
+            υποβολή αποστέλλεται αυτόματα στην ομάδα ανάπτυξης.
           </p>
         </div>
 
@@ -172,15 +201,28 @@ export const ClinicalFeedbackSection: React.FC = () => {
           <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
+              data-testid="send-batch-feedback-btn"
+              disabled={isSendingCloud}
+              onClick={() => void handleSendBatchSilently()}
+              className="touch-target px-4 py-2.5 rounded-2xl bg-sage-dark text-white font-extrabold text-xs flex items-center gap-1.5 hover:bg-sage disabled:opacity-60"
+            >
+              <span aria-hidden="true">📤</span>
+              <span>
+                {isSendingCloud
+                  ? 'Αποστολή...'
+                  : 'Αποστολή Συγκεντρωτικής Αναφοράς στην Ομάδα'}
+              </span>
+            </button>
+
+            <button
+              type="button"
               data-testid="copy-feedback-report-btn"
               onClick={() => void handleCopyReport()}
-              className="touch-target px-4 py-2.5 rounded-2xl bg-sage-dark text-white font-extrabold text-xs flex items-center gap-1.5 hover:bg-sage"
+              className="touch-target px-4 py-2.5 rounded-2xl bg-sand-light border-2 border-slate text-charcoal font-extrabold text-xs flex items-center gap-1.5 hover:bg-sand"
             >
               <span aria-hidden="true">📋</span>
               <span>
-                {copiedNotice
-                  ? '✓ Αντιγράφηκε στο Πρόχειρο!'
-                  : 'Αντιγραφή Αναφοράς (Viber / Email)'}
+                {copiedNotice ? '✓ Αντιγράφηκε στο Πρόχειρο!' : 'Αντιγραφή Αναφοράς'}
               </span>
             </button>
 
@@ -191,17 +233,8 @@ export const ClinicalFeedbackSection: React.FC = () => {
               className="touch-target px-4 py-2.5 rounded-2xl bg-slate text-white font-extrabold text-xs flex items-center gap-1.5 hover:bg-slate-dark"
             >
               <span aria-hidden="true">📥</span>
-              <span>Λήψη Αρχείου Αναφοράς (.txt)</span>
+              <span>Λήψη Αρχείου (.txt)</span>
             </button>
-
-            <a
-              href={mailtoHref}
-              data-testid="email-feedback-report-link"
-              className="touch-target px-4 py-2.5 rounded-2xl bg-sand-light border-2 border-slate text-charcoal font-extrabold text-xs flex items-center gap-1.5 hover:bg-sand"
-            >
-              <span aria-hidden="true">✉️</span>
-              <span>Αποστολή με Email</span>
-            </a>
           </div>
         )}
       </div>
@@ -395,11 +428,16 @@ export const ClinicalFeedbackSection: React.FC = () => {
           <button
             type="button"
             data-testid="submit-feedback-btn"
+            disabled={isSendingCloud}
             onClick={() => void handleSubmit()}
-            className="touch-target px-6 py-3 rounded-2xl bg-sage-dark text-white font-extrabold text-sm flex items-center gap-2 hover:bg-sage"
+            className="touch-target px-6 py-3 rounded-2xl bg-sage-dark text-white font-extrabold text-sm flex items-center gap-2 hover:bg-sage disabled:opacity-60"
           >
             <span aria-hidden="true">📨</span>
-            <span>Καταχώρηση Παρατήρησης & Αξιολόγησης</span>
+            <span>
+              {isSendingCloud
+                ? 'Αποστολή Παρατήρησης...'
+                : 'Καταχώρηση & Αυτόματη Αποστολή Παρατήρησης'}
+            </span>
           </button>
         </div>
       </form>

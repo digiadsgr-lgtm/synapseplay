@@ -462,8 +462,11 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
     expect(screen.getByTestId('feedback-entry-card-0')).toHaveTextContent(
       'Εξαιρετική η αυτόματη εναλλαγή αντικειμένων'
     );
+    expect(screen.getByTestId('send-batch-feedback-btn')).toBeInTheDocument();
     expect(screen.getByTestId('copy-feedback-report-btn')).toBeInTheDocument();
     expect(screen.getByTestId('download-feedback-report-btn')).toBeInTheDocument();
+    // Ensure owner recipient email is never visible anywhere in the DOM
+    expect(document.body.innerHTML).not.toContain('digiadsgr@gmail.com');
 
     const reportText = formatFeedbackReportText([
       {
