@@ -7,6 +7,7 @@ import {
   type AdhdBlogTopicCategory,
 } from '../data/adhdParentArticles';
 import { SynapsePlayLogoMark } from '../components/SynapsePlayLogoMark';
+import { SOCIAL_LINKS } from '../utils/seoEngine';
 
 function upsertMetaTag(attrName: 'name' | 'property', attrValue: string, content: string) {
   if (typeof document === 'undefined') return;
@@ -511,6 +512,26 @@ export const ParentArticlesPage: React.FC = () => {
             >
               Πώς Λειτουργεί η Μέθοδος
             </Link>
+            <a
+              href={SOCIAL_LINKS.facebookUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              data-testid="blog-social-facebook"
+              className="touch-target px-4 py-3.5 rounded-2xl bg-[#4A6B82] text-white font-extrabold text-xs sm:text-sm inline-flex items-center gap-2 hover:opacity-95"
+            >
+              <span>Facebook: Synapseplay.gr</span>
+              <span aria-hidden="true">↗️</span>
+            </a>
+            <a
+              href={SOCIAL_LINKS.instagramUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              data-testid="blog-social-instagram"
+              className="touch-target px-4 py-3.5 rounded-2xl bg-[#2C3539] text-white font-extrabold text-xs sm:text-sm inline-flex items-center gap-2 hover:opacity-95"
+            >
+              <span>Instagram: {SOCIAL_LINKS.instagramHandle}</span>
+              <span aria-hidden="true">↗️</span>
+            </a>
           </div>
         </section>
       </main>

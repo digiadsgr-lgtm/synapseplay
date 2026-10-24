@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { SynapsePlayLogoMark } from '../components/SynapsePlayLogoMark';
 import { clearGdprConsentAck } from '../components/GdprConsentBanner';
+import { SOCIAL_LINKS } from '../utils/seoEngine';
 
 export const LegalCompliancePage: React.FC = () => {
   const { settings, childProfiles, sessionLogs, feedbackEntries, wipeAllData } = useApp();
@@ -367,6 +368,41 @@ export const LegalCompliancePage: React.FC = () => {
             </ul>
           </div>
         </section>
+
+        {/* Official Social Media & Developer Contact Bar */}
+        <footer className="bg-[#FAF6EE] border-2 border-[#2C3539]/15 rounded-3xl p-5 sm:p-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-bold text-[#2C3539]">
+          <div>
+            © SynapsePlay — Ανάπτυξη:{' '}
+            <a
+              href="https://digiads.gr"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-extrabold text-[#4A6B82] underline"
+            >
+              DIGIADS (https://digiads.gr)
+            </a>
+          </div>
+          <div className="flex flex-wrap items-center gap-2.5">
+            <a
+              href={SOCIAL_LINKS.facebookUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              data-testid="legal-social-facebook"
+              className="touch-target px-3.5 py-2 rounded-xl bg-[#EFE8D8] border border-[#2C3539]/20 font-extrabold text-[#2C3539] hover:bg-[#4A6B82] hover:text-white transition-colors"
+            >
+              Facebook: Synapseplay.gr ↗️
+            </a>
+            <a
+              href={SOCIAL_LINKS.instagramUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              data-testid="legal-social-instagram"
+              className="touch-target px-3.5 py-2 rounded-xl bg-[#EFE8D8] border border-[#2C3539]/20 font-extrabold text-[#2C3539] hover:bg-[#D97757] hover:text-white transition-colors"
+            >
+              Instagram: {SOCIAL_LINKS.instagramHandle} ↗️
+            </a>
+          </div>
+        </footer>
       </main>
     </div>
   );

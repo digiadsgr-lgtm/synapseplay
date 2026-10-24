@@ -8,6 +8,13 @@ import type { CategoryId } from '../types/domain';
 export const SITE_BASE_URL = 'https://www.synapseplay.gr';
 export const DEFAULT_OG_IMAGE = `${SITE_BASE_URL}/brand-kit/png/synapseplay-social-cover-dark-1200x630.png`;
 
+export const SOCIAL_LINKS = {
+  facebookUrl: 'https://www.facebook.com/Synapseplay.gr/',
+  facebookLabel: 'Facebook • Synapseplay.gr',
+  instagramUrl: 'https://www.instagram.com/synapseplay.gr/',
+  instagramHandle: '@Synapseplay.gr',
+} as const;
+
 export interface SeoFaqItem {
   questionEl: string;
   answerEl: string;
@@ -99,6 +106,11 @@ export function resolveRouteSeoMetadata(pathname: string): RouteSeoMetadata {
             '@type': 'Organization',
             name: 'SynapsePlay by DIGIADS',
             url: 'https://digiads.gr',
+            sameAs: [
+              SOCIAL_LINKS.facebookUrl,
+              SOCIAL_LINKS.instagramUrl,
+              'https://digiads.gr',
+            ],
           },
           mainEntityOfPage: {
             '@type': 'WebPage',
@@ -305,6 +317,11 @@ export function resolveRouteSeoMetadata(pathname: string): RouteSeoMetadata {
             '@type': 'Organization',
             name: 'DIGIADS',
             url: 'https://digiads.gr',
+            sameAs: [
+              SOCIAL_LINKS.facebookUrl,
+              SOCIAL_LINKS.instagramUrl,
+              'https://digiads.gr',
+            ],
           },
           offers: {
             '@type': 'Offer',
