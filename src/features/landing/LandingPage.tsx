@@ -232,8 +232,10 @@ export const LandingPage: React.FC = () => {
                 data-testid="landing-hero-badge"
                 className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#7A9A7B]/20 border border-[#7A9A7B] text-xs sm:text-sm font-extrabold text-[#2C3539]"
               >
-                <span aria-hidden="true">🧠</span>
-                <span>Επιστημονικά Τεκμηριωμένη Εξάσκηση Εκτελεστικών Λειτουργιών</span>
+                <span aria-hidden="true">🤝</span>
+                <span>
+                  Για Γονείς, Ειδικούς Θεραπευτές & Παιδιά 4–12 ετών • Ξέρουμε τι αντιμετωπίζετε — Έχουμε τη λύση
+                </span>
               </span>
 
               <h1
@@ -241,18 +243,43 @@ export const LandingPage: React.FC = () => {
                 data-testid="landing-hero-headline"
                 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-[#2C3539] leading-tight tracking-tight"
               >
-                Από την οθόνη στην πράξη. Βοηθήστε το παιδί σας να συγκεντρώνεται χωρίς οθονικό
-                εθισμό.
+                «Το μυαλό μου τρέχει γρήγορα!» Έλα να παίξουμε λίγο μαζί, να πάρουμε μια ανάσα και
+                να βρούμε τον ρυθμό μας.
               </h1>
 
               <p
                 data-testid="landing-hero-subtitle"
-                className="text-base sm:text-lg md:text-xl text-[#2C3539]/85 leading-relaxed font-medium"
+                className="text-base sm:text-lg md:text-xl text-[#2C3539]/90 leading-relaxed font-medium"
               >
-                Μια ήρεμη, ψηφιακή γέφυρα για παιδιά 4–12 ετών (με έμφαση στη ΔΕΠΥ). Εξάσκηση
-                παρατηρητικότητας, μνήμης και αυτορρύθμισης με μηδενική ματαίωση και ομαλή επιστροφή
-                στον φυσικό κόσμο.
+                Γονείς και θεραπευτές, ξέρουμε πόσο κουραστικό είναι όταν μια απλή ρουτίνα μοιάζει
+                με βουνό και το κλείσιμο της οθόνης φέρνει δάκρυα και ένταση. Γι&apos; αυτό
+                φτιάξαμε ένα ήρεμο καταφύγιο που μιλάει στη γλώσσα του παιδιού: χωρίς «έχασες»,
+                χωρίς φασαρία και χωρίς εθισμό. Λίγα λεπτά έξυπνου παιχνιδιού, λίγη κίνηση στο
+                δωμάτιο, και το παιδί αφήνει μόνο του την ταμπλέτα — ήρεμο, περήφανο και χαρούμενο.
               </p>
+
+              {/* Warm Dual-Voice Empathy Callout: Child's Voice + Parent/Specialist Voice */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-1">
+                <div className="p-4 rounded-2xl bg-[#EFE8D8]/85 border border-[#7A9A7B]/45 space-y-1">
+                  <div className="text-xs font-extrabold text-[#5B7B5C] uppercase tracking-wide">
+                    👧 Πώς το νιώθει το παιδί
+                  </div>
+                  <p className="text-xs sm:text-sm font-bold text-[#2C3539] leading-snug">
+                    «Εδώ κανείς δεν μου φωνάζει να κάτσω φρόνιμα. Διαλέγω το ζωάκι μου, ακούω τη
+                    φωνούλα, παίζω, κινούμαι στον χώρο και τα καταφέρνω!»
+                  </p>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-[#EFE8D8]/85 border border-[#4A6B82]/40 space-y-1">
+                  <div className="text-xs font-extrabold text-[#4A6B82] uppercase tracking-wide">
+                    🩺 Πώς βοηθά Γονείς &amp; Ειδικούς
+                  </div>
+                  <p className="text-xs sm:text-sm font-bold text-[#2C3539] leading-snug">
+                    Ένα έτοιμο, δοκιμασμένο εργαλείο για το σπίτι και το θεραπευτήριο που ηρεμεί το
+                    νευρικό σύστημα, προσαρμόζεται στην ηλικία και χτίζει συγκέντρωση στην πράξη.
+                  </p>
+                </div>
+              </div>
             </div>
 
             <div className="hidden md:flex flex-col items-center justify-center shrink-0 p-4 rounded-3xl bg-[#EFE8D8]/70 border border-[#7A9A7B]/30">

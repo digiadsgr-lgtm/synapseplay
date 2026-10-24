@@ -598,10 +598,10 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
     expect(screen.queryByTestId('nav-home-btn')).not.toBeInTheDocument();
     expect(screen.queryByTestId('smooth-landing-ring')).not.toBeInTheDocument();
     expect(screen.getByTestId('landing-hero-badge')).toHaveTextContent(
-      'Επιστημονικά Τεκμηριωμένη Εξάσκηση Εκτελεστικών Λειτουργιών'
+      'Ξέρουμε τι αντιμετωπίζετε — Έχουμε τη λύση'
     );
     expect(screen.getByTestId('landing-hero-headline')).toHaveTextContent(
-      'Από την οθόνη στην πράξη. Βοηθήστε το παιδί σας να συγκεντρώνεται χωρίς οθονικό εθισμό.'
+      '«Το μυαλό μου τρέχει γρήγορα!» Έλα να παίξουμε λίγο μαζί, να πάρουμε μια ανάσα και να βρούμε τον ρυθμό μας.'
     );
     expect(screen.getByTestId('landing-trust-badges')).toHaveTextContent('100% Client-Side & Local');
     expect(screen.getByTestId('landing-trust-badges')).toHaveTextContent('Χωρίς Διαφημίσεις');
