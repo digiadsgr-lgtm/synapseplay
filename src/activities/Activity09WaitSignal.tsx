@@ -124,8 +124,13 @@ export const Activity09WaitSignal: React.FC<ActivityRunnerRenderProps> = ({
       setStepIndex(streamItems.length - 1);
     } else {
       setStepIndex(0);
+      speakGreek(
+        'Περίμενε με ήρεμα χέρια και πάτησε μόνο όταν εμφανιστεί το χρυσό αστέρι!',
+        settings.voiceEnabled,
+        adaptiveProfile.speechRate
+      );
     }
-  }, [currentRound, hintLevel, sessionSeed, streamItems.length]);
+  }, [currentRound, hintLevel, sessionSeed, streamItems.length, settings.voiceEnabled, adaptiveProfile.speechRate]);
 
   const currentItem = streamItems[stepIndex % streamItems.length] ?? streamItems[0];
 

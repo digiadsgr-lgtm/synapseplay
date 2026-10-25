@@ -16,6 +16,7 @@ import {
   computeClinicalStaircaseSnapshot,
   getAgeAndPerformanceDifficulty,
 } from '../utils/clinicalAdhdEngine';
+import { toGreekVocative } from '../utils/childProfileLearningEngine';
 
 export interface ActivityRunnerRenderProps {
   phase: RunnerPhase;
@@ -249,7 +250,7 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
     } else {
       playCalmTone('complete', settings.soundEnabled);
       speakGreek(
-        `Συγχαρητήρια! Ολοκλήρωσες τη δραστηριότητα ${activity.titleEl} με ηρεμία!`,
+        `Συγχαρητήρια, ${toGreekVocative(activeProfile.nickname)}! Ολοκλήρωσες τη δραστηριότητα ${activity.titleEl} με ηρεμία!`,
         settings.voiceEnabled,
         adaptiveProfile.speechRate
       );
@@ -586,7 +587,7 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
           <div className="text-5xl" aria-hidden="true">⏸️🌿</div>
           <h2 className="text-2xl font-extrabold text-charcoal">Το παιχνίδι είναι σε παύση</h2>
           <p className="text-base text-charcoal-muted">
-            Πάρε όσον χρόνο χρειάζεσαι. Όταν είσαι έτοιμος, πάτησε Συνέχεια!
+            Πάρε όσον χρόνο χρειάζεσαι. Όταν θέλεις να συνεχίσουμε, πάτησε «Συνέχεια»!
           </p>
           <button
             type="button"
@@ -608,7 +609,7 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
             🌿✨
           </div>
           <h2 id="activity-complete-heading" className="text-2xl md:text-3xl font-extrabold text-charcoal">
-            Υπέροχη Προσπάθεια!
+            Υπέροχη Προσπάθεια, {toGreekVocative(activeProfile.nickname)}!
           </h2>
           <p className="text-lg text-charcoal-muted max-w-lg mx-auto">
             Ολοκλήρωσες και τα {activity.totalRounds} βήματα στη δραστηριότητα «{activity.titleEl}» με

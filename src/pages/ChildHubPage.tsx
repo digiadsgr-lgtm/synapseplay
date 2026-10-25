@@ -9,6 +9,7 @@ import {
   evaluateChildAvatarProgress,
   getAvatarCompanionMetadata,
   getPersonalizedActivityRecommendation,
+  toGreekVocative,
 } from '../utils/childProfileLearningEngine';
 import { MONETIZATION_CONFIG } from '../config/monetization.config';
 import { speakGreek } from '../utils/soundAndSpeech';
@@ -130,7 +131,7 @@ export const ChildHubPage: React.FC = () => {
     setIsCreatingProfile(false);
     setShowFamilyLimitNotice(false);
     speakGreek(
-      `Καλώς ήρθες, ${created.nickname}! Το προσωπικό σου προφίλ είναι έτοιμο.`,
+      `Καλώς ήρθες, ${toGreekVocative(created.nickname)}! Το προσωπικό σου προφίλ είναι έτοιμο.`,
       settings.voiceEnabled,
       created.learnedModel.optimalSpeechRate
     );
@@ -495,7 +496,7 @@ export const ChildHubPage: React.FC = () => {
                 </span>
               </div>
               <h1 id="hub-welcome-heading" className="text-2xl md:text-3xl font-extrabold text-charcoal">
-                Γεια σου, {activeProfile.nickname}! Τι θέλεις να παίξουμε σήμερα;
+                Γεια σου, {toGreekVocative(activeProfile.nickname)}! Τι θέλεις να παίξουμε σήμερα;
               </h1>
               <p className="text-sm font-bold text-slate-dark" data-testid="active-profile-adaptation-summary">
                 🧠 {activeProfile.learnedModel.adaptationSummaryEl}
@@ -513,7 +514,7 @@ export const ChildHubPage: React.FC = () => {
             type="button"
             onClick={() =>
               speakGreek(
-                `Γεια σου, ${activeProfile.nickname}! ${avatarEvaluation.avatar.coachingTipEl} Διάλεξε μία από τις τέσσερις ομάδες παιχνιδιών για να ξεκινήσουμε.`,
+                `Γεια σου, ${toGreekVocative(activeProfile.nickname)}! ${avatarEvaluation.avatar.coachingTipEl} Διάλεξε μία από τις τέσσερις ομάδες παιχνιδιών για να ξεκινήσουμε.`,
                 true,
                 activeProfile.learnedModel.optimalSpeechRate
               )

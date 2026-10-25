@@ -231,6 +231,151 @@ export function getAvatarCompanionMetadata(emoji: string): TherapeuticAvatarPres
   );
 }
 
+const GENITIVE_STOP_WORDS = new Set([
+  'της',
+  'του',
+  'των',
+  'με',
+  'σε',
+  'από',
+  'για',
+  'στο',
+  'στον',
+  'στη',
+  'στην',
+]);
+
+const NEUTER_OS_WORDS = new Set(['δάσος', 'άνθος', 'βέλος', 'άστρος', 'φως', 'μέρος', 'έδαφος']);
+
+const COMMON_NOUNS_AND_ADJECTIVES_IN_E = new Set([
+  'δράκος',
+  'μάγος',
+  'φίλος',
+  'λύκος',
+  'ήλιος',
+  'καπετάνιος',
+  'άγγελος',
+  'μάριος',
+  'μονόκερος',
+  'ήρεμος',
+  'έξυπνος',
+  'γρήγορος',
+  'γαλήνιος',
+  'θαρραλέος',
+  'γενναίος',
+  'χαρούμενος',
+  'πολύχρωμος',
+]);
+
+const PAROXYTONE_NAMES_IN_O = new Set([
+  'γιώργος',
+  'νίκος',
+  'πέτρος',
+  'παύλος',
+  'σπύρος',
+  'σταύρος',
+  'χρήστος',
+  'χρίστος',
+  'φοίβος',
+  'μάρκος',
+  'μίλτος',
+  'τάσος',
+  'πάνος',
+  'θάνος',
+  'μάνος',
+  'βάσος',
+  'λάμπρος',
+  'δήμος',
+  'σίμος',
+  'ντίνος',
+  'τίμος',
+  'στράτος',
+  'μήτσος',
+  'κίτσος',
+  'αλέκος',
+  'στέλιος',
+  'κυριάκος',
+]);
+
+function inflectSingleWordToGreekVocative(word: string): string {
+  const clean = word.trim();
+  if (!clean) return clean;
+  const lower = clean.toLowerCase();
+
+  // Do not inflect neuter words in -ος or genitive words in -ού (e.g. Ρυθμού)
+  if (NEUTER_OS_WORDS.has(lower) || lower.endsWith('ού')) {
+    return clean;
+  }
+
+  // Feminine archaic names in -ις -> -η (e.g. Άρτεμις -> Άρτεμη)
+  if (lower === 'άρτεμις') {
+    return clean.slice(0, -2) + 'η';
+  }
+
+  // 1. Masculine words in -ας, -άς, -ης, -ής, -ες, -ές, -ους, -ούς, -ύς, -υς -> drop final -ς
+  if (/(ας|άς|ης|ής|ες|ές|ους|ούς|ύς|υς)$/i.test(clean)) {
+    return clean.slice(0, -1);
+  }
+
+  // 2. Masculine oxytone words in -ός -> -έ (e.g. Μικρός -> Μικρέ, Φωτεινός -> Φωτεινέ, Σοφός -> Σοφέ)
+  if (/ός$/i.test(clean)) {
+    const isUpper = clean === clean.toUpperCase();
+    return clean.slice(0, -2) + (isUpper ? 'Έ' : 'έ');
+  }
+
+  // 3. Masculine unstressed words in -ος
+  if (/ος$/i.test(clean)) {
+    const isUpper = clean === clean.toUpperCase();
+    // Explicit common nouns & adjectives taking -ε (Δράκος -> Δράκε, Μάγος -> Μάγε, Μονόκερος -> Μονόκερε)
+    if (COMMON_NOUNS_AND_ADJECTIVES_IN_E.has(lower)) {
+      return clean.slice(0, -2) + (isUpper ? 'Ε' : 'ε');
+    }
+    // Explicit paroxytone proper names or diminutives in -άκος / -ούκος / -ίτσος taking -ο (Γιώργος -> Γιώργο, Νίκος -> Νίκο)
+    if (PAROXYTONE_NAMES_IN_O.has(lower) || /(άκος|ούκος|ίτσος)$/i.test(clean)) {
+      return clean.slice(0, -2) + (isUpper ? 'Ο' : 'ο');
+    }
+    // Count Greek vowel clusters (syllables) to distinguish disyllabic paroxytone names (-ο) from polysyllabic names/adjectives (-ε)
+    const syllables =
+      clean.match(/(αυ|ευ|ου|αι|ει|οι|υι|[αεηιουωάέήίόύώϊϋΐΰ])/gi)?.length ?? 1;
+    if (syllables <= 2) {
+      return clean.slice(0, -2) + (isUpper ? 'Ο' : 'ο');
+    }
+    return clean.slice(0, -2) + (isUpper ? 'Ε' : 'ε');
+  }
+
+  return clean;
+}
+
+/**
+ * Converts a Greek name or multi-word companion title from Nominative (Ονομαστική)
+ * to Vocative (Κλητική πτώση) according to Modern Greek grammar rules (Τριανταφυλλίδης).
+ * Examples:
+ * - "Μικρός Εξερευνητής" -> "Μικρέ Εξερευνητή"
+ * - "Φωτεινός Μονόκερος" -> "Φωτεινέ Μονόκερε"
+ * - "Ήρεμος Δράκος της Ανάσας" -> "Ήρεμε Δράκε της Ανάσας"
+ * - "Σοφός Μάγος της Μνήμης" -> "Σοφέ Μάγε της Μνήμης"
+ * - "Γιώργος" -> "Γιώργο", "Αλέξανδρος" -> "Αλέξανδρε", "Δημήτρης" -> "Δημήτρη"
+ */
+export function toGreekVocative(nameOrPhrase: string): string {
+  const trimmed = nameOrPhrase.trim();
+  if (!trimmed) return trimmed;
+
+  const tokens = trimmed.split(/\s+/);
+  const result: string[] = [];
+  let reachedGenitiveTail = false;
+
+  for (const token of tokens) {
+    if (reachedGenitiveTail || GENITIVE_STOP_WORDS.has(token.toLowerCase())) {
+      reachedGenitiveTail = true;
+      result.push(token);
+    } else {
+      result.push(inflectSingleWordToGreekVocative(token));
+    }
+  }
+
+  return result.join(' ');
+}
+
 export interface AvatarClinicalProgressEvaluation {
   avatar: TherapeuticAvatarPreset;
   evolutionLevel: 1 | 2 | 3 | 4;

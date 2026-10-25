@@ -64,7 +64,7 @@ export const Activity04SequenceMemory: React.FC<ActivityRunnerRenderProps> = ({
     if (ageBand === '4-5' || adaptiveProfile.distractorReductionRatio >= 0.5) {
       return baseSequence.slice(0, 2);
     }
-    if (ageBand === '10-12' || adaptiveProfile.enrichChallenge) {
+    if (ageBand === '8-10' || ageBand === '10-12' || adaptiveProfile.enrichChallenge) {
       const extraSymbol = baseSequence[0] === 'sun' ? 'star' : 'sun';
       return [...baseSequence, extraSymbol];
     }

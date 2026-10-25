@@ -36,31 +36,31 @@ const PRAXIS_ROUNDS: PraxisScenario[] = [
   {
     titleEl: 'Αυτονομία: Οργάνωση Γραφείου Μελέτης',
     goalEmoji: '🗂️✏️',
-    questionEl: 'Τελείωσες τη ζωγραφική σου. Πού βάζουμε τους μαρκαδόρους για να μη στεγνώσουν;',
+    questionEl: 'Τελείωσες τη ζωγραφική σου. Πού βάζεις τους μαρκαδόρους για να μη στεγνώσουν;',
     options: [
-      { id: 'px3-1', emoji: '🖍️🔒', labelEl: 'Κλείνουμε τα καπάκια και τους βάζουμε στην κασετίνα', isCorrect: true },
-      { id: 'px3-2', emoji: '🛋️', labelEl: 'Τους αφήνουμε ανοιχτούς στο πάτωμα', isCorrect: false },
-      { id: 'px3-3', emoji: '🧊', labelEl: 'Τους βάζουμε στην κατάψυξη', isCorrect: false },
+      { id: 'px3-1', emoji: '🖍️🔒', labelEl: 'Κλείνω τα καπάκια και τους βάζω στην κασετίνα', isCorrect: true },
+      { id: 'px3-2', emoji: '🛋️', labelEl: 'Τους αφήνω ανοιχτούς στο πάτωμα', isCorrect: false },
+      { id: 'px3-3', emoji: '🧊', labelEl: 'Τους βάζω στην κατάψυξη', isCorrect: false },
     ],
   },
   {
     titleEl: 'Αυτονομία: Βροχερός Καιρός & Έξοδος από το Σπίτι',
     goalEmoji: '🌧️🧥',
-    questionEl: 'Έξω βρέχει και φυσάει. Τι φοράμε πάνω από την μπλούζα μας πριν βγούμε;',
+    questionEl: 'Έξω βρέχει και φυσάει. Τι φοράς πάνω από την μπλούζα σου πριν βγεις;',
     options: [
-      { id: 'px4-1', emoji: '🧥☂️', labelEl: 'Φοράμε το αδιάβροχο μπουφάν μας και παίρνουμε ομπρέλα', isCorrect: true },
-      { id: 'px4-2', emoji: '🩳', labelEl: 'Φοράμε καλοκαιρινό μαγιό', isCorrect: false },
-      { id: 'px4-3', emoji: '🕶️', labelEl: 'Φοράμε μόνο γυαλιά ηλίου', isCorrect: false },
+      { id: 'px4-1', emoji: '🧥☂️', labelEl: 'Φοράω το αδιάβροχο μπουφάν μου και παίρνω ομπρέλα', isCorrect: true },
+      { id: 'px4-2', emoji: '🩳', labelEl: 'Φοράω καλοκαιρινό μαγιό', isCorrect: false },
+      { id: 'px4-3', emoji: '🕶️', labelEl: 'Φοράω μόνο γυαλιά ηλίου', isCorrect: false },
     ],
   },
   {
     titleEl: 'Αυτονομία: Κόβω Χαρτονάκια στη Χειροτεχνία',
     goalEmoji: '✂️📄',
-    questionEl: 'Θέλεις να κόψεις ένα χάρτινο αστέρι με ασφάλεια. Πώς χρησιμοποιούμε τα δύο μας χέρια;',
+    questionEl: 'Θέλεις να κόψεις ένα χάρτινο αστέρι με ασφάλεια. Πώς χρησιμοποιείς τα δύο σου χέρια;',
     options: [
       { id: 'px5-1', emoji: '🤲✂️', labelEl: 'Το ένα χέρι κρατάει σταθερά το χαρτί και το άλλο κόβει αργά με το παιδικό ψαλίδι', isCorrect: true },
-      { id: 'px5-2', emoji: '🏃✂️', labelEl: 'Τρέχουμε στο δωμάτιο κρατώντας το ψαλίδι', isCorrect: false },
-      { id: 'px5-3', emoji: '🥄', labelEl: 'Κόβουμε το χαρτόνι με κουτάλι', isCorrect: false },
+      { id: 'px5-2', emoji: '🏃✂️', labelEl: 'Τρέχω στο δωμάτιο κρατώντας το ψαλίδι', isCorrect: false },
+      { id: 'px5-3', emoji: '🥄', labelEl: 'Κόβω το χαρτόνι με κουτάλι', isCorrect: false },
     ],
   },
   {
@@ -86,21 +86,21 @@ const PRAXIS_ROUNDS: PraxisScenario[] = [
   {
     titleEl: 'Αυτονομία: Πλένω τα Φρούτα πριν τα Φάω',
     goalEmoji: '🍎🚰',
-    questionEl: 'Πήρες ένα μήλο από το καλάθι της κουζίνας. Τι κάνουμε πάντα πριν το δαγκώσουμε;',
+    questionEl: 'Πήρες ένα μήλο από το καλάθι της κουζίνας. Τι κάνεις πάντα πριν το δαγκώσεις;',
     options: [
-      { id: 'px8-1', emoji: '🚰🍎', labelEl: 'Το πλένουμε καλά με καθαρό νερό στη βρύση και το σκουπίζουμε', isCorrect: true },
-      { id: 'px8-2', emoji: '🖍️', labelEl: 'Το βάφουμε με μαρκαδόρους', isCorrect: false },
-      { id: 'px8-3', emoji: '🛋️', labelEl: 'Το κρύβουμε κάτω από τον καναπέ', isCorrect: false },
+      { id: 'px8-1', emoji: '🚰🍎', labelEl: 'Το πλένω καλά με καθαρό νερό στη βρύση και το σκουπίζω', isCorrect: true },
+      { id: 'px8-2', emoji: '🖍️', labelEl: 'Το βάφω με μαρκαδόρους', isCorrect: false },
+      { id: 'px8-3', emoji: '🛋️', labelEl: 'Το κρύβω κάτω από τον καναπέ', isCorrect: false },
     ],
   },
   {
     titleEl: 'Αυτονομία: Αλείφω Βούτυρο ή Μέλι στο Ψωμί',
     goalEmoji: '🍞🍯',
-    questionEl: 'Θέλεις να αλείψεις μέλι στη φέτα του ψωμιού σου. Πώς χρησιμοποιούμε τα χέρια μας;',
+    questionEl: 'Θέλεις να αλείψεις μέλι στη φέτα του ψωμιού σου. Πώς χρησιμοποιείς τα χέρια σου;',
     options: [
       { id: 'px9-1', emoji: '🍞🥄', labelEl: 'Το ένα χέρι κρατάει σταθερό το πιάτο/ψωμί και το άλλο απλώνει απαλά το μέλι', isCorrect: true },
-      { id: 'px9-2', emoji: '🌀', labelEl: 'Πετάμε τη φέτα ψηλά στον αέρα', isCorrect: false },
-      { id: 'px9-3', emoji: '📏', labelEl: 'Αλείφουμε με τον σχολικό χάρακα', isCorrect: false },
+      { id: 'px9-2', emoji: '🌀', labelEl: 'Πετάω τη φέτα ψηλά στον αέρα', isCorrect: false },
+      { id: 'px9-3', emoji: '📏', labelEl: 'Αλείφω με τον σχολικό χάρακα', isCorrect: false },
     ],
   },
   {

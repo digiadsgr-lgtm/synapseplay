@@ -105,8 +105,8 @@ const RULE_ROUNDS: RuleRound[] = [
   {
     ruleType: 'color',
     ruleTitleEl: '🔄 Αλλαγή Κανόνα! Διαλέγω το ίδιο χρώμα (Πορτοκαλί)',
-    targetEmoji: '🍊',
-    targetDescriptionEl: 'Πορτοκαλί Πορτοκάλι',
+    targetEmoji: '🎃',
+    targetDescriptionEl: 'Πορτοκαλί Κολοκύθα',
     options: [
       { id: 'r9-1', emoji: '📘', labelEl: 'Μπλε Βιβλίο', isCorrect: false },
       { id: 'r9-2', emoji: '🥕', labelEl: 'Πορτοκαλί Καρότο', isCorrect: true },

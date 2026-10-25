@@ -16,6 +16,7 @@ import {
   AVATAR_PRESETS,
   createDefaultChildProfile,
   evaluateChildAvatarProgress,
+  toGreekVocative,
   trainChildProfileOnActivityCompletion,
 } from '../utils/childProfileLearningEngine';
 import {
@@ -904,6 +905,48 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
     const { unmount: u08 } = renderRoute('/activity/08-listen-do');
     expect(screen.getByTestId('listen-do-target')).toHaveTextContent('Άκου πρώτα...');
     u08();
+  });
+
+  it('Modern Greek Grammar & Vocative Case (Κλητική Πτώση): inflects child names and companion titles accurately in Hub and Completion screens', async () => {
+    // 1. Unit tests for Modern Greek Vocative morphology (Γραμματική Τριανταφυλλίδη)
+    expect(toGreekVocative('Μικρός Εξερευνητής')).toBe('Μικρέ Εξερευνητή');
+    expect(toGreekVocative('Φωτεινός Μονόκερος')).toBe('Φωτεινέ Μονόκερε');
+    expect(toGreekVocative('Ήρεμος Δράκος της Ανάσας')).toBe('Ήρεμε Δράκε της Ανάσας');
+    expect(toGreekVocative('Σοφός Μάγος της Μνήμης')).toBe('Σοφέ Μάγε της Μνήμης');
+    expect(toGreekVocative('Μικρός Αστροναύτης')).toBe('Μικρέ Αστροναύτη');
+    expect(toGreekVocative('Γρήγορο Κουνελάκι Ρυθμού')).toBe('Γρήγορο Κουνελάκι Ρυθμού');
+
+    // Masculine proper names (-ος -> -ο for disyllabic paroxytones; -ος -> -ε for polysyllabic; -ης/-ας -> drop -ς)
+    expect(toGreekVocative('Γιώργος')).toBe('Γιώργο');
+    expect(toGreekVocative('Νίκος')).toBe('Νίκο');
+    expect(toGreekVocative('Πέτρος')).toBe('Πέτρο');
+    expect(toGreekVocative('Χρήστος')).toBe('Χρήστο');
+    expect(toGreekVocative('Αλέξανδρος')).toBe('Αλέξανδρε');
+    expect(toGreekVocative('Κωνσταντίνος')).toBe('Κωνσταντίνε');
+    expect(toGreekVocative('Στέφανος')).toBe('Στέφανε');
+    expect(toGreekVocative('Δημήτρης')).toBe('Δημήτρη');
+    expect(toGreekVocative('Γιάννης')).toBe('Γιάννη');
+    expect(toGreekVocative('Ορέστης')).toBe('Ορέστη');
+    expect(toGreekVocative('Κώστας')).toBe('Κώστα');
+    expect(toGreekVocative('Ανδρέας')).toBe('Ανδρέα');
+    expect(toGreekVocative('Αριάδνη')).toBe('Αριάδνη');
+    expect(toGreekVocative('Άρτεμις')).toBe('Άρτεμη');
+
+    // 2. Verify Child Hub greets the default profile in Vocative ("Γεια σου, Μικρέ Εξερευνητή!")
+    const { unmount: uHub } = renderRoute('/app');
+    expect(screen.getByText(/Γεια σου, Μικρέ Εξερευνητή!/i)).toBeInTheDocument();
+
+    // Create a profile with a masculine name in Nominative ("Γιώργος") and verify Vocative greeting ("Γεια σου, Γιώργο!")
+    fireEvent.click(screen.getByTestId('open-create-profile-btn'));
+    fireEvent.change(screen.getByTestId('new-profile-name-input'), {
+      target: { value: 'Γιώργος' },
+    });
+    fireEvent.click(screen.getByTestId('submit-create-profile-btn'));
+
+    await waitFor(() => {
+      expect(screen.getByText(/Γεια σου, Γιώργο!/i)).toBeInTheDocument();
+    });
+    uHub();
   });
 });
 
