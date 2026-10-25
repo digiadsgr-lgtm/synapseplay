@@ -253,6 +253,9 @@
 
     <h2 style="font-size:20px; font-weight:900; margin-bottom:14px;">📦 Αρχεία Λογοτύπων &amp; Social Media</h2>
     <div class="assets-grid" id="assetsGrid"></div>
+
+    <h2 style="font-size:20px; font-weight:900; margin:42px 0 14px;">📱 Πακέτο 10 Instagram Stories (1080 × 1920 px • Αναλογία 9:16 • Φάκελος instagram-stories/)</h2>
+    <div class="assets-grid" id="storiesGrid"></div>
   </div>
 
   <script>
@@ -402,6 +405,124 @@
         </div>
       `;
       grid.appendChild(card);
+    });
+
+    const INSTAGRAM_STORIES = [
+      {
+        id: 'story-01',
+        title: 'Story 01: «Το μυαλό μου τρέχει γρήγορα!»',
+        dims: '1080 × 1920 px (9:16)',
+        desc: 'Ταυτοποίηση γονέα & μετατροπή της υπερδιέγερσης σε ήρεμη εστίαση 15 λεπτών.',
+        pngPath: 'instagram-stories/story-01-symptom-hook-1080x1920.png',
+        svgPath: 'instagram-stories/svg/story-01-symptom-hook-1080x1920.svg',
+        fileName: 'story-01-symptom-hook-1080x1920.png'
+      },
+      {
+        id: 'story-02',
+        title: 'Story 02: Τέλος στις εκρήξεις όταν κλείνει το τάμπλετ!',
+        dims: '1080 × 1920 px (9:16)',
+        desc: 'Παρουσίαση του Module 13: Smooth Landing Protocol (Πράσινο ➔ Κεχριμπάρι ➔ Ύπνος Ζωακίου).',
+        pngPath: 'instagram-stories/story-02-smooth-landing-1080x1920.png',
+        svgPath: 'instagram-stories/svg/story-02-smooth-landing-1080x1920.svg',
+        fileName: 'story-02-smooth-landing-1080x1920.png'
+      },
+      {
+        id: 'story-03',
+        title: 'Story 03: Μηδενική Τιμωρία — Χωρίς «Game Over»!',
+        dims: '1080 × 1920 px (9:16)',
+        desc: 'Ψυχολογική ασφάλεια, κλίμακα βοήθειας 3 επιπέδων & απορρόφηση παρορμητικών πατημάτων.',
+        pngPath: 'instagram-stories/story-03-zero-punishment-1080x1920.png',
+        svgPath: 'instagram-stories/svg/story-03-zero-punishment-1080x1920.svg',
+        fileName: 'story-03-zero-punishment-1080x1920.png'
+      },
+      {
+        id: 'story-04',
+        title: 'Story 04: 4 Ομάδες Παιχνιδιών για Κάθε Ανάγκη ΔΕΠΥ',
+        dims: '1080 × 1920 px (9:16)',
+        desc: 'Detective Eyes, Think & Plan, Pause & Choose (Go/No-Go) και Move & Build.',
+        pngPath: 'instagram-stories/story-04-four-clinical-pillars-1080x1920.png',
+        svgPath: 'instagram-stories/svg/story-04-four-clinical-pillars-1080x1920.svg',
+        fileName: 'story-04-four-clinical-pillars-1080x1920.png'
+      },
+      {
+        id: 'story-05',
+        title: 'Story 05: Χτυπάμε Παλαμάκια στον Ρυθμό των Συλλαβών!',
+        dims: '1080 × 1920 px (9:16)',
+        desc: 'Λογοθεραπεία με Αυτόματο Δρομέα Συλλαβών (Karaoke Runner), γρίφους & δόμηση πρότασης.',
+        pngPath: 'instagram-stories/story-05-karaoke-speech-rhythm-1080x1920.png',
+        svgPath: 'instagram-stories/svg/story-05-karaoke-speech-rhythm-1080x1920.svg',
+        fileName: 'story-05-karaoke-speech-rhythm-1080x1920.png'
+      },
+      {
+        id: 'story-06',
+        title: 'Story 06: Από το Τάμπλετ... στον Πραγματικό Χώρο!',
+        dims: '1080 × 1920 px (9:16)',
+        desc: 'Εργοθεραπεία, ιδιοδεκτική γείωση, αποστολές αυτονομίας & πλήρης Καθιστή Εκδοχή.',
+        pngPath: 'instagram-stories/story-06-screen-to-real-world-1080x1920.png',
+        svgPath: 'instagram-stories/svg/story-06-screen-to-real-world-1080x1920.svg',
+        fileName: 'story-06-screen-to-real-world-1080x1920.png'
+      },
+      {
+        id: 'story-07',
+        title: 'Story 07: 16 Θεραπευτικοί Συνοδοιπόροι Ηρεμίας!',
+        dims: '1080 × 1920 px (9:16)',
+        desc: 'Σοφή Χελώνα, Ήρεμο Κοάλα, Φωτεινός Μονόκερος, Ήρεμος Δράκος & προσφώνηση στην Κλητική.',
+        pngPath: 'instagram-stories/story-07-companion-avatars-1080x1920.png',
+        svgPath: 'instagram-stories/svg/story-07-companion-avatars-1080x1920.svg',
+        fileName: 'story-07-companion-avatars-1080x1920.png'
+      },
+      {
+        id: 'story-08',
+        title: 'Story 08: Μεγαλώνει Μαζί με το Παιδί σας (4–12 Ετών)',
+        dims: '1080 × 1920 px (9:16)',
+        desc: 'Αυτόματη ηλικιακή εξατομίκευση για 4–5, 5–6, 6–8, 8–10 και 10–12 ετών.',
+        pngPath: 'instagram-stories/story-08-age-pathways-4-to-12-1080x1920.png',
+        svgPath: 'instagram-stories/svg/story-08-age-pathways-4-to-12-1080x1920.svg',
+        fileName: 'story-08-age-pathways-4-to-12-1080x1920.png'
+      },
+      {
+        id: 'story-09',
+        title: 'Story 09: 8 Ειδικότητες Ειδικής Αγωγής σε 1 Εφαρμογή',
+        dims: '1080 × 1920 px (9:16)',
+        desc: 'Κλινική αξιοπιστία, B2B εργαλεία για θεραπευτές & 100% απόρρητο (Zero Cloud Tracking).',
+        pngPath: 'instagram-stories/story-09-eight-specialties-b2b-1080x1920.png',
+        svgPath: 'instagram-stories/svg/story-09-eight-specialties-b2b-1080x1920.svg',
+        fileName: 'story-09-eight-specialties-b2b-1080x1920.png'
+      },
+      {
+        id: 'story-10',
+        title: 'Story 10: Ξεκινήστε Δωρεάν σε 10 Δευτερόλεπτα!',
+        dims: '1080 × 1920 px (9:16)',
+        desc: 'Άμεσο Call-to-Action σε 3 απλά βήματα χωρίς εγγραφή ή κάρτα.',
+        pngPath: 'instagram-stories/story-10-free-beta-launch-cta-1080x1920.png',
+        svgPath: 'instagram-stories/svg/story-10-free-beta-launch-cta-1080x1920.svg',
+        fileName: 'story-10-free-beta-launch-cta-1080x1920.png'
+      }
+    ];
+
+    const storiesGrid = document.getElementById('storiesGrid');
+    INSTAGRAM_STORIES.forEach((st) => {
+      const card = document.createElement('div');
+      card.className = 'asset-card';
+      card.innerHTML = `
+        <div>
+          <span class="meta-tag">${st.dims}</span>
+          <h3 class="asset-title">${st.title}</h3>
+          <p class="asset-desc">${st.desc}</p>
+        </div>
+        <div class="preview-box">
+          <img src="${st.pngPath}" alt="${st.title}" style="max-height:320px;" />
+        </div>
+        <div class="actions">
+          <a class="btn-secondary" href="${st.pngPath}" download="${st.fileName}">
+            ⬇️ Λήψη Story PNG
+          </a>
+          <a class="btn-outline" href="${st.svgPath}" download>
+            📐 Λήψη Vector SVG
+          </a>
+        </div>
+      `;
+      storiesGrid.appendChild(card);
     });
 
     async function exportSvgToPng(svgUrl, pngFilename, width, height) {
