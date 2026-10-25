@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import type { ActivityRunnerRenderProps } from '../components/ActivityRunner';
 import { useDebouncedAction } from '../hooks/useDebouncedAction';
-import { playCalmTone } from '../utils/soundAndSpeech';
+import { playCalmTone, speakGreek } from '../utils/soundAndSpeech';
 import { useApp } from '../context/AppContext';
 import { selectSessionRounds } from '../utils/clinicalAdhdEngine';
 
@@ -184,6 +184,14 @@ export const Activity16ErgoFineMotor: React.FC<ActivityRunnerRenderProps> = ({
     setTracedStep(hintLevel === 2 ? 2 : 0);
     setIsPointerDragging(false);
   }, [currentRound, hintLevel, sessionSeed]);
+
+  useEffect(() => {
+    speakGreek(
+      seatedMode ? exercise.seatedPromptEl : exercise.ergoPromptEl,
+      settings.voiceEnabled,
+      adaptiveProfile.speechRate
+    );
+  }, [currentRound, seatedMode, exercise.seatedPromptEl, exercise.ergoPromptEl, sessionSeed, settings.voiceEnabled, adaptiveProfile.speechRate]);
 
   const nextExpectedStep = tracedStep + 1;
   const tracePct = Math.min(

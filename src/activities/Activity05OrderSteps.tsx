@@ -161,9 +161,11 @@ export const Activity05OrderSteps: React.FC<ActivityRunnerRenderProps> = ({
 
   useEffect(() => {
     setSelectedOrders([]);
-    if (currentRound > 1 || sessionSeed > 0) {
-      speakGreek(routine.titleEl, settings.voiceEnabled, adaptiveProfile.speechRate);
-    }
+    speakGreek(
+      `${routine.titleEl}. Ποιο είναι το πρώτο βήμα;`,
+      settings.voiceEnabled,
+      adaptiveProfile.speechRate
+    );
   }, [currentRound, sessionSeed, routine.titleEl, settings.voiceEnabled, adaptiveProfile.speechRate]);
 
   const nextExpectedOrder = selectedOrders.length + 1;

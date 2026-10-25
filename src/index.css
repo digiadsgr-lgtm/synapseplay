@@ -47,8 +47,15 @@
   scroll-behavior: auto !important;
 }
 
-/* Guaranteed 64x64px minimum touch target utility */
+/* Guaranteed touch target utility (64x64px on tablet/desktop, compact 44x44px on mobile phones) */
 .touch-target {
   min-width: 64px;
   min-height: 64px;
+}
+
+@media (max-width: 640px) {
+  .touch-target {
+    min-width: 44px;
+    min-height: 44px;
+  }
 }

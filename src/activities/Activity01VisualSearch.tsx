@@ -201,19 +201,18 @@ export const Activity01VisualSearch: React.FC<ActivityRunnerRenderProps> = ({
   const roundData = activeRounds[(currentRound - 1) % activeRounds.length];
 
   useEffect(() => {
-    if (currentRound > 1 || sessionSeed > 0) {
-      speakGreek(
-        `Ψάχνουμε: ${roundData.target.labelEl}!`,
-        settings.voiceEnabled,
-        adaptiveProfile.speechRate
-      );
-    }
+    speakGreek(
+      `Κοίτα τον στόχο επάνω και βρες το: ${roundData.target.labelEl}!`,
+      settings.voiceEnabled,
+      adaptiveProfile.speechRate
+    );
   }, [currentRound, sessionSeed, roundData.target.labelEl, settings.voiceEnabled, adaptiveProfile.speechRate]);
 
   // Age-graded & Invisible Adaptive Scenario distractor scaling:
   // - Hint Level 2 or Age 4-5: 3 items (2 distractors + 1 target)
   // - Age 5-6 or high distractorReductionRatio: 4 items
-  // - Age 6-8 / 8-10 / 10-12: full calibrated grid (6-8 items)
+  // - Age 6-8: 6 items
+  // - Age 8-10 / 10-12: 8 items (enriched visual search grid)
   const visibleItems = useMemo(() => {
     const targetItem = roundData.grid.find((i) => i.isTarget)!;
     const distractors = roundData.grid.filter((i) => !i.isTarget);
@@ -223,9 +222,15 @@ export const Activity01VisualSearch: React.FC<ActivityRunnerRenderProps> = ({
       baseItems = [distractors[0], targetItem, distractors[1]];
     } else if (ageBand === '5-6' || adaptiveProfile.distractorReductionRatio >= 0.3) {
       baseItems = [distractors[0], distractors[1], targetItem, distractors[2]];
+    } else if (ageBand === '8-10' || ageBand === '10-12' || adaptiveProfile.enrichChallenge) {
+      baseItems = [
+        ...roundData.grid,
+        { id: `vs-ex1-${currentRound}`, emoji: '🔮', labelEl: 'Γυάλινη Σφαίρα', isTarget: false },
+        { id: `vs-ex2-${currentRound}`, emoji: '🧲', labelEl: 'Μαγνήτης', isTarget: false },
+      ];
     }
     return rotateOptionsForSession(baseItems, sessionSeed, currentRound);
-  }, [roundData, hintLevel, ageBand, adaptiveProfile.distractorReductionRatio, sessionSeed, currentRound]);
+  }, [roundData, hintLevel, ageBand, adaptiveProfile.distractorReductionRatio, adaptiveProfile.enrichChallenge, sessionSeed, currentRound]);
 
   const handleSelect = useCallback(
     (isTarget: boolean, labelEl: string) => {

@@ -13,111 +13,111 @@ interface ListenRound {
 
 const LISTEN_ROUNDS: ListenRound[] = [
   {
-    instructionEl: 'Περίμενε να ολοκληρωθεί η οδηγία, και μετά πάτησε το κίτρινο αστέρι!',
-    pictogramCue: '👂 ⏳ ➡️ ⭐',
+    instructionEl: 'Άκου μέχρι το τέλος: Ποιο αντικείμενο ανοίγουμε όταν πέφτει βροχή; Πάτησε την ομπρέλα!',
+    pictogramCue: '🌧️ ⏳ ➡️ ☂️',
     options: [
-      { id: 'l1-1', emoji: '🍎', labelEl: 'Κόκκινο Μήλο', isTarget: false },
-      { id: 'l1-2', emoji: '⭐', labelEl: 'Κίτρινο Αστέρι', isTarget: true },
-      { id: 'l1-3', emoji: '🐸', labelEl: 'Πράσινο Βατραχάκι', isTarget: false },
+      { id: 'l1-1', emoji: '🕶️', labelEl: 'Γυαλιά Ηλίου', isTarget: false },
+      { id: 'l1-2', emoji: '☂️', labelEl: 'Ανοιχτή Ομπρέλα', isTarget: true },
+      { id: 'l1-3', emoji: '🩴', labelEl: 'Σαγιονάρες', isTarget: false },
     ],
   },
   {
-    instructionEl: 'Άκου προσεκτικά μέχρι το τέλος, και πάτησε την πράσινη χελώνα!',
-    pictogramCue: '👂 ⏳ ➡️ 🐢',
+    instructionEl: 'Περίμενε το πράσινο σήμα: Με ποιο αντικείμενο ξεκλειδώνουμε την πόρτα; Πάτησε το κλειδί!',
+    pictogramCue: '🚪 ⏳ ➡️ 🔑',
     options: [
-      { id: 'l2-1', emoji: '🐢', labelEl: 'Πράσινη Χελώνα', isTarget: true },
-      { id: 'l2-2', emoji: '🎈', labelEl: 'Μπαλόνι', isTarget: false },
-      { id: 'l2-3', emoji: '⛵', labelEl: 'Καραβάκι', isTarget: false },
+      { id: 'l2-1', emoji: '🔑', labelEl: 'Χρυσό Κλειδί', isTarget: true },
+      { id: 'l2-2', emoji: '🥄', labelEl: 'Κουτάλι', isTarget: false },
+      { id: 'l2-3', emoji: '✏️', labelEl: 'Μολύβι', isTarget: false },
     ],
   },
   {
-    instructionEl: 'Κράτα τα χέρια ήρεμα, και τώρα πάτησε το μπλε καραβάκι!',
-    pictogramCue: '👂 ⏳ ➡️ ⛵',
+    instructionEl: 'Κράτα τα χέρια ήρεμα: Τι ανάβουμε στο σκοτάδι για να βλέπουμε μπροστά μας; Πάτησε τον φακό!',
+    pictogramCue: '🌑 ⏳ ➡️ 🔦',
     options: [
-      { id: 'l3-1', emoji: '🌻', labelEl: 'Ηλίανθος', isTarget: false },
-      { id: 'l3-2', emoji: '🍄', labelEl: 'Μανιτάρι', isTarget: false },
-      { id: 'l3-3', emoji: '⛵', labelEl: 'Μπλε Καραβάκι', isTarget: true },
+      { id: 'l3-1', emoji: '📚', labelEl: 'Βιβλίο', isTarget: false },
+      { id: 'l3-2', emoji: '🧣', labelEl: 'Κασκόλ', isTarget: false },
+      { id: 'l3-3', emoji: '🔦', labelEl: 'Φωτεινός Φακός', isTarget: true },
     ],
   },
   {
-    instructionEl: 'Πάρε μια ήρεμη ανάσα, άκου το σύνθημα, και πάτησε τη σοφή κουκουβάγια!',
-    pictogramCue: '👂 ⏳ ➡️ 🦉',
+    instructionEl: 'Άκου προσεκτικά: Τι φοράμε στα χέρια μας όταν κάνει πολύ κρύο; Πάτησε τα γάντια!',
+    pictogramCue: '❄️ ⏳ ➡️ 🧤',
     options: [
-      { id: 'l4-1', emoji: '🦉', labelEl: 'Σοφή Κουκουβάγια', isTarget: true },
-      { id: 'l4-2', emoji: '🐿️', labelEl: 'Σκιουράκι', isTarget: false },
-      { id: 'l4-3', emoji: '🦌', labelEl: 'Ελάφι', isTarget: false },
+      { id: 'l4-1', emoji: '🧤', labelEl: 'Ζεστά Γάντια', isTarget: true },
+      { id: 'l4-2', emoji: '🩱', labelEl: 'Μαγιό', isTarget: false },
+      { id: 'l4-3', emoji: '👒', labelEl: 'Ψάθινο Καπέλο', isTarget: false },
     ],
   },
   {
-    instructionEl: 'Μη βιαστείς να πατήσεις, περίμενε το πράσινο σήμα και διάλεξε το δελφίνι!',
-    pictogramCue: '👂 ⏳ ➡️ 🐬',
+    instructionEl: 'Μη βιαστείς να πατήσεις: Με τι πλένουμε τα δόντια μας πρωί και βράδυ; Πάτησε την οδοντόβουρτσα!',
+    pictogramCue: '🦷 ⏳ ➡️ 🪥',
     options: [
-      { id: 'l5-1', emoji: '🦀', labelEl: 'Καβούρι', isTarget: false },
-      { id: 'l5-2', emoji: '🐬', labelEl: 'Μπλε Δελφίνι', isTarget: true },
-      { id: 'l5-3', emoji: '🐚', labelEl: 'Κοχύλι', isTarget: false },
+      { id: 'l5-1', emoji: '🪮', labelEl: 'Χτένα', isTarget: false },
+      { id: 'l5-2', emoji: '🪥', labelEl: 'Οδοντόβουρτσα', isTarget: true },
+      { id: 'l5-3', emoji: '🧽', labelEl: 'Σφουγγάρι', isTarget: false },
     ],
   },
   {
-    instructionEl: 'Άκου όλη την πρόταση με υπομονή και μετά πάτησε την ξύλινη κιθάρα!',
-    pictogramCue: '👂 ⏳ ➡️ 🎸',
+    instructionEl: 'Άκου όλη την πρόταση: Ποιο κόκκινο όχημα σβήνει τις φωτιές; Πάτησε το πυροσβεστικό!',
+    pictogramCue: '🚒 ⏳ ➡️ 💦',
     options: [
-      { id: 'l6-1', emoji: '🥁', labelEl: 'Τύμπανο', isTarget: false },
-      { id: 'l6-2', emoji: '🎹', labelEl: 'Πιάνο', isTarget: false },
-      { id: 'l6-3', emoji: '🎸', labelEl: 'Ξύλινη Κιθάρα', isTarget: true },
+      { id: 'l6-1', emoji: '🚜', labelEl: 'Τρακτέρ', isTarget: false },
+      { id: 'l6-2', emoji: '🚲', labelEl: 'Ποδήλατο', isTarget: false },
+      { id: 'l6-3', emoji: '🚒', labelEl: 'Πυροσβεστικό Όχημα', isTarget: true },
     ],
   },
   {
-    instructionEl: 'Άκου πρώτα μέχρι το τέλος και μετά διάλεξε τον διαστημικό πύραυλο!',
-    pictogramCue: '👂 ⏳ ➡️ 🚀',
+    instructionEl: 'Άκου πρώτα μέχρι το τέλος: Πού βάζουμε τα τετράδιά μας για το σχολείο; Πάτησε τη σχολική τσάντα!',
+    pictogramCue: '🏫 ⏳ ➡️ 🎒',
     options: [
-      { id: 'l7-1', emoji: '🚀', labelEl: 'Διαστημικός Πύραυλος', isTarget: true },
-      { id: 'l7-2', emoji: '🪐', labelEl: 'Πλανήτης', isTarget: false },
-      { id: 'l7-3', emoji: '🌙', labelEl: 'Φεγγάρι', isTarget: false },
+      { id: 'l7-1', emoji: '🎒', labelEl: 'Σχολική Τσάντα', isTarget: true },
+      { id: 'l7-2', emoji: '🗑️', labelEl: 'Καλάθι', isTarget: false },
+      { id: 'l7-3', emoji: '🪣', labelEl: 'Κουβάς', isTarget: false },
     ],
   },
   {
-    instructionEl: 'Κράτα τα δάχτυλά σου ήρεμα, άκου την οδηγία και πάτησε την κόκκινη φράουλα!',
-    pictogramCue: '👂 ⏳ ➡️ 🍓',
+    instructionEl: 'Κράτα τα δάχτυλά σου ήρεμα: Με τι τρώμε τη ζεστή μας σούπα; Πάτησε το κουτάλι!',
+    pictogramCue: '🥣 ⏳ ➡️ 🥄',
     options: [
-      { id: 'l8-1', emoji: '🍐', labelEl: 'Αχλάδι', isTarget: false },
-      { id: 'l8-2', emoji: '🍓', labelEl: 'Κόκκινη Φράουλα', isTarget: true },
-      { id: 'l8-3', emoji: '🍋', labelEl: 'Λεμόνι', isTarget: false },
+      { id: 'l8-1', emoji: '🥢', labelEl: 'Ξυλάκια', isTarget: false },
+      { id: 'l8-2', emoji: '🥄', labelEl: 'Ασημένιο Κουτάλι', isTarget: true },
+      { id: 'l8-3', emoji: '🥤', labelEl: 'Καλαμάκι', isTarget: false },
     ],
   },
   {
-    instructionEl: 'Περίμενε να ανάψει το πράσινο σήμα και μετά πάτησε την πολύχρωμη πεταλούδα!',
-    pictogramCue: '👂 ⏳ ➡️ 🦋',
+    instructionEl: 'Περίμενε να ανάψει το πράσινο σήμα: Τι φοράμε στο κεφάλι μας στον δυνατό ήλιο; Πάτησε το καπέλο!',
+    pictogramCue: '☀️ ⏳ ➡️ 🧢',
     options: [
-      { id: 'l9-1', emoji: '🐝', labelEl: 'Μέλισσα', isTarget: false },
-      { id: 'l9-2', emoji: '🐞', labelEl: 'Πασχαλίτσα', isTarget: false },
-      { id: 'l9-3', emoji: '🦋', labelEl: 'Πολύχρωμη Πεταλούδα', isTarget: true },
+      { id: 'l9-1', emoji: '🧦', labelEl: 'Κάλτσες', isTarget: false },
+      { id: 'l9-2', emoji: '👟', labelEl: 'Αθλητικά Παπούτσια', isTarget: false },
+      { id: 'l9-3', emoji: '🧢', labelEl: 'Καπέλο Ηλίου', isTarget: true },
     ],
   },
   {
-    instructionEl: 'Άκου με προσοχή όλη την εντολή και διάλεξε το πράσινο τριφύλλι!',
-    pictogramCue: '👂 ⏳ ➡️ 🍀',
+    instructionEl: 'Άκου με προσοχή: Με τι πλένουμε τα χέρια μας για να καθαρίσουν; Πάτησε το σαπούνι!',
+    pictogramCue: '🚰 ⏳ ➡️ 🧼',
     options: [
-      { id: 'l10-1', emoji: '🍀', labelEl: 'Πράσινο Τριφύλλι', isTarget: true },
-      { id: 'l10-2', emoji: '🌻', labelEl: 'Ηλίανθος', isTarget: false },
-      { id: 'l10-3', emoji: '🌷', labelEl: 'Τουλίπα', isTarget: false },
+      { id: 'l10-1', emoji: '🧼', labelEl: 'Μπάρα Σαπουνιού', isTarget: true },
+      { id: 'l10-2', emoji: '🪨', labelEl: 'Πέτρα', isTarget: false },
+      { id: 'l10-3', emoji: '🧱', labelEl: 'Τούβλο', isTarget: false },
     ],
   },
   {
-    instructionEl: 'Πάρε μια ήρεμη ανάσα, περίμενε το σήμα και πάτησε την κόκκινη αλεπού!',
-    pictogramCue: '👂 ⏳ ➡️ 🦊',
+    instructionEl: 'Πάρε μια ήρεμη ανάσα: Τι χτυπάει το πρωί για να ξυπνήσουμε στην ώρα μας; Πάτησε το ξυπνητήρι!',
+    pictogramCue: '🌅 ⏳ ➡️ ⏰',
     options: [
-      { id: 'l11-1', emoji: '🐻', labelEl: 'Αρκουδάκι', isTarget: false },
-      { id: 'l11-2', emoji: '🦊', labelEl: 'Κόκκινη Αλεπού', isTarget: true },
-      { id: 'l11-3', emoji: '🐰', labelEl: 'Κουνελάκι', isTarget: false },
+      { id: 'l11-1', emoji: '📷', labelEl: 'Φωτογραφική Μηχανή', isTarget: false },
+      { id: 'l11-2', emoji: '⏰', labelEl: 'Ξυπνητήρι', isTarget: true },
+      { id: 'l11-3', emoji: '📻', labelEl: 'Ραδιόφωνο', isTarget: false },
     ],
   },
   {
-    instructionEl: 'Άκου ήρεμα μέχρι την τελευταία λέξη και μετά πάτησε την πυξίδα!',
-    pictogramCue: '👂 ⏳ ➡️ 🧭',
+    instructionEl: 'Άκου ήρεμα μέχρι την τελευταία λέξη: Πού ξαπλώνουμε το βράδυ για να κοιμηθούμε; Πάτησε το κρεβάτι!',
+    pictogramCue: '🌙 ⏳ ➡️ 🛏️',
     options: [
-      { id: 'l12-1', emoji: '⛺', labelEl: 'Σκηνή', isTarget: false },
-      { id: 'l12-2', emoji: '🔦', labelEl: 'Φακός', isTarget: false },
-      { id: 'l12-3', emoji: '🧭', labelEl: 'Πυξίδα', isTarget: true },
+      { id: 'l12-1', emoji: '🪑', labelEl: 'Καρέκλα', isTarget: false },
+      { id: 'l12-2', emoji: '🪜', labelEl: 'Σκάλα', isTarget: false },
+      { id: 'l12-3', emoji: '🛏️', labelEl: 'Κρεβάτι', isTarget: true },
     ],
   },
 ];
@@ -205,25 +205,35 @@ export const Activity08ListenDo: React.FC<ActivityRunnerRenderProps> = ({
   };
 
   return (
-    <div className="space-y-6 text-center" data-testid="activity-08-listen-do">
+    <div className="space-y-4 sm:space-y-6 text-center" data-testid="activity-08-listen-do">
       <div
         data-testid={isListeningFinished ? 'listen-status-ready' : 'listen-status-waiting'}
-        className={`p-5 rounded-3xl border-4 space-y-2 transition-colors ${
+        className={`p-4 sm:p-5 rounded-3xl border-4 space-y-2 transition-colors ${
           isListeningFinished
             ? 'bg-sage-surface border-sage-dark'
             : 'bg-slate-surface border-slate'
         }`}
       >
-        <div className="text-3xl font-extrabold" aria-hidden="true">
+        <div className="text-2xl sm:text-3xl font-extrabold" aria-hidden="true">
           {isListeningFinished ? round.pictogramCue : '👂 ⏳ ➡️ ❓'}
         </div>
-        <p className="text-lg font-extrabold text-charcoal">
+        <p className="text-base sm:text-lg font-extrabold text-charcoal">
           {isListeningFinished
             ? round.instructionEl
-            : 'Άκου προσεκτικά την οδηγία μέχρι να ολοκληρωθεί...'}
+            : 'Άκου προσεκτικά το αίνιγμα μέχρι να ολοκληρωθεί...'}
         </p>
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border-2 border-charcoal/20 text-sm font-extrabold">
-          <span>{isListeningFinished ? '🟢 Τώρα Διάλεξε!' : '⏳ Άκου πρώτα με ήρεμα χέρια...'}</span>
+        <div className="flex flex-wrap items-center justify-center gap-2">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border-2 border-charcoal/20 text-xs sm:text-sm font-extrabold">
+            <span>{isListeningFinished ? '🟢 Τώρα Διάλεξε!' : '⏳ Άκου πρώτα με ήρεμα χέρια...'}</span>
+          </div>
+          <button
+            type="button"
+            data-testid="listen-do-replay-btn"
+            onClick={() => speakGreek(round.instructionEl, true, adaptiveProfile.speechRate)}
+            className="px-3.5 py-1.5 rounded-full bg-white border-2 border-slate text-xs font-extrabold text-charcoal hover:bg-sand-surface"
+          >
+            🔊 Άκου ξανά το αίνιγμα
+          </button>
         </div>
 
         {!isListeningFinished && (
@@ -238,7 +248,7 @@ export const Activity08ListenDo: React.FC<ActivityRunnerRenderProps> = ({
         )}
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-2xl mx-auto">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 max-w-2xl mx-auto">
         {visibleOptions.map((opt) => {
           const highlight = isListeningFinished && hintLevel >= 1 && opt.isTarget;
           return (
@@ -247,16 +257,20 @@ export const Activity08ListenDo: React.FC<ActivityRunnerRenderProps> = ({
               type="button"
               data-testid={opt.isTarget ? 'listen-do-target' : `listen-do-opt-${opt.id}`}
               onClick={() => handleSelect(opt.isTarget, opt.labelEl)}
-              className={`touch-target min-h-[120px] p-5 rounded-3xl border-4 flex flex-col items-center justify-center gap-2 transition-all ${
+              className={`touch-target min-h-[104px] sm:min-h-[120px] p-4 sm:p-5 rounded-3xl border-4 flex flex-col items-center justify-center gap-2 transition-all ${
                 !isListeningFinished
-                  ? 'bg-sand-light border-sand-dark opacity-70'
+                  ? 'bg-sand-light border-sand-dark opacity-75'
                   : highlight
                   ? 'bg-sage-surface border-sage-dark ring-4 ring-sage/40 scale-105'
                   : 'bg-white border-sand-dark hover:border-slate'
               }`}
             >
-              <span className="text-5xl" aria-hidden="true">{opt.emoji}</span>
-              <span className="text-base font-extrabold text-charcoal">{opt.labelEl}</span>
+              <span className="text-4xl sm:text-5xl" aria-hidden="true">
+                {isListeningFinished ? opt.emoji : '🎧'}
+              </span>
+              <span className="text-sm sm:text-base font-extrabold text-charcoal">
+                {isListeningFinished ? opt.labelEl : 'Άκου πρώτα...'}
+              </span>
             </button>
           );
         })}

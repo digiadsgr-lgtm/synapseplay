@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import type { ActivityRunnerRenderProps } from '../components/ActivityRunner';
 import { useDebouncedAction } from '../hooks/useDebouncedAction';
-import { playCalmTone } from '../utils/soundAndSpeech';
+import { playCalmTone, speakGreek } from '../utils/soundAndSpeech';
 import { useApp } from '../context/AppContext';
 import { selectSessionRounds } from '../utils/clinicalAdhdEngine';
 
@@ -123,6 +123,10 @@ export const Activity20MusicKineticRhythm: React.FC<ActivityRunnerRenderProps> =
     setStepIdx(hintLevel === 2 ? round.pattern.length - 1 : 0);
     setRestSilenceMs(0);
   }, [currentRound, hintLevel, round.pattern.length, sessionSeed]);
+
+  useEffect(() => {
+    speakGreek(round.tempoDescEl, settings.voiceEnabled, adaptiveProfile.speechRate);
+  }, [currentRound, round.tempoDescEl, sessionSeed, settings.voiceEnabled, adaptiveProfile.speechRate]);
 
   const expectedMove = round.pattern[stepIdx];
 

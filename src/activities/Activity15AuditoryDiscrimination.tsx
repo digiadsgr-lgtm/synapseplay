@@ -16,9 +16,9 @@ const AUDITORY_ROUNDS: AuditoryConceptRound[] = [
     conceptBadgeEl: 'Χωρική Έννοια: Μέσα στο κουτί',
     spokenInstructionEl: 'Διάλεξε την εικόνα όπου το δώρο είναι μέσα στο κουτί!',
     options: [
-      { id: 'au1-1', emoji: '🎁📦', labelEl: 'Μέσα στο κουτί', isCorrect: true },
-      { id: 'au1-2', emoji: '📦⬆️⚽', labelEl: 'Πάνω από το κουτί', isCorrect: false },
-      { id: 'au1-3', emoji: '📦➡️⚽', labelEl: 'Δίπλα στο κουτί', isCorrect: false },
+      { id: 'au1-1', emoji: '📦🎁📦', labelEl: 'Μέσα στο κουτί', isCorrect: true },
+      { id: 'au1-2', emoji: '🎁⬆️📦', labelEl: 'Πάνω από το κουτί', isCorrect: false },
+      { id: 'au1-3', emoji: '📦➡️🎁', labelEl: 'Δίπλα στο κουτί', isCorrect: false },
     ],
   },
   {
@@ -40,11 +40,11 @@ const AUDITORY_ROUNDS: AuditoryConceptRound[] = [
     ],
   },
   {
-    conceptBadgeEl: 'Ακουστική Διάκριση: «Ρόδι» vs «Πόδι»',
-    spokenInstructionEl: 'Άκου προσεκτικά τη λέξη «ρόδι». Ποια εικόνα δείχνει το κόκκινο ρόδι και όχι το πόδι;',
+    conceptBadgeEl: 'Ακουστική Διάκριση: «Ρόδα» vs «Ρόδο»',
+    spokenInstructionEl: 'Άκου προσεκτικά τη λέξη «ρόδα». Ποια εικόνα δείχνει τη στρογγυλή ρόδα και όχι το ρόδο;',
     options: [
       { id: 'au4-1', emoji: '🦶', labelEl: 'Πόδι', isCorrect: false },
-      { id: 'au4-2', emoji: '🍎', labelEl: 'Ρόδι', isCorrect: true },
+      { id: 'au4-2', emoji: '🛞', labelEl: 'Ρόδα', isCorrect: true },
       { id: 'au4-3', emoji: '🌹', labelEl: 'Ρόδο', isCorrect: false },
     ],
   },
@@ -81,7 +81,7 @@ const AUDITORY_ROUNDS: AuditoryConceptRound[] = [
     options: [
       { id: 'au8-1', emoji: '☂️⬇️🐱', labelEl: 'Κάτω από την ομπρέλα', isCorrect: true },
       { id: 'au8-2', emoji: '🐱⬆️☂️', labelEl: 'Πάνω από την ομπρέλα', isCorrect: false },
-      { id: 'au8-3', emoji: '☂️➡️🚲', labelEl: 'Μακριά από την ομπρέλα', isCorrect: false },
+      { id: 'au8-3', emoji: '☂️➡️🐱', labelEl: 'Δίπλα στην ομπρέλα', isCorrect: false },
     ],
   },
   {
@@ -116,8 +116,8 @@ const AUDITORY_ROUNDS: AuditoryConceptRound[] = [
     spokenInstructionEl: 'Διάλεξε την εικόνα όπου το ποδήλατο βρίσκεται ακριβώς μπροστά από το σπιτάκι!',
     options: [
       { id: 'au12-1', emoji: '🚲🏠', labelEl: 'Μπροστά από το σπιτάκι', isCorrect: true },
-      { id: 'au12-2', emoji: '🏠⬆️☁️', labelEl: 'Πάνω στον ουρανό', isCorrect: false },
-      { id: 'au12-3', emoji: '🌲🌲🌲', labelEl: 'Μέσα στο δάσος', isCorrect: false },
+      { id: 'au12-2', emoji: '🏠🚲🌲', labelEl: 'Ανάμεσα στο σπιτάκι και στο δέντρο', isCorrect: false },
+      { id: 'au12-3', emoji: '🌲🚲🌲', labelEl: 'Ανάμεσα στα δέντρα', isCorrect: false },
     ],
   },
 ];

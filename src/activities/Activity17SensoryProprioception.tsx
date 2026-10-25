@@ -33,7 +33,7 @@ const SENSORY_EXERCISES: ProprioceptiveExercise[] = [
       'Πιάσε τα πλαϊνά της καρέκλας, ίσιωσε την πλάτη σου και κατέβασε ήρεμα τους ώμους μακριά από τα αυτιά!',
   },
   {
-    emoji: '🐢🧘',
+    emoji: '🐻🧘',
     titleEl: 'Σφιχτή Αγκαλιά Αρκούδας (Αυτορρύθμιση Βαθιάς Πίεσης)',
     disciplineTagEl: 'Εργοθεραπεία & Παιδοψυχιατρική Αποφόρτιση Διέγερσης',
     standingInstructionEl:
@@ -148,13 +148,20 @@ export const Activity17SensoryProprioception: React.FC<ActivityRunnerRenderProps
   const absorbedRef = useRef(getAbsorbedCount);
   absorbedRef.current = getAbsorbedCount;
 
+  const activeInstructionEl = seatedMode ? item.seatedInstructionEl : item.standingInstructionEl;
+
   useEffect(() => {
     setPulsesCompleted(hintLevel === 2 || ageBand === '4-5' ? 2 : 0);
   }, [currentRound, hintLevel, ageBand, sessionSeed]);
 
-  // Automatic Hands-Free Proprioceptive Metronome (ticks every 1800ms while child presses palms/feet)
+  useEffect(() => {
+    speakGreek(activeInstructionEl, settings.voiceEnabled, adaptiveProfile.speechRate);
+  }, [currentRound, activeInstructionEl, sessionSeed, settings.voiceEnabled, adaptiveProfile.speechRate]);
+
+  // Automatic Hands-Free Proprioceptive Metronome (ticks while child presses palms/feet)
   useEffect(() => {
     if (phase === 'PAUSED' || phase === 'COMPLETED') return;
+    const delayMs = pulsesCompleted === 0 ? 2400 : 1800;
     const timer = window.setTimeout(() => {
       const next = pulsesCompleted + 1;
       playCalmTone(next >= 3 ? 'complete' : 'soft-step', settings.soundEnabled);
@@ -167,7 +174,7 @@ export const Activity17SensoryProprioception: React.FC<ActivityRunnerRenderProps
       } else {
         setPulsesCompleted(next);
       }
-    }, 1800);
+    }, delayMs);
     return () => window.clearTimeout(timer);
   }, [phase, pulsesCompleted, currentRound, settings.soundEnabled, settings.voiceEnabled, adaptiveProfile.speechRate]);
 

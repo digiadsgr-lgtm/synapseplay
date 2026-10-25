@@ -64,12 +64,12 @@ export const Activity12BuildPattern: React.FC<ActivityRunnerRenderProps> = ({
   // Calibrate pattern length by ageBand & live performance:
   // - 4-5 years: 2 blocks
   // - 6-8 years: 3 blocks
-  // - 10-12 years or Mastery challenge: 4 blocks
+  // - 8-10 / 10-12 years or Mastery challenge: 4 blocks
   const targetPattern = useMemo(() => {
     if (ageBand === '4-5' || adaptiveProfile.distractorReductionRatio >= 0.5) {
       return basePattern.slice(0, 2);
     }
-    if (ageBand === '10-12' || adaptiveProfile.enrichChallenge) {
+    if (ageBand === '8-10' || ageBand === '10-12' || adaptiveProfile.enrichChallenge) {
       return [...basePattern, basePattern[0]];
     }
     return basePattern;
@@ -84,6 +84,14 @@ export const Activity12BuildPattern: React.FC<ActivityRunnerRenderProps> = ({
       setBuiltBlocks([]);
     }
   }, [currentRound, hintLevel, targetPattern, sessionSeed]);
+
+  useEffect(() => {
+    speakGreek(
+      'Κοίτα το πρότυπο μοτίβο και βάλε τα τουβλάκια με την ίδια ακριβώς σειρά!',
+      settings.voiceEnabled,
+      adaptiveProfile.speechRate
+    );
+  }, [currentRound, sessionSeed, settings.voiceEnabled, adaptiveProfile.speechRate]);
 
   const nextExpectedColor = targetPattern[builtBlocks.length];
 

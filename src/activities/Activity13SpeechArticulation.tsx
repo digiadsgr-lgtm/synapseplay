@@ -116,7 +116,7 @@ const AGE_SPEECH_ROUNDS: Record<string, SpeechRound[]> = {
       wordEl: 'Βά-ζο',
       spokenWordEl: 'βάζο',
       syllables: ['βά', 'ζο'],
-      promptQuestionEl: 'Χτύπα 2 παλαμάκια για τη λέξη «βάζο» και βρες το βάζο με το λουλούδι!',
+      promptQuestionEl: 'Χτύπα 2 παλαμάκια για τη λέξη «βάζο» και βρες το πήλινο βάζο!',
       targetEmoji: '🏺',
       options: [
         { id: 'sp4-25', emoji: '🏺', labelEl: 'Βάζο (2 συλλαβές)', isCorrect: true },
@@ -194,7 +194,7 @@ const AGE_SPEECH_ROUNDS: Record<string, SpeechRound[]> = {
       targetEmoji: '🌊',
       options: [
         { id: 'sp6-7', emoji: '☀️', labelEl: 'Ήλιος (2 συλλαβές)', isCorrect: false },
-        { id: 'sp6-8', emoji: '🦋', labelEl: 'Μέλισσα (3 συλλαβές)', isCorrect: true },
+        { id: 'sp6-8', emoji: '🐝', labelEl: 'Μέλισσα (3 συλλαβές)', isCorrect: true },
         { id: 'sp6-9', emoji: '🏠', labelEl: 'Σπίτι (2 συλλαβές)', isCorrect: false },
       ],
     },
@@ -278,8 +278,8 @@ const AGE_SPEECH_ROUNDS: Record<string, SpeechRound[]> = {
       targetEmoji: '🍓',
       options: [
         { id: 'sp6-28', emoji: '🍒', labelEl: 'Κεράσι (3 συλλαβές)', isCorrect: true },
-        { id: 'sp6-29', emoji: '🍐', labelEl: 'Αχλάδι', isCorrect: false },
-        { id: 'sp6-30', emoji: '🥝', labelEl: 'Σύκο (2 συλλαβές)', isCorrect: false },
+        { id: 'sp6-29', emoji: '🍇', labelEl: 'Μούρο (2 συλλαβές)', isCorrect: false },
+        { id: 'sp6-30', emoji: '🍏', labelEl: 'Μήλο (2 συλλαβές)', isCorrect: false },
       ],
     },
     {
@@ -315,7 +315,7 @@ const AGE_SPEECH_ROUNDS: Record<string, SpeechRound[]> = {
       promptQuestionEl: 'Κατάτμησε τις 4 συλλαβές στη λέξη «ποδήλατο» και επίλεξε την πολυσύλλαβη σύνθετη λέξη (4 συλλαβές):',
       targetEmoji: '🚲',
       options: [
-        { id: 'sp10-1', emoji: '🔭', labelEl: 'Αστροναύτης (4 συλλαβές)', isCorrect: true },
+        { id: 'sp10-1', emoji: '🧑‍🚀', labelEl: 'Αστροναύτης (4 συλλαβές)', isCorrect: true },
         { id: 'sp10-2', emoji: '🎒', labelEl: 'Τσάντα (2 συλλαβές)', isCorrect: false },
         { id: 'sp10-3', emoji: '✏️', labelEl: 'Μολύβι (3 συλλαβές)', isCorrect: false },
       ],
@@ -437,7 +437,7 @@ const AGE_SPEECH_ROUNDS: Record<string, SpeechRound[]> = {
       options: [
         { id: 'sp10-31', emoji: '🔭', labelEl: 'Όργανο που βλέπει πολύ μακριά στα αστέρια', isCorrect: true },
         { id: 'sp10-32', emoji: '🎧', labelEl: 'Ακουστικά για μουσική', isCorrect: false },
-        { id: 'sp10-33', emoji: '🧭', labelEl: 'Ρολόι χειρός', isCorrect: false },
+        { id: 'sp10-33', emoji: '⌚', labelEl: 'Ρολόι χειρός', isCorrect: false },
       ],
     },
     {
@@ -468,10 +468,11 @@ export const Activity13SpeechArticulation: React.FC<ActivityRunnerRenderProps> =
   const { settings } = useApp();
   const { runDebounced, getAbsorbedCount } = useDebouncedAction();
 
+  // Age 8-10 and 10-12 both receive the 4-to-6 syllable phonological & semantic challenge pool
   const tierKey =
     ageBand === '4-5' || ageBand === '5-6'
       ? '4-5'
-      : ageBand === '10-12' || (ageBand === '8-10' && adaptiveProfile.enrichChallenge)
+      : ageBand === '8-10' || ageBand === '10-12' || adaptiveProfile.enrichChallenge
       ? '10-12'
       : '6-8';
 
@@ -483,9 +484,14 @@ export const Activity13SpeechArticulation: React.FC<ActivityRunnerRenderProps> =
   const round = activeRounds[(currentRound - 1) % activeRounds.length];
 
   const [clappedCount, setClappedCount] = useState<number>(0);
+  const [activeKaraokeIdx, setActiveKaraokeIdx] = useState<number | null>(null);
+  const [karaokeRunId, setKaraokeRunId] = useState<number>(0);
+  const [speakSyllablesDuringRun, setSpeakSyllablesDuringRun] = useState<boolean>(false);
 
   useEffect(() => {
     setClappedCount(hintLevel === 2 ? round.syllables.length : 0);
+    setActiveKaraokeIdx(null);
+    setSpeakSyllablesDuringRun(false);
     speakGreek(round.promptQuestionEl, settings.voiceEnabled, adaptiveProfile.speechRate);
   }, [
     currentRound,
@@ -497,12 +503,61 @@ export const Activity13SpeechArticulation: React.FC<ActivityRunnerRenderProps> =
     adaptiveProfile.speechRate,
   ]);
 
+  // Automatic Karaoke Syllable Runner: steps through each syllable in rhythm so the child can clap their hands live!
+  useEffect(() => {
+    if (hintLevel === 2) {
+      setActiveKaraokeIdx(null);
+      return;
+    }
+
+    const total = round.syllables.length;
+    const initialDelayMs = speakSyllablesDuringRun ? 180 : 750;
+    const stepIntervalMs = 650;
+    const timers: number[] = [];
+
+    for (let i = 0; i < total; i++) {
+      const t = window.setTimeout(() => {
+        setActiveKaraokeIdx(i);
+        setClappedCount((prev) => Math.max(prev, i + 1));
+        playCalmTone('pulse', settings.soundEnabled);
+        if (speakSyllablesDuringRun) {
+          speakGreekSyllable(round.syllables[i], settings.voiceEnabled, adaptiveProfile.speechRate);
+        }
+      }, initialDelayMs + i * stepIntervalMs);
+      timers.push(t);
+    }
+
+    const endTimer = window.setTimeout(() => {
+      setActiveKaraokeIdx(null);
+      if (speakSyllablesDuringRun) {
+        speakGreek(round.spokenWordEl, settings.voiceEnabled, adaptiveProfile.speechRate);
+      }
+    }, initialDelayMs + total * stepIntervalMs + 250);
+    timers.push(endTimer);
+
+    return () => {
+      timers.forEach((id) => window.clearTimeout(id));
+    };
+  }, [
+    currentRound,
+    hintLevel,
+    karaokeRunId,
+    speakSyllablesDuringRun,
+    round.syllables,
+    round.spokenWordEl,
+    sessionSeed,
+    settings.soundEnabled,
+    settings.voiceEnabled,
+    adaptiveProfile.speechRate,
+  ]);
+
   const allClapped = clappedCount >= round.syllables.length;
 
   const handleClapSyllable = () => {
     runDebounced(() => {
       if (clappedCount < round.syllables.length) {
         const syl = round.syllables[clappedCount];
+        setActiveKaraokeIdx(clappedCount);
         playCalmTone('pulse', settings.soundEnabled);
         // Uses dedicated syllable phonetic synthesis so single syllables are NEVER spelled out as letters
         speakGreekSyllable(syl, settings.voiceEnabled, adaptiveProfile.speechRate);
@@ -510,6 +565,7 @@ export const Activity13SpeechArticulation: React.FC<ActivityRunnerRenderProps> =
           const next = c + 1;
           if (next === round.syllables.length) {
             window.setTimeout(() => {
+              setActiveKaraokeIdx(null);
               speakGreek(round.spokenWordEl, settings.voiceEnabled, adaptiveProfile.speechRate);
             }, 380);
           }
@@ -517,6 +573,13 @@ export const Activity13SpeechArticulation: React.FC<ActivityRunnerRenderProps> =
         });
       }
     });
+  };
+
+  const handleRestartKaraokeRun = () => {
+    setClappedCount(0);
+    setActiveKaraokeIdx(null);
+    setSpeakSyllablesDuringRun(true);
+    setKaraokeRunId((r) => r + 1);
   };
 
   const visibleOptions = useMemo(() => {
@@ -533,6 +596,7 @@ export const Activity13SpeechArticulation: React.FC<ActivityRunnerRenderProps> =
         // Even if the child clapped physically in the room instead of pressing the syllable button,
         // celebrate and advance immediately!
         setClappedCount(round.syllables.length);
+        setActiveKaraokeIdx(null);
         speakGreek(round.spokenWordEl, settings.voiceEnabled, adaptiveProfile.speechRate);
         advanceRound(getAbsorbedCount());
       } else {
@@ -544,12 +608,12 @@ export const Activity13SpeechArticulation: React.FC<ActivityRunnerRenderProps> =
   };
 
   return (
-    <div className="space-y-6 text-center" data-testid="activity-13-speech-articulation">
+    <div className="space-y-4 sm:space-y-6 text-center" data-testid="activity-13-speech-articulation">
       {/* Syllabic Rhythm & Articulation Stage */}
-      <div className="p-6 rounded-3xl bg-sage-surface border-4 border-sage space-y-4">
-        <div className="text-5xl" aria-hidden="true">{round.targetEmoji}</div>
-        <div className="flex flex-wrap items-center justify-center gap-3">
-          <h2 className="text-2xl font-extrabold text-charcoal">{round.wordEl}</h2>
+      <div className="p-4 sm:p-6 rounded-3xl bg-sage-surface border-4 border-sage space-y-3 sm:space-y-4">
+        <div className="text-4xl sm:text-5xl" aria-hidden="true">{round.targetEmoji}</div>
+        <div className="flex flex-wrap items-center justify-center gap-2.5 sm:gap-3">
+          <h2 className="text-xl sm:text-2xl font-extrabold text-charcoal">{round.wordEl}</h2>
           <button
             type="button"
             data-testid="speech-word-listen-btn"
@@ -559,40 +623,53 @@ export const Activity13SpeechArticulation: React.FC<ActivityRunnerRenderProps> =
             🔊 Άκου τη λέξη «{round.spokenWordEl}»
           </button>
         </div>
-        <p className="text-base font-bold text-charcoal">{round.promptQuestionEl}</p>
+        <p className="text-sm sm:text-base font-bold text-charcoal">{round.promptQuestionEl}</p>
 
-        {/* Interactive Syllable Clapping Boxes (each box is also directly clickable!) */}
-        <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+        {/* Interactive Karaoke Syllable Runner Boxes (auto-runs in rhythm AND each box is directly clickable!) */}
+        <div
+          className="flex flex-wrap items-center justify-center gap-2.5 sm:gap-3 pt-1"
+          data-testid="speech-karaoke-syllable-track"
+        >
           {round.syllables.map((syl, idx) => {
             const isClapped = idx < clappedCount;
+            const isCurrentlyRunning = activeKaraokeIdx === idx;
             return (
               <button
                 key={`${syl}-${idx}`}
                 type="button"
                 data-testid={`syllable-box-${idx}`}
+                data-karaoke-active={isCurrentlyRunning ? 'true' : 'false'}
                 onClick={() => {
+                  setActiveKaraokeIdx(idx);
                   speakGreekSyllable(syl, true, adaptiveProfile.speechRate);
                   setClappedCount((c) => Math.max(c, idx + 1));
                 }}
-                className={`px-5 py-3 rounded-2xl border-3 font-extrabold text-xl transition-all cursor-pointer ${
-                  isClapped
+                className={`relative px-4 py-2.5 sm:px-5 sm:py-3 rounded-2xl border-3 font-extrabold text-lg sm:text-xl transition-all cursor-pointer ${
+                  isCurrentlyRunning
+                    ? 'bg-ochre text-charcoal border-charcoal scale-110 ring-4 ring-ochre/40'
+                    : isClapped
                     ? 'bg-sage-dark text-white border-charcoal scale-105'
                     : 'bg-white text-charcoal border-sand-dark hover:border-sage'
                 }`}
               >
-                {syl}
+                <span className="inline-flex items-center gap-1.5">
+                  <span>{syl}</span>
+                  {(isCurrentlyRunning || isClapped) && (
+                    <span className="text-base" aria-hidden="true">👏</span>
+                  )}
+                </span>
               </button>
             );
           })}
         </div>
 
-        <div className="pt-2">
+        <div className="pt-1 flex flex-wrap items-center justify-center gap-2.5">
           <button
             type="button"
             data-testid="speech-clap-syllable-btn"
             disabled={allClapped}
             onClick={handleClapSyllable}
-            className="touch-target px-6 py-3 rounded-2xl bg-slate text-white font-extrabold text-lg inline-flex items-center gap-2 hover:bg-slate-dark disabled:opacity-60"
+            className="touch-target px-5 py-2.5 sm:px-6 sm:py-3 rounded-2xl bg-slate text-white font-extrabold text-base sm:text-lg inline-flex items-center gap-2 hover:bg-slate-dark disabled:opacity-60"
           >
             <span aria-hidden="true">👏</span>
             <span>
@@ -601,11 +678,21 @@ export const Activity13SpeechArticulation: React.FC<ActivityRunnerRenderProps> =
                 : `Χτύπα Συλλαβή (${clappedCount}/${round.syllables.length})`}
             </span>
           </button>
+
+          <button
+            type="button"
+            data-testid="speech-auto-run-syllables-btn"
+            onClick={handleRestartKaraokeRun}
+            className="touch-target px-4 py-2.5 sm:px-5 sm:py-3 rounded-2xl bg-white border-2 border-slate text-charcoal font-extrabold text-xs sm:text-sm inline-flex items-center gap-1.5 hover:bg-sand-surface"
+          >
+            <span aria-hidden="true">▶️</span>
+            <span>Τρέξε τις Συλλαβές με Ρυθμό</span>
+          </button>
         </div>
       </div>
 
       {/* Phonological Target Selection */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-2xl mx-auto">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 max-w-2xl mx-auto">
         {visibleOptions.map((opt) => {
           const highlight = (hintLevel >= 1 || adaptiveProfile.autoHintBoost) && opt.isCorrect;
           return (
@@ -614,14 +701,14 @@ export const Activity13SpeechArticulation: React.FC<ActivityRunnerRenderProps> =
               type="button"
               data-testid={opt.isCorrect ? 'speech-articulation-target' : `speech-opt-${opt.id}`}
               onClick={() => handleSelectOption(opt.isCorrect, opt.labelEl)}
-              className={`touch-target min-h-[116px] p-5 rounded-3xl border-4 flex flex-col items-center justify-center gap-2 ${
+              className={`touch-target min-h-[96px] sm:min-h-[116px] p-4 sm:p-5 rounded-3xl border-4 flex flex-col items-center justify-center gap-1.5 sm:gap-2 ${
                 highlight
                   ? 'bg-sage-surface border-sage-dark ring-4 ring-sage/40'
                   : 'bg-white border-sand-dark hover:border-slate'
               }`}
             >
-              <span className="text-5xl" aria-hidden="true">{opt.emoji}</span>
-              <span className="text-base font-extrabold text-charcoal">{opt.labelEl}</span>
+              <span className="text-4xl sm:text-5xl" aria-hidden="true">{opt.emoji}</span>
+              <span className="text-sm sm:text-base font-extrabold text-charcoal">{opt.labelEl}</span>
             </button>
           );
         })}

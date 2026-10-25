@@ -868,5 +868,42 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
 
     vi.useRealTimers();
   });
+
+  it('Field Evaluation Report Fixes (#1 & #2): Automatic Karaoke Syllable Runner, Age 8-10 Challenge, Emoji-Label Parity, and Distinct Activity 08 Riddles', async () => {
+    vi.useFakeTimers();
+
+    // 1. Automatic Karaoke Syllable Runner in Activity 13: syllables run automatically across the screen in rhythm!
+    const { unmount: u13 } = renderRoute('/activity/13-speech-articulation');
+    expect(screen.getByTestId('speech-clap-syllable-btn')).toHaveTextContent('0/3');
+
+    // Advance through the automatic syllable runner (750ms initial + 3 * 650ms)
+    act(() => {
+      vi.advanceTimersByTime(2800);
+    });
+    expect(screen.getByTestId('speech-clap-syllable-btn')).toHaveTextContent('Μπράβο! (3/3 Συλλαβές)');
+    u13();
+
+    // 2. Age 8-10 receives 4-syllable compound challenge words in Activity 13 right from Round 1 (no boredom!)
+    vi.useRealTimers();
+    await saveSettings({ ageBand: '8-10' });
+    const { unmount: u810 } = renderRoute('/activity/13-speech-articulation');
+    await waitFor(() => {
+      expect(screen.getByTestId('shared-activity-runner')).toHaveAttribute('data-age-band', '8-10');
+    });
+    expect(screen.getByTestId('activity-13-speech-articulation')).toHaveTextContent('Πο-δή-λα-το');
+    expect(screen.getByTestId('speech-articulation-target')).toHaveTextContent('🧑‍🚀');
+    u810();
+
+    // 3. Activity 02 (Spot the Difference) shows exact single-object labels matching each emoji ('Ήλιος' vs 'Φεγγάρι')
+    const { unmount: u02 } = renderRoute('/activity/02-spot-difference');
+    expect(screen.getByTestId('difference-item-target')).toHaveTextContent('Φεγγάρι');
+    expect(screen.getByTestId('difference-item-target')).not.toHaveTextContent('Ήλιος / Φεγγάρι');
+    u02();
+
+    // 4. Activity 08 (Listen & Do) uses distinct auditory riddles & mystery cards while listening
+    const { unmount: u08 } = renderRoute('/activity/08-listen-do');
+    expect(screen.getByTestId('listen-do-target')).toHaveTextContent('Άκου πρώτα...');
+    u08();
+  });
 });
 

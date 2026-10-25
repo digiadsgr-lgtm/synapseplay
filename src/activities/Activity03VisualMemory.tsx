@@ -199,7 +199,12 @@ export const Activity03VisualMemory: React.FC<ActivityRunnerRenderProps> = ({
     setIsHidden(false);
     setObsElapsedMs(0);
     setPeekCardId(null);
-  }, [currentRound, sessionSeed]);
+    speakGreek(
+      'Κοίτα καλά τις κάρτες και θυμήσου πού βρίσκεται η καθεμία!',
+      settings.voiceEnabled,
+      adaptiveProfile.speechRate
+    );
+  }, [currentRound, sessionSeed, settings.voiceEnabled, adaptiveProfile.speechRate]);
 
   // Automatic Observation Countdown: cards stay face-up while the child memorizes all positions,
   // then automatically flip face-down and announce the target to find!

@@ -111,13 +111,20 @@ export const Activity10CopyAnimal: React.FC<ActivityRunnerRenderProps> = ({
   const absorbedRef = useRef(getAbsorbedCount);
   absorbedRef.current = getAbsorbedCount;
 
+  const activePromptEl = seatedMode ? pose.seatedPromptEl : pose.standingPromptEl;
+
   useEffect(() => {
     setCountsDone(hintLevel === 2 || ageBand === '4-5' ? 2 : 0);
   }, [currentRound, hintLevel, ageBand, sessionSeed]);
 
-  // Automatic Hands-Free Rhythm Metronome (ticks every 1800ms while child holds the physical animal pose)
+  useEffect(() => {
+    speakGreek(`${pose.nameEl}. ${activePromptEl}`, settings.voiceEnabled, adaptiveProfile.speechRate);
+  }, [currentRound, pose.nameEl, activePromptEl, sessionSeed, settings.voiceEnabled, adaptiveProfile.speechRate]);
+
+  // Automatic Hands-Free Rhythm Metronome (ticks while child holds the physical animal pose)
   useEffect(() => {
     if (phase === 'PAUSED' || phase === 'COMPLETED') return;
+    const delayMs = countsDone === 0 ? 2400 : 1800;
     const timer = window.setTimeout(() => {
       const next = countsDone + 1;
       playCalmTone(next >= 3 ? 'complete' : 'soft-step', settings.soundEnabled);
@@ -130,7 +137,7 @@ export const Activity10CopyAnimal: React.FC<ActivityRunnerRenderProps> = ({
       } else {
         setCountsDone(next);
       }
-    }, 1800);
+    }, delayMs);
     return () => window.clearTimeout(timer);
   }, [phase, countsDone, currentRound, settings.soundEnabled, settings.voiceEnabled, adaptiveProfile.speechRate]);
 

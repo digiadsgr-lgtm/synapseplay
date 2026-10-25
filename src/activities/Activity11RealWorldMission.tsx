@@ -117,10 +117,12 @@ export const Activity11RealWorldMission: React.FC<ActivityRunnerRenderProps> = (
 
   useEffect(() => {
     setCheckedSteps([false, false]);
-    if (currentRound > 1 || sessionSeed > 0) {
-      speakGreek(mission.titleEl, settings.voiceEnabled, adaptiveProfile.speechRate);
-    }
-  }, [currentRound, sessionSeed, mission.titleEl, settings.voiceEnabled, adaptiveProfile.speechRate]);
+    speakGreek(
+      `${mission.titleEl}. Βήμα 1: ${mission.steps[0].textEl}`,
+      settings.voiceEnabled,
+      adaptiveProfile.speechRate
+    );
+  }, [currentRound, sessionSeed, mission.titleEl, mission.steps, settings.voiceEnabled, adaptiveProfile.speechRate]);
 
   const toggleStep = (index: number) => {
     runDebounced(() => {

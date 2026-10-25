@@ -6,9 +6,9 @@ import { ParentGateModal } from './ParentGateModal';
 export const SmoothLandingRing: React.FC = () => {
   const { remainingRatio, isWarningWindow, isSessionDepleted } = useApp();
 
-  // SVG circle parameters
-  const size = 56;
-  const strokeWidth = 7;
+  // Compact SVG circle parameters so it never crowds mobile viewports
+  const size = 38;
+  const strokeWidth = 5;
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   const dashOffset = circumference * (1 - remainingRatio);
@@ -28,7 +28,7 @@ export const SmoothLandingRing: React.FC = () => {
 
   return (
     <div
-      className="flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-sand-light border-2 border-sand-dark"
+      className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-sand-light border border-sand-dark shrink-0"
       aria-label={`Οπτικός δείκτης ενέργειας συνεδρίας: ${statusLabel}`}
       title={statusLabel}
       data-testid="smooth-landing-ring"
@@ -55,13 +55,13 @@ export const SmoothLandingRing: React.FC = () => {
             strokeLinecap="round"
           />
         </svg>
-        <span className="absolute text-xl select-none" aria-hidden="true">
+        <span className="absolute text-sm select-none" aria-hidden="true">
           {isSessionDepleted ? '🌙' : isWarningWindow ? '🌅' : '🌿'}
         </span>
       </div>
-      <div className="hidden sm:flex flex-col">
-        <span className="text-xs font-bold text-charcoal leading-tight">Ενέργεια</span>
-        <span className="text-xs text-charcoal-muted leading-tight">
+      <div className="hidden md:flex flex-col">
+        <span className="text-[11px] font-bold text-charcoal leading-tight">Ενέργεια</span>
+        <span className="text-[11px] text-charcoal-muted leading-tight">
           {isWarningWindow ? 'Σύντομα ξεκούραση' : 'Ήρεμη ροή'}
         </span>
       </div>
@@ -71,42 +71,54 @@ export const SmoothLandingRing: React.FC = () => {
 
 export const SmoothLandingWarningBanner: React.FC = () => {
   const { isWarningWindow, isSessionDepleted, settings } = useApp();
+  const [dismissed, setDismissed] = useState(false);
 
-  if (!isWarningWindow || isSessionDepleted) return null;
+  if (!isWarningWindow || isSessionDepleted || dismissed) return null;
 
   return (
     <div
       role="status"
       aria-live="polite"
       data-testid="smooth-landing-warning-banner"
-      className="w-full bg-terracotta-surface border-b-2 border-terracotta px-4 py-3 flex items-center justify-between gap-4"
+      className="w-full bg-terracotta-surface border-b-2 border-terracotta px-3 py-2 sm:px-4 sm:py-2.5 flex flex-wrap items-center justify-between gap-2"
     >
-      <div className="flex items-center gap-3">
-        <span className="text-3xl" aria-hidden="true">🌅</span>
+      <div className="flex items-center gap-2.5">
+        <span className="text-xl sm:text-2xl" aria-hidden="true">🌅</span>
         <div>
-          <p className="font-bold text-charcoal text-base md:text-lg">
+          <p className="font-bold text-charcoal text-xs sm:text-sm md:text-base">
             Τελευταία αποστολή για σήμερα! Το τάμπλετ θα ξεκουραστεί σύντομα!
           </p>
-          <p className="text-sm text-charcoal-muted">
+          <p className="hidden sm:block text-xs text-charcoal-muted">
             Ολοκληρώνουμε φυσικά το τρέχον βήμα μας (Smooth Landing) και ετοιμαζόμαστε για παιχνίδι
             εκτός οθόνης.
           </p>
         </div>
       </div>
-      <button
-        type="button"
-        onClick={() =>
-          speakGreek(
-            'Το τάμπλετ θα ξεκουραστεί σύντομα! Ολοκληρώνουμε ήρεμα τη δραστηριότητά μας.',
-            settings.voiceEnabled
-          )
-        }
-        className="touch-target px-4 py-2 rounded-xl bg-white border-2 border-terracotta text-charcoal font-bold flex items-center gap-2 hover:bg-sand"
-        aria-label="Άκουσε την υπενθύμιση ξεκούρασης"
-      >
-        <span aria-hidden="true">🔊</span>
-        <span>Άκου</span>
-      </button>
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={() =>
+            speakGreek(
+              'Το τάμπλετ θα ξεκουραστεί σύντομα! Ολοκληρώνουμε ήρεμα τη δραστηριότητά μας.',
+              settings.voiceEnabled
+            )
+          }
+          className="touch-target px-3 py-1.5 rounded-xl bg-white border border-terracotta text-charcoal text-xs font-bold flex items-center justify-center gap-1.5 hover:bg-sand"
+          aria-label="Άκουσε την υπενθύμιση ξεκούρασης"
+        >
+          <span aria-hidden="true">🔊</span>
+          <span>Άκου</span>
+        </button>
+        <button
+          type="button"
+          data-testid="dismiss-smooth-warning-btn"
+          onClick={() => setDismissed(true)}
+          className="touch-target px-2.5 py-1.5 rounded-xl bg-white/80 border border-charcoal/20 text-charcoal text-xs font-extrabold flex items-center justify-center hover:bg-white"
+          aria-label="Κλείσιμο υπενθύμισης"
+        >
+          ✕
+        </button>
+      </div>
     </div>
   );
 };

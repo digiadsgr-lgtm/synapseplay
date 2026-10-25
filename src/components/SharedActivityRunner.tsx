@@ -201,8 +201,12 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
   }, [settings.seatedModeDefault, toggleSeatedMode]);
 
   useEffect(() => {
-    speakGreek(activity.voicePromptEl, settings.voiceEnabled, adaptiveProfile.speechRate);
-  }, [activity.voicePromptEl, settings.voiceEnabled, adaptiveProfile.speechRate]);
+    // Only speak generic overview on INTRO phase; during ACTIVE_ROUND each activity speaks its exact per-round instruction
+    // so parent useEffect never cancels the child activity's specific spoken prompt.
+    if (state.phase === 'INTRO') {
+      speakGreek(activity.voicePromptEl, settings.voiceEnabled, adaptiveProfile.speechRate);
+    }
+  }, [state.phase, activity.voicePromptEl, settings.voiceEnabled, adaptiveProfile.speechRate]);
 
   const handleRequestHint = () => {
     if (state.hintLevel >= 2 || state.phase === 'PAUSED' || state.phase === 'COMPLETED') {
@@ -241,18 +245,7 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
 
     if (!isFinalRound) {
       playCalmTone('chime', settings.soundEnabled);
-      const hasPerRoundSpokenPrompt =
-        activity.id === '06-switch-rule' ||
-        activity.id === '07-move-freeze' ||
-        activity.id === '08-listen-do' ||
-        activity.id === '13-speech-articulation' ||
-        activity.id === '14-narrative-builder' ||
-        activity.id === '15-auditory-discrimination' ||
-        activity.id === '18-adl-praxis' ||
-        activity.id === '19-emotional-theater';
-      if (!hasPerRoundSpokenPrompt) {
-        speakGreek('Μπράβο! Πάμε στο επόμενο βήμα.', settings.voiceEnabled, adaptiveProfile.speechRate);
-      }
+      // Every activity component speaks its next round's specific instruction automatically via useEffect
     } else {
       playCalmTone('complete', settings.soundEnabled);
       speakGreek(
@@ -299,7 +292,6 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
       return next;
     });
     dispatchRestart(activity.totalRounds, settings.seatedModeDefault);
-    speakGreek(activity.voicePromptEl, settings.voiceEnabled, adaptiveProfile.speechRate);
   };
 
   const handleShuffleVariation = () => {
@@ -317,7 +309,6 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
       return next;
     });
     playCalmTone('soft-step', settings.soundEnabled);
-    speakGreek('Φορτώθηκε νέα παραλλαγή δραστηριότητας!', settings.voiceEnabled, adaptiveProfile.speechRate);
   };
 
   const isCompleted = state.phase === 'COMPLETED';
@@ -334,39 +325,39 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
 
   return (
     <main
-      className="max-w-5xl mx-auto px-4 py-6 space-y-6"
+      className="max-w-5xl mx-auto px-2.5 py-3 sm:px-4 sm:py-6 space-y-3 sm:space-y-5"
       data-testid="shared-activity-runner"
       data-activity-id={activity.id}
       data-runner-phase={state.phase}
       data-age-band={ageBand}
     >
       {/* Top Activity Navigation & Progress Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-4 bg-sand-light border-2 border-sand-dark rounded-3xl p-4">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-4 bg-sand-light border-2 border-sand-dark rounded-2xl sm:rounded-3xl p-2.5 sm:p-4">
+        <div className="flex items-center gap-2 sm:gap-3">
           <button
             type="button"
             onClick={() => navigate(`/category/${activity.categoryId}`)}
             data-testid="back-to-category-btn"
             aria-label="Επιστροφή στην κατηγορία"
-            className="touch-target px-4 py-2 rounded-2xl bg-white border-2 border-slate text-charcoal font-bold flex items-center gap-2 hover:bg-slate-surface"
+            className="touch-target px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl sm:rounded-2xl bg-white border-2 border-slate text-charcoal font-bold text-xs sm:text-sm flex items-center gap-1.5 hover:bg-slate-surface"
           >
             <span aria-hidden="true">⬅️</span>
             <span>Πίσω</span>
           </button>
 
           <div>
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="text-3xl" aria-hidden="true">{activity.pictogram}</span>
-              <h1 className="text-xl md:text-2xl font-extrabold text-charcoal">
+            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+              <span className="text-xl sm:text-3xl" aria-hidden="true">{activity.pictogram}</span>
+              <h1 className="text-base sm:text-xl md:text-2xl font-extrabold text-charcoal">
                 {activity.code}. {activity.titleEl}
               </h1>
-              <span className="px-2.5 py-0.5 rounded-full bg-sage-surface border border-sage text-xs font-extrabold text-charcoal">
+              <span className="px-2 py-0.5 rounded-full bg-sage-surface border border-sage text-[11px] sm:text-xs font-extrabold text-charcoal">
                 Ηλικία {ageBand} ετών
               </span>
             </div>
-            <p className="text-sm text-charcoal-muted">{activity.subtitleEl}</p>
+            <p className="hidden sm:block text-sm text-charcoal-muted">{activity.subtitleEl}</p>
             {ageAdaptationText && (
-              <p className="text-xs font-bold text-slate-dark mt-0.5" data-testid="age-adaptation-subtitle">
+              <p className="hidden sm:block text-xs font-bold text-slate-dark mt-0.5" data-testid="age-adaptation-subtitle">
                 ✨ Προσαρμογή {ageBand}: {ageAdaptationText}
               </p>
             )}
@@ -374,12 +365,12 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
         </div>
 
         {/* Calm Pebble Progress Indicator & Local Runner Pause Toggle */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <div
-            className="flex items-center gap-2"
+            className="flex items-center gap-1.5 sm:gap-2"
             aria-label={`Βήμα ${state.currentRound} από ${state.totalRounds}`}
           >
-            <span className="text-sm font-bold text-charcoal">Βήμα:</span>
+            <span className="text-xs sm:text-sm font-bold text-charcoal">Βήμα:</span>
             {Array.from({ length: state.totalRounds }).map((_, idx) => {
               const roundNum = idx + 1;
               const isDone = isCompleted || roundNum < state.currentRound;
@@ -388,7 +379,7 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
                 <span
                   key={roundNum}
                   data-testid={`round-pebble-${roundNum}`}
-                  className={`w-10 h-10 rounded-full flex items-center justify-center font-extrabold text-sm border-2 transition-colors ${
+                  className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-extrabold text-xs sm:text-sm border-2 transition-colors ${
                     isDone
                       ? 'bg-sage text-white border-sage-dark'
                       : isCurrent
@@ -408,7 +399,7 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
               data-testid="runner-pause-toggle-btn"
               onClick={() => (isPaused ? resumeActivity() : pauseActivity())}
               aria-pressed={isPaused}
-              className="touch-target px-4 py-2 rounded-2xl bg-white border-2 border-slate text-charcoal font-bold text-sm flex items-center gap-1.5 hover:bg-slate-surface"
+              className="touch-target px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl sm:rounded-2xl bg-white border-2 border-slate text-charcoal font-bold text-xs sm:text-sm flex items-center gap-1 hover:bg-slate-surface"
             >
               <span aria-hidden="true">{isPaused ? '▶️' : '⏸️'}</span>
               <span>{isPaused ? 'Συνέχεια' : 'Παύση'}</span>
@@ -420,22 +411,22 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
       {/* Speech Synthesis Independent Visual + Audio Instruction Strip */}
       <section
         aria-label="Οδηγίες Δραστηριότητας"
-        className="bg-white border-2 border-sage rounded-3xl p-4 md:p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-sm"
+        className="bg-white border-2 border-sage rounded-2xl sm:rounded-3xl p-3 sm:p-4 md:p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-2.5 sm:gap-4 shadow-sm"
       >
-        <div className="space-y-3 flex-1">
-          <div className="flex items-center gap-3">
+        <div className="space-y-2 sm:space-y-3 flex-1 w-full">
+          <div className="flex items-center gap-2.5 sm:gap-3">
             <button
               type="button"
               onClick={() => speakGreek(activity.voicePromptEl, true, adaptiveProfile.speechRate)}
               data-testid="replay-voice-prompt-btn"
               aria-label="Ακρόαση φωνητικής οδηγίας"
-              className="touch-target px-4 py-2 rounded-2xl bg-sage-surface border-2 border-sage text-charcoal font-bold flex items-center gap-2 hover:bg-sage hover:text-white shrink-0"
+              className="touch-target px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl sm:rounded-2xl bg-sage-surface border-2 border-sage text-charcoal font-bold text-xs sm:text-sm flex items-center gap-1.5 hover:bg-sage hover:text-white shrink-0"
             >
-              <span className="text-2xl" aria-hidden="true">🔊</span>
+              <span className="text-lg sm:text-2xl" aria-hidden="true">🔊</span>
               <span>Άκου Οδηγία</span>
             </button>
             <p
-              className="text-base md:text-lg font-bold text-charcoal"
+              className="text-sm sm:text-base md:text-lg font-bold text-charcoal leading-snug"
               data-testid="activity-voice-prompt-text"
             >
               {activity.voicePromptEl}
@@ -443,13 +434,13 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
           </div>
 
           {/* Visual Pictogram Cues (Guarantees 100% playability without audio) */}
-          <div className="flex flex-wrap items-center gap-2" data-testid="visual-pictogram-cues">
+          <div className="hidden sm:flex flex-wrap items-center gap-2" data-testid="visual-pictogram-cues">
             {activity.cues.map((cue, index) => (
               <div
                 key={cue.labelEl}
-                className="px-3 py-1.5 rounded-xl bg-sand border border-sand-dark flex items-center gap-2 text-sm font-bold text-charcoal"
+                className="px-3 py-1 rounded-xl bg-sand border border-sand-dark flex items-center gap-1.5 text-xs sm:text-sm font-bold text-charcoal"
               >
-                <span className="text-lg" aria-hidden="true">{cue.emoji}</span>
+                <span className="text-base sm:text-lg" aria-hidden="true">{cue.emoji}</span>
                 <span>
                   {index + 1}. {cue.labelEl}
                 </span>
@@ -458,10 +449,10 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
           </div>
 
           {/* Inner-Speech Self-Coaching Cue & Live Age/Performance Difficulty Calibration */}
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
             <div
               data-testid="inner-speech-cue-pill"
-              className="inline-flex items-center gap-2 px-3 py-1 rounded-xl bg-sage-surface/70 border border-sage text-xs font-extrabold text-charcoal"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-sage-surface/70 border border-sage text-[11px] sm:text-xs font-extrabold text-charcoal"
             >
               <span>{staircaseSnapshot.innerSpeechCueEl}</span>
             </div>
@@ -469,7 +460,7 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
             <div
               data-testid="live-difficulty-calibration-bar"
               data-difficulty-tier={difficultyProfile.tierLevel}
-              className="inline-flex flex-wrap items-center gap-2 px-3 py-1 rounded-xl bg-slate-surface border border-slate text-xs font-extrabold text-charcoal"
+              className="inline-flex flex-wrap items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-surface border border-slate text-[11px] sm:text-xs font-extrabold text-charcoal"
             >
               <span>🎯 {difficultyProfile.ageTierLabelEl}</span>
               <span aria-hidden="true">•</span>
@@ -481,10 +472,10 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
               data-testid="toggle-parent-coaching-tip-btn"
               onClick={() => setShowParentCoachingTip((v) => !v)}
               aria-expanded={showParentCoachingTip}
-              className="touch-target px-3 py-1.5 rounded-xl bg-sand-light border border-sand-dark text-xs font-extrabold text-charcoal hover:bg-sand flex items-center gap-1"
+              className="touch-target px-2.5 py-1 rounded-xl bg-sand-light border border-sand-dark text-[11px] sm:text-xs font-extrabold text-charcoal hover:bg-sand flex items-center gap-1"
             >
               <span aria-hidden="true">👨‍👩‍👧</span>
-              <span>{showParentCoachingTip ? 'Κλείσιμο Συμβουλής Γονέα' : 'Συμβουλή για τον Γονέα'}</span>
+              <span>{showParentCoachingTip ? 'Κλείσιμο Συμβουλής' : 'Συμβουλή Γονέα'}</span>
             </button>
           </div>
 
@@ -506,15 +497,15 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
 
         {/* Unified Hint Ladder, Variety Shuffle & Seated Mode Controls */}
         {!isCompleted && !isPaused && (
-          <div className="flex flex-wrap items-center gap-2 shrink-0">
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 shrink-0 w-full md:w-auto">
             <button
               type="button"
               onClick={handleShuffleVariation}
               data-testid="shuffle-variation-btn"
               title="Εναλλαγή σε νέο σετ ερωτήσεων και εικόνων"
-              className="touch-target px-4 py-2 rounded-2xl bg-sand border-2 border-sand-dark text-charcoal font-bold text-sm flex items-center gap-1.5 hover:bg-slate-surface"
+              className="touch-target px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl sm:rounded-2xl bg-sand border-2 border-sand-dark text-charcoal font-bold text-xs sm:text-sm flex items-center gap-1.5 hover:bg-slate-surface"
             >
-              <span className="text-xl" aria-hidden="true">🎲</span>
+              <span className="text-base sm:text-xl" aria-hidden="true">🎲</span>
               <span>Νέα Παραλλαγή (#{(effectiveSessionSeed % 12) + 1})</span>
             </button>
 
@@ -524,13 +515,13 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
                 onClick={() => toggleSeatedMode()}
                 data-testid="toggle-seated-mode-btn"
                 aria-pressed={state.seatedMode}
-                className={`touch-target px-4 py-2 rounded-2xl border-2 font-bold text-sm flex items-center gap-2 ${
+                className={`touch-target px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl sm:rounded-2xl border-2 font-bold text-xs sm:text-sm flex items-center gap-1.5 ${
                   state.seatedMode
                     ? 'bg-slate text-white border-slate-dark'
                     : 'bg-slate-surface text-charcoal border-slate'
                 }`}
               >
-                <span className="text-xl" aria-hidden="true">🪑</span>
+                <span className="text-base sm:text-xl" aria-hidden="true">🪑</span>
                 <span>{state.seatedMode ? 'Καθιστή Εκδοχή: ΝΑΙ' : 'Καθιστή Εκδοχή'}</span>
               </button>
             )}
@@ -540,9 +531,9 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
               onClick={handleRequestHint}
               disabled={state.hintLevel === 2}
               data-testid="hint-ladder-btn"
-              className="touch-target px-4 py-2 rounded-2xl bg-terracotta-surface border-2 border-terracotta text-charcoal font-bold text-sm flex items-center gap-2 hover:bg-terracotta hover:text-white disabled:opacity-60"
+              className="touch-target px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl sm:rounded-2xl bg-terracotta-surface border-2 border-terracotta text-charcoal font-bold text-xs sm:text-sm flex items-center gap-1.5 hover:bg-terracotta hover:text-white disabled:opacity-60"
             >
-              <span className="text-xl" aria-hidden="true">💡</span>
+              <span className="text-base sm:text-xl" aria-hidden="true">💡</span>
               <span>
                 {state.hintLevel === 0
                   ? 'Βοήθεια (1/2)'
