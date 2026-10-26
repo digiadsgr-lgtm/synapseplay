@@ -1,54 +1,35 @@
-import { ClinicalFeedbackEntry } from '../types/domain';
+import type { ClinicalFeedbackEntry } from '../types/domain';
 
-export interface CloudRelayResult {
+export interface FeedbackRelayResult {
   delivered: boolean;
-  provider: string;
+  channel: 'serverless-api' | 'local-only';
 }
 
 /**
- * Sends feedback exclusively through the same-origin `/api/feedback` serverless
- * endpoint so that destination addresses, rate limits, and validation stay
- * strictly on the server.
+ * Sends feedback ONLY via the server-side /api/feedback function.
+ * No direct third-party relay from the browser → no email address in the bundle.
  */
 export async function sendFeedbackSilentlyToOwner(
   entry: Omit<ClinicalFeedbackEntry, 'id' | 'timestamp' | 'dateKey'>,
-  fullReportText?: string,
-  honeypotWebsite?: string
-): Promise<CloudRelayResult> {
+  fullReportText?: string
+): Promise<FeedbackRelayResult> {
   if (typeof window === 'undefined' || import.meta.env.MODE === 'test') {
-    return { delivered: true, provider: 'test-bypass' };
+    return { delivered: true, channel: 'serverless-api' };
   }
-
-  const payload = {
-    role: entry.reviewerRoleLabelEl,
-    centerOrName: entry.reviewerNameOrCenter || 'Ανώνυμος Αξιολογητής',
-    scope: entry.targetScopeLabelEl,
-    ageBand: `${entry.ageBandTested} ετών`,
-    rating: `${entry.ratingStars}/5 ⭐ (Ευχρηστία: ${entry.usabilityScore}/5, Κλινική: ${entry.clinicalAppropriatenessScore}/5)`,
-    category: entry.observationCategory,
-    comment: entry.commentEl,
-    fullReport: fullReportText || '',
-    website: honeypotWebsite || '',
-  };
 
   try {
-    const apiRes = await fetch('/api/feedback', {
+    const apiResp = await fetch('/api/feedback', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-      },
-      body: JSON.stringify(payload),
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...entry, fullReportText }),
     });
-    if (apiRes.ok) {
-      const data = await apiRes.json().catch(() => ({}));
-      if (data && data.ok) {
-        return { delivered: true, provider: data.provider || 'vercel-api' };
-      }
+    if (apiResp.ok) {
+      const data = (await apiResp.json()) as { ok?: boolean };
+      if (data.ok) return { delivered: true, channel: 'serverless-api' };
     }
   } catch {
-    // Network error; feedback remains safely stored locally on the device
+    // Offline: entry is already saved in local IndexedDB
   }
 
-  return { delivered: false, provider: 'offline-local-queued' };
+  return { delivered: false, channel: 'local-only' };
 }

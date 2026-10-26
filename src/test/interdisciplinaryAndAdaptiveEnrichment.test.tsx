@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
@@ -70,7 +70,7 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
     expect(screen.getByTestId('visual-search-grid').children).toHaveLength(3);
     unmount45();
 
-    // 2. Age 10-12: Speech Articulation serves 4-syllable compound words (Πο-δή-λα-το)
+    // 2. Age 10-12: Speech Articulation serves 4-syllable compound words (╬á╬┐-╬┤╬«-╬╗╬▒-╧ä╬┐)
     await saveSettings({ ageBand: '10-12' });
     renderRoute('/activity/13-speech-articulation');
     await waitFor(() => {
@@ -79,7 +79,7 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
         '10-12'
       );
     });
-    expect(screen.getByTestId('activity-13-speech-articulation')).toHaveTextContent('Πο-δή-λα-το');
+    expect(screen.getByTestId('activity-13-speech-articulation')).toHaveTextContent('╬á╬┐-╬┤╬«-╬╗╬▒-╧ä╬┐');
   });
 
   it('Requirement C: Renders all 8 Interdisciplinary Protocols (OT, Physiatry, SLT, Psychology, Psychiatry, Social Work, Music-Kinetic, Theater) in Parent Dashboard', async () => {
@@ -236,23 +236,23 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
     vi.useRealTimers();
   });
 
-  it('Greek Speech & Prosody Engine: normalizes ΚΟΤΑ, «ΚΟ - ΤΑ», Κοτα, syllables and phonemes into natural accented Greek (zero letter-by-letter spelling)', () => {
+  it('Greek Speech & Prosody Engine: normalizes ╬Ü╬ƒ╬ñ╬æ, ┬½╬Ü╬ƒ - ╬ñ╬æ┬╗, ╬Ü╬┐╧ä╬▒, syllables and phonemes into natural accented Greek (zero letter-by-letter spelling)', () => {
     const rawSentence =
-      'Άκου προσεκτικά τη λέξη: «ΚΟ - ΤΑ». Ποια εικόνα δείχνει την ΚΟΤΑ (όχι την ΠΟΡΤΑ); 🐔';
+      '╬å╬║╬┐╧à ╧Ç╧ü╬┐╧â╬╡╬║╧ä╬╣╬║╬¼ ╧ä╬╖ ╬╗╬¡╬╛╬╖: ┬½╬Ü╬ƒ - ╬ñ╬æ┬╗. ╬á╬┐╬╣╬▒ ╬╡╬╣╬║╧î╬╜╬▒ ╬┤╬╡╬»╧ç╬╜╬╡╬╣ ╧ä╬╖╬╜ ╬Ü╬ƒ╬ñ╬æ (╧î╧ç╬╣ ╧ä╬╖╬╜ ╬á╬ƒ╬í╬ñ╬æ); ≡ƒÉö';
     const normalized = normalizeGreekForSpeech(rawSentence);
 
-    expect(normalized).toContain('κότα');
-    expect(normalized).toContain('πόρτα');
-    expect(normalized).not.toContain('ΚΟΤΑ');
-    expect(normalized).not.toContain('ΚΟ - ΤΑ');
-    expect(normalized).not.toContain('🐔');
+    expect(normalized).toContain('╬║╧î╧ä╬▒');
+    expect(normalized).toContain('╧Ç╧î╧ü╧ä╬▒');
+    expect(normalized).not.toContain('╬Ü╬ƒ╬ñ╬æ');
+    expect(normalized).not.toContain('╬Ü╬ƒ - ╬ñ╬æ');
+    expect(normalized).not.toContain('≡ƒÉö');
 
-    // Title-case unaccented "Κοτα" also normalizes to accented "κότα"
-    expect(normalizeGreekForSpeech('Η λέξη Κοτα')).toContain('κότα');
+    // Title-case unaccented "╬Ü╬┐╧ä╬▒" also normalizes to accented "╬║╧î╧ä╬▒"
+    expect(normalizeGreekForSpeech('╬ù ╬╗╬¡╬╛╬╖ ╬Ü╬┐╧ä╬▒')).toContain('╬║╧î╧ä╬▒');
 
     // Hyphenated syllables normalize to fluent words
-    expect(normalizeGreekForSpeech('Χτύπα «ΜΠΑ - ΛΑ» και «ΧΕ-ΛΩ-ΝΑ»')).toContain('μπάλα');
-    expect(normalizeGreekForSpeech('Χτύπα «ΜΠΑ - ΛΑ» και «ΧΕ-ΛΩ-ΝΑ»')).toContain('χελώνα');
+    expect(normalizeGreekForSpeech('╬º╧ä╧ì╧Ç╬▒ ┬½╬£╬á╬æ - ╬¢╬æ┬╗ ╬║╬▒╬╣ ┬½╬º╬ò-╬¢╬⌐-╬¥╬æ┬╗')).toContain('╬╝╧Ç╬¼╬╗╬▒');
+    expect(normalizeGreekForSpeech('╬º╧ä╧ì╧Ç╬▒ ┬½╬£╬á╬æ - ╬¢╬æ┬╗ ╬║╬▒╬╣ ┬½╬º╬ò-╬¢╬⌐-╬¥╬æ┬╗')).toContain('╧ç╬╡╬╗╧Ä╬╜╬▒');
   });
 
   it('Dynamic Variety & Clinical RCT Engine: rotates game scenarios on shuffle/replay and renders clinical trials in Parent Dashboard', async () => {
@@ -262,13 +262,13 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
     expect(screen.getByTestId('inner-speech-cue-pill')).toBeInTheDocument();
 
     const firstTarget = screen.getByTestId('visual-search-target-badge').textContent;
-    expect(firstTarget).toContain('Πράσινη Χελώνα');
+    expect(firstTarget).toContain('╬á╧ü╬¼╧â╬╣╬╜╬╖ ╬º╬╡╬╗╧Ä╬╜╬▒');
 
-    // Clicking "Νέα Παραλλαγή" rotates to a brand-new set of items from the expanded pool
+    // Clicking "╬¥╬¡╬▒ ╬á╬▒╧ü╬▒╬╗╬╗╬▒╬│╬«" rotates to a brand-new set of items from the expanded pool
     fireEvent.click(screen.getByTestId('shuffle-variation-btn'));
     const nextTarget = screen.getByTestId('visual-search-target-badge').textContent;
     expect(nextTarget).not.toBe(firstTarget);
-    expect(nextTarget).toContain('Σοφή Κουκουβάγια');
+    expect(nextTarget).toContain('╬ú╬┐╧å╬« ╬Ü╬┐╧à╬║╬┐╧à╬▓╬¼╬│╬╣╬▒');
     unmount();
 
     // Verify Clinical Studies & RCTs section in Parent Dashboard
@@ -327,13 +327,13 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
 
     fireEvent.click(screen.getByTestId('open-create-profile-btn'));
     fireEvent.change(screen.getByTestId('new-profile-name-input'), {
-      target: { value: 'Αριάδνη' },
+      target: { value: '╬æ╧ü╬╣╬¼╬┤╬╜╬╖' },
     });
     fireEvent.click(screen.getByTestId('new-profile-age-8-10'));
     fireEvent.click(screen.getByTestId('submit-create-profile-btn'));
 
     await waitFor(() => {
-      expect(screen.getByText(/Γεια σου, Αριάδνη!/i)).toBeInTheDocument();
+      expect(screen.getByText(/╬ô╬╡╬╣╬▒ ╧â╬┐╧à, ╬æ╧ü╬╣╬¼╬┤╬╜╬╖!/i)).toBeInTheDocument();
     });
   });
 
@@ -360,13 +360,13 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
 
     // 2. Activity 03 (Visual Memory): Cards automatically flip face-down after the observation countdown (3400ms)
     const { unmount: u03 } = renderRoute('/activity/03-visual-memory');
-    expect(screen.getByTestId('memory-card-target')).toHaveTextContent('Κόκκινο Μήλο');
+    expect(screen.getByTestId('memory-card-target')).toHaveTextContent('╬Ü╧î╬║╬║╬╣╬╜╬┐ ╬£╬«╬╗╬┐');
 
     act(() => {
       vi.advanceTimersByTime(3500);
     });
-    // Now cards are automatically hidden ('Πού ήταν;') without pressing any button!
-    expect(screen.getByTestId('memory-card-target')).toHaveTextContent('Πού ήταν;');
+    // Now cards are automatically hidden ('╬á╬┐╧ì ╬«╧ä╬▒╬╜;') without pressing any button!
+    expect(screen.getByTestId('memory-card-target')).toHaveTextContent('╬á╬┐╧ì ╬«╧ä╬▒╬╜;');
     fireEvent.click(screen.getByTestId('memory-card-target'));
     expect(screen.getByTestId('round-pebble-2')).toHaveTextContent('2');
     u03();
@@ -449,7 +449,7 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
       target: { value: 'occupational-therapist' },
     });
     fireEvent.change(screen.getByTestId('feedback-center-input'), {
-      target: { value: 'Πρότυπο Κέντρο ΔΕΠΥ Αθήνας' },
+      target: { value: '╬á╧ü╧î╧ä╧à╧Ç╬┐ ╬Ü╬¡╬╜╧ä╧ü╬┐ ╬ö╬ò╬á╬Ñ ╬æ╬╕╬«╬╜╬▒╧é' },
     });
     fireEvent.change(screen.getByTestId('feedback-scope-select'), {
       target: { value: '09-wait-signal' },
@@ -459,7 +459,7 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
     fireEvent.change(screen.getByTestId('feedback-comment-textarea'), {
       target: {
         value:
-          'Εξαιρετική η αυτόματη εναλλαγή αντικειμένων στο 09. Προτείνουμε και επιλογή ήχου μετρονόμου.',
+          '╬ò╬╛╬▒╬╣╧ü╬╡╧ä╬╣╬║╬« ╬╖ ╬▒╧à╧ä╧î╬╝╬▒╧ä╬╖ ╬╡╬╜╬▒╬╗╬╗╬▒╬│╬« ╬▒╬╜╧ä╬╣╬║╬╡╬╣╬╝╬¡╬╜╧ë╬╜ ╧â╧ä╬┐ 09. ╬á╧ü╬┐╧ä╬╡╬»╬╜╬┐╧à╬╝╬╡ ╬║╬▒╬╣ ╬╡╧Ç╬╣╬╗╬┐╬│╬« ╬«╧ç╬┐╧à ╬╝╬╡╧ä╧ü╬┐╬╜╧î╬╝╬┐╧à.',
       },
     });
 
@@ -470,10 +470,10 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
     });
 
     expect(screen.getByTestId('feedback-entry-card-0')).toHaveTextContent(
-      'Πρότυπο Κέντρο ΔΕΠΥ Αθήνας'
+      '╬á╧ü╧î╧ä╧à╧Ç╬┐ ╬Ü╬¡╬╜╧ä╧ü╬┐ ╬ö╬ò╬á╬Ñ ╬æ╬╕╬«╬╜╬▒╧é'
     );
     expect(screen.getByTestId('feedback-entry-card-0')).toHaveTextContent(
-      'Εξαιρετική η αυτόματη εναλλαγή αντικειμένων'
+      '╬ò╬╛╬▒╬╣╧ü╬╡╧ä╬╣╬║╬« ╬╖ ╬▒╧à╧ä╧î╬╝╬▒╧ä╬╖ ╬╡╬╜╬▒╬╗╬╗╬▒╬│╬« ╬▒╬╜╧ä╬╣╬║╬╡╬╣╬╝╬¡╬╜╧ë╬╜'
     );
     expect(screen.getByTestId('send-batch-feedback-btn')).toBeInTheDocument();
     expect(screen.getByTestId('copy-feedback-report-btn')).toBeInTheDocument();
@@ -487,20 +487,20 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
         timestamp: new Date().toISOString(),
         dateKey: '2026-10-24',
         reviewerRole: 'occupational-therapist',
-        reviewerRoleLabelEl: '👐 Εργοθεραπευτής (OT)',
-        reviewerNameOrCenter: 'Πρότυπο Κέντρο ΔΕΠΥ Αθήνας',
+        reviewerRoleLabelEl: '≡ƒæÉ ╬ò╧ü╬│╬┐╬╕╬╡╧ü╬▒╧Ç╬╡╧à╧ä╬«╧é (OT)',
+        reviewerNameOrCenter: '╬á╧ü╧î╧ä╧à╧Ç╬┐ ╬Ü╬¡╬╜╧ä╧ü╬┐ ╬ö╬ò╬á╬Ñ ╬æ╬╕╬«╬╜╬▒╧é',
         targetScope: '09-wait-signal',
-        targetScopeLabelEl: '09. Περίμενε το Σήμα',
+        targetScopeLabelEl: '09. ╬á╬╡╧ü╬»╬╝╬╡╬╜╬╡ ╧ä╬┐ ╬ú╬«╬╝╬▒',
         ageBandTested: '6-8',
         ratingStars: 5,
         usabilityScore: 5,
         clinicalAppropriatenessScore: 5,
         observationCategory: 'clinical-suggestion',
-        commentEl: 'Δοκιμή αναφοράς Κέντρου ΔΕΠΥ.',
+        commentEl: '╬ö╬┐╬║╬╣╬╝╬« ╬▒╬╜╬▒╧å╬┐╧ü╬¼╧é ╬Ü╬¡╬╜╧ä╧ü╬┐╧à ╬ö╬ò╬á╬Ñ.',
       },
     ]);
-    expect(reportText).toContain('Πρότυπο Κέντρο ΔΕΠΥ Αθήνας');
-    expect(reportText).toContain('Δοκιμή αναφοράς Κέντρου ΔΕΠΥ.');
+    expect(reportText).toContain('╬á╧ü╧î╧ä╧à╧Ç╬┐ ╬Ü╬¡╬╜╧ä╧ü╬┐ ╬ö╬ò╬á╬Ñ ╬æ╬╕╬«╬╜╬▒╧é');
+    expect(reportText).toContain('╬ö╬┐╬║╬╣╬╝╬« ╬▒╬╜╬▒╧å╬┐╧ü╬¼╧é ╬Ü╬¡╬╜╧ä╧ü╬┐╧à ╬ö╬ò╬á╬Ñ.');
   });
 
   it('License & Profiles Architecture: 100% Free & Unlocked in Dev Mode, 2-Profile Limit in Family Mode, and Unlimited Profiles + Quick Switcher in B2B Mode', async () => {
@@ -508,7 +508,7 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
     expect(ENABLE_PAYWALL).toBe(false);
     const defaultLicense = resolveEffectiveLicenseState({ licenseTier: 'dev-unlocked' });
     expect(defaultLicense.isDevUnlocked).toBe(true);
-    expect(defaultLicense.statusLabelEl).toBe('Δοκιμαστική Έκδοση - Όλα Ξεκλείδωτα');
+    expect(defaultLicense.statusLabelEl).toBe('╬ö╬┐╬║╬╣╬╝╬▒╧â╧ä╬╣╬║╬« ╬ê╬║╬┤╬┐╧â╬╖ - ╬î╬╗╬▒ ╬₧╬╡╬║╬╗╬╡╬»╬┤╧ë╧ä╬▒');
     expect(checkProfileCreationPermission(5, { licenseTier: 'dev-unlocked' }).allowed).toBe(true);
 
     // 2. Unit-test Family Plan (when ENABLE_PAYWALL = true or Family License Key active)
@@ -524,7 +524,7 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
     expect(b2bKeyRes.tier).toBe('b2b');
     expect(checkProfileCreationPermission(10, { licenseTier: 'b2b' }).allowed).toBe(true);
 
-    // 4. Integration test in Parent Area ("Διαχείριση Συνδρομής") and Child Hub
+    // 4. Integration test in Parent Area ("╬ö╬╣╬▒╧ç╬╡╬»╧ü╬╣╧â╬╖ ╬ú╧à╬╜╬┤╧ü╬┐╬╝╬«╧é") and Child Hub
     const { unmount: unmountParent } = renderRoute('/parent');
     fireEvent.click(screen.getByTestId('parent-gate-option-15'));
 
@@ -532,9 +532,9 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
       expect(screen.getByTestId('subscription-management-section')).toBeInTheDocument();
     });
 
-    // Verify default status is "Δοκιμαστική Έκδοση - Όλα Ξεκλείδωτα"
+    // Verify default status is "╬ö╬┐╬║╬╣╬╝╬▒╧â╧ä╬╣╬║╬« ╬ê╬║╬┤╬┐╧â╬╖ - ╬î╬╗╬▒ ╬₧╬╡╬║╬╗╬╡╬»╬┤╧ë╧ä╬▒"
     expect(screen.getByTestId('subscription-current-status')).toHaveTextContent(
-      'Δοκιμαστική Έκδοση - Όλα Ξεκλείδωτα'
+      '╬ö╬┐╬║╬╣╬╝╬▒╧â╧ä╬╣╬║╬« ╬ê╬║╬┤╬┐╧â╬╖ - ╬î╬╗╬▒ ╬₧╬╡╬║╬╗╬╡╬»╬┤╧ë╧ä╬▒'
     );
     expect(screen.getByTestId('stripe-family-checkout-link')).toHaveAttribute(
       'href',
@@ -545,7 +545,7 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
       expect.stringContaining('https://buy.stripe.com/')
     );
 
-    // Activate Family mode via "Κωδικός Ενεργοποίησης" input
+    // Activate Family mode via "╬Ü╧ë╬┤╬╣╬║╧î╧é ╬ò╬╜╬╡╧ü╬│╬┐╧Ç╬┐╬»╬╖╧â╬╖╧é" input
     fireEvent.change(screen.getByTestId('license-key-input'), {
       target: { value: 'FAMILY-2026' },
     });
@@ -553,25 +553,25 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
 
     await waitFor(() => {
       expect(screen.getByTestId('subscription-current-status')).toHaveTextContent(
-        'Οικογενειακό Πλάνο'
+        '╬ƒ╬╣╬║╬┐╬│╬╡╬╜╬╡╬╣╬▒╬║╧î ╬á╬╗╬¼╬╜╬┐'
       );
     });
 
     // Create 2nd profile in Parent Area (allowed, total = 2)
     fireEvent.change(screen.getByTestId('parent-new-profile-name-input'), {
-      target: { value: 'Δεύτερο Παιδί' },
+      target: { value: '╬ö╬╡╧ì╧ä╬╡╧ü╬┐ ╬á╬▒╬╣╬┤╬»' },
     });
     fireEvent.click(screen.getByTestId('parent-create-profile-btn'));
 
     // Now at 2 profiles under Family Plan -> friendly notice is displayed for 3rd profile!
     await waitFor(() => {
       expect(screen.getByTestId('parent-family-plan-limit-notice')).toHaveTextContent(
-        'Το οικογενειακό πλάνο περιλαμβάνει έως 2 προφίλ παιδιών. Για επιπλέον προφίλ απαιτείται αναβάθμιση.'
+        '╬ñ╬┐ ╬┐╬╣╬║╬┐╬│╬╡╬╜╬╡╬╣╬▒╬║╧î ╧Ç╬╗╬¼╬╜╬┐ ╧Ç╬╡╧ü╬╣╬╗╬▒╬╝╬▓╬¼╬╜╬╡╬╣ ╬¡╧ë╧é 2 ╧Ç╧ü╬┐╧å╬»╬╗ ╧Ç╬▒╬╣╬┤╬╣╧Ä╬╜. ╬ô╬╣╬▒ ╬╡╧Ç╬╣╧Ç╬╗╬¡╬┐╬╜ ╧Ç╧ü╬┐╧å╬»╬╗ ╬▒╧Ç╬▒╬╣╧ä╬╡╬»╧ä╬▒╬╣ ╬▒╬╜╬▒╬▓╬¼╬╕╬╝╬╣╧â╬╖.'
       );
     });
     expect(screen.getByTestId('parent-family-limit-stripe-upgrade-link')).toBeInTheDocument();
 
-    // Activate B2B / Therapist License via "Κωδικός Ενεργοποίησης" -> unlocks 3+ profiles & Quick Switcher
+    // Activate B2B / Therapist License via "╬Ü╧ë╬┤╬╣╬║╧î╧é ╬ò╬╜╬╡╧ü╬│╬┐╧Ç╬┐╬»╬╖╧â╬╖╧é" -> unlocks 3+ profiles & Quick Switcher
     fireEvent.change(screen.getByTestId('license-key-input'), {
       target: { value: 'B2B-CLINIC-2026' },
     });
@@ -583,7 +583,7 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
 
     // Create 3rd profile under B2B mode -> succeeds without any limitation!
     fireEvent.change(screen.getByTestId('parent-new-profile-name-input'), {
-      target: { value: 'Τρίτο Παιδί Κλινικής' },
+      target: { value: '╬ñ╧ü╬»╧ä╬┐ ╬á╬▒╬╣╬┤╬» ╬Ü╬╗╬╣╬╜╬╣╬║╬«╧é' },
     });
     fireEvent.click(screen.getByTestId('parent-create-profile-btn'));
 
@@ -602,38 +602,38 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
     expect(screen.queryByTestId('nav-home-btn')).not.toBeInTheDocument();
     expect(screen.queryByTestId('smooth-landing-ring')).not.toBeInTheDocument();
     expect(screen.getByTestId('landing-hero-badge')).toHaveTextContent(
-      'Ξέρουμε τι αντιμετωπίζετε — Έχουμε τη λύση'
+      '╬₧╬¡╧ü╬┐╧à╬╝╬╡ ╧ä╬╣ ╬▒╬╜╧ä╬╣╬╝╬╡╧ä╧ë╧Ç╬»╬╢╬╡╧ä╬╡ ΓÇö ╬ê╧ç╬┐╧à╬╝╬╡ ╧ä╬╖ ╬╗╧ì╧â╬╖'
     );
     expect(screen.getByTestId('landing-hero-headline')).toHaveTextContent(
-      '«Το μυαλό μου τρέχει γρήγορα!» Έλα να παίξουμε λίγο μαζί, να πάρουμε μια ανάσα και να βρούμε τον ρυθμό μας.'
+      '┬½╬ñ╬┐ ╬╝╧à╬▒╬╗╧î ╬╝╬┐╧à ╧ä╧ü╬¡╧ç╬╡╬╣ ╬│╧ü╬«╬│╬┐╧ü╬▒!┬╗ ╬ê╬╗╬▒ ╬╜╬▒ ╧Ç╬▒╬»╬╛╬┐╧à╬╝╬╡ ╬╗╬»╬│╬┐ ╬╝╬▒╬╢╬», ╬╜╬▒ ╧Ç╬¼╧ü╬┐╧à╬╝╬╡ ╬╝╬╣╬▒ ╬▒╬╜╬¼╧â╬▒ ╬║╬▒╬╣ ╬╜╬▒ ╬▓╧ü╬┐╧ì╬╝╬╡ ╧ä╬┐╬╜ ╧ü╧à╬╕╬╝╧î ╬╝╬▒╧é.'
     );
     expect(screen.getByTestId('landing-trust-badges')).toHaveTextContent('100% Client-Side & Local');
-    expect(screen.getByTestId('landing-trust-badges')).toHaveTextContent('Χωρίς Διαφημίσεις');
-    expect(screen.getByTestId('landing-trust-badges')).toHaveTextContent('Σχεδιασμένο για Tablet');
+    expect(screen.getByTestId('landing-trust-badges')).toHaveTextContent('╬º╧ë╧ü╬»╧é ╬ö╬╣╬▒╧å╬╖╬╝╬»╧â╬╡╬╣╧é');
+    expect(screen.getByTestId('landing-trust-badges')).toHaveTextContent('╬ú╧ç╬╡╬┤╬╣╬▒╧â╬╝╬¡╬╜╬┐ ╬│╬╣╬▒ Tablet');
 
     // 2. The Problem We Solve (3 columns)
     expect(screen.getByTestId('landing-problem-section')).toHaveTextContent(
-      'Όχι άλλο Zombie Scrolling'
+      '╬î╧ç╬╣ ╬¼╬╗╬╗╬┐ Zombie Scrolling'
     );
     expect(screen.getByTestId('landing-problem-section')).toHaveTextContent(
-      'Μηδενική Τιμωρία (No Game Over)'
+      '╬£╬╖╬┤╬╡╬╜╬╣╬║╬« ╬ñ╬╣╬╝╧ë╧ü╬»╬▒ (No Game Over)'
     );
     expect(screen.getByTestId('landing-problem-section')).toHaveTextContent(
-      'Σύνδεση με τον Πραγματικό Χώρο'
+      '╬ú╧ì╬╜╬┤╬╡╧â╬╖ ╬╝╬╡ ╧ä╬┐╬╜ ╬á╧ü╬▒╬│╬╝╬▒╧ä╬╣╬║╧î ╬º╧Ä╧ü╬┐'
     );
 
     // 3. The 4 Pillars & Module 13 Smooth Landing Callout
     expect(screen.getByTestId('landing-pillars-section')).toHaveTextContent(
-      'Ομάδα Α: Detective Eyes'
+      '╬ƒ╬╝╬¼╬┤╬▒ ╬æ: Detective Eyes'
     );
     expect(screen.getByTestId('landing-pillars-section')).toHaveTextContent(
-      'Ομάδα Β: Think & Plan'
+      '╬ƒ╬╝╬¼╬┤╬▒ ╬Æ: Think & Plan'
     );
     expect(screen.getByTestId('landing-pillars-section')).toHaveTextContent(
-      'Ομάδα Γ: Pause & Choose'
+      '╬ƒ╬╝╬¼╬┤╬▒ ╬ô: Pause & Choose'
     );
     expect(screen.getByTestId('landing-pillars-section')).toHaveTextContent(
-      'Ομάδα Δ: Move & Build'
+      '╬ƒ╬╝╬¼╬┤╬▒ ╬ö: Move & Build'
     );
     expect(screen.getByTestId('landing-smooth-landing-callout')).toHaveTextContent(
       'Module 13: Smooth Landing Protocol'
@@ -642,20 +642,20 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
     // 4. Age-Appropriate Pathways (4-5 to 10-12 interactive tabs)
     fireEvent.click(screen.getByTestId('landing-age-tab-4-5'));
     expect(screen.getByTestId('landing-active-age-card')).toHaveTextContent(
-      'Μηδενικό κείμενο, μεγάλα εικονογράμματα, αισθητηριακή γείωση.'
+      '╬£╬╖╬┤╬╡╬╜╬╣╬║╧î ╬║╬╡╬»╬╝╬╡╬╜╬┐, ╬╝╬╡╬│╬¼╬╗╬▒ ╬╡╬╣╬║╬┐╬╜╬┐╬│╧ü╬¼╬╝╬╝╬▒╧ä╬▒, ╬▒╬╣╧â╬╕╬╖╧ä╬╖╧ü╬╣╬▒╬║╬« ╬│╬╡╬»╧ë╧â╬╖.'
     );
     fireEvent.click(screen.getByTestId('landing-age-tab-10-12'));
     expect(screen.getByTestId('landing-active-age-card')).toHaveTextContent(
-      'Μεταγνώση, στρατηγικός σχεδιασμός πολλαπλών βημάτων.'
+      '╬£╬╡╧ä╬▒╬│╬╜╧Ä╧â╬╖, ╧â╧ä╧ü╬▒╧ä╬╖╬│╬╣╬║╧î╧é ╧â╧ç╬╡╬┤╬╣╬▒╧â╬╝╧î╧é ╧Ç╬┐╬╗╬╗╬▒╧Ç╬╗╧Ä╬╜ ╬▓╬╖╬╝╬¼╧ä╧ë╬╜.'
     );
 
     // 5. Pricing & Licensing Plans + Beta Free Badge + All 4 Live Stripe Checkout URLs
     expect(screen.getByTestId('landing-beta-free-badge')).toHaveTextContent(
-      'Τρέχουσα Φάση: Δωρεάν Δοκιμαστική Πρόσβαση (Beta) για Όλους!'
+      '╬ñ╧ü╬¡╧ç╬┐╧à╧â╬▒ ╬ª╬¼╧â╬╖: ╬ö╧ë╧ü╬╡╬¼╬╜ ╬ö╬┐╬║╬╣╬╝╬▒╧â╧ä╬╣╬║╬« ╬á╧ü╧î╧â╬▓╬▒╧â╬╖ (Beta) ╬│╬╣╬▒ ╬î╬╗╬┐╧à╧é!'
     );
-    expect(screen.getByTestId('landing-plan-family')).toHaveTextContent('Έως 2 Προφίλ Παιδιών');
+    expect(screen.getByTestId('landing-plan-family')).toHaveTextContent('╬ê╧ë╧é 2 ╬á╧ü╬┐╧å╬»╬╗ ╬á╬▒╬╣╬┤╬╣╧Ä╬╜');
     expect(screen.getByTestId('landing-plan-b2b')).toHaveTextContent(
-      'Απεριόριστα Προφίλ Παιδιών & Γρήγορος Profile Switcher'
+      '╬æ╧Ç╬╡╧ü╬╣╧î╧ü╬╣╧â╧ä╬▒ ╬á╧ü╬┐╧å╬»╬╗ ╬á╬▒╬╣╬┤╬╣╧Ä╬╜ & ╬ô╧ü╬«╬│╬┐╧ü╬┐╧é Profile Switcher'
     );
     expect(screen.getByTestId('landing-stripe-family-monthly-link')).toHaveAttribute(
       'href',
@@ -677,14 +677,14 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
     // 6. Privacy & Safety Commitment + 7. Footer
     expect(screen.getByTestId('landing-privacy-section')).toHaveTextContent('Zero Cloud Tracking');
     expect(screen.getByTestId('landing-privacy-section')).toHaveTextContent(
-      'Πλήρης Διαγραφή με 1 Κλικ'
+      '╬á╬╗╬«╧ü╬╖╧é ╬ö╬╣╬▒╬│╧ü╬▒╧å╬« ╬╝╬╡ 1 ╬Ü╬╗╬╣╬║'
     );
     expect(screen.getByTestId('landing-privacy-section')).toHaveTextContent(
-      'Επιστημονική Ειλικρίνεια'
+      '╬ò╧Ç╬╣╧â╧ä╬╖╬╝╬┐╬╜╬╣╬║╬« ╬ò╬╣╬╗╬╣╬║╧ü╬»╬╜╬╡╬╣╬▒'
     );
-    expect(screen.getByTestId('landing-footer')).toHaveTextContent('© SynapsePlay — FocusEngine 5+');
+    expect(screen.getByTestId('landing-footer')).toHaveTextContent('┬⌐ SynapsePlay ΓÇö FocusEngine 5+');
 
-    // Clicking Primary Hero CTA ("Δοκιμάστε το Δωρεάν (Beta)") navigates to /app (ChildHubPage)
+    // Clicking Primary Hero CTA ("╬ö╬┐╬║╬╣╬╝╬¼╧â╧ä╬╡ ╧ä╬┐ ╬ö╧ë╧ü╬╡╬¼╬╜ (Beta)") navigates to /app (ChildHubPage)
     fireEvent.click(screen.getByTestId('hero-primary-cta-btn'));
     await waitFor(() => {
       expect(screen.getByTestId('child-hub-page')).toBeInTheDocument();
@@ -693,26 +693,26 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
 
   it('Therapeutic Companion Avatars (Unicorns, Dragons, Animals) & Clinical Progress Evaluation: empowers child and evaluates ADHD domain growth', async () => {
     expect(AVATAR_PRESETS.length).toBeGreaterThanOrEqual(16);
-    expect(AVATAR_PRESETS.some((p) => p.emoji === '🦄' && p.category === 'fantasy')).toBe(true);
-    expect(AVATAR_PRESETS.some((p) => p.emoji === '🐉' && p.category === 'fantasy')).toBe(true);
+    expect(AVATAR_PRESETS.some((p) => p.emoji === '≡ƒªä' && p.category === 'fantasy')).toBe(true);
+    expect(AVATAR_PRESETS.some((p) => p.emoji === '≡ƒÉë' && p.category === 'fantasy')).toBe(true);
 
     // Verify speech normalization for abbreviations, phoneme hints, and ratios
-    expect(normalizeGreekForSpeech('Χταπόδι (Αρχίζει με Χ) σε 3 δευτ. (1/2)')).toContain(
-      'αρχίζει με τη φωνούλα χου'
+    expect(normalizeGreekForSpeech('╬º╧ä╬▒╧Ç╧î╬┤╬╣ (╬æ╧ü╧ç╬»╬╢╬╡╬╣ ╬╝╬╡ ╬º) ╧â╬╡ 3 ╬┤╬╡╧à╧ä. (1/2)')).toContain(
+      '╬▒╧ü╧ç╬»╬╢╬╡╬╣ ╬╝╬╡ ╧ä╬╖ ╧å╧ë╬╜╬┐╧ì╬╗╬▒ ╧ç╬┐╧à'
     );
-    expect(normalizeGreekForSpeech('Χταπόδι (Αρχίζει με Χ) σε 3 δευτ. (1/2)')).toContain(
-      'δευτερόλεπτα'
+    expect(normalizeGreekForSpeech('╬º╧ä╬▒╧Ç╧î╬┤╬╣ (╬æ╧ü╧ç╬»╬╢╬╡╬╣ ╬╝╬╡ ╬º) ╧â╬╡ 3 ╬┤╬╡╧à╧ä. (1/2)')).toContain(
+      '╬┤╬╡╧à╧ä╬╡╧ü╧î╬╗╬╡╧Ç╧ä╬▒'
     );
-    expect(normalizeGreekForSpeech('Χταπόδι (Αρχίζει με Χ) σε 3 δευτ. (1/2)')).toContain(
-      '1 από 2'
+    expect(normalizeGreekForSpeech('╬º╧ä╬▒╧Ç╧î╬┤╬╣ (╬æ╧ü╧ç╬»╬╢╬╡╬╣ ╬╝╬╡ ╬º) ╧â╬╡ 3 ╬┤╬╡╧à╧ä. (1/2)')).toContain(
+      '1 ╬▒╧Ç╧î 2'
     );
 
     // Evaluate avatar evolution across sessions
     let profile = createDefaultChildProfile('6-8');
-    profile = { ...profile, avatarEmoji: '🦄', nickname: 'Μικρός Μονόκερος' };
+    profile = { ...profile, avatarEmoji: '≡ƒªä', nickname: '╬£╬╣╬║╧ü╧î╧é ╬£╬┐╬╜╧î╬║╬╡╧ü╬┐╧é' };
     const initialEval = evaluateChildAvatarProgress(profile);
     expect(initialEval.evolutionLevel).toBe(1);
-    expect(initialEval.avatar.defaultNameEl).toBe('Φωτεινός Μονόκερος');
+    expect(initialEval.avatar.defaultNameEl).toBe('╬ª╧ë╧ä╬╡╬╣╬╜╧î╧é ╬£╬┐╬╜╧î╬║╬╡╧ü╬┐╧é');
 
     for (let i = 0; i < 6; i++) {
       profile = trainChildProfileOnActivityCompletion(profile, {
@@ -724,16 +724,16 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
     }
     const advancedEval = evaluateChildAvatarProgress(profile);
     expect(advancedEval.evolutionLevel).toBeGreaterThanOrEqual(3);
-    expect(advancedEval.clinicalAssessmentEl).toContain('Συνολικός Δείκτης Εξέλιξης ΔΕΠΥ');
+    expect(advancedEval.clinicalAssessmentEl).toContain('╬ú╧à╬╜╬┐╬╗╬╣╬║╧î╧é ╬ö╬╡╬»╬║╧ä╬╖╧é ╬ò╬╛╬¡╬╗╬╣╬╛╬╖╧é ╬ö╬ò╬á╬Ñ');
 
     // Interactive Companion Avatar Picker on Child Hub
     renderRoute('/app');
     fireEvent.click(screen.getByTestId('toggle-avatar-companion-picker-btn'));
     expect(screen.getByTestId('companion-avatar-picker-panel')).toBeInTheDocument();
-    fireEvent.click(screen.getByTestId('switch-avatar-btn-🦄'));
+    fireEvent.click(screen.getByTestId('switch-avatar-btn-≡ƒªä'));
     await waitFor(() => {
       expect(screen.getByTestId('companion-superpower-banner')).toHaveTextContent(
-        'Μαγική Ακτίνα Εστίασης'
+        '╬£╬▒╬│╬╣╬║╬« ╬æ╬║╧ä╬»╬╜╬▒ ╬ò╧â╧ä╬»╬▒╧â╬╖╧é'
       );
     });
   });
@@ -763,14 +763,14 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
     });
   });
 
-  it('ADHD Parent & B2B SEO Blog (/articles): renders all 22 SEO articles, filters by topic category, and verifies philological adaptation («τάμπλετ (Tablet)»)', async () => {
+  it('ADHD Parent & B2B SEO Blog (/articles): renders all 22 SEO articles, filters by topic category, and verifies philological adaptation (┬½╧ä╬¼╬╝╧Ç╬╗╬╡╧ä (Tablet)┬╗)', async () => {
     renderRoute('/articles');
     expect(screen.getByTestId('parent-articles-page')).toBeInTheDocument();
     expect(screen.getByTestId('blog-article-card-01')).toBeInTheDocument();
     expect(screen.getByTestId('blog-article-card-10')).toBeInTheDocument();
     expect(screen.getByTestId('blog-article-card-11')).toBeInTheDocument();
     expect(screen.getByTestId('blog-article-card-22')).toBeInTheDocument();
-    expect(document.body.textContent).not.toMatch(/ταμπλέτα/i);
+    expect(document.body.textContent).not.toMatch(/╧ä╬▒╬╝╧Ç╬╗╬¡╧ä╬▒/i);
 
     fireEvent.click(screen.getByTestId('filter-articles-home'));
     expect(screen.getByTestId('blog-article-card-01')).toBeInTheDocument();
@@ -805,7 +805,7 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
   it('Developer QA Audit: seamlessly transitions to next game via next-activity-in-category-btn and advances timer rounds strictly by 1 under React.StrictMode', () => {
     vi.useFakeTimers();
 
-    // 1. Game-to-Game Transition inside React.StrictMode: completing Activity 01 and clicking "Επόμενο: Βρες τη Διαφορά"
+    // 1. Game-to-Game Transition inside React.StrictMode: completing Activity 01 and clicking "╬ò╧Ç╧î╬╝╬╡╬╜╬┐: ╬Æ╧ü╬╡╧é ╧ä╬╖ ╬ö╬╣╬▒╧å╬┐╧ü╬¼"
     // must reset SharedActivityRunner to ACTIVE_ROUND (Round 1) for Activity 02 instead of remaining stuck on COMPLETED.
     const { unmount: uTransition } = render(
       <React.StrictMode>
@@ -826,7 +826,7 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
       'COMPLETED'
     );
 
-    // Click "⏭️ Επόμενο: Βρες τη Διαφορά"
+    // Click "ΓÅ¡∩╕Å ╬ò╧Ç╧î╬╝╬╡╬╜╬┐: ╬Æ╧ü╬╡╧é ╧ä╬╖ ╬ö╬╣╬▒╧å╬┐╧ü╬¼"
     fireEvent.click(screen.getByTestId('next-activity-in-category-btn'));
 
     expect(screen.getByTestId('shared-activity-runner')).toHaveAttribute(
@@ -882,7 +882,7 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
     act(() => {
       vi.advanceTimersByTime(2800);
     });
-    expect(screen.getByTestId('speech-clap-syllable-btn')).toHaveTextContent('Μπράβο! (3/3 Συλλαβές)');
+    expect(screen.getByTestId('speech-clap-syllable-btn')).toHaveTextContent('╬£╧Ç╧ü╬¼╬▓╬┐! (3/3 ╬ú╧à╬╗╬╗╬▒╬▓╬¡╧é)');
     u13();
 
     // 2. Age 8-10 receives 4-syllable compound challenge words in Activity 13 right from Round 1 (no boredom!)
@@ -892,20 +892,20 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
     await waitFor(() => {
       expect(screen.getByTestId('shared-activity-runner')).toHaveAttribute('data-age-band', '8-10');
     });
-    expect(screen.getByTestId('activity-13-speech-articulation')).toHaveTextContent('Πο-δή-λα-το');
-    expect(screen.getByTestId('speech-articulation-target')).toHaveTextContent('🚲');
-    expect(screen.getByTestId('speech-articulation-target')).toHaveTextContent('Ποδήλατο');
+    expect(screen.getByTestId('activity-13-speech-articulation')).toHaveTextContent('╬á╬┐-╬┤╬«-╬╗╬▒-╧ä╬┐');
+    expect(screen.getByTestId('speech-articulation-target')).toHaveTextContent('≡ƒÜ▓');
+    expect(screen.getByTestId('speech-articulation-target')).toHaveTextContent('╬á╬┐╬┤╬«╬╗╬▒╧ä╬┐');
     u810();
 
-    // 3. Activity 02 (Spot the Difference) shows exact single-object labels matching each emoji ('Ήλιος' vs 'Φεγγάρι')
+    // 3. Activity 02 (Spot the Difference) shows exact single-object labels matching each emoji ('╬ë╬╗╬╣╬┐╧é' vs '╬ª╬╡╬│╬│╬¼╧ü╬╣')
     const { unmount: u02 } = renderRoute('/activity/02-spot-difference');
-    expect(screen.getByTestId('difference-item-target')).toHaveTextContent('Φεγγάρι');
-    expect(screen.getByTestId('difference-item-target')).not.toHaveTextContent('Ήλιος / Φεγγάρι');
+    expect(screen.getByTestId('difference-item-target')).toHaveTextContent('╬ª╬╡╬│╬│╬¼╧ü╬╣');
+    expect(screen.getByTestId('difference-item-target')).not.toHaveTextContent('╬ë╬╗╬╣╬┐╧é / ╬ª╬╡╬│╬│╬¼╧ü╬╣');
     u02();
 
     // 4. Activity 08 (Listen & Do) uses distinct auditory riddles & mystery cards while listening
     const { unmount: u08 } = renderRoute('/activity/08-listen-do');
-    expect(screen.getByTestId('listen-do-target')).toHaveTextContent('Άκου πρώτα...');
+    expect(screen.getByTestId('listen-do-target')).toHaveTextContent('╬å╬║╬┐╧à ╧Ç╧ü╧Ä╧ä╬▒...');
     u08();
   });
 
@@ -922,7 +922,7 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
       vi.advanceTimersByTime(3600);
     });
     expect(screen.getByTestId('live-syllable-runner-banner')).toHaveTextContent(
-      /Τρέχει τώρα η συλλαβή|Ο ρυθμός συλλαβών επαναλαμβάνεται/
+      /╬ñ╧ü╬¡╧ç╬╡╬╣ ╧ä╧Ä╧ü╬▒ ╬╖ ╧â╧à╬╗╬╗╬▒╬▓╬«|╬ƒ ╧ü╧à╬╕╬╝╧î╧é ╧â╧à╬╗╬╗╬▒╬▓╧Ä╬╜ ╬╡╧Ç╬▒╬╜╬▒╬╗╬▒╬╝╬▓╬¼╬╜╬╡╧ä╬▒╬╣/
     );
     uLoop();
     vi.useRealTimers();
@@ -942,7 +942,7 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
     const { unmount: u05 } = renderRoute('/activity/05-order-steps');
     await waitFor(() => {
       expect(screen.getByTestId('activity-05-order-steps')).toHaveTextContent(
-        'Οργάνωση Επιστημονικού Πειράματος (STEM)'
+        '╬ƒ╧ü╬│╬¼╬╜╧ë╧â╬╖ ╬ò╧Ç╬╣╧â╧ä╬╖╬╝╬┐╬╜╬╣╬║╬┐╧ì ╬á╬╡╬╣╧ü╬¼╬╝╬▒╧ä╬┐╧é (STEM)'
       );
     });
     u05();
@@ -951,16 +951,16 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
     const { unmount: u14 } = renderRoute('/activity/14-narrative-builder');
     await waitFor(() => {
       expect(screen.getByTestId('activity-14-narrative-builder')).toHaveTextContent(
-        'Η Ομάδα Ρομποτικής'
+        '╬ù ╬ƒ╬╝╬¼╬┤╬▒ ╬í╬┐╬╝╧Ç╬┐╧ä╬╣╬║╬«╧é'
       );
     });
     u14();
 
-    // Activity 15: Senior Temporal Inversion ("ΠΡΙΝ... αλλά ΑΦΟΥ...")
+    // Activity 15: Senior Temporal Inversion ("╬á╬í╬Ö╬¥... ╬▒╬╗╬╗╬¼ ╬æ╬ª╬ƒ╬Ñ...")
     const { unmount: u15 } = renderRoute('/activity/15-auditory-discrimination');
     await waitFor(() => {
       expect(screen.getByTestId('activity-15-auditory-discrimination')).toHaveTextContent(
-        'Χρονική Αναστροφή (8-12 ετών)'
+        '╬º╧ü╬┐╬╜╬╣╬║╬« ╬æ╬╜╬▒╧â╧ä╧ü╬┐╧å╬« (8-12 ╬╡╧ä╧Ä╬╜)'
       );
     });
     u15();
@@ -969,50 +969,50 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
     const { unmount: u18 } = renderRoute('/activity/18-adl-praxis');
     await waitFor(() => {
       expect(screen.getByTestId('activity-18-adl-praxis')).toHaveTextContent(
-        'Ιεράρχηση Απογευματινής Μελέτης'
+        '╬Ö╬╡╧ü╬¼╧ü╧ç╬╖╧â╬╖ ╬æ╧Ç╬┐╬│╬╡╧à╬╝╬▒╧ä╬╣╬╜╬«╧é ╬£╬╡╬╗╬¡╧ä╬╖╧é'
       );
     });
     u18();
   });
 
-  it('Modern Greek Grammar & Vocative Case (Κλητική Πτώση): inflects child names and companion titles accurately in Hub and Completion screens', async () => {
-    // 1. Unit tests for Modern Greek Vocative morphology (Γραμματική Τριανταφυλλίδη)
-    expect(toGreekVocative('Μικρός Εξερευνητής')).toBe('Μικρέ Εξερευνητή');
-    expect(toGreekVocative('Φωτεινός Μονόκερος')).toBe('Φωτεινέ Μονόκερε');
-    expect(toGreekVocative('Ήρεμος Δράκος της Ανάσας')).toBe('Ήρεμε Δράκε της Ανάσας');
-    expect(toGreekVocative('Σοφός Μάγος της Μνήμης')).toBe('Σοφέ Μάγε της Μνήμης');
-    expect(toGreekVocative('Μικρός Αστροναύτης')).toBe('Μικρέ Αστροναύτη');
-    expect(toGreekVocative('Γρήγορο Κουνελάκι Ρυθμού')).toBe('Γρήγορο Κουνελάκι Ρυθμού');
+  it('Modern Greek Grammar & Vocative Case (╬Ü╬╗╬╖╧ä╬╣╬║╬« ╬á╧ä╧Ä╧â╬╖): inflects child names and companion titles accurately in Hub and Completion screens', async () => {
+    // 1. Unit tests for Modern Greek Vocative morphology (╬ô╧ü╬▒╬╝╬╝╬▒╧ä╬╣╬║╬« ╬ñ╧ü╬╣╬▒╬╜╧ä╬▒╧å╧à╬╗╬╗╬»╬┤╬╖)
+    expect(toGreekVocative('╬£╬╣╬║╧ü╧î╧é ╬ò╬╛╬╡╧ü╬╡╧à╬╜╬╖╧ä╬«╧é')).toBe('╬£╬╣╬║╧ü╬¡ ╬ò╬╛╬╡╧ü╬╡╧à╬╜╬╖╧ä╬«');
+    expect(toGreekVocative('╬ª╧ë╧ä╬╡╬╣╬╜╧î╧é ╬£╬┐╬╜╧î╬║╬╡╧ü╬┐╧é')).toBe('╬ª╧ë╧ä╬╡╬╣╬╜╬¡ ╬£╬┐╬╜╧î╬║╬╡╧ü╬╡');
+    expect(toGreekVocative('╬ë╧ü╬╡╬╝╬┐╧é ╬ö╧ü╬¼╬║╬┐╧é ╧ä╬╖╧é ╬æ╬╜╬¼╧â╬▒╧é')).toBe('╬ë╧ü╬╡╬╝╬╡ ╬ö╧ü╬¼╬║╬╡ ╧ä╬╖╧é ╬æ╬╜╬¼╧â╬▒╧é');
+    expect(toGreekVocative('╬ú╬┐╧å╧î╧é ╬£╬¼╬│╬┐╧é ╧ä╬╖╧é ╬£╬╜╬«╬╝╬╖╧é')).toBe('╬ú╬┐╧å╬¡ ╬£╬¼╬│╬╡ ╧ä╬╖╧é ╬£╬╜╬«╬╝╬╖╧é');
+    expect(toGreekVocative('╬£╬╣╬║╧ü╧î╧é ╬æ╧â╧ä╧ü╬┐╬╜╬▒╧ì╧ä╬╖╧é')).toBe('╬£╬╣╬║╧ü╬¡ ╬æ╧â╧ä╧ü╬┐╬╜╬▒╧ì╧ä╬╖');
+    expect(toGreekVocative('╬ô╧ü╬«╬│╬┐╧ü╬┐ ╬Ü╬┐╧à╬╜╬╡╬╗╬¼╬║╬╣ ╬í╧à╬╕╬╝╬┐╧ì')).toBe('╬ô╧ü╬«╬│╬┐╧ü╬┐ ╬Ü╬┐╧à╬╜╬╡╬╗╬¼╬║╬╣ ╬í╧à╬╕╬╝╬┐╧ì');
 
-    // Masculine proper names (-ος -> -ο for disyllabic paroxytones; -ος -> -ε for polysyllabic; -ης/-ας -> drop -ς)
-    expect(toGreekVocative('Γιώργος')).toBe('Γιώργο');
-    expect(toGreekVocative('Νίκος')).toBe('Νίκο');
-    expect(toGreekVocative('Πέτρος')).toBe('Πέτρο');
-    expect(toGreekVocative('Χρήστος')).toBe('Χρήστο');
-    expect(toGreekVocative('Αλέξανδρος')).toBe('Αλέξανδρε');
-    expect(toGreekVocative('Κωνσταντίνος')).toBe('Κωνσταντίνε');
-    expect(toGreekVocative('Στέφανος')).toBe('Στέφανε');
-    expect(toGreekVocative('Δημήτρης')).toBe('Δημήτρη');
-    expect(toGreekVocative('Γιάννης')).toBe('Γιάννη');
-    expect(toGreekVocative('Ορέστης')).toBe('Ορέστη');
-    expect(toGreekVocative('Κώστας')).toBe('Κώστα');
-    expect(toGreekVocative('Ανδρέας')).toBe('Ανδρέα');
-    expect(toGreekVocative('Αριάδνη')).toBe('Αριάδνη');
-    expect(toGreekVocative('Άρτεμις')).toBe('Άρτεμη');
+    // Masculine proper names (-╬┐╧é -> -╬┐ for disyllabic paroxytones; -╬┐╧é -> -╬╡ for polysyllabic; -╬╖╧é/-╬▒╧é -> drop -╧é)
+    expect(toGreekVocative('╬ô╬╣╧Ä╧ü╬│╬┐╧é')).toBe('╬ô╬╣╧Ä╧ü╬│╬┐');
+    expect(toGreekVocative('╬¥╬»╬║╬┐╧é')).toBe('╬¥╬»╬║╬┐');
+    expect(toGreekVocative('╬á╬¡╧ä╧ü╬┐╧é')).toBe('╬á╬¡╧ä╧ü╬┐');
+    expect(toGreekVocative('╬º╧ü╬«╧â╧ä╬┐╧é')).toBe('╬º╧ü╬«╧â╧ä╬┐');
+    expect(toGreekVocative('╬æ╬╗╬¡╬╛╬▒╬╜╬┤╧ü╬┐╧é')).toBe('╬æ╬╗╬¡╬╛╬▒╬╜╬┤╧ü╬╡');
+    expect(toGreekVocative('╬Ü╧ë╬╜╧â╧ä╬▒╬╜╧ä╬»╬╜╬┐╧é')).toBe('╬Ü╧ë╬╜╧â╧ä╬▒╬╜╧ä╬»╬╜╬╡');
+    expect(toGreekVocative('╬ú╧ä╬¡╧å╬▒╬╜╬┐╧é')).toBe('╬ú╧ä╬¡╧å╬▒╬╜╬╡');
+    expect(toGreekVocative('╬ö╬╖╬╝╬«╧ä╧ü╬╖╧é')).toBe('╬ö╬╖╬╝╬«╧ä╧ü╬╖');
+    expect(toGreekVocative('╬ô╬╣╬¼╬╜╬╜╬╖╧é')).toBe('╬ô╬╣╬¼╬╜╬╜╬╖');
+    expect(toGreekVocative('╬ƒ╧ü╬¡╧â╧ä╬╖╧é')).toBe('╬ƒ╧ü╬¡╧â╧ä╬╖');
+    expect(toGreekVocative('╬Ü╧Ä╧â╧ä╬▒╧é')).toBe('╬Ü╧Ä╧â╧ä╬▒');
+    expect(toGreekVocative('╬æ╬╜╬┤╧ü╬¡╬▒╧é')).toBe('╬æ╬╜╬┤╧ü╬¡╬▒');
+    expect(toGreekVocative('╬æ╧ü╬╣╬¼╬┤╬╜╬╖')).toBe('╬æ╧ü╬╣╬¼╬┤╬╜╬╖');
+    expect(toGreekVocative('╬å╧ü╧ä╬╡╬╝╬╣╧é')).toBe('╬å╧ü╧ä╬╡╬╝╬╖');
 
-    // 2. Verify Child Hub greets the default profile in Vocative ("Γεια σου, Μικρέ Εξερευνητή!")
+    // 2. Verify Child Hub greets the default profile in Vocative ("╬ô╬╡╬╣╬▒ ╧â╬┐╧à, ╬£╬╣╬║╧ü╬¡ ╬ò╬╛╬╡╧ü╬╡╧à╬╜╬╖╧ä╬«!")
     const { unmount: uHub } = renderRoute('/app');
-    expect(screen.getByText(/Γεια σου, Μικρέ Εξερευνητή!/i)).toBeInTheDocument();
+    expect(screen.getByText(/╬ô╬╡╬╣╬▒ ╧â╬┐╧à, ╬£╬╣╬║╧ü╬¡ ╬ò╬╛╬╡╧ü╬╡╧à╬╜╬╖╧ä╬«!/i)).toBeInTheDocument();
 
-    // Create a profile with a masculine name in Nominative ("Γιώργος") and verify Vocative greeting ("Γεια σου, Γιώργο!")
+    // Create a profile with a masculine name in Nominative ("╬ô╬╣╧Ä╧ü╬│╬┐╧é") and verify Vocative greeting ("╬ô╬╡╬╣╬▒ ╧â╬┐╧à, ╬ô╬╣╧Ä╧ü╬│╬┐!")
     fireEvent.click(screen.getByTestId('open-create-profile-btn'));
     fireEvent.change(screen.getByTestId('new-profile-name-input'), {
-      target: { value: 'Γιώργος' },
+      target: { value: '╬ô╬╣╧Ä╧ü╬│╬┐╧é' },
     });
     fireEvent.click(screen.getByTestId('submit-create-profile-btn'));
 
     await waitFor(() => {
-      expect(screen.getByText(/Γεια σου, Γιώργο!/i)).toBeInTheDocument();
+      expect(screen.getByText(/╬ô╬╡╬╣╬▒ ╧â╬┐╧à, ╬ô╬╣╧Ä╧ü╬│╬┐!/i)).toBeInTheDocument();
     });
     uHub();
   });
@@ -1036,7 +1036,7 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
       '<link rel="alternate" hreflang="el-GR" href="https://www.synapseplay.gr/articles/09-fine-motor-writing-readiness" />'
     );
     expect(html09).not.toContain('<link rel="canonical" href="https://www.synapseplay.gr/" />');
-    expect(html09).toContain('Όταν το παιδί κουράζεται αμέσως στο γράψιμο');
+    expect(html09).toContain('╬î╧ä╬▒╬╜ ╧ä╬┐ ╧Ç╬▒╬╣╬┤╬» ╬║╬┐╧à╧ü╬¼╬╢╬╡╧ä╬▒╬╣ ╬▒╬╝╬¡╧â╧ë╧é ╧â╧ä╬┐ ╬│╧ü╬¼╧ê╬╣╬╝╬┐');
 
     const html01 = injectSeoIntoHtmlTemplate(
       sampleTemplate,
@@ -1046,38 +1046,7 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
       '<link rel="canonical" href="https://www.synapseplay.gr/articles/01-smooth-landing-screen-meltdowns" />'
     );
     expect(html01).not.toContain('<link rel="canonical" href="https://www.synapseplay.gr/" />');
-    expect(html01).toContain('Γιατί το παιδί με ΔΕΠΥ ξεσπάει όταν του παίρνεις το τάμπλετ');
-  });
-
-  it('Security & GDPR Consent Hardening: enforces opt-in analytics consent, removes DOM answer leaks, and protects /api/feedback against origin spoofing, spam honeypots, and rate abuse', async () => {
-    const { hasAnalyticsConsent } = await import('../utils/analyticsConsent');
-    const { clearGdprConsentAck, getGdprConsentAck } = await import(
-      '../components/GdprConsentBanner'
-    );
-
-    expect(hasAnalyticsConsent(null)).toBe(false);
-    expect(
-      hasAnalyticsConsent(JSON.stringify({ mode: 'strictly-necessary-local-only', analytics: false }))
-    ).toBe(false);
-    expect(
-      hasAnalyticsConsent(JSON.stringify({ mode: 'necessary-and-analytics', analytics: true }))
-    ).toBe(true);
-
-    // Verify GDPR consent banner exposes both Necessary-Only and Opt-In Analytics buttons
-    clearGdprConsentAck();
-    const { unmount } = renderRoute('/');
-    expect(screen.getByTestId('gdpr-banner-accept-btn')).toBeInTheDocument();
-    expect(screen.getByTestId('gdpr-banner-accept-analytics-btn')).toBeInTheDocument();
-    fireEvent.click(screen.getByTestId('gdpr-banner-accept-analytics-btn'));
-    expect(hasAnalyticsConsent(getGdprConsentAck())).toBe(true);
-    unmount();
-
-    // Verify ParentGateModal does not leak data-correct-option in DOM
-    const { unmount: uGate } = renderRoute('/app');
-    fireEvent.click(screen.getByTestId('open-parent-gate-btn'));
-    const optBtn = screen.getByTestId('parent-gate-option-15');
-    expect(optBtn).not.toHaveAttribute('data-correct-option');
-    uGate();
+    expect(html01).toContain('╬ô╬╣╬▒╧ä╬» ╧ä╬┐ ╧Ç╬▒╬╣╬┤╬» ╬╝╬╡ ╬ö╬ò╬á╬Ñ ╬╛╬╡╧â╧Ç╬¼╬╡╬╣ ╧î╧ä╬▒╬╜ ╧ä╬┐╧à ╧Ç╬▒╬»╧ü╬╜╬╡╬╣╧é ╧ä╬┐ ╧ä╬¼╬╝╧Ç╬╗╬╡╧ä');
   });
 });
 

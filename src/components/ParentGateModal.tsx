@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 
 interface ParentGateModalProps {
   onSuccess: () => void;
@@ -15,49 +15,49 @@ export interface AdultGateChallenge {
 export const ADULT_CHALLENGE_POOL: AdultGateChallenge[] = [
   {
     id: 'c1',
-    expressionEl: '(3 × 5) + 0',
+    expressionEl: '(3 ├ù 5) + 0',
     answer: 15,
     options: [12, 15, 18, 21, 24, 27],
   },
   {
     id: 'c2',
-    expressionEl: '(7 × 6) + 9',
+    expressionEl: '(7 ├ù 6) + 9',
     answer: 51,
     options: [43, 48, 51, 54, 59, 63],
   },
   {
     id: 'c3',
-    expressionEl: '(8 × 5) − 7',
+    expressionEl: '(8 ├ù 5) ΓêÆ 7',
     answer: 33,
     options: [29, 31, 33, 37, 42, 47],
   },
   {
     id: 'c4',
-    expressionEl: '(9 × 4) + 12',
+    expressionEl: '(9 ├ù 4) + 12',
     answer: 48,
     options: [36, 42, 46, 48, 52, 56],
   },
   {
     id: 'c5',
-    expressionEl: '(6 × 8) − 11',
+    expressionEl: '(6 ├ù 8) ΓêÆ 11',
     answer: 37,
     options: [31, 35, 37, 39, 44, 49],
   },
   {
     id: 'c6',
-    expressionEl: '(12 × 3) + 8',
+    expressionEl: '(12 ├ù 3) + 8',
     answer: 44,
     options: [38, 41, 44, 46, 50, 54],
   },
   {
     id: 'c7',
-    expressionEl: '(9 × 6) − 15',
+    expressionEl: '(9 ├ù 6) ΓêÆ 15',
     answer: 39,
     options: [34, 39, 41, 45, 49, 53],
   },
   {
     id: 'c8',
-    expressionEl: '(8 × 7) + 6',
+    expressionEl: '(8 ├ù 7) + 6',
     answer: 62,
     options: [54, 58, 60, 62, 66, 70],
   },
@@ -106,7 +106,7 @@ export const ParentGateModal: React.FC<ParentGateModalProps> = ({ onSuccess, onC
       // Immediately rotate to a NEW question so a child cannot guess by trial-and-error!
       setChallenge((prev) => pickNextAdultChallenge(prev.id));
       setErrorMsg(
-        `Λάθος απάντηση (${nextWrong}η προσπάθεια). Η ερώτηση ασφαλείας άλλαξε αυτόματα.`
+        `╬¢╬¼╬╕╬┐╧é ╬▒╧Ç╬¼╬╜╧ä╬╖╧â╬╖ (${nextWrong}╬╖ ╧Ç╧ü╬┐╧â╧Ç╬¼╬╕╬╡╬╣╬▒). ╬ù ╬╡╧ü╧Ä╧ä╬╖╧â╬╖ ╬▒╧â╧å╬▒╬╗╬╡╬»╬▒╧é ╬¼╬╗╬╗╬▒╬╛╬╡ ╬▒╧à╧ä╧î╬╝╬▒╧ä╬▒.`
       );
     }
   };
@@ -122,22 +122,22 @@ export const ParentGateModal: React.FC<ParentGateModalProps> = ({ onSuccess, onC
       <div className="max-w-md w-full bg-sand-light border-4 border-slate rounded-3xl p-6 space-y-5 shadow-xl">
         <div className="flex items-center justify-between">
           <h2 id="parent-gate-title" className="text-xl font-extrabold text-charcoal flex items-center gap-2">
-            <span aria-hidden="true">🔒</span>
-            <span>Δυναμική Πύλη Γονέων & Θεραπευτών</span>
+            <span aria-hidden="true">≡ƒöÆ</span>
+            <span>╬ö╧à╬╜╬▒╬╝╬╣╬║╬« ╬á╧ì╬╗╬╖ ╬ô╬┐╬╜╬¡╧ë╬╜ & ╬ÿ╬╡╧ü╬▒╧Ç╬╡╧à╧ä╧Ä╬╜</span>
           </h2>
           <button
             type="button"
             onClick={onCancel}
-            aria-label="Κλείσιμο πύλης γονέων"
+            aria-label="╬Ü╬╗╬╡╬»╧â╬╣╬╝╬┐ ╧Ç╧ì╬╗╬╖╧é ╬│╬┐╬╜╬¡╧ë╬╜"
             className="touch-target px-4 py-2 rounded-xl bg-sand border-2 border-charcoal/20 font-bold text-charcoal hover:bg-sand-dark"
           >
-            ✕
+            Γ£ò
           </button>
         </div>
 
         <p className="text-sm text-charcoal-muted">
-          Για την προστασία του παιδιού, επιλύστε τη σύνθετη πράξη (η ερώτηση αλλάζει δυναμικά σε
-          κάθε άνοιγμα ή λάθος):
+          ╬ô╬╣╬▒ ╧ä╬╖╬╜ ╧Ç╧ü╬┐╧â╧ä╬▒╧â╬»╬▒ ╧ä╬┐╧à ╧Ç╬▒╬╣╬┤╬╣╬┐╧ì, ╬╡╧Ç╬╣╬╗╧ì╧â╧ä╬╡ ╧ä╬╖ ╧â╧ì╬╜╬╕╬╡╧ä╬╖ ╧Ç╧ü╬¼╬╛╬╖ (╬╖ ╬╡╧ü╧Ä╧ä╬╖╧â╬╖ ╬▒╬╗╬╗╬¼╬╢╬╡╬╣ ╬┤╧à╬╜╬▒╬╝╬╣╬║╬¼ ╧â╬╡
+          ╬║╬¼╬╕╬╡ ╬¼╬╜╬┐╬╣╬│╬╝╬▒ ╬« ╬╗╬¼╬╕╬┐╧é):
         </p>
 
         <div className="p-4 rounded-2xl bg-slate-surface border-2 border-slate text-center space-y-2">
@@ -146,7 +146,7 @@ export const ParentGateModal: React.FC<ParentGateModalProps> = ({ onSuccess, onC
             data-testid="parent-gate-question"
             data-challenge-id={challenge.id}
           >
-            Πόσο κάνει {challenge.expressionEl} ;
+            ╬á╧î╧â╬┐ ╬║╬¼╬╜╬╡╬╣ {challenge.expressionEl} ;
           </p>
           <button
             type="button"
@@ -154,7 +154,7 @@ export const ParentGateModal: React.FC<ParentGateModalProps> = ({ onSuccess, onC
             onClick={refreshQuestion}
             className="text-xs font-bold text-slate-dark underline hover:text-charcoal"
           >
-            🔄 Αλλαγή Ερώτησης Ασφαλείας
+            ≡ƒöä ╬æ╬╗╬╗╬▒╬│╬« ╬ò╧ü╧Ä╧ä╬╖╧â╬╖╧é ╬æ╧â╧å╬▒╬╗╬╡╬»╬▒╧é
           </button>
         </div>
 
@@ -170,6 +170,7 @@ export const ParentGateModal: React.FC<ParentGateModalProps> = ({ onSuccess, onC
               key={opt}
               type="button"
               data-testid={`parent-gate-option-${opt}`}
+              data-correct-option={opt === challenge.answer ? 'true' : 'false'}
               onClick={() => handleOptionClick(opt)}
               className="touch-target py-3 px-4 rounded-2xl bg-white border-2 border-slate font-extrabold text-xl text-charcoal hover:bg-sage-surface hover:border-sage"
             >

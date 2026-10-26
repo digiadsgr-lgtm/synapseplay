@@ -50,7 +50,7 @@ export const GdprConsentBanner: React.FC = () => {
     }
   }, []);
 
-  const handleAcceptNecessaryOnly = () => {
+  const handleAcceptNecessary = () => {
     setGdprConsentAck(
       JSON.stringify({
         acceptedAt: new Date().toISOString(),
@@ -61,11 +61,11 @@ export const GdprConsentBanner: React.FC = () => {
     setIsVisible(false);
   };
 
-  const handleAcceptWithAnalytics = () => {
+  const handleAcceptAnalytics = () => {
     setGdprConsentAck(
       JSON.stringify({
         acceptedAt: new Date().toISOString(),
-        mode: 'necessary-and-analytics',
+        mode: 'necessary-plus-analytics',
         analytics: true,
       })
     );
@@ -87,7 +87,7 @@ export const GdprConsentBanner: React.FC = () => {
           <div className="font-extrabold flex items-center gap-2 text-[#2C3539]">
             <span aria-hidden="true">🛡️</span>
             <span>
-              Προστασία Δεδομένων GDPR &amp; Επιλογή Στατιστικών (Privacy-by-Design)
+              Προστασία Δεδομένων (GDPR)
             </span>
           </div>
           <p className="text-[#2C3539]/85 leading-relaxed">
@@ -100,10 +100,9 @@ export const GdprConsentBanner: React.FC = () => {
             >
               DIGIADS
             </a>
-            ) αποθηκεύει τα προφίλ και την πρόοδο των παιδιών{' '}
-            <strong>αποκλειστικά τοπικά στη συσκευή σας</strong> (IndexedDB). Τα ανώνυμα στατιστικά
-            επισκεψιμότητας (Google Tag Manager &amp; Vercel Analytics) ενεργοποιούνται{' '}
-            <strong>μόνο αν δώσετε ρητή συγκατάθεση</strong>.
+            ) χρησιμοποιεί στατιστικά επισκεψιμότητας (Google Tag Manager) <strong>μόνο αν τα αποδεχτείτε</strong>. Τα προφίλ και
+            η πρόοδος των παιδιών αποθηκεύονται <strong>αποκλειστικά τοπικά στη συσκευή σας</strong>{' '}
+            (IndexedDB) με δυνατότητα οριστικής διαγραφής με 1 κλικ ανά πάσα στιγμή.
           </p>
         </div>
 
@@ -117,19 +116,19 @@ export const GdprConsentBanner: React.FC = () => {
           </Link>
           <button
             type="button"
-            data-testid="gdpr-banner-accept-btn"
-            onClick={handleAcceptNecessaryOnly}
+            data-testid="gdpr-banner-accept-analytics-btn"
+            onClick={handleAcceptAnalytics}
             className="touch-target px-4 py-2.5 rounded-2xl bg-white border-2 border-[#7A9A7B] text-[#2C3539] font-extrabold text-xs text-center flex items-center justify-center hover:bg-[#EFE8D8] transition-colors"
           >
-            Μόνο τα Απαραίτητα
+            Αποδοχή &amp; Στατιστικών
           </button>
           <button
             type="button"
-            data-testid="gdpr-banner-accept-analytics-btn"
-            onClick={handleAcceptWithAnalytics}
+            data-testid="gdpr-banner-accept-btn"
+            onClick={handleAcceptNecessary}
             className="touch-target px-5 py-2.5 rounded-2xl bg-[#7A9A7B] text-white font-extrabold text-xs text-center flex items-center justify-center hover:opacity-95 transition-opacity"
           >
-            Αποδοχή &amp; Στατιστικών
+            Μόνο τα Απαραίτητα
           </button>
         </div>
       </div>

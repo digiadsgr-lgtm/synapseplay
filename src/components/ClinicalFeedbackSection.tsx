@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { ACTIVITIES } from '../data/activitiesCatalog';
 import { AGE_BAND_PROTOCOLS, type AgeBandId } from '../data/ageProtocols';
@@ -10,32 +10,32 @@ import type {
 import { sendFeedbackSilentlyToOwner } from '../utils/feedbackCloudRelay';
 
 const ROLE_OPTIONS: Array<{ value: ReviewerRole; labelEl: string }> = [
-  { value: 'parent', labelEl: '👨‍👩‍👧 Γονέας / Κηδεμόνας' },
-  { value: 'occupational-therapist', labelEl: '👐 Εργοθεραπευτής (OT)' },
-  { value: 'speech-therapist', labelEl: '🗣️ Λογοθεραπευτής (SLT)' },
-  { value: 'child-psychologist', labelEl: '🧠 Παιδοψυχολόγος / Ειδικός Παιδαγωγός' },
-  { value: 'child-psychiatrist', labelEl: '🩺 Παιδοψυχίατρος' },
-  { value: 'physiatrist', labelEl: '🏃 Φυσίατρος' },
-  { value: 'social-worker', labelEl: '🤝 Κοινωνικός Λειτουργός' },
-  { value: 'adhd-center-director', labelEl: '🏥 Υπεύθυνος Κέντρου ΔΕΠΥ / Θεραπευτηρίου' },
+  { value: 'parent', labelEl: '≡ƒæ¿ΓÇì≡ƒæ⌐ΓÇì≡ƒæº ╬ô╬┐╬╜╬¡╬▒╧é / ╬Ü╬╖╬┤╬╡╬╝╧î╬╜╬▒╧é' },
+  { value: 'occupational-therapist', labelEl: '≡ƒæÉ ╬ò╧ü╬│╬┐╬╕╬╡╧ü╬▒╧Ç╬╡╧à╧ä╬«╧é (OT)' },
+  { value: 'speech-therapist', labelEl: '≡ƒùú∩╕Å ╬¢╬┐╬│╬┐╬╕╬╡╧ü╬▒╧Ç╬╡╧à╧ä╬«╧é (SLT)' },
+  { value: 'child-psychologist', labelEl: '≡ƒºá ╬á╬▒╬╣╬┤╬┐╧ê╧à╧ç╬┐╬╗╧î╬│╬┐╧é / ╬ò╬╣╬┤╬╣╬║╧î╧é ╬á╬▒╬╣╬┤╬▒╬│╧ë╬│╧î╧é' },
+  { value: 'child-psychiatrist', labelEl: '≡ƒ⌐║ ╬á╬▒╬╣╬┤╬┐╧ê╧à╧ç╬»╬▒╧ä╧ü╬┐╧é' },
+  { value: 'physiatrist', labelEl: '≡ƒÅâ ╬ª╧à╧â╬»╬▒╧ä╧ü╬┐╧é' },
+  { value: 'social-worker', labelEl: '≡ƒñ¥ ╬Ü╬┐╬╣╬╜╧ë╬╜╬╣╬║╧î╧é ╬¢╬╡╬╣╧ä╬┐╧à╧ü╬│╧î╧é' },
+  { value: 'adhd-center-director', labelEl: '≡ƒÅÑ ╬Ñ╧Ç╬╡╧ì╬╕╧à╬╜╬┐╧é ╬Ü╬¡╬╜╧ä╧ü╬┐╧à ╬ö╬ò╬á╬Ñ / ╬ÿ╬╡╧ü╬▒╧Ç╬╡╧à╧ä╬╖╧ü╬»╬┐╧à' },
 ];
 
 const CATEGORY_OPTIONS: Array<{ value: ObservationCategory; labelEl: string }> = [
-  { value: 'clinical-suggestion', labelEl: '🩺 Κλινική Πρόταση Βελτίωσης' },
-  { value: 'bug-ux', labelEl: '🛠️ Λειτουργική Παρατήρηση / UX Παιχνιδιού' },
-  { value: 'age-calibration', labelEl: '🎯 Κλιμάκωση Ηλικίας & Δυσκολίας' },
-  { value: 'new-game-idea', labelEl: '💡 Ιδέα για Νέα Θεραπευτική Άσκηση' },
-  { value: 'positive-review', labelEl: '🌟 Θετική Αξιολόγηση & Ανταπόκριση Παιδιού' },
+  { value: 'clinical-suggestion', labelEl: '≡ƒ⌐║ ╬Ü╬╗╬╣╬╜╬╣╬║╬« ╬á╧ü╧î╧ä╬▒╧â╬╖ ╬Æ╬╡╬╗╧ä╬»╧ë╧â╬╖╧é' },
+  { value: 'bug-ux', labelEl: '≡ƒ¢á∩╕Å ╬¢╬╡╬╣╧ä╬┐╧à╧ü╬│╬╣╬║╬« ╬á╬▒╧ü╬▒╧ä╬«╧ü╬╖╧â╬╖ / UX ╬á╬▒╬╣╧ç╬╜╬╣╬┤╬╣╬┐╧ì' },
+  { value: 'age-calibration', labelEl: '≡ƒÄ» ╬Ü╬╗╬╣╬╝╬¼╬║╧ë╧â╬╖ ╬ù╬╗╬╣╬║╬»╬▒╧é & ╬ö╧à╧â╬║╬┐╬╗╬»╬▒╧é' },
+  { value: 'new-game-idea', labelEl: '≡ƒÆí ╬Ö╬┤╬¡╬▒ ╬│╬╣╬▒ ╬¥╬¡╬▒ ╬ÿ╬╡╧ü╬▒╧Ç╬╡╧à╧ä╬╣╬║╬« ╬å╧â╬║╬╖╧â╬╖' },
+  { value: 'positive-review', labelEl: '≡ƒîƒ ╬ÿ╬╡╧ä╬╣╬║╬« ╬æ╬╛╬╣╬┐╬╗╧î╬│╬╖╧â╬╖ & ╬æ╬╜╧ä╬▒╧Ç╧î╬║╧ü╬╣╧â╬╖ ╬á╬▒╬╣╬┤╬╣╬┐╧ì' },
 ];
 
 export function formatFeedbackReportText(entries: ClinicalFeedbackEntry[]): string {
   if (entries.length === 0) {
-    return 'Δεν υπάρχουν ακόμη καταγεγραμμένες παρατηρήσεις.';
+    return '╬ö╬╡╬╜ ╧à╧Ç╬¼╧ü╧ç╬┐╧à╬╜ ╬▒╬║╧î╬╝╬╖ ╬║╬▒╧ä╬▒╬│╬╡╬│╧ü╬▒╬╝╬╝╬¡╬╜╬╡╧é ╧Ç╬▒╧ü╬▒╧ä╬╖╧ü╬«╧â╬╡╬╣╧é.';
   }
   const header = [
     '==========================================================',
-    'SYNAPSEPLAY (FocusEngine 5+) — ΑΝΑΦΟΡΑ ΑΞΙΟΛΟΓΗΣΗΣ & ΠΑΡΑΤΗΡΗΣΕΩΝ',
-    `Σύνολο Παρατηρήσεων: ${entries.length} | Ημερομηνία Εξαγωγής: ${new Date().toLocaleDateString('el-GR')}`,
+    'SYNAPSEPLAY (FocusEngine 5+) ΓÇö ╬æ╬¥╬æ╬ª╬ƒ╬í╬æ ╬æ╬₧╬Ö╬ƒ╬¢╬ƒ╬ô╬ù╬ú╬ù╬ú & ╬á╬æ╬í╬æ╬ñ╬ù╬í╬ù╬ú╬ò╬⌐╬¥',
+    `╬ú╧ì╬╜╬┐╬╗╬┐ ╬á╬▒╧ü╬▒╧ä╬╖╧ü╬«╧â╬╡╧ë╬╜: ${entries.length} | ╬ù╬╝╬╡╧ü╬┐╬╝╬╖╬╜╬»╬▒ ╬ò╬╛╬▒╬│╧ë╬│╬«╧é: ${new Date().toLocaleDateString('el-GR')}`,
     '==========================================================',
     '',
   ].join('\n');
@@ -43,12 +43,12 @@ export function formatFeedbackReportText(entries: ClinicalFeedbackEntry[]): stri
   const body = entries
     .map((e, idx) => {
       return [
-        `#${idx + 1} [${e.dateKey}] — ${e.reviewerRoleLabelEl}${
+        `#${idx + 1} [${e.dateKey}] ΓÇö ${e.reviewerRoleLabelEl}${
           e.reviewerNameOrCenter ? ` (${e.reviewerNameOrCenter})` : ''
         }`,
-        `• Αφορά: ${e.targetScopeLabelEl} | Ηλικία Δοκιμής: ${e.ageBandTested} ετών`,
-        `• Βαθμολογία: ${e.ratingStars}/5 ⭐ (Ευχρηστία Παιδιού: ${e.usabilityScore}/5 | Κλινική Καταλληλότητα: ${e.clinicalAppropriatenessScore}/5)`,
-        `• Παρατήρηση / Πρόταση: ${e.commentEl}`,
+        `ΓÇó ╬æ╧å╬┐╧ü╬¼: ${e.targetScopeLabelEl} | ╬ù╬╗╬╣╬║╬»╬▒ ╬ö╬┐╬║╬╣╬╝╬«╧é: ${e.ageBandTested} ╬╡╧ä╧Ä╬╜`,
+        `ΓÇó ╬Æ╬▒╬╕╬╝╬┐╬╗╬┐╬│╬»╬▒: ${e.ratingStars}/5 Γ¡É (╬ò╧à╧ç╧ü╬╖╧â╧ä╬»╬▒ ╬á╬▒╬╣╬┤╬╣╬┐╧ì: ${e.usabilityScore}/5 | ╬Ü╬╗╬╣╬╜╬╣╬║╬« ╬Ü╬▒╧ä╬▒╬╗╬╗╬╖╬╗╧î╧ä╬╖╧ä╬▒: ${e.clinicalAppropriatenessScore}/5)`,
+        `ΓÇó ╬á╬▒╧ü╬▒╧ä╬«╧ü╬╖╧â╬╖ / ╬á╧ü╧î╧ä╬▒╧â╬╖: ${e.commentEl}`,
         '----------------------------------------------------------',
       ].join('\n');
     })
@@ -70,15 +70,14 @@ export const ClinicalFeedbackSection: React.FC = () => {
   const [usabilityScore, setUsabilityScore] = useState<1 | 2 | 3 | 4 | 5>(5);
   const [clinicalScore, setClinicalScore] = useState<1 | 2 | 3 | 4 | 5>(5);
   const [commentEl, setCommentEl] = useState<string>('');
-  const [websiteHoneypot, setWebsiteHoneypot] = useState<string>('');
   const [submittedNotice, setSubmittedNotice] = useState<string | null>(null);
   const [copiedNotice, setCopiedNotice] = useState<boolean>(false);
   const [isSendingCloud, setIsSendingCloud] = useState<boolean>(false);
 
   const scopeOptions = [
-    { value: 'general', labelEl: '🌐 Γενική Λειτουργία & Περιβάλλον Εφαρμογής' },
-    { value: 'voice-engine', labelEl: '🔊 Φωνητική Εκφώνηση & Ελληνική Προσωδία' },
-    { value: 'age-adaptation', labelEl: '🎯 Προσαρμογή Ηλικίας & Δυναμική Δυσκολία' },
+    { value: 'general', labelEl: '≡ƒîÉ ╬ô╬╡╬╜╬╣╬║╬« ╬¢╬╡╬╣╧ä╬┐╧à╧ü╬│╬»╬▒ & ╬á╬╡╧ü╬╣╬▓╬¼╬╗╬╗╬┐╬╜ ╬ò╧å╬▒╧ü╬╝╬┐╬│╬«╧é' },
+    { value: 'voice-engine', labelEl: '≡ƒöè ╬ª╧ë╬╜╬╖╧ä╬╣╬║╬« ╬ò╬║╧å╧Ä╬╜╬╖╧â╬╖ & ╬ò╬╗╬╗╬╖╬╜╬╣╬║╬« ╬á╧ü╬┐╧â╧ë╬┤╬»╬▒' },
+    { value: 'age-adaptation', labelEl: '≡ƒÄ» ╬á╧ü╬┐╧â╬▒╧ü╬╝╬┐╬│╬« ╬ù╬╗╬╣╬║╬»╬▒╧é & ╬ö╧à╬╜╬▒╬╝╬╣╬║╬« ╬ö╧à╧â╬║╬┐╬╗╬»╬▒' },
     ...ACTIVITIES.map((a) => ({
       value: a.id,
       labelEl: `${a.code}. ${a.titleEl} (${a.executiveDomain})`,
@@ -89,7 +88,7 @@ export const ClinicalFeedbackSection: React.FC = () => {
     if (e) e.preventDefault();
     const trimmed = commentEl.trim();
     if (!trimmed) {
-      setSubmittedNotice('⚠️ Παρακαλώ γράψτε την παρατήρηση ή την πρότασή σας πριν από την υποβολή.');
+      setSubmittedNotice('ΓÜá∩╕Å ╬á╬▒╧ü╬▒╬║╬▒╬╗╧Ä ╬│╧ü╬¼╧ê╧ä╬╡ ╧ä╬╖╬╜ ╧Ç╬▒╧ü╬▒╧ä╬«╧ü╬╖╧â╬╖ ╬« ╧ä╬╖╬╜ ╧Ç╧ü╧î╧ä╬▒╧â╬« ╧â╬▒╧é ╧Ç╧ü╬╣╬╜ ╬▒╧Ç╧î ╧ä╬╖╬╜ ╧à╧Ç╬┐╬▓╬┐╬╗╬«.');
       return;
     }
 
@@ -99,7 +98,7 @@ export const ClinicalFeedbackSection: React.FC = () => {
     const payload = {
       reviewerRole,
       reviewerRoleLabelEl: roleMeta.labelEl,
-      reviewerNameOrCenter: reviewerNameOrCenter.trim() || 'Ανώνυμος Αξιολογητής',
+      reviewerNameOrCenter: reviewerNameOrCenter.trim() || '╬æ╬╜╧Ä╬╜╧à╬╝╬┐╧é ╬æ╬╛╬╣╬┐╬╗╬┐╬│╬╖╧ä╬«╧é',
       targetScope,
       targetScopeLabelEl: scopeMeta.labelEl,
       ageBandTested,
@@ -113,18 +112,18 @@ export const ClinicalFeedbackSection: React.FC = () => {
     await submitFeedbackEntry(payload);
     setCommentEl('');
     setIsSendingCloud(true);
-    setSubmittedNotice('⏳ Καταγράφηκε και αποστέλλεται αυτόματα στην ομάδα ανάπτυξης...');
+    setSubmittedNotice('ΓÅ│ ╬Ü╬▒╧ä╬▒╬│╧ü╬¼╧å╬╖╬║╬╡ ╬║╬▒╬╣ ╬▒╧Ç╬┐╧â╧ä╬¡╬╗╬╗╬╡╧ä╬▒╬╣ ╬▒╧à╧ä╧î╬╝╬▒╧ä╬▒ ╧â╧ä╬╖╬╜ ╬┐╬╝╬¼╬┤╬▒ ╬▒╬╜╬¼╧Ç╧ä╧à╬╛╬╖╧é...');
 
-    const relayResult = await sendFeedbackSilentlyToOwner(payload, undefined, websiteHoneypot);
+    const relayResult = await sendFeedbackSilentlyToOwner(payload);
     setIsSendingCloud(false);
 
     if (relayResult.delivered) {
       setSubmittedNotice(
-        '✅ Η παρατήρησή σας καταγράφηκε και εστάλη αυτόματα στην ομάδα ανάπτυξης του SynapsePlay! Σας ευχαριστούμε!'
+        'Γ£à ╬ù ╧Ç╬▒╧ü╬▒╧ä╬«╧ü╬╖╧â╬« ╧â╬▒╧é ╬║╬▒╧ä╬▒╬│╧ü╬¼╧å╬╖╬║╬╡ ╬║╬▒╬╣ ╬╡╧â╧ä╬¼╬╗╬╖ ╬▒╧à╧ä╧î╬╝╬▒╧ä╬▒ ╧â╧ä╬╖╬╜ ╬┐╬╝╬¼╬┤╬▒ ╬▒╬╜╬¼╧Ç╧ä╧à╬╛╬╖╧é ╧ä╬┐╧à SynapsePlay! ╬ú╬▒╧é ╬╡╧à╧ç╬▒╧ü╬╣╧â╧ä╬┐╧ì╬╝╬╡!'
       );
     } else {
       setSubmittedNotice(
-        '✅ Η παρατήρηση αποθηκεύτηκε στη συσκευή! Μόλις συνδεθείτε στο διαδίκτυο, πατήστε «Αποστολή Συγκεντρωτικής Αναφοράς».'
+        'Γ£à ╬ù ╧Ç╬▒╧ü╬▒╧ä╬«╧ü╬╖╧â╬╖ ╬▒╧Ç╬┐╬╕╬╖╬║╬╡╧ì╧ä╬╖╬║╬╡ ╧â╧ä╬╖ ╧â╧à╧â╬║╬╡╧à╬«! ╬£╧î╬╗╬╣╧é ╧â╧à╬╜╬┤╬╡╬╕╬╡╬»╧ä╬╡ ╧â╧ä╬┐ ╬┤╬╣╬▒╬┤╬»╬║╧ä╧à╬┐, ╧Ç╬▒╧ä╬«╧â╧ä╬╡ ┬½╬æ╧Ç╬┐╧â╧ä╬┐╬╗╬« ╬ú╧à╬│╬║╬╡╬╜╧ä╧ü╧ë╧ä╬╣╬║╬«╧é ╬æ╬╜╬▒╧å╬┐╧ü╬¼╧é┬╗.'
       );
     }
   };
@@ -138,11 +137,11 @@ export const ClinicalFeedbackSection: React.FC = () => {
     setIsSendingCloud(false);
     if (res.delivered) {
       setSubmittedNotice(
-        `✅ Όλες οι παρατηρήσεις (${feedbackEntries.length}) εστάλησαν αυτόματα στην ομάδα ανάπτυξης!`
+        `Γ£à ╬î╬╗╬╡╧é ╬┐╬╣ ╧Ç╬▒╧ü╬▒╧ä╬╖╧ü╬«╧â╬╡╬╣╧é (${feedbackEntries.length}) ╬╡╧â╧ä╬¼╬╗╬╖╧â╬▒╬╜ ╬▒╧à╧ä╧î╬╝╬▒╧ä╬▒ ╧â╧ä╬╖╬╜ ╬┐╬╝╬¼╬┤╬▒ ╬▒╬╜╬¼╧Ç╧ä╧à╬╛╬╖╧é!`
       );
     } else {
       setSubmittedNotice(
-        '⚠️ Δεν ήταν δυνατή η άμεση δικτυακή αποστολή αυτή τη στιγμή. Μπορείτε να πατήσετε «Λήψη Αρχείου Αναφοράς» ή «Αντιγραφή».'
+        'ΓÜá∩╕Å ╬ö╬╡╬╜ ╬«╧ä╬▒╬╜ ╬┤╧à╬╜╬▒╧ä╬« ╬╖ ╬¼╬╝╬╡╧â╬╖ ╬┤╬╣╬║╧ä╧à╬▒╬║╬« ╬▒╧Ç╬┐╧â╧ä╬┐╬╗╬« ╬▒╧à╧ä╬« ╧ä╬╖ ╧â╧ä╬╣╬│╬╝╬«. ╬£╧Ç╬┐╧ü╬╡╬»╧ä╬╡ ╬╜╬▒ ╧Ç╬▒╧ä╬«╧â╬╡╧ä╬╡ ┬½╬¢╬«╧ê╬╖ ╬æ╧ü╧ç╬╡╬»╬┐╧à ╬æ╬╜╬▒╧å╬┐╧ü╬¼╧é┬╗ ╬« ┬½╬æ╬╜╧ä╬╣╬│╧ü╬▒╧å╬«┬╗.'
       );
     }
   };
@@ -167,7 +166,7 @@ export const ClinicalFeedbackSection: React.FC = () => {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `SynapsePlay_Αξιολόγηση_Κέντρου_ΔΕΠΥ_${new Date().toISOString().slice(0, 10)}.txt`;
+      a.download = `SynapsePlay_╬æ╬╛╬╣╬┐╬╗╧î╬│╬╖╧â╬╖_╬Ü╬¡╬╜╧ä╧ü╬┐╧à_╬ö╬ò╬á╬Ñ_${new Date().toISOString().slice(0, 10)}.txt`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -185,16 +184,16 @@ export const ClinicalFeedbackSection: React.FC = () => {
       <div className="flex flex-wrap items-start justify-between gap-4 border-b-2 border-sand-dark pb-4">
         <div className="space-y-1">
           <span className="inline-block px-3 py-1 rounded-full bg-sage-surface border border-sage text-xs font-extrabold text-charcoal">
-            💬 Κλινική Δοκιμή Κέντρων ΔΕΠΥ & Αξιολόγηση Γονέων
+            ≡ƒÆ¼ ╬Ü╬╗╬╣╬╜╬╣╬║╬« ╬ö╬┐╬║╬╣╬╝╬« ╬Ü╬¡╬╜╧ä╧ü╧ë╬╜ ╬ö╬ò╬á╬Ñ & ╬æ╬╛╬╣╬┐╬╗╧î╬│╬╖╧â╬╖ ╬ô╬┐╬╜╬¡╧ë╬╜
           </span>
           <h2 className="text-2xl font-extrabold text-charcoal">
-            📝 Προτάσεις, Αξιολόγηση & Παρατηρήσεις Βελτίωσης ({feedbackEntries.length})
+            ≡ƒô¥ ╬á╧ü╬┐╧ä╬¼╧â╬╡╬╣╧é, ╬æ╬╛╬╣╬┐╬╗╧î╬│╬╖╧â╬╖ & ╬á╬▒╧ü╬▒╧ä╬╖╧ü╬«╧â╬╡╬╣╧é ╬Æ╬╡╬╗╧ä╬»╧ë╧â╬╖╧é ({feedbackEntries.length})
           </h2>
           <p className="text-sm text-charcoal-muted max-w-3xl">
-            Ειδικός χώρος για <strong>Θεραπευτές Κέντρων ΔΕΠΥ</strong> (Εργοθεραπευτές,
-            Λογοθεραπευτές, Παιδοψυχολόγους, Ειδικούς Παιδαγωγούς) και <strong>Γονείς</strong>.
-            Καταγράψτε οποιαδήποτε παρατήρηση από τη δοκιμή των παιχνιδιών με τα παιδιά — κάθε
-            υποβολή αποστέλλεται αυτόματα στην ομάδα ανάπτυξης.
+            ╬ò╬╣╬┤╬╣╬║╧î╧é ╧ç╧Ä╧ü╬┐╧é ╬│╬╣╬▒ <strong>╬ÿ╬╡╧ü╬▒╧Ç╬╡╧à╧ä╬¡╧é ╬Ü╬¡╬╜╧ä╧ü╧ë╬╜ ╬ö╬ò╬á╬Ñ</strong> (╬ò╧ü╬│╬┐╬╕╬╡╧ü╬▒╧Ç╬╡╧à╧ä╬¡╧é,
+            ╬¢╬┐╬│╬┐╬╕╬╡╧ü╬▒╧Ç╬╡╧à╧ä╬¡╧é, ╬á╬▒╬╣╬┤╬┐╧ê╧à╧ç╬┐╬╗╧î╬│╬┐╧à╧é, ╬ò╬╣╬┤╬╣╬║╬┐╧ì╧é ╬á╬▒╬╣╬┤╬▒╬│╧ë╬│╬┐╧ì╧é) ╬║╬▒╬╣ <strong>╬ô╬┐╬╜╬╡╬»╧é</strong>.
+            ╬Ü╬▒╧ä╬▒╬│╧ü╬¼╧ê╧ä╬╡ ╬┐╧Ç╬┐╬╣╬▒╬┤╬«╧Ç╬┐╧ä╬╡ ╧Ç╬▒╧ü╬▒╧ä╬«╧ü╬╖╧â╬╖ ╬▒╧Ç╧î ╧ä╬╖ ╬┤╬┐╬║╬╣╬╝╬« ╧ä╧ë╬╜ ╧Ç╬▒╬╣╧ç╬╜╬╣╬┤╬╣╧Ä╬╜ ╬╝╬╡ ╧ä╬▒ ╧Ç╬▒╬╣╬┤╬╣╬¼ ΓÇö ╬║╬¼╬╕╬╡
+            ╧à╧Ç╬┐╬▓╬┐╬╗╬« ╬▒╧Ç╬┐╧â╧ä╬¡╬╗╬╗╬╡╧ä╬▒╬╣ ╬▒╧à╧ä╧î╬╝╬▒╧ä╬▒ ╧â╧ä╬╖╬╜ ╬┐╬╝╬¼╬┤╬▒ ╬▒╬╜╬¼╧Ç╧ä╧à╬╛╬╖╧é.
           </p>
         </div>
 
@@ -207,11 +206,11 @@ export const ClinicalFeedbackSection: React.FC = () => {
               onClick={() => void handleSendBatchSilently()}
               className="touch-target px-4 py-2.5 rounded-2xl bg-sage-dark text-white font-extrabold text-xs flex items-center gap-1.5 hover:bg-sage disabled:opacity-60"
             >
-              <span aria-hidden="true">📤</span>
+              <span aria-hidden="true">≡ƒôñ</span>
               <span>
                 {isSendingCloud
-                  ? 'Αποστολή...'
-                  : 'Αποστολή Συγκεντρωτικής Αναφοράς στην Ομάδα'}
+                  ? '╬æ╧Ç╬┐╧â╧ä╬┐╬╗╬«...'
+                  : '╬æ╧Ç╬┐╧â╧ä╬┐╬╗╬« ╬ú╧à╬│╬║╬╡╬╜╧ä╧ü╧ë╧ä╬╣╬║╬«╧é ╬æ╬╜╬▒╧å╬┐╧ü╬¼╧é ╧â╧ä╬╖╬╜ ╬ƒ╬╝╬¼╬┤╬▒'}
               </span>
             </button>
 
@@ -221,9 +220,9 @@ export const ClinicalFeedbackSection: React.FC = () => {
               onClick={() => void handleCopyReport()}
               className="touch-target px-4 py-2.5 rounded-2xl bg-sand-light border-2 border-slate text-charcoal font-extrabold text-xs flex items-center gap-1.5 hover:bg-sand"
             >
-              <span aria-hidden="true">📋</span>
+              <span aria-hidden="true">≡ƒôï</span>
               <span>
-                {copiedNotice ? '✓ Αντιγράφηκε στο Πρόχειρο!' : 'Αντιγραφή Αναφοράς'}
+                {copiedNotice ? 'Γ£ô ╬æ╬╜╧ä╬╣╬│╧ü╬¼╧å╬╖╬║╬╡ ╧â╧ä╬┐ ╬á╧ü╧î╧ç╬╡╬╣╧ü╬┐!' : '╬æ╬╜╧ä╬╣╬│╧ü╬▒╧å╬« ╬æ╬╜╬▒╧å╬┐╧ü╬¼╧é'}
               </span>
             </button>
 
@@ -233,8 +232,8 @@ export const ClinicalFeedbackSection: React.FC = () => {
               onClick={handleDownloadReport}
               className="touch-target px-4 py-2.5 rounded-2xl bg-slate text-white font-extrabold text-xs flex items-center gap-1.5 hover:bg-slate-dark"
             >
-              <span aria-hidden="true">📥</span>
-              <span>Λήψη Αρχείου (.txt)</span>
+              <span aria-hidden="true">≡ƒôÑ</span>
+              <span>╬¢╬«╧ê╬╖ ╬æ╧ü╧ç╬╡╬»╬┐╧à (.txt)</span>
             </button>
           </div>
         )}
@@ -246,20 +245,6 @@ export const ClinicalFeedbackSection: React.FC = () => {
         data-testid="clinical-feedback-form"
         className="p-5 rounded-3xl bg-sand-light border-2 border-sand-dark space-y-4"
       >
-        {/* Anti-spam Honeypot (hidden from human users and screen readers) */}
-        <div aria-hidden="true" className="sr-only" style={{ position: 'absolute', left: '-9999px' }}>
-          <label htmlFor="feedback-website-honeypot">Website</label>
-          <input
-            id="feedback-website-honeypot"
-            name="website"
-            type="text"
-            tabIndex={-1}
-            autoComplete="off"
-            value={websiteHoneypot}
-            onChange={(e) => setWebsiteHoneypot(e.target.value)}
-          />
-        </div>
-
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Reviewer Role */}
           <div className="space-y-1.5">
@@ -267,7 +252,7 @@ export const ClinicalFeedbackSection: React.FC = () => {
               htmlFor="feedback-role-select"
               className="block text-xs font-extrabold text-charcoal"
             >
-              1. Ιδιότητα / Ειδικότητα Αξιολογητή:
+              1. ╬Ö╬┤╬╣╧î╧ä╬╖╧ä╬▒ / ╬ò╬╣╬┤╬╣╬║╧î╧ä╬╖╧ä╬▒ ╬æ╬╛╬╣╬┐╬╗╬┐╬│╬╖╧ä╬«:
             </label>
             <select
               id="feedback-role-select"
@@ -290,7 +275,7 @@ export const ClinicalFeedbackSection: React.FC = () => {
               htmlFor="feedback-center-input"
               className="block text-xs font-extrabold text-charcoal"
             >
-              2. Όνομα ή Κέντρο ΔΕΠΥ (Προαιρετικό):
+              2. ╬î╬╜╬┐╬╝╬▒ ╬« ╬Ü╬¡╬╜╧ä╧ü╬┐ ╬ö╬ò╬á╬Ñ (╬á╧ü╬┐╬▒╬╣╧ü╬╡╧ä╬╣╬║╧î):
             </label>
             <input
               id="feedback-center-input"
@@ -299,7 +284,7 @@ export const ClinicalFeedbackSection: React.FC = () => {
               maxLength={80}
               value={reviewerNameOrCenter}
               onChange={(e) => setReviewerNameOrCenter(e.target.value)}
-              placeholder="π.χ. Κέντρο Ειδικών Θεραπειών / Εργοθεραπεύτρια Μαρία"
+              placeholder="╧Ç.╧ç. ╬Ü╬¡╬╜╧ä╧ü╬┐ ╬ò╬╣╬┤╬╣╬║╧Ä╬╜ ╬ÿ╬╡╧ü╬▒╧Ç╬╡╬╣╧Ä╬╜ / ╬ò╧ü╬│╬┐╬╕╬╡╧ü╬▒╧Ç╬╡╧ì╧ä╧ü╬╣╬▒ ╬£╬▒╧ü╬»╬▒"
               className="w-full px-3.5 py-2.5 rounded-xl bg-white border-2 border-slate text-sm font-bold text-charcoal"
             />
           </div>
@@ -310,7 +295,7 @@ export const ClinicalFeedbackSection: React.FC = () => {
               htmlFor="feedback-scope-select"
               className="block text-xs font-extrabold text-charcoal"
             >
-              3. Αφορά Δραστηριότητα ή Ενότητα:
+              3. ╬æ╧å╬┐╧ü╬¼ ╬ö╧ü╬▒╧â╧ä╬╖╧ü╬╣╧î╧ä╬╖╧ä╬▒ ╬« ╬ò╬╜╧î╧ä╬╖╧ä╬▒:
             </label>
             <select
               id="feedback-scope-select"
@@ -335,7 +320,7 @@ export const ClinicalFeedbackSection: React.FC = () => {
               htmlFor="feedback-category-select"
               className="block text-xs font-extrabold text-charcoal"
             >
-              4. Είδος Παρατήρησης:
+              4. ╬ò╬»╬┤╬┐╧é ╬á╬▒╧ü╬▒╧ä╬«╧ü╬╖╧â╬╖╧é:
             </label>
             <select
               id="feedback-category-select"
@@ -355,7 +340,7 @@ export const ClinicalFeedbackSection: React.FC = () => {
           {/* Age Band Tested */}
           <div className="space-y-1.5">
             <label className="block text-xs font-extrabold text-charcoal">
-              5. Ηλικιακή Ομάδα Δοκιμής:
+              5. ╬ù╬╗╬╣╬║╬╣╬▒╬║╬« ╬ƒ╬╝╬¼╬┤╬▒ ╬ö╬┐╬║╬╣╬╝╬«╧é:
             </label>
             <div className="flex flex-wrap gap-1.5">
               {AGE_BAND_PROTOCOLS.map((b) => (
@@ -370,7 +355,7 @@ export const ClinicalFeedbackSection: React.FC = () => {
                       : 'bg-white text-charcoal border-sand-dark'
                   }`}
                 >
-                  {b.id} ετών
+                  {b.id} ╬╡╧ä╧Ä╬╜
                 </button>
               ))}
             </div>
@@ -379,7 +364,7 @@ export const ClinicalFeedbackSection: React.FC = () => {
           {/* 3-Metric Rating (Stars, Child Usability, Clinical Appropriateness) */}
           <div className="space-y-1.5">
             <label className="block text-xs font-extrabold text-charcoal">
-              6. Βαθμολογία Αξιολόγησης (1–5 ⭐):
+              6. ╬Æ╬▒╬╕╬╝╬┐╬╗╬┐╬│╬»╬▒ ╬æ╬╛╬╣╬┐╬╗╧î╬│╬╖╧â╬╖╧é (1ΓÇô5 Γ¡É):
             </label>
             <div className="flex items-center gap-1.5">
               {([1, 2, 3, 4, 5] as const).map((star) => (
@@ -398,7 +383,7 @@ export const ClinicalFeedbackSection: React.FC = () => {
                       : 'bg-white text-charcoal-muted border-sand-dark'
                   }`}
                 >
-                  {star}⭐
+                  {star}Γ¡É
                 </button>
               ))}
             </div>
@@ -411,7 +396,7 @@ export const ClinicalFeedbackSection: React.FC = () => {
             htmlFor="feedback-comment-textarea"
             className="block text-xs font-extrabold text-charcoal"
           >
-            7. Παρατηρήσεις, Προτάσεις Βελτίωσης ή Συμπεριφορά Παιδιού κατά τη Συνεδρία:
+            7. ╬á╬▒╧ü╬▒╧ä╬╖╧ü╬«╧â╬╡╬╣╧é, ╬á╧ü╬┐╧ä╬¼╧â╬╡╬╣╧é ╬Æ╬╡╬╗╧ä╬»╧ë╧â╬╖╧é ╬« ╬ú╧à╬╝╧Ç╬╡╧ü╬╣╧å╬┐╧ü╬¼ ╬á╬▒╬╣╬┤╬╣╬┐╧ì ╬║╬▒╧ä╬¼ ╧ä╬╖ ╬ú╧à╬╜╬╡╬┤╧ü╬»╬▒:
           </label>
           <textarea
             id="feedback-comment-textarea"
@@ -419,7 +404,7 @@ export const ClinicalFeedbackSection: React.FC = () => {
             rows={3}
             value={commentEl}
             onChange={(e) => setCommentEl(e.target.value)}
-            placeholder="Γράψτε αναλυτικά τι παρατηρήσατε (π.χ. «Στο παιχνίδι 09 με παιδί 6 ετών θα θέλαμε...», «Η φωνή στη λέξη...», «Προτείνουμε να προστεθεί...»)"
+            placeholder="╬ô╧ü╬¼╧ê╧ä╬╡ ╬▒╬╜╬▒╬╗╧à╧ä╬╣╬║╬¼ ╧ä╬╣ ╧Ç╬▒╧ü╬▒╧ä╬╖╧ü╬«╧â╬▒╧ä╬╡ (╧Ç.╧ç. ┬½╬ú╧ä╬┐ ╧Ç╬▒╬╣╧ç╬╜╬»╬┤╬╣ 09 ╬╝╬╡ ╧Ç╬▒╬╣╬┤╬» 6 ╬╡╧ä╧Ä╬╜ ╬╕╬▒ ╬╕╬¡╬╗╬▒╬╝╬╡...┬╗, ┬½╬ù ╧å╧ë╬╜╬« ╧â╧ä╬╖ ╬╗╬¡╬╛╬╖...┬╗, ┬½╬á╧ü╬┐╧ä╬╡╬»╬╜╬┐╧à╬╝╬╡ ╬╜╬▒ ╧Ç╧ü╬┐╧â╧ä╬╡╬╕╬╡╬»...┬╗)"
             className="w-full p-3.5 rounded-2xl bg-white border-2 border-slate text-sm font-bold text-charcoal"
           />
         </div>
@@ -435,8 +420,8 @@ export const ClinicalFeedbackSection: React.FC = () => {
             </p>
           ) : (
             <p className="text-xs text-charcoal-muted">
-              💡 Κάθε παρατήρηση αποθηκεύεται τοπικά και μπορεί να εξαχθεί/αποσταλεί συγκεντρωτικά με
-              1 κλικ.
+              ≡ƒÆí ╬Ü╬¼╬╕╬╡ ╧Ç╬▒╧ü╬▒╧ä╬«╧ü╬╖╧â╬╖ ╬▒╧Ç╬┐╬╕╬╖╬║╬╡╧ì╬╡╧ä╬▒╬╣ ╧ä╬┐╧Ç╬╣╬║╬¼ ╬║╬▒╬╣ ╬╝╧Ç╬┐╧ü╬╡╬» ╬╜╬▒ ╬╡╬╛╬▒╧ç╬╕╬╡╬»/╬▒╧Ç╬┐╧â╧ä╬▒╬╗╬╡╬» ╧â╧à╬│╬║╬╡╬╜╧ä╧ü╧ë╧ä╬╣╬║╬¼ ╬╝╬╡
+              1 ╬║╬╗╬╣╬║.
             </p>
           )}
 
@@ -447,11 +432,11 @@ export const ClinicalFeedbackSection: React.FC = () => {
             onClick={() => void handleSubmit()}
             className="touch-target px-6 py-3 rounded-2xl bg-sage-dark text-white font-extrabold text-sm flex items-center gap-2 hover:bg-sage disabled:opacity-60"
           >
-            <span aria-hidden="true">📨</span>
+            <span aria-hidden="true">≡ƒô¿</span>
             <span>
               {isSendingCloud
-                ? 'Αποστολή Παρατήρησης...'
-                : 'Καταχώρηση & Αυτόματη Αποστολή Παρατήρησης'}
+                ? '╬æ╧Ç╬┐╧â╧ä╬┐╬╗╬« ╬á╬▒╧ü╬▒╧ä╬«╧ü╬╖╧â╬╖╧é...'
+                : '╬Ü╬▒╧ä╬▒╧ç╧Ä╧ü╬╖╧â╬╖ & ╬æ╧à╧ä╧î╬╝╬▒╧ä╬╖ ╬æ╧Ç╬┐╧â╧ä╬┐╬╗╬« ╬á╬▒╧ü╬▒╧ä╬«╧ü╬╖╧â╬╖╧é'}
             </span>
           </button>
         </div>
@@ -461,7 +446,7 @@ export const ClinicalFeedbackSection: React.FC = () => {
       {feedbackEntries.length > 0 && (
         <div className="space-y-3" data-testid="feedback-entries-list">
           <h3 className="text-sm font-extrabold text-charcoal">
-            📋 Καταγεγραμμένες Παρατηρήσεις Θεραπευτών & Γονέων ({feedbackEntries.length}):
+            ≡ƒôï ╬Ü╬▒╧ä╬▒╬│╬╡╬│╧ü╬▒╬╝╬╝╬¡╬╜╬╡╧é ╬á╬▒╧ü╬▒╧ä╬╖╧ü╬«╧â╬╡╬╣╧é ╬ÿ╬╡╧ü╬▒╧Ç╬╡╧à╧ä╧Ä╬╜ & ╬ô╬┐╬╜╬¡╧ë╬╜ ({feedbackEntries.length}):
           </h3>
           <div className="space-y-3">
             {feedbackEntries.map((entry, index) => (
@@ -482,7 +467,7 @@ export const ClinicalFeedbackSection: React.FC = () => {
                       {entry.targetScopeLabelEl}
                     </span>
                     <span className="px-2 py-0.5 rounded-full bg-white border border-sand-dark text-xs font-extrabold text-charcoal">
-                      Ηλικία {entry.ageBandTested} • {entry.ratingStars}/5 ⭐
+                      ╬ù╬╗╬╣╬║╬»╬▒ {entry.ageBandTested} ΓÇó {entry.ratingStars}/5 Γ¡É
                     </span>
                     <span className="text-[11px] text-charcoal-muted">{entry.dateKey}</span>
                   </div>
@@ -497,9 +482,9 @@ export const ClinicalFeedbackSection: React.FC = () => {
                     data-testid={`delete-feedback-btn-${index}`}
                     onClick={() => void removeFeedbackEntry(entry.id!)}
                     className="px-3 py-1.5 rounded-xl bg-terracotta-surface border border-terracotta text-xs font-extrabold text-charcoal shrink-0"
-                    title="Διαγραφή παρατήρησης"
+                    title="╬ö╬╣╬▒╬│╧ü╬▒╧å╬« ╧Ç╬▒╧ü╬▒╧ä╬«╧ü╬╖╧â╬╖╧é"
                   >
-                    🗑️ Διαγραφή
+                    ≡ƒùæ∩╕Å ╬ö╬╣╬▒╬│╧ü╬▒╧å╬«
                   </button>
                 )}
               </div>
