@@ -892,7 +892,8 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
       expect(screen.getByTestId('shared-activity-runner')).toHaveAttribute('data-age-band', '8-10');
     });
     expect(screen.getByTestId('activity-13-speech-articulation')).toHaveTextContent('Πο-δή-λα-το');
-    expect(screen.getByTestId('speech-articulation-target')).toHaveTextContent('🧑‍🚀');
+    expect(screen.getByTestId('speech-articulation-target')).toHaveTextContent('🚲');
+    expect(screen.getByTestId('speech-articulation-target')).toHaveTextContent('Ποδήλατο');
     u810();
 
     // 3. Activity 02 (Spot the Difference) shows exact single-object labels matching each emoji ('Ήλιος' vs 'Φεγγάρι')
@@ -905,6 +906,72 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
     const { unmount: u08 } = renderRoute('/activity/08-listen-do');
     expect(screen.getByTestId('listen-do-target')).toHaveTextContent('Άκου πρώτα...');
     u08();
+  });
+
+  it('Age 8-10 (9-Year-Old) Senior Calibration & Continuous Looping Karaoke Runner: serves STEM/Executive challenges and loops syllable runner continuously', async () => {
+    vi.useFakeTimers();
+
+    // 1. Continuous Looping Karaoke Runner in Activity 13: keeps cycling active syllable even after 4+ seconds!
+    const { unmount: uLoop } = renderRoute('/activity/13-speech-articulation');
+    expect(screen.getByTestId('live-syllable-runner-banner')).toBeInTheDocument();
+    expect(screen.getByTestId('syllable-box-0')).toHaveAttribute('data-karaoke-active', 'true');
+
+    // Advance past the first sweep (3500ms) -> runner continues looping to syllable 0 or 1!
+    act(() => {
+      vi.advanceTimersByTime(3600);
+    });
+    expect(screen.getByTestId('live-syllable-runner-banner')).toHaveTextContent(
+      /Τρέχει τώρα η συλλαβή|Ο ρυθμός συλλαβών επαναλαμβάνεται/
+    );
+    uLoop();
+    vi.useRealTimers();
+
+    // 2. Switch to Age 8-10 (9-year-old) and verify Senior Challenge Pools across Activities 01, 03, 04, 05, 06, 08, 14, 15, 18
+    await saveSettings({ ageBand: '8-10' });
+
+    // Activity 01: 12-item Senior Detective visual search matrix
+    const { unmount: u01 } = renderRoute('/activity/01-visual-search');
+    await waitFor(() => {
+      expect(screen.getByTestId('shared-activity-runner')).toHaveAttribute('data-age-band', '8-10');
+    });
+    expect(screen.getByTestId('visual-search-grid').children).toHaveLength(12);
+    u01();
+
+    // Activity 05: Senior STEM Experiment Routine instead of preschool toothbrushing
+    const { unmount: u05 } = renderRoute('/activity/05-order-steps');
+    await waitFor(() => {
+      expect(screen.getByTestId('activity-05-order-steps')).toHaveTextContent(
+        'Οργάνωση Επιστημονικού Πειράματος (STEM)'
+      );
+    });
+    u05();
+
+    // Activity 14: Senior Robotics Team Scenario
+    const { unmount: u14 } = renderRoute('/activity/14-narrative-builder');
+    await waitFor(() => {
+      expect(screen.getByTestId('activity-14-narrative-builder')).toHaveTextContent(
+        'Η Ομάδα Ρομποτικής'
+      );
+    });
+    u14();
+
+    // Activity 15: Senior Temporal Inversion ("ΠΡΙΝ... αλλά ΑΦΟΥ...")
+    const { unmount: u15 } = renderRoute('/activity/15-auditory-discrimination');
+    await waitFor(() => {
+      expect(screen.getByTestId('activity-15-auditory-discrimination')).toHaveTextContent(
+        'Χρονική Αναστροφή (8-12 ετών)'
+      );
+    });
+    u15();
+
+    // Activity 18: Senior Homework Prioritization & Executive Planning
+    const { unmount: u18 } = renderRoute('/activity/18-adl-praxis');
+    await waitFor(() => {
+      expect(screen.getByTestId('activity-18-adl-praxis')).toHaveTextContent(
+        'Ιεράρχηση Απογευματινής Μελέτης'
+      );
+    });
+    u18();
   });
 
   it('Modern Greek Grammar & Vocative Case (Κλητική Πτώση): inflects child names and companion titles accurately in Hub and Completion screens', async () => {

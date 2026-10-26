@@ -122,6 +122,63 @@ const AUDITORY_ROUNDS: AuditoryConceptRound[] = [
   },
 ];
 
+const SENIOR_AUDITORY_ROUNDS: typeof AUDITORY_ROUNDS = [
+  {
+    conceptBadgeEl: 'Χρονική Αναστροφή (8-12 ετών): «Πριν... αλλά Αφού...»',
+    spokenInstructionEl: 'Άκου προσεκτικά τη χρονική σειρά: ΠΡΙΝ ξεκινήσεις το πείραμα με το μικροσκόπιο, αλλά ΑΦΟΥ φορέσεις την εργαστηριακή ποδιά, τι πρέπει να ελέγξεις πρώτο από τα δύο;',
+    options: [
+      { id: 'sau1-1', emoji: '🥼', labelEl: 'Πρώτα φοράω την εργαστηριακή ποδιά', isCorrect: true },
+      { id: 'sau1-2', emoji: '🔬', labelEl: 'Πρώτα κοιτάζω στο μικροσκόπιο', isCorrect: false },
+      { id: 'sau1-3', emoji: '📓', labelEl: 'Κλείνω το τετράδιο εργαστηρίου', isCorrect: false },
+    ],
+  },
+  {
+    conceptBadgeEl: 'Ακουστική Διάκριση Παρομοίων Λέξεων (Παρώνυμα)',
+    spokenInstructionEl: 'Άκου προσεκτικά τη λέξη: «Εξάρτημα» (όχι «Εξάρτηση»). Ποια κάρτα δείχνει το μηχανικό εξάρτημα;',
+    options: [
+      { id: 'sau2-1', emoji: '⚙️', labelEl: 'Εξάρτημα (Γρανάζι / κομμάτι μηχανισμού)', isCorrect: true },
+      { id: 'sau2-2', emoji: '🔗', labelEl: 'Εξάρτηση (Δεσμός / σύνδεση)', isCorrect: false },
+      { id: 'sau2-3', emoji: '🎒', labelEl: 'Εξόρμηση (Εκδρομή στη φύση)', isCorrect: false },
+    ],
+  },
+  {
+    conceptBadgeEl: 'Σύνθετος Χωρικός Προσανατολισμός',
+    spokenInstructionEl: 'Επίλεξε τη διάταξη όπου η πυξίδα βρίσκεται ΑΡΙΣΤΕΡΑ από το τηλεσκόπιο αλλά ΔΕΞΙΑ από τον χάρτη!',
+    options: [
+      { id: 'sau3-1', emoji: '🗺️ 🧭 🔭', labelEl: 'Χάρτης ➔ Πυξίδα ➔ Τηλεσκόπιο', isCorrect: true },
+      { id: 'sau3-2', emoji: '🧭 🗺️ 🔭', labelEl: 'Πυξίδα ➔ Χάρτης ➔ Τηλεσκόπιο', isCorrect: false },
+      { id: 'sau3-3', emoji: '🔭 🧭 🗺️', labelEl: 'Τηλεσκόπιο ➔ Πυξίδα ➔ Χάρτης', isCorrect: false },
+    ],
+  },
+  {
+    conceptBadgeEl: 'Ακουστική Διάκριση Παρομοίων Λέξεων (Παρώνυμα)',
+    spokenInstructionEl: 'Άκου προσεκτικά τη λέξη: «Πυξίδα» (όχι «Πυρίτιδα» ούτε «Πινακίδα»). Ποια κάρτα ταιριάζει;',
+    options: [
+      { id: 'sau4-1', emoji: '🧭', labelEl: 'Πυξίδα (Όργανο προσανατολισμού)', isCorrect: true },
+      { id: 'sau4-2', emoji: '🪧', labelEl: 'Πινακίδα (Επιγραφή δρόμου)', isCorrect: false },
+      { id: 'sau4-3', emoji: '🏛️', labelEl: 'Πυραμίδα (Γεωμετρικό μνημείο)', isCorrect: false },
+    ],
+  },
+  {
+    conceptBadgeEl: 'Λογική Συνθήκη Ακρόασης («Εκτός αν...»)',
+    spokenInstructionEl: 'Άκου όλη την πρόταση: Παίρνουμε το ποδήλατο για προπόνηση, ΕΚΤΟΣ ΑΝ βρέχει δυνατά, οπότε παίρνουμε ομπρέλα. Σήμερα βρέχει δυνατά — τι επιλέγουμε;',
+    options: [
+      { id: 'sau5-1', emoji: '☂️', labelEl: 'Ομπρέλα (Επειδή σήμερα βρέχει δυνατά)', isCorrect: true },
+      { id: 'sau5-2', emoji: '🚲', labelEl: 'Ποδήλατο', isCorrect: false },
+      { id: 'sau5-3', emoji: '🕶️', labelEl: 'Γυαλιά Ηλίου', isCorrect: false },
+    ],
+  },
+  {
+    conceptBadgeEl: 'Χρονική Ακολουθία 3 Στοιχείων',
+    spokenInstructionEl: 'Άκου τη σειρά: Αφού μελετήσεις τη Γεωγραφία, αλλά πριν λύσεις τη Φυσική, διάβασε Ιστορία. Ποιο μάθημα είναι στη ΜΕΣΗ (2ο);',
+    options: [
+      { id: 'sau6-1', emoji: '🏛️', labelEl: 'Ιστορία (2ο στη σειρά: Γεωγραφία ➔ Ιστορία ➔ Φυσική)', isCorrect: true },
+      { id: 'sau6-2', emoji: '🌍', labelEl: 'Γεωγραφία (1ο στη σειρά)', isCorrect: false },
+      { id: 'sau6-3', emoji: '⚡', labelEl: 'Φυσική (3ο στη σειρά)', isCorrect: false },
+    ],
+  },
+];
+
 export const Activity15AuditoryDiscrimination: React.FC<ActivityRunnerRenderProps> = ({
   currentRound,
   totalRounds,
@@ -134,9 +191,11 @@ export const Activity15AuditoryDiscrimination: React.FC<ActivityRunnerRenderProp
 }) => {
   const { settings } = useApp();
   const { runDebounced, getAbsorbedCount } = useDebouncedAction();
+  const isSeniorAge = ageBand === '8-10' || ageBand === '10-12';
+  const auditoryPool = isSeniorAge ? SENIOR_AUDITORY_ROUNDS : AUDITORY_ROUNDS;
   const activeRounds = useMemo(
-    () => selectSessionRounds(AUDITORY_ROUNDS, totalRounds, sessionSeed),
-    [totalRounds, sessionSeed]
+    () => selectSessionRounds(auditoryPool, totalRounds, sessionSeed),
+    [auditoryPool, totalRounds, sessionSeed]
   );
   const round = activeRounds[(currentRound - 1) % activeRounds.length];
 

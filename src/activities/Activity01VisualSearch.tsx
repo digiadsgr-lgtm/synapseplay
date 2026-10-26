@@ -208,11 +208,13 @@ export const Activity01VisualSearch: React.FC<ActivityRunnerRenderProps> = ({
     );
   }, [currentRound, sessionSeed, roundData.target.labelEl, settings.voiceEnabled, adaptiveProfile.speechRate]);
 
+  const isSeniorAge = ageBand === '8-10' || ageBand === '10-12';
+
   // Age-graded & Invisible Adaptive Scenario distractor scaling:
   // - Hint Level 2 or Age 4-5: 3 items (2 distractors + 1 target)
   // - Age 5-6 or high distractorReductionRatio: 4 items
   // - Age 6-8: 6 items
-  // - Age 8-10 / 10-12: 8 items (enriched visual search grid)
+  // - Age 8-10 / 10-12: 12 items (3x4 high-density Senior Detective visual search matrix)
   const visibleItems = useMemo(() => {
     const targetItem = roundData.grid.find((i) => i.isTarget)!;
     const distractors = roundData.grid.filter((i) => !i.isTarget);
@@ -222,15 +224,19 @@ export const Activity01VisualSearch: React.FC<ActivityRunnerRenderProps> = ({
       baseItems = [distractors[0], targetItem, distractors[1]];
     } else if (ageBand === '5-6' || adaptiveProfile.distractorReductionRatio >= 0.3) {
       baseItems = [distractors[0], distractors[1], targetItem, distractors[2]];
-    } else if (ageBand === '8-10' || ageBand === '10-12' || adaptiveProfile.enrichChallenge) {
-      baseItems = [
-        ...roundData.grid,
+    } else if (isSeniorAge || adaptiveProfile.enrichChallenge) {
+      const seniorExtras = [
         { id: `vs-ex1-${currentRound}`, emoji: '🔮', labelEl: 'Γυάλινη Σφαίρα', isTarget: false },
         { id: `vs-ex2-${currentRound}`, emoji: '🧲', labelEl: 'Μαγνήτης', isTarget: false },
+        { id: `vs-ex3-${currentRound}`, emoji: '🔬', labelEl: 'Μικροσκόπιο', isTarget: false },
+        { id: `vs-ex4-${currentRound}`, emoji: '🧬', labelEl: 'Έλικα DNA', isTarget: false },
+        { id: `vs-ex5-${currentRound}`, emoji: '🧪', labelEl: 'Δοκιμαστικός Σωλήνας', isTarget: false },
+        { id: `vs-ex6-${currentRound}`, emoji: '⚙️', labelEl: 'Γρανάζι Μηχανής', isTarget: false },
       ];
+      baseItems = [...roundData.grid.slice(0, 6), ...seniorExtras];
     }
     return rotateOptionsForSession(baseItems, sessionSeed, currentRound);
-  }, [roundData, hintLevel, ageBand, adaptiveProfile.distractorReductionRatio, adaptiveProfile.enrichChallenge, sessionSeed, currentRound]);
+  }, [roundData, hintLevel, ageBand, isSeniorAge, adaptiveProfile.distractorReductionRatio, adaptiveProfile.enrichChallenge, sessionSeed, currentRound]);
 
   const handleSelect = useCallback(
     (isTarget: boolean, labelEl: string) => {
@@ -265,7 +271,9 @@ export const Activity01VisualSearch: React.FC<ActivityRunnerRenderProps> = ({
     <div className="space-y-6" data-testid="activity-01-visual-search">
       {/* Target Display Card */}
       <div className="p-5 rounded-3xl bg-slate-surface border-2 border-slate flex flex-wrap items-center justify-center gap-4">
-        <span className="text-lg font-extrabold text-charcoal">Στόχος Αναζήτησης:</span>
+        <span className="text-lg font-extrabold text-charcoal">
+          {isSeniorAge ? 'Αποστολή Ντετέκτιβ (12 Σύμβολα):' : 'Στόχος Αναζήτησης:'}
+        </span>
         <button
           type="button"
           data-testid="visual-search-target-badge"
@@ -278,7 +286,9 @@ export const Activity01VisualSearch: React.FC<ActivityRunnerRenderProps> = ({
           }
           className="touch-target px-5 py-3 rounded-2xl bg-white border-2 border-slate flex items-center gap-3 shadow-sm hover:bg-sand-light cursor-pointer"
         >
-          <span className="text-4xl" aria-hidden="true">{roundData.target.emoji}</span>
+          <span className="text-4xl" aria-hidden="true">
+            {isSeniorAge && hintLevel === 0 ? '🕵️‍♂️' : roundData.target.emoji}
+          </span>
           <span className="text-xl font-extrabold text-charcoal">{roundData.target.labelEl}</span>
           <span className="text-lg" aria-hidden="true">🔊</span>
         </button>
@@ -304,7 +314,9 @@ export const Activity01VisualSearch: React.FC<ActivityRunnerRenderProps> = ({
               <span className="text-5xl select-none" aria-hidden="true">
                 {item.emoji}
               </span>
-              <span className="text-sm font-bold text-charcoal">{item.labelEl}</span>
+              {(!isSeniorAge || hintLevel >= 1) && (
+                <span className="text-sm font-bold text-charcoal">{item.labelEl}</span>
+              )}
             </button>
           );
         })}

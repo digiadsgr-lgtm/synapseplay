@@ -148,6 +148,53 @@ const NARRATIVE_ROUNDS: NarrativePrompt[] = [
   },
 ];
 
+const SENIOR_NARRATIVE_ROUNDS: typeof NARRATIVE_ROUNDS = [
+  {
+    storyGoalEl: 'Σενάριο Αιτίας-Αποτελέσματος (8-12 ετών): Η σχολική ομάδα ρομποτικής βλέπει ότι ο αισθητήρας του ρομπότ δεν ανταποκρίνεται πριν την παρουσίαση. Ποια είναι η πιο ώριμη κίνηση;',
+    whoCard: { emoji: '🤖', textEl: 'Η Ομάδα Ρομποτικής' },
+    whereCard: { emoji: '🔬', textEl: 'στο σχολικό εργαστήριο τεχνολογίας' },
+    actionOptions: [
+      { id: 'snb1-1', emoji: '🔌', textEl: 'ελέγχει μεθοδικά τα καλώδια σύνδεσης και δοκιμάζει ξανά τον κώδικα', isCorrect: true },
+      { id: 'snb1-2', emoji: '💢', textEl: 'παρατάει το project και κατηγορεί τους συμμαθητές', isCorrect: false },
+      { id: 'snb1-3', emoji: '🎲', textEl: 'πατάει τυχαία κουμπιά χωρίς να ελέγξει τις οδηγίες', isCorrect: false },
+    ],
+    fullSentenceEl: 'Η ομάδα ρομποτικής στο σχολικό εργαστήριο τεχνολογίας ελέγχει μεθοδικά τα καλώδια σύνδεσης και δοκιμάζει ξανά τον κώδικα!',
+  },
+  {
+    storyGoalEl: 'Σενάριο Ομαδικότητας: Στον σχολικό αγώνα μπάσκετ, ένας συμπαίκτης αστοχεί σε κρίσιμη πάσα. Πώς αντιδρά ο αρχηγός της ομάδας;',
+    whoCard: { emoji: '🏀', textEl: 'Ο Αρχηγός της Ομάδας' },
+    whereCard: { emoji: '🏟️', textEl: 'μέσα στο γήπεδο του σχολείου' },
+    actionOptions: [
+      { id: 'snb2-1', emoji: '🤝', textEl: 'ενθαρρύνει τον συμπαίκτη του και οργανώνει ήρεμα την επόμενη άμυνα', isCorrect: true },
+      { id: 'snb2-2', emoji: '📢', textEl: 'φωνάζει θυμωμένα στον συμπαίκτη μπροστά σε όλους', isCorrect: false },
+      { id: 'snb2-3', emoji: '🚶', textEl: 'φεύγει από τον αγώνα πριν τελειώσει το ημίχρονο', isCorrect: false },
+    ],
+    fullSentenceEl: 'Ο αρχηγός της ομάδας μέσα στο γήπεδο του σχολείου ενθαρρύνει τον συμπαίκτη του και οργανώνει ήρεμα την επόμενη άμυνα!',
+  },
+  {
+    storyGoalEl: 'Σενάριο Αυτορρύθμισης: Ο μαθητής έχει αύριο διαγώνισμα Ιστορίας αλλά οι φίλοι του τον καλούν για βιντεοπαιχνίδια το απόγευμα. Τι επιλέγει;',
+    whoCard: { emoji: '🧑‍🎓', textEl: 'Ο Μαθητής' },
+    whereCard: { emoji: '📚', textEl: 'στο γραφείο μελέτης του' },
+    actionOptions: [
+      { id: 'snb3-1', emoji: '⏱️', textEl: 'ολοκληρώνει πρώτα την επανάληψη με πρόγραμμα και μετά επικοινωνεί με τους φίλους του', isCorrect: true },
+      { id: 'snb3-2', emoji: '🎮', textEl: 'παίζει όλο το βράδυ αφήνοντας το βιβλίο κλειστό', isCorrect: false },
+      { id: 'snb3-3', emoji: '😰', textEl: 'αγχώνεται χωρίς να ανοίξει καθόλου τις σημειώσεις του', isCorrect: false },
+    ],
+    fullSentenceEl: 'Ο μαθητής στο γραφείο μελέτης του ολοκληρώνει πρώτα την επανάληψη με πρόγραμμα και μετά επικοινωνεί με τους φίλους του!',
+  },
+  {
+    storyGoalEl: 'Σενάριο Έρευνας: Η μαθήτρια ετοιμάζει εργασία για την προστασία της θαλάσσιας χελώνας Καρέτα-Καρέτα. Πώς ξεκινά;',
+    whoCard: { emoji: '👩‍🔬', textEl: 'Η Ερευνήτρια Μαθήτρια' },
+    whereCard: { emoji: '🏛️', textEl: 'στη σχολική βιβλιοθήκη' },
+    actionOptions: [
+      { id: 'snb4-1', emoji: '📖', textEl: 'διασταυρώνει έγκυρες επιστημονικές πηγές και κρατά οργανωμένες σημειώσεις', isCorrect: true },
+      { id: 'snb4-2', emoji: '✂️', textEl: 'αντιγράφει μια τυχαία φράση χωρίς να τη διαβάσει', isCorrect: false },
+      { id: 'snb4-3', emoji: '🎨', textEl: 'ζωγραφίζει μόνο το εξώφυλλο χωρίς περιεχόμενο', isCorrect: false },
+    ],
+    fullSentenceEl: 'Η ερευνήτρια μαθήτρια στη σχολική βιβλιοθήκη διασταυρώνει έγκυρες επιστημονικές πηγές και κρατά οργανωμένες σημειώσεις!',
+  },
+];
+
 export const Activity14NarrativeBuilder: React.FC<ActivityRunnerRenderProps> = ({
   currentRound,
   totalRounds,
@@ -160,9 +207,11 @@ export const Activity14NarrativeBuilder: React.FC<ActivityRunnerRenderProps> = (
 }) => {
   const { settings } = useApp();
   const { runDebounced, getAbsorbedCount } = useDebouncedAction();
+  const isSeniorAge = ageBand === '8-10' || ageBand === '10-12';
+  const narrativePool = isSeniorAge ? SENIOR_NARRATIVE_ROUNDS : NARRATIVE_ROUNDS;
   const activeRounds = useMemo(
-    () => selectSessionRounds(NARRATIVE_ROUNDS, totalRounds, sessionSeed),
-    [totalRounds, sessionSeed]
+    () => selectSessionRounds(narrativePool, totalRounds, sessionSeed),
+    [narrativePool, totalRounds, sessionSeed]
   );
   const round = activeRounds[(currentRound - 1) % activeRounds.length];
   const [whoConfirmed, setWhoConfirmed] = useState<boolean>(false);

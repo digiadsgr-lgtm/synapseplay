@@ -245,14 +245,16 @@ export const Activity03VisualMemory: React.FC<ActivityRunnerRenderProps> = ({
     let baseCards = roundData.cards;
     if (diff.isSimplified) {
       baseCards = roundData.cards.filter((c, idx) => c.isTarget || idx === 0);
-    } else if (diff.isAdvancedMastery) {
-      baseCards = [
-        ...roundData.cards,
-        { id: `extra-${currentRound}`, emoji: '🧭', labelEl: 'Πυξίδα', isTarget: false },
+    } else if (ageBand === '8-10' || ageBand === '10-12' || diff.isAdvancedMastery) {
+      const extraPool = [
+        { id: `extra1-${currentRound}`, emoji: '🧭', labelEl: 'Πυξίδα', isTarget: false },
+        { id: `extra2-${currentRound}`, emoji: '🔭', labelEl: 'Τηλεσκόπιο', isTarget: false },
+        { id: `extra3-${currentRound}`, emoji: '🔬', labelEl: 'Μικροσκόπιο', isTarget: false },
       ];
+      baseCards = [...roundData.cards, ...extraPool].slice(0, 6);
     }
     return rotateOptionsForSession(baseCards, sessionSeed, currentRound);
-  }, [roundData.cards, diff.isSimplified, diff.isAdvancedMastery, currentRound, sessionSeed]);
+  }, [roundData.cards, diff.isSimplified, diff.isAdvancedMastery, ageBand, currentRound, sessionSeed]);
 
   const obsRemainingPct = Math.max(
     0,

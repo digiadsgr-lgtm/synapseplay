@@ -122,6 +122,63 @@ const LISTEN_ROUNDS: ListenRound[] = [
   },
 ];
 
+const SENIOR_LISTEN_ROUNDS: ListenRound[] = [
+  {
+    instructionEl: 'Άκου ολόκληρη την εντολή πριν πατήσεις: ΜΗΝ πατήσεις το όχημα με τις ρόδες ούτε το ελικόπτερο· επίλεξε το επιστημονικό όργανο που παρατηρεί τους πλανήτες!',
+    pictogramCue: '🚫🚗 🚫🚁 ➡️ 🔭',
+    options: [
+      { id: 'sl1-1', emoji: '🚗', labelEl: 'Αυτοκίνητο', isTarget: false },
+      { id: 'sl1-2', emoji: '🔭', labelEl: 'Τηλεσκόπιο', isTarget: true },
+      { id: 'sl1-3', emoji: '🚁', labelEl: 'Ελικόπτερο', isTarget: false },
+    ],
+  },
+  {
+    instructionEl: 'Πρόσεξε την ανατροπή στο τέλος: Αν και η κιθάρα και το τύμπανο παίζουν μουσική, εσύ επίλεξε το όργανο προσανατολισμού που δείχνει τον Βορρά!',
+    pictogramCue: '🚫🎸 🚫🥁 ➡️ 🧭',
+    options: [
+      { id: 'sl2-1', emoji: '🎸', labelEl: 'Κιθάρα', isTarget: false },
+      { id: 'sl2-2', emoji: '🥁', labelEl: 'Τύμπανο', isTarget: false },
+      { id: 'sl2-3', emoji: '🧭', labelEl: 'Πυξίδα Προσανατολισμού', isTarget: true },
+    ],
+  },
+  {
+    instructionEl: 'Άκου μέχρι την τελευταία λέξη: Αγνόησε τα αντικείμενα που χρειάζονται ηλεκτρικό ρεύμα και επίλεξε το τετράδιο εργαστηρίου!',
+    pictogramCue: '🚫💻 🚫📺 ➡️ 📓',
+    options: [
+      { id: 'sl3-1', emoji: '💻', labelEl: 'Υπολογιστής', isTarget: false },
+      { id: 'sl3-2', emoji: '📓', labelEl: 'Τετράδιο Εργαστηρίου', isTarget: true },
+      { id: 'sl3-3', emoji: '📺', labelEl: 'Οθόνη', isTarget: false },
+    ],
+  },
+  {
+    instructionEl: 'Κράτησε την οδηγία στη μνήμη σου: ΜΗΝ επιλέξεις το αντικείμενο που μετράει τον χρόνο, αλλά εκείνο που μετράει τη θερμοκρασία!',
+    pictogramCue: '🚫⏱️ 🚫📏 ➡️ 🌡️',
+    options: [
+      { id: 'sl4-1', emoji: '⏱️', labelEl: 'Χρονόμετρο', isTarget: false },
+      { id: 'sl4-2', emoji: '📏', labelEl: 'Χάρακας', isTarget: false },
+      { id: 'sl4-3', emoji: '🌡️', labelEl: 'Θερμόμετρο', isTarget: true },
+    ],
+  },
+  {
+    instructionEl: 'Άκου προσεκτικά: Αν η Γη γυρίζει γύρω από τον Ήλιο, επίλεξε το αντικείμενο που φοράμε στο κεφάλι για ασφάλεια στο ποδήλατο!',
+    pictogramCue: '🌍☀️ ➡️ 🪖',
+    options: [
+      { id: 'sl5-1', emoji: '🎒', labelEl: 'Σακίδιο Πλάτης', isTarget: false },
+      { id: 'sl5-2', emoji: '🪖', labelEl: 'Προστατευτικό Κράνος', isTarget: true },
+      { id: 'sl5-3', emoji: '👟', labelEl: 'Αθλητικό Παπούτσι', isTarget: false },
+    ],
+  },
+  {
+    instructionEl: 'Πρόσεξε: ΜΗΝ διαλέξεις το φρούτο ούτε το λουλούδι· επίλεξε το εργαστηριακό όργανο που μεγεθύνει τα κύτταρα!',
+    pictogramCue: '🚫🍎 🚫🌻 ➡️ 🔬',
+    options: [
+      { id: 'sl6-1', emoji: '🍎', labelEl: 'Κόκκινο Μήλο', isTarget: false },
+      { id: 'sl6-2', emoji: '🌻', labelEl: 'Ηλίανθος', isTarget: false },
+      { id: 'sl6-3', emoji: '🔬', labelEl: 'Μικροσκόπιο', isTarget: true },
+    ],
+  },
+];
+
 export const Activity08ListenDo: React.FC<ActivityRunnerRenderProps> = ({
   phase,
   currentRound,
@@ -135,9 +192,11 @@ export const Activity08ListenDo: React.FC<ActivityRunnerRenderProps> = ({
 }) => {
   const { settings } = useApp();
   const { runDebounced, getAbsorbedCount } = useDebouncedAction();
+  const isSeniorAge = ageBand === '8-10' || ageBand === '10-12';
+  const listenPool = isSeniorAge ? SENIOR_LISTEN_ROUNDS : LISTEN_ROUNDS;
   const activeRounds = useMemo(
-    () => selectSessionRounds(LISTEN_ROUNDS, totalRounds, sessionSeed),
-    [totalRounds, sessionSeed]
+    () => selectSessionRounds(listenPool, totalRounds, sessionSeed),
+    [listenPool, totalRounds, sessionSeed]
   );
   const round = activeRounds[(currentRound - 1) % activeRounds.length];
   const [isListeningFinished, setIsListeningFinished] = useState<boolean>(false);

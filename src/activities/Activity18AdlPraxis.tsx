@@ -135,6 +135,49 @@ const PRAXIS_ROUNDS: PraxisScenario[] = [
   },
 ];
 
+const SENIOR_PRAXIS_ROUNDS: typeof PRAXIS_ROUNDS = [
+  {
+    titleEl: 'Εκτελεστική Οργάνωση (8-12 ετών): Ιεράρχηση Απογευματινής Μελέτης',
+    goalEmoji: '🗂️⏱️',
+    questionEl: 'Έχεις 3 εργασίες για αύριο: ένα απαιτητικό κεφάλαιο Μαθηματικών, μια σύντομη αντιγραφή και την προετοιμασία της τσάντας. Ποια στρατηγική αξιοποιεί καλύτερα την ενέργειά σου;',
+    options: [
+      { id: 'spx1-1', emoji: '🧠✅', labelEl: 'Ξεκινώ με τα Μαθηματικά όσο το μυαλό μου είναι ξεκούραστο, συνεχίζω με τη σύντομη εργασία και κλείνω ετοιμάζοντας την τσάντα', isCorrect: true },
+      { id: 'spx1-2', emoji: '🌙😴', labelEl: 'Αφήνω τα δύσκολα Μαθηματικά για αργά το βράδυ όταν νυστάζω', isCorrect: false },
+      { id: 'spx1-3', emoji: '🌪️', labelEl: 'Ανοίγω και τα 3 βιβλία ταυτόχρονα πηδώντας από το ένα στο άλλο', isCorrect: false },
+    ],
+  },
+  {
+    titleEl: 'Εκτελεστική Αυτονομία: Σχολικό Project με Προθεσμία 5 Ημερών',
+    goalEmoji: '📅📊',
+    questionEl: 'Ο εκπαιδευτικός αναθέτει μια εργασία Φυσικής που παραδίδεται την Παρασκευή. Πώς την οργανώνεις χωρίς άγχος;',
+    options: [
+      { id: 'spx2-1', emoji: '📋✨', labelEl: 'Χωρίζω την εργασία σε 4 μικρά ημερήσια βήματα (Έρευνα ➔ Συγγραφή ➔ Εικόνες ➔ Έλεγχος)', isCorrect: true },
+      { id: 'spx2-2', emoji: '⏳😰', labelEl: 'Την ξεχνάω όλη την εβδομάδα και ξεκινάω την Πέμπτη στις 10 το βράδυ', isCorrect: false },
+      { id: 'spx2-3', emoji: '🙈', labelEl: 'Περιμένω να την κάνει κάποιος άλλος αντί για μένα', isCorrect: false },
+    ],
+  },
+  {
+    titleEl: 'Ψηφιακή Αυτορρύθμιση: Συγκέντρωση την Ώρα της Μελέτης',
+    goalEmoji: '🔕📚',
+    questionEl: 'Καθώς διαβάζεις Ιστορία, ακούς συνεχώς ειδοποιήσεις από ομαδική συνομιλία στο τάμπλετ (Tablet). Τι κάνεις;',
+    options: [
+      { id: 'spx3-1', emoji: '🔕🎯', labelEl: 'Ενεργοποιώ τη λειτουργία «Μην Ενοχλείτε» μέχρι να ολοκληρώσω το κεφάλαιο μελέτης', isCorrect: true },
+      { id: 'spx3-2', emoji: '📱🔄', labelEl: 'Διακόπτω το διάβασμα κάθε 30 δευτερόλεπτα για να απαντάω στα μηνύματα', isCorrect: false },
+      { id: 'spx3-3', emoji: '🔊', labelEl: 'Δυναμώνω την ένταση των ειδοποιήσεων πάνω στο βιβλίο', isCorrect: false },
+    ],
+  },
+  {
+    titleEl: 'Πράξη & Ακρίβεια: Σχεδίαση Κύκλου στη Γεωμετρία',
+    goalEmoji: '📐⭕',
+    questionEl: 'Χρειάζεται να σχεδιάσεις έναν απόλυτα συμμετρικό κύκλο ακτίνας 4 εκατοστών στο τετράδιο Γεωμετρίας. Πώς χρησιμοποιείς τα όργανα;',
+    options: [
+      { id: 'spx4-1', emoji: '📏🧭', labelEl: 'Μετράω 4 εκ. στον χάρακα με τον διαβήτη, σταθεροποιώ την ακίδα στο κέντρο και περιστρέφω ομαλά', isCorrect: true },
+      { id: 'spx4-2', emoji: '🖍️', labelEl: 'Ζωγραφίζω βιαστικά με το χέρι χωρίς κανένα όργανο μέτρησης', isCorrect: false },
+      { id: 'spx4-3', emoji: '✂️', labelEl: 'Χρησιμοποιώ το ψαλίδι πάνω στο τετράδιο', isCorrect: false },
+    ],
+  },
+];
+
 export const Activity18AdlPraxis: React.FC<ActivityRunnerRenderProps> = ({
   currentRound,
   totalRounds,
@@ -147,9 +190,11 @@ export const Activity18AdlPraxis: React.FC<ActivityRunnerRenderProps> = ({
 }) => {
   const { settings } = useApp();
   const { runDebounced, getAbsorbedCount } = useDebouncedAction();
+  const isSeniorAge = ageBand === '8-10' || ageBand === '10-12';
+  const praxisPool = isSeniorAge ? SENIOR_PRAXIS_ROUNDS : PRAXIS_ROUNDS;
   const activeRounds = useMemo(
-    () => selectSessionRounds(PRAXIS_ROUNDS, totalRounds, sessionSeed),
-    [totalRounds, sessionSeed]
+    () => selectSessionRounds(praxisPool, totalRounds, sessionSeed),
+    [praxisPool, totalRounds, sessionSeed]
   );
   const round = activeRounds[(currentRound - 1) % activeRounds.length];
 

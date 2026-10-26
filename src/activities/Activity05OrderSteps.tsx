@@ -140,6 +140,63 @@ const ROUTINES: Array<{ titleEl: string; steps: RoutineStep[]; displayOrder: num
   },
 ];
 
+const SENIOR_ROUTINES: typeof ROUTINES = [
+  {
+    titleEl: 'Οργάνωση Επιστημονικού Πειράματος (STEM)',
+    steps: [
+      { order: 1, emoji: '📋', labelEl: 'Διαβάζω προσεκτικά τις οδηγίες και ετοιμάζω τα υλικά στον πάγκο' },
+      { order: 2, emoji: '🔬', labelEl: 'Εκτελώ το πείραμα μετρώντας ακριβώς τις ποσότητες' },
+      { order: 3, emoji: '📓', labelEl: 'Καταγράφω τα αποτελέσματα στο τετράδιο εργαστηρίου' },
+    ],
+    displayOrder: [2, 3, 1],
+  },
+  {
+    titleEl: 'Στρατηγική Μελέτης Χωρίς Διασπάσεις',
+    steps: [
+      { order: 1, emoji: '🔕', labelEl: 'Απομακρύνω κινητό/παιχνίδια και αφήνω στο γραφείο μόνο το μάθημα' },
+      { order: 2, emoji: '⏱️', labelEl: 'Μελετώ εστιασμένα για 20 λεπτά χωρίζοντας την ύλη σε ενότητες' },
+      { order: 3, emoji: '✅', labelEl: 'Κάνω γρήγορη επανάληψη και ελέγχω τις απαντήσεις μου' },
+    ],
+    displayOrder: [3, 1, 2],
+  },
+  {
+    titleEl: 'Σχεδιασμός Σχολικής Παρουσίασης (Project)',
+    steps: [
+      { order: 1, emoji: '🔍', labelEl: 'Συγκεντρώνω έγκυρες πληροφορίες και σημειώνω τα βασικά σημεία' },
+      { order: 2, emoji: '🗂️', labelEl: 'Οργανώνω τις ενότητες με αρχή, μέση και συμπέρασμα' },
+      { order: 3, emoji: '🎤', labelEl: 'Κάνω πρόβα παρουσίασης με καθαρή φωνή και σταθερό ρυθμό' },
+    ],
+    displayOrder: [2, 1, 3],
+  },
+  {
+    titleEl: 'Προετοιμασία για Αθλητική Προπόνηση',
+    steps: [
+      { order: 1, emoji: '🎒', labelEl: 'Ετοιμάζω από νωρίς παγούρι νερού, αθλητικά παπούτσια και εμφάνιση' },
+      { order: 2, emoji: '🤸', labelEl: 'Κάνω προθέρμανση και διατάσεις πριν ξεκινήσει ο αγώνας' },
+      { order: 3, emoji: '💧', labelEl: 'Ενυδατώνομαι και κάνω αποθεραπεία μετά την προπόνηση' },
+    ],
+    displayOrder: [3, 2, 1],
+  },
+  {
+    titleEl: 'Έλεγχος Ασφαλείας Ποδηλάτου Πριν τη Βόλτα',
+    steps: [
+      { order: 1, emoji: '🛞', labelEl: 'Ελέγχω τον αέρα στα λάστιχα και ότι τα φρένα πιάνουν σωστά' },
+      { order: 2, emoji: '🪖', labelEl: 'Φοράω και κουμπώνω σταθερά το προστατευτικό κράνος' },
+      { order: 3, emoji: '🚲', labelEl: 'Ξεκινώ στον ποδηλατόδρομο προσέχοντας τους γύρω μου' },
+    ],
+    displayOrder: [2, 3, 1],
+  },
+  {
+    titleEl: 'Επίλυση Σύνθετου Προβλήματος Μαθηματικών',
+    steps: [
+      { order: 1, emoji: '📖', labelEl: 'Υπογραμμίζω τα δεδομένα και τι ακριβώς ζητάει η εκφώνηση' },
+      { order: 2, emoji: '✏️', labelEl: 'Επιλέγω τη μέθοδο επίλυσης και εκτελώ τις πράξεις βήμα-βήμα' },
+      { order: 3, emoji: '🔎', labelEl: 'Επαληθεύω αν το τελικό αποτέλεσμα είναι λογικό και σωστό' },
+    ],
+    displayOrder: [3, 1, 2],
+  },
+];
+
 export const Activity05OrderSteps: React.FC<ActivityRunnerRenderProps> = ({
   currentRound,
   totalRounds,
@@ -152,9 +209,11 @@ export const Activity05OrderSteps: React.FC<ActivityRunnerRenderProps> = ({
 }) => {
   const { settings } = useApp();
   const { runDebounced, getAbsorbedCount } = useDebouncedAction();
+  const isSeniorAge = ageBand === '8-10' || ageBand === '10-12';
+  const routinePool = isSeniorAge ? SENIOR_ROUTINES : ROUTINES;
   const activeRoutines = useMemo(
-    () => selectSessionRounds(ROUTINES, totalRounds, sessionSeed),
-    [totalRounds, sessionSeed]
+    () => selectSessionRounds(routinePool, totalRounds, sessionSeed),
+    [routinePool, totalRounds, sessionSeed]
   );
   const routine = activeRoutines[(currentRound - 1) % activeRoutines.length];
   const [selectedOrders, setSelectedOrders] = useState<number[]>([]);

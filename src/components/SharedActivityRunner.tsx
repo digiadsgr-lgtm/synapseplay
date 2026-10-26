@@ -45,7 +45,7 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
   children,
 }) => {
   const navigate = useNavigate();
-  const { settings, activeProfile, logCompletedActivity, recordStrategyPreference } = useApp();
+  const { settings, updateSettings, activeProfile, logCompletedActivity, recordStrategyPreference } = useApp();
 
   const storageKey = `synapseplay_runner_${activity.id}`;
   const savedCheckpoint = (() => {
@@ -352,9 +352,22 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
               <h1 className="text-base sm:text-xl md:text-2xl font-extrabold text-charcoal">
                 {activity.code}. {activity.titleEl}
               </h1>
-              <span className="px-2 py-0.5 rounded-full bg-sage-surface border border-sage text-[11px] sm:text-xs font-extrabold text-charcoal">
-                Ηλικία {ageBand} ετών
-              </span>
+              <label className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-sage-surface border border-sage text-[11px] sm:text-xs font-extrabold text-charcoal">
+                <span>Ηλικία:</span>
+                <select
+                  data-testid="runner-age-band-select"
+                  aria-label="Επιλογή Ηλικιακής Ομάδας"
+                  value={ageBand}
+                  onChange={(e) => void updateSettings({ ageBand: e.target.value as AgeBandId })}
+                  className="bg-transparent font-extrabold text-charcoal cursor-pointer focus:outline-none"
+                >
+                  <option value="4-5">4-5 ετών</option>
+                  <option value="5-6">5-6 ετών</option>
+                  <option value="6-8">6-8 ετών</option>
+                  <option value="8-10">8-10 ετών</option>
+                  <option value="10-12">10-12 ετών</option>
+                </select>
+              </label>
             </div>
             <p className="hidden sm:block text-sm text-charcoal-muted">{activity.subtitleEl}</p>
             {ageAdaptationText && (

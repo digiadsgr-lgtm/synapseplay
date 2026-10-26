@@ -65,8 +65,9 @@ export const Activity04SequenceMemory: React.FC<ActivityRunnerRenderProps> = ({
       return baseSequence.slice(0, 2);
     }
     if (ageBand === '8-10' || ageBand === '10-12' || adaptiveProfile.enrichChallenge) {
-      const extraSymbol = baseSequence[0] === 'sun' ? 'star' : 'sun';
-      return [...baseSequence, extraSymbol];
+      const extra1 = baseSequence[0] === 'sun' ? 'star' : 'sun';
+      const extra2 = baseSequence[1] === 'wave' ? 'leaf' : 'wave';
+      return baseSequence.length === 2 ? [...baseSequence, extra1, extra2] : [...baseSequence, extra1];
     }
     return baseSequence;
   }, [baseSequence, ageBand, adaptiveProfile.distractorReductionRatio, adaptiveProfile.enrichChallenge]);

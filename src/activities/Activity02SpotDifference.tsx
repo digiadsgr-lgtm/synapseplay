@@ -149,11 +149,13 @@ export const Activity02SpotDifference: React.FC<ActivityRunnerRenderProps> = ({
       baseSlots = slots.filter((s, i) => s.isDifferent || i === 0);
     } else if (ageBand === '5-6') {
       baseSlots = slots.slice(0, 3);
-    } else if (diff.isAdvancedMastery) {
+    } else if (ageBand === '8-10' || ageBand === '10-12' || diff.isAdvancedMastery) {
       baseSlots = [
         ...slots,
         { id: `ex1-${currentRound}`, leftEmoji: '☁️', rightEmoji: '☁️', labelEl: 'Σύννεφο', isDifferent: false },
         { id: `ex2-${currentRound}`, leftEmoji: '🍀', rightEmoji: '🍀', labelEl: 'Τριφύλλι', isDifferent: false },
+        { id: `ex3-${currentRound}`, leftEmoji: '🧭', rightEmoji: '🧭', labelEl: 'Πυξίδα', isDifferent: false },
+        { id: `ex4-${currentRound}`, leftEmoji: '🔭', rightEmoji: '🔭', labelEl: 'Τηλεσκόπιο', isDifferent: false },
       ];
     }
     return rotateOptionsForSession(baseSlots, sessionSeed, currentRound);
