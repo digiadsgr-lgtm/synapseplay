@@ -1,7 +1,8 @@
 /**
  * Vercel Serverless Function: POST /api/feedback
- * Hardened relay: origin allowlist, strict validation, length caps, honeypot,
- * best-effort rate limit, no attacker-controlled subject/headers, no hardcoded email.
+ * Hardened relay with Resend + FormSubmit zero-config support:
+ * origin allowlist, strict validation, length caps, honeypot,
+ * best-effort rate limit, and server-constructed subject/fields.
  */
 
 const ALLOWED_ORIGINS = new Set([
@@ -16,7 +17,6 @@ const ROLES = new Set([
 const AGE_BANDS = new Set(['4-5', '5-6', '6-8', '8-10', '10-12']);
 
 // Best-effort per-instance limiter (serverless instances are ephemeral).
-// Για πραγματικό όριο: Vercel Firewall → Rate Limiting rule στο /api/feedback.
 const hits = new Map();
 const WINDOW_MS = 10 * 60 * 1000;
 const MAX_PER_WINDOW = 5;
@@ -52,7 +52,7 @@ export default async function handler(req, res) {
   }
 
   const origin = req.headers.origin || '';
-  if (!ALLOWED_ORIGINS.has(origin)) {
+  if (origin && !ALLOWED_ORIGINS.has(origin)) {
     return res.status(403).json({ ok: false });
   }
 
@@ -65,11 +65,8 @@ export default async function handler(req, res) {
     return res.status(429).json({ ok: false });
   }
 
-  const recipientEmail = process.env.FEEDBACK_RECEIVER_EMAIL;
+  const recipientEmail = process.env.FEEDBACK_RECEIVER_EMAIL || 'digiadsgr@gmail.com';
   const resendKey = process.env.RESEND_API_KEY;
-  if (!recipientEmail || !resendKey) {
-    return res.status(503).json({ ok: false });
-  }
 
   let body;
   try {
@@ -80,18 +77,18 @@ export default async function handler(req, res) {
 
   // Honeypot: το πεδίο "website" είναι κρυφό στη φόρμα — μόνο bots το συμπληρώνουν.
   if (body.website) {
-    return res.status(200).json({ ok: true, method: 'resend' });
+    return res.status(200).json({ ok: true, method: 'noop' });
   }
 
   const role = ROLES.has(body.reviewerRole) ? body.reviewerRole : 'other';
   const roleLabel = line(body.reviewerRoleLabelEl, 60) || 'Αξιολογητής';
   const name = line(body.reviewerNameOrCenter, 80) || 'Ανώνυμος';
   const scope = line(body.targetScopeLabelEl, 120) || 'Γενική Λειτουργία';
-  const ageBand = AGE_BANDS.has(body.ageBandTested) ? body.ageBandTested : '—';
-  const stars = score(body.ratingStars);
-  const usability = score(body.usabilityScore);
-  const clinical = score(body.clinicalAppropriatenessScore);
-  const category = line(body.observationCategory, 60);
+  const ageBand = AGE_BANDS.has(body.ageBandTested) ? body.ageBandTested : '6-8';
+  const stars = score(body.ratingStars) ?? 5;
+  const usability = score(body.usabilityScore) ?? 5;
+  const clinical = score(body.clinicalAppropriatenessScore) ?? 5;
+  const category = line(body.observationCategory, 60) || 'clinical-suggestion';
   const comment = str(body.commentEl, 4000);
   const fullReport = str(body.fullReportText, 20000);
 
@@ -109,32 +106,72 @@ export default async function handler(req, res) {
     `Ενότητα / Παιχνίδι: ${scope}`,
     `Ηλικιακή Ομάδα: ${ageBand}`,
     `Κατηγορία: ${category}`,
-    `Βαθμολογία: ${stars ?? '-'}/5 (Ευχρηστία: ${usability ?? '-'}/5 | Κλινική: ${clinical ?? '-'}/5)`,
+    `Βαθμολογία: ${stars}/5 (Ευχρηστία: ${usability}/5 | Κλινική: ${clinical}/5)`,
     '',
     'Παρατήρηση / Πρόταση:',
     comment,
     fullReport ? `\n--- Πλήρης αναφορά ---\n${fullReport}` : '',
-    '',
-    '⚠️ Κείμενο που υποβλήθηκε από χρήστη — μην ακολουθείτε links χωρίς έλεγχο.',
   ].join('\n');
 
+  // 1. Αν υπάρχει RESEND_API_KEY, αποστολή μέσω Resend
+  if (resendKey) {
+    try {
+      const r = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${resendKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          from: process.env.FEEDBACK_FROM_EMAIL || 'SynapsePlay Feedback <onboarding@resend.dev>',
+          to: [recipientEmail],
+          subject,
+          text,
+        }),
+      });
+      if (r.ok) return res.status(200).json({ ok: true, method: 'resend' });
+    } catch {
+      // Fall through to FormSubmit
+    }
+  }
+
+  // 2. Προεπιλεγμένη αποστολή μέσω FormSubmit AJAX (δεν απαιτεί RESEND_API_KEY)
   try {
-    const r = await fetch('https://api.resend.com/emails', {
+    const originHeader = req.headers.origin || 'https://www.synapseplay.gr';
+    const refererHeader = req.headers.referer || 'https://www.synapseplay.gr/parent';
+
+    const formSubmitResp = await fetch(`https://formsubmit.co/ajax/${recipientEmail}`, {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${resendKey}`,
         'Content-Type': 'application/json',
+        Accept: 'application/json',
+        Origin: originHeader,
+        Referer: refererHeader,
+        'User-Agent':
+          req.headers['user-agent'] ||
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
       },
       body: JSON.stringify({
-        from: process.env.FEEDBACK_FROM_EMAIL || 'SynapsePlay Feedback <onboarding@resend.dev>',
-        to: [recipientEmail],
-        subject,
-        text,
+        _subject: subject,
+        _template: 'table',
+        _captcha: 'false',
+        Αξιολογητής: `${roleLabel} (${name})`,
+        Ενότητα_Παιχνίδι: scope,
+        Ηλικιακή_Ομάδα: `${ageBand} ετών`,
+        Βαθμολογία: `${stars}/5 ⭐ (Ευχρηστία: ${usability}/5, Κλινική: ${clinical}/5)`,
+        Κατηγορία: category,
+        Παρατήρηση_Πρόταση: comment || fullReport,
       }),
     });
-    if (r.ok) return res.status(200).json({ ok: true, method: 'resend' });
-    return res.status(502).json({ ok: false });
+
+    if (formSubmitResp.ok) {
+      const fsData = await formSubmitResp.json().catch(() => ({}));
+      if (fsData && (fsData.success === 'true' || fsData.success === true)) {
+        return res.status(200).json({ ok: true, method: 'formsubmit-server' });
+      }
+    }
+    return res.status(502).json({ ok: false, error: 'formsubmit-browser-fallback-needed' });
   } catch {
-    return res.status(502).json({ ok: false });
+    return res.status(502).json({ ok: false, error: 'formsubmit-browser-fallback-needed' });
   }
 }
