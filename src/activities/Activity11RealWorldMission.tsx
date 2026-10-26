@@ -146,8 +146,8 @@ export const Activity11RealWorldMission: React.FC<ActivityRunnerRenderProps> = (
   };
 
   return (
-    <div className="space-y-6 max-w-2xl mx-auto" data-testid="activity-11-real-world-mission">
-      <div className="p-5 rounded-3xl bg-sage-surface border-2 border-sage text-center space-y-2">
+    <div className="space-y-3 max-w-2xl mx-auto" data-testid="activity-11-real-world-mission">
+      <div className="p-4 rounded-3xl bg-sage-surface border-2 border-sage text-center space-y-1.5">
         <h2 className="text-xl md:text-2xl font-extrabold text-charcoal">{mission.titleEl}</h2>
         <p className="text-sm font-bold text-charcoal-muted">
           {allChecked
@@ -156,7 +156,7 @@ export const Activity11RealWorldMission: React.FC<ActivityRunnerRenderProps> = (
         </p>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-2.5">
         {mission.steps.map((step, idx) => {
           const isDone = checkedSteps[idx];
           const isNextHint =

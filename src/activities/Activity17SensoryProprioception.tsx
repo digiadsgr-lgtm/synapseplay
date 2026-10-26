@@ -199,9 +199,6 @@ export const Activity17SensoryProprioception: React.FC<ActivityRunnerRenderProps
         onClick={handleProprioceptivePulse}
         className="p-6 rounded-3xl bg-slate-surface border-4 border-slate space-y-3 cursor-pointer"
       >
-        <span className="inline-block px-3 py-1 rounded-full bg-white text-xs font-extrabold text-slate-dark border border-slate">
-          🧘 {item.disciplineTagEl}
-        </span>
         <div className="text-6xl" aria-hidden="true">{item.emoji}</div>
         <h2 className="text-xl md:text-2xl font-extrabold text-charcoal">{item.titleEl}</h2>
         <p className="text-lg font-bold text-charcoal" data-testid="proprioception-instruction">

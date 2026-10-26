@@ -221,12 +221,12 @@ export const Activity07MoveFreeze: React.FC<ActivityRunnerRenderProps> = ({
   };
 
   return (
-    <div className="space-y-6 text-center" data-testid="activity-07-move-freeze">
+    <div className="space-y-3 text-center" data-testid="activity-07-move-freeze">
       {/* Live Traffic Light Stage */}
       <div
         data-testid={`signal-card-${phase.mode}`}
         onClick={phase.mode === 'go' ? handleDrumPadTap : undefined}
-        className={`p-6 rounded-3xl border-4 max-w-xl mx-auto space-y-4 transition-all ${
+        className={`p-4 rounded-3xl border-4 max-w-xl mx-auto space-y-2 transition-all ${
           phase.mode === 'go'
             ? 'bg-sage-surface border-sage-dark shadow-sm cursor-pointer'
             : 'bg-terracotta-surface border-terracotta-dark shadow-sm'
@@ -249,7 +249,7 @@ export const Activity07MoveFreeze: React.FC<ActivityRunnerRenderProps> = ({
           </span>
         </div>
 
-        <div className="text-6xl" aria-hidden="true">
+        <div className="text-5xl" aria-hidden="true">
           {phase.mode === 'go' ? '🌿🥁' : '🛑🧘'}
         </div>
 
@@ -321,13 +321,13 @@ export const Activity07MoveFreeze: React.FC<ActivityRunnerRenderProps> = ({
       </div>
 
       {/* Single Drum Pad Action Control (Hidden at Hint Level 2 during FREEZE to prevent impulsive error) */}
-      <div className="flex flex-wrap items-center justify-center gap-6">
+      <div className="flex flex-wrap items-center justify-center gap-4">
         {!(hintLevel === 2 && phase.mode === 'freeze') && (
           <button
             type="button"
             data-testid="move-freeze-go-btn"
             onClick={handleDrumPadTap}
-            className={`touch-target min-w-[260px] min-h-[104px] px-8 py-5 rounded-3xl border-4 font-extrabold text-xl flex flex-col items-center justify-center gap-1.5 transition-all ${
+            className={`touch-target min-w-[260px] min-h-[88px] px-8 py-3 rounded-3xl border-4 font-extrabold text-xl flex flex-col items-center justify-center gap-1.5 transition-all ${
               phase.mode === 'go'
                 ? 'bg-sage text-white border-charcoal ring-4 ring-sage/40 hover:bg-sage-dark scale-[1.02]'
                 : 'bg-sand-light border-sand-dark text-charcoal-muted opacity-75'

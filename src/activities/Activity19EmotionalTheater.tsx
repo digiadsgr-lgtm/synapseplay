@@ -402,9 +402,6 @@ export const Activity19EmotionalTheater: React.FC<ActivityRunnerRenderProps> = (
   return (
     <div className="space-y-6 text-center" data-testid="activity-19-emotional-theater">
       <div className="p-6 rounded-3xl bg-terracotta-surface border-4 border-terracotta space-y-3">
-        <span className="inline-block px-3 py-1 rounded-full bg-white text-xs font-extrabold text-charcoal border border-terracotta">
-          🎭 Θεατρική Αγωγή • Παιδοψυχολογία • Κοινωνική Εργασία
-        </span>
         <div className="text-5xl" aria-hidden="true">{scene.sceneEmoji}</div>
         <h2 className="text-xl md:text-2xl font-extrabold text-charcoal">{scene.titleEl}</h2>
         <p className="text-base font-bold text-charcoal">{scene.storyEl}</p>

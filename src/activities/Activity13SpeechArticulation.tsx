@@ -625,10 +625,10 @@ export const Activity13SpeechArticulation: React.FC<ActivityRunnerRenderProps> =
   };
 
   return (
-    <div className="space-y-4 sm:space-y-6 text-center" data-testid="activity-13-speech-articulation">
+    <div className="space-y-3 text-center" data-testid="activity-13-speech-articulation">
       {/* Syllabic Rhythm & Articulation Stage */}
-      <div className="p-4 sm:p-6 rounded-3xl bg-sage-surface border-4 border-sage space-y-3 sm:space-y-4">
-        <div className="text-4xl sm:text-5xl" aria-hidden="true">{round.targetEmoji}</div>
+      <div className="p-3 sm:p-4 rounded-3xl bg-sage-surface border-4 border-sage space-y-2">
+        <div className="text-3xl sm:text-4xl" aria-hidden="true">{round.targetEmoji}</div>
         <div className="flex flex-wrap items-center justify-center gap-2.5 sm:gap-3">
           <h2 className="text-xl sm:text-2xl font-extrabold text-charcoal">{round.wordEl}</h2>
           <button
@@ -729,7 +729,7 @@ export const Activity13SpeechArticulation: React.FC<ActivityRunnerRenderProps> =
       </div>
 
       {/* Phonological Target Selection */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 max-w-2xl mx-auto">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3 max-w-2xl mx-auto">
         {visibleOptions.map((opt) => {
           const highlight = (hintLevel >= 1 || adaptiveProfile.autoHintBoost) && opt.isCorrect;
           return (
@@ -744,7 +744,7 @@ export const Activity13SpeechArticulation: React.FC<ActivityRunnerRenderProps> =
                   : 'bg-white border-sand-dark hover:border-slate'
               }`}
             >
-              <span className="text-4xl sm:text-5xl" aria-hidden="true">{opt.emoji}</span>
+              <span className="text-3xl sm:text-4xl" aria-hidden="true">{opt.emoji}</span>
               <span className="text-sm sm:text-base font-extrabold text-charcoal">{opt.labelEl}</span>
             </button>
           );

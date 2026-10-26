@@ -351,8 +351,8 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
       data-difficulty-tier={difficultyProfile.tierLevel}
     >
       {/* Top Activity Navigation & Progress Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-3 bg-sand-light border-2 border-sand-dark rounded-2xl sm:rounded-3xl p-2 sm:p-2.5">
-        <div className="flex items-center gap-2 sm:gap-3">
+      <div className="flex flex-wrap md:flex-nowrap items-center justify-between gap-2 sm:gap-3 bg-sand-light border-2 border-sand-dark rounded-2xl sm:rounded-3xl p-2 sm:p-2.5">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           <button
             type="button"
             onClick={() => navigate(`/category/${activity.categoryId}`)}
@@ -364,10 +364,10 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
             <span>Πίσω</span>
           </button>
 
-          <div>
-            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+          <div className="min-w-0">
+            <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
               <span className="text-xl sm:text-3xl" aria-hidden="true">{activity.pictogram}</span>
-              <h1 className="text-base sm:text-xl md:text-2xl font-extrabold text-charcoal">
+              <h1 className="text-base sm:text-xl md:text-2xl font-extrabold text-charcoal truncate" title={activity.titleEl}>
                 {activity.code}. {activity.titleEl}
               </h1>
               {/* Read-only: the age band is changed by the parent (hub / parent area), not inside the game */}
@@ -382,7 +382,7 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
         </div>
 
         {/* Calm Pebble Progress Indicator & Local Runner Pause Toggle */}
-        <div className="flex items-center gap-2 sm:gap-3">
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           <div
             className="flex items-center gap-1.5 sm:gap-2"
             aria-label={`Βήμα ${state.currentRound} από ${state.totalRounds}`}
@@ -499,7 +499,8 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
                   }`}
                 >
                   <span className="text-base sm:text-xl" aria-hidden="true">🪑</span>
-                  <span>{state.seatedMode ? 'Καθιστή Εκδοχή: ΝΑΙ' : 'Καθιστή Εκδοχή'}</span>
+                  <span className="hidden xl:inline">{state.seatedMode ? 'Καθιστή Εκδοχή: ΝΑΙ' : 'Καθιστή Εκδοχή'}</span>
+                  <span className="sr-only xl:hidden">{state.seatedMode ? 'Καθιστή Εκδοχή: ΝΑΙ' : 'Καθιστή Εκδοχή'}</span>
                 </button>
               )}
 

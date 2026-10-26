@@ -225,9 +225,6 @@ export const Activity16ErgoFineMotor: React.FC<ActivityRunnerRenderProps> = ({
   return (
     <div className="space-y-6 text-center" data-testid="activity-16-ergo-fine-motor">
       <div className="p-5 rounded-3xl bg-sage-surface border-4 border-sage space-y-2">
-        <span className="inline-block px-3 py-1 rounded-full bg-white text-xs font-extrabold text-charcoal border border-sage">
-          👐 Εργοθεραπεία — Λεπτή Κινητικότητα & Γραφοκινητική Πορεία
-        </span>
         <h2 className="text-xl md:text-2xl font-extrabold text-charcoal">{exercise.titleEl}</h2>
         <p className="text-base font-bold text-charcoal" data-testid="ergo-fine-motor-prompt">
           {seatedMode ? exercise.seatedPromptEl : exercise.ergoPromptEl}

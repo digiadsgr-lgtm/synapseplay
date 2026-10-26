@@ -182,9 +182,6 @@ export const Activity20MusicKineticRhythm: React.FC<ActivityRunnerRenderProps> =
   return (
     <div className="space-y-6 text-center" data-testid="activity-20-music-kinetic-rhythm">
       <div className="p-5 rounded-3xl bg-white border-2 border-sand-dark space-y-3">
-        <span className="inline-block px-3 py-1 rounded-full bg-sage-surface text-xs font-extrabold text-charcoal border border-sage">
-          🎵 Μουσικοκινητική Αγωγή Dalcroze / Orff
-        </span>
         <h2 className="text-xl md:text-2xl font-extrabold text-charcoal">{round.tempoTitleEl}</h2>
         <p className="text-sm font-bold text-charcoal-muted">{round.tempoDescEl}</p>
 
