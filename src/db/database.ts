@@ -272,3 +272,100 @@ export async function wipeAllLocalData(): Promise<void> {
     // Fallback already reset
   }
 }
+
+/* ------------------------------------------------------------------ */
+/* Backup / restore (manual transfer between devices, e.g. therapist   */
+/* tablet → office PC). Until cloud sync exists, this is the only way  */
+/* to move a child's history. The file contains children's data:       */
+/* parents/therapists must store it securely.                          */
+/* ------------------------------------------------------------------ */
+
+export const BACKUP_FORMAT = 'synapseplay-backup';
+export const BACKUP_VERSION = 1;
+
+export interface SynapsePlayBackup {
+  format: typeof BACKUP_FORMAT;
+  version: number;
+  exportedAt: string;
+  childProfiles: ChildMicroProfile[];
+  sessionLogs: ActivitySessionLog[];
+}
+
+export async function exportBackup(): Promise<SynapsePlayBackup> {
+  const childProfiles = await loadChildProfiles();
+  const sessionLogs = await getSessionLogs();
+  return {
+    format: BACKUP_FORMAT,
+    version: BACKUP_VERSION,
+    exportedAt: new Date().toISOString(),
+    childProfiles,
+    // ids are re-assigned on import
+    sessionLogs: sessionLogs.map(({ id: _id, ...rest }) => rest as ActivitySessionLog),
+  };
+}
+
+/** Validates an untrusted backup file. Throws a Greek message on failure. */
+export function parseBackup(raw: string): SynapsePlayBackup {
+  let data: unknown;
+  try {
+    data = JSON.parse(raw);
+  } catch {
+    throw new Error('Το αρχείο δεν είναι έγκυρο αντίγραφο ασφαλείας (μη έγκυρο JSON).');
+  }
+  const b = data as Partial<SynapsePlayBackup>;
+  if (!b || b.format !== BACKUP_FORMAT || typeof b.version !== 'number') {
+    throw new Error('Το αρχείο δεν είναι αντίγραφο ασφαλείας του SynapsePlay.');
+  }
+  if (b.version > BACKUP_VERSION) {
+    throw new Error('Το αντίγραφο προέρχεται από νεότερη έκδοση της εφαρμογής. Ενημερώστε την εφαρμογή.');
+  }
+  if (!Array.isArray(b.childProfiles) || !Array.isArray(b.sessionLogs) || b.childProfiles.length === 0) {
+    throw new Error('Το αντίγραφο ασφαλείας δεν περιέχει προφίλ παιδιών.');
+  }
+  const okProfile = (p: unknown): p is ChildMicroProfile => {
+    const x = p as ChildMicroProfile;
+    return (
+      !!x &&
+      typeof x.id === 'string' &&
+      typeof x.nickname === 'string' &&
+      x.nickname.length <= 60 &&
+      typeof x.ageBand === 'string' &&
+      typeof x.learnedModel === 'object' &&
+      x.learnedModel !== null
+    );
+  };
+  const okLog = (l: unknown): l is ActivitySessionLog => {
+    const x = l as ActivitySessionLog;
+    return (
+      !!x &&
+      typeof x.activityId === 'string' &&
+      typeof x.timestamp === 'string' &&
+      typeof x.dateKey === 'string' &&
+      typeof x.completedRounds === 'number' &&
+      typeof x.totalRounds === 'number'
+    );
+  };
+  if (!b.childProfiles.every(okProfile) || !b.sessionLogs.every(okLog)) {
+    throw new Error('Το αντίγραφο ασφαλείας είναι κατεστραμμένο ή έχει τροποποιηθεί.');
+  }
+  return b as SynapsePlayBackup;
+}
+
+/** REPLACES all child profiles and session logs on this device with the backup. */
+export async function importBackup(backup: SynapsePlayBackup): Promise<ChildMicroProfile[]> {
+  const profiles = backup.childProfiles;
+  const logs = backup.sessionLogs.map(({ id: _id, ...rest }) => rest as ActivitySessionLog);
+  memoryProfiles = [...profiles];
+  memoryLogs = [...logs];
+  try {
+    await db.transaction('rw', [db.childProfiles, db.sessionLogs], async () => {
+      await db.childProfiles.clear();
+      await db.sessionLogs.clear();
+      await db.childProfiles.bulkPut(profiles);
+      await db.sessionLogs.bulkAdd(logs);
+    });
+  } catch {
+    // In-memory fallback already updated
+  }
+  return [...profiles];
+}

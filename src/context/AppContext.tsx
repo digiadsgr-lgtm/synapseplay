@@ -21,6 +21,8 @@ import {
   saveSettings,
   setTodayUsageSeconds,
   wipeAllLocalData,
+  importBackup,
+  type SynapsePlayBackup,
 } from '../db/database';
 import {
   createDefaultChildProfile,
@@ -53,6 +55,13 @@ interface AppContextValue {
     ageBand: AgeBandId;
   }) => Promise<ChildMicroProfile | null>;
   updateProfileAvatar: (profileId: string, avatarEmoji: string) => Promise<void>;
+  /** Rename a child profile and/or change its age band (parent area). */
+  updateChildProfileDetails: (
+    profileId: string,
+    changes: { nickname?: string; ageBand?: AgeBandId }
+  ) => Promise<void>;
+  /** Replace all profiles + session logs with a validated backup file. */
+  restoreBackup: (backup: SynapsePlayBackup) => Promise<void>;
   deleteChildProfile: (profileId: string) => Promise<void>;
   recordStrategyPreference: (strategyId: 'time' | 'example' | 'retry') => Promise<void>;
   elapsedSeconds: number;
@@ -278,6 +287,42 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     [childProfiles]
   );
 
+  const updateChildProfileDetails = useCallback(
+    async (profileId: string, changes: { nickname?: string; ageBand?: AgeBandId }) => {
+      const target = childProfiles.find((p) => p.id === profileId);
+      if (!target) return;
+      const nickname = changes.nickname?.trim().slice(0, 40);
+      const updated: ChildMicroProfile = {
+        ...target,
+        ...(nickname ? { nickname } : {}),
+        ...(changes.ageBand ? { ageBand: changes.ageBand } : {}),
+      };
+      setChildProfiles((prev) => prev.map((p) => (p.id === profileId ? updated : p)));
+      const updatedList = await saveChildProfile(updated);
+      setChildProfiles(updatedList);
+      // Keep the global age band in sync when editing the ACTIVE child
+      if (changes.ageBand && settings.activeChildProfileId === profileId) {
+        const nextSettings = await saveSettings({ ageBand: changes.ageBand });
+        setSettings(nextSettings);
+      }
+    },
+    [childProfiles, settings.activeChildProfileId]
+  );
+
+  const restoreBackup = useCallback(async (backup: SynapsePlayBackup) => {
+    const restored = await importBackup(backup);
+    setChildProfiles(restored);
+    const first = restored[0];
+    if (first) {
+      const nextSettings = await saveSettings({
+        activeChildProfileId: first.id,
+        ageBand: first.ageBand,
+      });
+      setSettings(nextSettings);
+    }
+    setSessionLogs(await getSessionLogs());
+  }, []);
+
   const deleteChildProfile = useCallback(
     async (profileId: string) => {
       if (childProfiles.length <= 1) return;
@@ -418,6 +463,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         switchChildProfile,
         createChildProfile,
         updateProfileAvatar,
+        updateChildProfileDetails,
+        restoreBackup,
         deleteChildProfile,
         recordStrategyPreference,
         elapsedSeconds,

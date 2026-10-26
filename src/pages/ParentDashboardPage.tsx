@@ -22,6 +22,7 @@ import { getActiveGreekVoiceLabel, speakGreek } from '../utils/soundAndSpeech';
 import { ParentGateModal } from '../components/ParentGateModal';
 import { ClinicalFeedbackSection } from '../components/ClinicalFeedbackSection';
 import { SubscriptionManagementSection } from '../components/SubscriptionManagementSection';
+import { ProfessionalToolsSection } from '../components/ProfessionalToolsSection';
 import { MONETIZATION_CONFIG } from '../config/monetization.config';
 import { formatLogAccuracy, summarizeRecentAccuracy } from '../utils/progressMetrics';
 
@@ -795,6 +796,9 @@ export const ParentDashboardPage: React.FC = () => {
           })}
         </div>
       </section>
+
+      {/* Profiles editing, PDF/CSV reports, backup & restore */}
+      <ProfessionalToolsSection />
 
       {/* Activity Session Logs & One-Click Data Wipe */}
       <section className="bg-white border-2 border-sand-dark rounded-3xl p-6 space-y-5">
