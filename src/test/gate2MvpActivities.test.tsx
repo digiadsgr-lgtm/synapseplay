@@ -149,6 +149,10 @@ describe('Gate 2 (MVP Milestone) — Child Hub Navigation & Activities 01, 04, 0
         vi.advanceTimersByTime(100);
       });
     }
+    // Freeze timer filled -> adult/child confirms the statue hold with one tap
+    expect(screen.getByTestId('signal-card-freeze')).toBeInTheDocument();
+    vi.advanceTimersByTime(450);
+    fireEvent.click(screen.getByTestId('freeze-confirm-btn'));
     expect(screen.getByTestId('signal-card-go')).toBeInTheDocument();
 
     // Complete Round 3 -> Completed

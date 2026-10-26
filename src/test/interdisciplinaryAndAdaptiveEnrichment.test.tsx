@@ -385,6 +385,10 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
     act(() => {
       vi.advanceTimersByTime(3100);
     });
+    act(() => {
+      vi.advanceTimersByTime(450);
+    });
+    fireEvent.click(screen.getByTestId('freeze-confirm-btn'));
     expect(screen.getByTestId('round-pebble-3')).toHaveTextContent('3');
     u07();
 
@@ -860,6 +864,10 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
     act(() => {
       vi.advanceTimersByTime(3100);
     });
+    act(() => {
+      vi.advanceTimersByTime(450);
+    });
+    fireEvent.click(screen.getByTestId('freeze-confirm-btn'));
     // Must be on Round 3 (ACTIVE_ROUND), NOT prematurely completed by double-invocation
     expect(screen.getByTestId('shared-activity-runner')).toHaveAttribute(
       'data-runner-phase',

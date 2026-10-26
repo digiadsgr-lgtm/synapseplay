@@ -23,7 +23,7 @@ const AGE_SPEECH_ROUNDS: Record<string, SpeechRound[]> = {
       promptQuestionEl: 'Χτύπα 2 παλαμάκια για τη λέξη «μπάλα» και βρες την μπάλα!',
       targetEmoji: '⚽',
       options: [
-        { id: 'sp4-1', emoji: '⚽', labelEl: 'Μπάλα (2 συλλαβές)', isCorrect: true },
+        { id: 'sp4-1', emoji: '⚽', labelEl: 'Μπάλα', isCorrect: true },
         { id: 'sp4-2', emoji: '🚂', labelEl: 'Τρένο', isCorrect: false },
         { id: 'sp4-3', emoji: '🍎', labelEl: 'Μήλο', isCorrect: false },
       ],
@@ -36,7 +36,7 @@ const AGE_SPEECH_ROUNDS: Record<string, SpeechRound[]> = {
       targetEmoji: '🐱',
       options: [
         { id: 'sp4-4', emoji: '🐶', labelEl: 'Σκύλος', isCorrect: false },
-        { id: 'sp4-5', emoji: '🐱', labelEl: 'Γάτα (2 συλλαβές)', isCorrect: true },
+        { id: 'sp4-5', emoji: '🐱', labelEl: 'Γάτα', isCorrect: true },
         { id: 'sp4-6', emoji: '🐸', labelEl: 'Βάτραχος', isCorrect: false },
       ],
     },
@@ -47,7 +47,7 @@ const AGE_SPEECH_ROUNDS: Record<string, SpeechRound[]> = {
       promptQuestionEl: 'Χτύπα 2 παλαμάκια για τη λέξη «παπί» και βρες το παπί!',
       targetEmoji: '🦆',
       options: [
-        { id: 'sp4-7', emoji: '🦆', labelEl: 'Παπί (2 συλλαβές)', isCorrect: true },
+        { id: 'sp4-7', emoji: '🦆', labelEl: 'Παπί', isCorrect: true },
         { id: 'sp4-8', emoji: '🐮', labelEl: 'Αγελάδα', isCorrect: false },
         { id: 'sp4-9', emoji: '🐴', labelEl: 'Άλογο', isCorrect: false },
       ],
@@ -59,7 +59,7 @@ const AGE_SPEECH_ROUNDS: Record<string, SpeechRound[]> = {
       promptQuestionEl: 'Χτύπα 2 παλαμάκια για τη λέξη «κότα» και βρες την κότα!',
       targetEmoji: '🐔',
       options: [
-        { id: 'sp4-10', emoji: '🐔', labelEl: 'Κότα (2 συλλαβές)', isCorrect: true },
+        { id: 'sp4-10', emoji: '🐔', labelEl: 'Κότα', isCorrect: true },
         { id: 'sp4-11', emoji: '🐟', labelEl: 'Ψάρι', isCorrect: false },
         { id: 'sp4-12', emoji: '🐢', labelEl: 'Χελώνα', isCorrect: false },
       ],
@@ -72,7 +72,7 @@ const AGE_SPEECH_ROUNDS: Record<string, SpeechRound[]> = {
       targetEmoji: '🍎',
       options: [
         { id: 'sp4-13', emoji: '🍌', labelEl: 'Μπανάνα', isCorrect: false },
-        { id: 'sp4-14', emoji: '🍎', labelEl: 'Μήλο (2 συλλαβές)', isCorrect: true },
+        { id: 'sp4-14', emoji: '🍎', labelEl: 'Μήλο', isCorrect: true },
         { id: 'sp4-15', emoji: '🍓', labelEl: 'Φράουλα', isCorrect: false },
       ],
     },
@@ -83,7 +83,7 @@ const AGE_SPEECH_ROUNDS: Record<string, SpeechRound[]> = {
       promptQuestionEl: 'Χτύπα 2 παλαμάκια για τη λέξη «ψάρι» και βρες το ψαράκι!',
       targetEmoji: '🐟',
       options: [
-        { id: 'sp4-16', emoji: '🐟', labelEl: 'Ψάρι (2 συλλαβές)', isCorrect: true },
+        { id: 'sp4-16', emoji: '🐟', labelEl: 'Ψάρι', isCorrect: true },
         { id: 'sp4-17', emoji: '🦁', labelEl: 'Λιοντάρι', isCorrect: false },
         { id: 'sp4-18', emoji: '🐘', labelEl: 'Ελέφαντας', isCorrect: false },
       ],
@@ -95,7 +95,7 @@ const AGE_SPEECH_ROUNDS: Record<string, SpeechRound[]> = {
       promptQuestionEl: 'Χτύπα 2 παλαμάκια για τη λέξη «δέντρο» και βρες το πράσινο δέντρο!',
       targetEmoji: '🌳',
       options: [
-        { id: 'sp4-19', emoji: '🌳', labelEl: 'Δέντρο (2 συλλαβές)', isCorrect: true },
+        { id: 'sp4-19', emoji: '🌳', labelEl: 'Δέντρο', isCorrect: true },
         { id: 'sp4-20', emoji: '🌻', labelEl: 'Ηλίανθος', isCorrect: false },
         { id: 'sp4-21', emoji: '🍄', labelEl: 'Μανιτάρι', isCorrect: false },
       ],
@@ -108,7 +108,7 @@ const AGE_SPEECH_ROUNDS: Record<string, SpeechRound[]> = {
       targetEmoji: '🏠',
       options: [
         { id: 'sp4-22', emoji: '⛺', labelEl: 'Σκηνή', isCorrect: false },
-        { id: 'sp4-23', emoji: '🏠', labelEl: 'Σπίτι (2 συλλαβές)', isCorrect: true },
+        { id: 'sp4-23', emoji: '🏠', labelEl: 'Σπίτι', isCorrect: true },
         { id: 'sp4-24', emoji: '🏰', labelEl: 'Κάστρο', isCorrect: false },
       ],
     },
@@ -119,7 +119,7 @@ const AGE_SPEECH_ROUNDS: Record<string, SpeechRound[]> = {
       promptQuestionEl: 'Χτύπα 2 παλαμάκια για τη λέξη «βάζο» και βρες το πήλινο βάζο!',
       targetEmoji: '🏺',
       options: [
-        { id: 'sp4-25', emoji: '🏺', labelEl: 'Βάζο (2 συλλαβές)', isCorrect: true },
+        { id: 'sp4-25', emoji: '🏺', labelEl: 'Βάζο', isCorrect: true },
         { id: 'sp4-26', emoji: '🥄', labelEl: 'Κουτάλι', isCorrect: false },
         { id: 'sp4-27', emoji: '🪑', labelEl: 'Καρέκλα', isCorrect: false },
       ],
@@ -132,7 +132,7 @@ const AGE_SPEECH_ROUNDS: Record<string, SpeechRound[]> = {
       targetEmoji: '🍃',
       options: [
         { id: 'sp4-28', emoji: '☁️', labelEl: 'Σύννεφο', isCorrect: false },
-        { id: 'sp4-29', emoji: '🍃', labelEl: 'Φύλλο (2 συλλαβές)', isCorrect: true },
+        { id: 'sp4-29', emoji: '🍃', labelEl: 'Φύλλο', isCorrect: true },
         { id: 'sp4-30', emoji: '🌈', labelEl: 'Ουράνιο Τόξο', isCorrect: false },
       ],
     },
@@ -143,7 +143,7 @@ const AGE_SPEECH_ROUNDS: Record<string, SpeechRound[]> = {
       promptQuestionEl: 'Χτύπα 2 παλαμάκια για τη λέξη «ρόδα» και βρες τη στρογγυλή ρόδα!',
       targetEmoji: '🛞',
       options: [
-        { id: 'sp4-31', emoji: '🛞', labelEl: 'Ρόδα (2 συλλαβές)', isCorrect: true },
+        { id: 'sp4-31', emoji: '🛞', labelEl: 'Ρόδα', isCorrect: true },
         { id: 'sp4-32', emoji: '⛵', labelEl: 'Καράβι', isCorrect: false },
         { id: 'sp4-33', emoji: '🚁', labelEl: 'Ελικόπτερο', isCorrect: false },
       ],
@@ -156,7 +156,7 @@ const AGE_SPEECH_ROUNDS: Record<string, SpeechRound[]> = {
       targetEmoji: '🌊',
       options: [
         { id: 'sp4-34', emoji: '⛰️', labelEl: 'Βουνό', isCorrect: false },
-        { id: 'sp4-35', emoji: '🌊', labelEl: 'Κύμα (2 συλλαβές)', isCorrect: true },
+        { id: 'sp4-35', emoji: '🌊', labelEl: 'Κύμα', isCorrect: true },
         { id: 'sp4-36', emoji: '🌵', labelEl: 'Κάκτος', isCorrect: false },
       ],
     },
@@ -169,7 +169,7 @@ const AGE_SPEECH_ROUNDS: Record<string, SpeechRound[]> = {
       promptQuestionEl: 'Χτύπα παλαμάκια καθώς τρέχουν οι 3 συλλαβές στη λέξη «χελώνα» και βρες τη σωστή περιγραφή της!',
       targetEmoji: '🐢',
       options: [
-        { id: 'sp6-1', emoji: '🐢', labelEl: 'Χελώνα: Έχει σκληρό καβούκι (3 συλλαβές)', isCorrect: true },
+        { id: 'sp6-1', emoji: '🐢', labelEl: 'Χελώνα: Έχει σκληρό καβούκι', isCorrect: true },
         { id: 'sp6-2', emoji: '⛵', labelEl: 'Καράβι: Ταξιδεύει στη θάλασσα', isCorrect: false },
         { id: 'sp6-3', emoji: '🌻', labelEl: 'Ηλίανθος: Κίτρινο λουλούδι', isCorrect: false },
       ],
@@ -182,7 +182,7 @@ const AGE_SPEECH_ROUNDS: Record<string, SpeechRound[]> = {
       targetEmoji: '⛵',
       options: [
         { id: 'sp6-4', emoji: '🌳', labelEl: 'Δέντρο: Έχει πράσινα φύλλα', isCorrect: false },
-        { id: 'sp6-5', emoji: '⛵', labelEl: 'Καράβι: Ταξιδεύει πάνω στα κύματα (3 συλλαβές)', isCorrect: true },
+        { id: 'sp6-5', emoji: '⛵', labelEl: 'Καράβι: Ταξιδεύει πάνω στα κύματα', isCorrect: true },
         { id: 'sp6-6', emoji: '📘', labelEl: 'Βιβλίο: Έχει σελίδες που διαβάζουμε', isCorrect: false },
       ],
     },
@@ -194,7 +194,7 @@ const AGE_SPEECH_ROUNDS: Record<string, SpeechRound[]> = {
       targetEmoji: '🌊',
       options: [
         { id: 'sp6-7', emoji: '☀️', labelEl: 'Ήλιος: Λάμπει ψηλά στον ουρανό', isCorrect: false },
-        { id: 'sp6-8', emoji: '🌊', labelEl: 'Θάλασσα: Αλμυρό νερό με κύματα (3 συλλαβές)', isCorrect: true },
+        { id: 'sp6-8', emoji: '🌊', labelEl: 'Θάλασσα: Αλμυρό νερό με κύματα', isCorrect: true },
         { id: 'sp6-9', emoji: '🏠', labelEl: 'Σπίτι: Έχει στέγη και παράθυρα', isCorrect: false },
       ],
     },
@@ -205,7 +205,7 @@ const AGE_SPEECH_ROUNDS: Record<string, SpeechRound[]> = {
       promptQuestionEl: 'Χτύπα παλαμάκια καθώς τρέχουν οι 3 συλλαβές στη λέξη «λεμόνι» και βρες τη σωστή περιγραφή του!',
       targetEmoji: '🍋',
       options: [
-        { id: 'sp6-10', emoji: '🍋', labelEl: 'Λεμόνι: Κίτρινο ξινό φρούτο (3 συλλαβές)', isCorrect: true },
+        { id: 'sp6-10', emoji: '🍋', labelEl: 'Λεμόνι: Κίτρινο ξινό φρούτο', isCorrect: true },
         { id: 'sp6-11', emoji: '🍎', labelEl: 'Μήλο: Κόκκινο γλυκό φρούτο', isCorrect: false },
         { id: 'sp6-12', emoji: '🚲', labelEl: 'Ποδήλατο: Έχει δύο ρόδες', isCorrect: false },
       ],
@@ -217,7 +217,7 @@ const AGE_SPEECH_ROUNDS: Record<string, SpeechRound[]> = {
       promptQuestionEl: 'Χτύπα παλαμάκια καθώς τρέχουν οι 3 συλλαβές στη λέξη «τρενάκι» και βρες τη σωστή περιγραφή του!',
       targetEmoji: '🚂',
       options: [
-        { id: 'sp6-13', emoji: '🚂', labelEl: 'Τρενάκι: Κινείται πάνω στις ράγες (3 συλλαβές)', isCorrect: true },
+        { id: 'sp6-13', emoji: '🚂', labelEl: 'Τρενάκι: Κινείται πάνω στις ράγες', isCorrect: true },
         { id: 'sp6-14', emoji: '⛵', labelEl: 'Καράβι: Πλέει στο νερό', isCorrect: false },
         { id: 'sp6-15', emoji: '🌙', labelEl: 'Φεγγάρι: Φωτίζει τη νύχτα', isCorrect: false },
       ],
@@ -229,7 +229,7 @@ const AGE_SPEECH_ROUNDS: Record<string, SpeechRound[]> = {
       promptQuestionEl: 'Χτύπα παλαμάκια καθώς τρέχουν οι 3 συλλαβές στη λέξη «κιθάρα» και βρες τη σωστή περιγραφή της!',
       targetEmoji: '🎸',
       options: [
-        { id: 'sp6-16', emoji: '🎸', labelEl: 'Κιθάρα: Μουσικό όργανο με χορδές (3 συλλαβές)', isCorrect: true },
+        { id: 'sp6-16', emoji: '🎸', labelEl: 'Κιθάρα: Μουσικό όργανο με χορδές', isCorrect: true },
         { id: 'sp6-17', emoji: '🔔', labelEl: 'Κουδούνι: Χτυπάει στην πόρτα', isCorrect: false },
         { id: 'sp6-18', emoji: '🏠', labelEl: 'Σπίτι: Χώρος που μένουμε', isCorrect: false },
       ],
@@ -241,7 +241,7 @@ const AGE_SPEECH_ROUNDS: Record<string, SpeechRound[]> = {
       promptQuestionEl: 'Χτύπα παλαμάκια καθώς τρέχουν οι 3 συλλαβές στη λέξη «πυξίδα» και βρες τη σωστή περιγραφή της!',
       targetEmoji: '🧭',
       options: [
-        { id: 'sp6-19', emoji: '🧭', labelEl: 'Πυξίδα: Δείχνει πάντα τον Βορρά (3 συλλαβές)', isCorrect: true },
+        { id: 'sp6-19', emoji: '🧭', labelEl: 'Πυξίδα: Δείχνει πάντα τον Βορρά', isCorrect: true },
         { id: 'sp6-20', emoji: '⛺', labelEl: 'Σκηνή: Κατασκήνωση στο δάσος', isCorrect: false },
         { id: 'sp6-21', emoji: '🔦', labelEl: 'Φακός: Φωτίζει στο σκοτάδι', isCorrect: false },
       ],
@@ -253,7 +253,7 @@ const AGE_SPEECH_ROUNDS: Record<string, SpeechRound[]> = {
       promptQuestionEl: 'Χτύπα παλαμάκια καθώς τρέχουν οι 3 συλλαβές στη λέξη «σταφύλι» και βρες τη σωστή περιγραφή του!',
       targetEmoji: '🍇',
       options: [
-        { id: 'sp6-22', emoji: '🍇', labelEl: 'Σταφύλι: Τσαμπί με γλυκές ρώγες (3 συλλαβές)', isCorrect: true },
+        { id: 'sp6-22', emoji: '🍇', labelEl: 'Σταφύλι: Τσαμπί με γλυκές ρώγες', isCorrect: true },
         { id: 'sp6-23', emoji: '🍎', labelEl: 'Μήλο: Στρογγυλό κόκκινο φρούτο', isCorrect: false },
         { id: 'sp6-24', emoji: '🍌', labelEl: 'Μπανάνα: Μακρύ κίτρινο φρούτο', isCorrect: false },
       ],
@@ -265,7 +265,7 @@ const AGE_SPEECH_ROUNDS: Record<string, SpeechRound[]> = {
       promptQuestionEl: 'Χτύπα παλαμάκια καθώς τρέχουν οι 3 συλλαβές στη λέξη «δελφίνι» και βρες τη σωστή περιγραφή του!',
       targetEmoji: '🐬',
       options: [
-        { id: 'sp6-25', emoji: '🐬', labelEl: 'Δελφίνι: Έξυπνο πλάσμα της θάλασσας (3 συλλαβές)', isCorrect: true },
+        { id: 'sp6-25', emoji: '🐬', labelEl: 'Δελφίνι: Έξυπνο πλάσμα της θάλασσας', isCorrect: true },
         { id: 'sp6-26', emoji: '🦅', labelEl: 'Αετός: Πετάει ψηλά στα βουνά', isCorrect: false },
         { id: 'sp6-27', emoji: '🦁', labelEl: 'Λιοντάρι: Ζει στη σαβάνα', isCorrect: false },
       ],
@@ -277,7 +277,7 @@ const AGE_SPEECH_ROUNDS: Record<string, SpeechRound[]> = {
       promptQuestionEl: 'Χτύπα παλαμάκια καθώς τρέχουν οι 3 συλλαβές στη λέξη «φράουλα» και βρες τη σωστή περιγραφή της!',
       targetEmoji: '🍓',
       options: [
-        { id: 'sp6-28', emoji: '🍓', labelEl: 'Φράουλα: Κόκκινο αρωματικό φρούτο (3 συλλαβές)', isCorrect: true },
+        { id: 'sp6-28', emoji: '🍓', labelEl: 'Φράουλα: Κόκκινο αρωματικό φρούτο', isCorrect: true },
         { id: 'sp6-29', emoji: '🥦', labelEl: 'Μπρόκολο: Πράσινο λαχανικό', isCorrect: false },
         { id: 'sp6-30', emoji: '🥕', labelEl: 'Καρότο: Πορτοκαλί λαχανικό', isCorrect: false },
       ],
@@ -289,7 +289,7 @@ const AGE_SPEECH_ROUNDS: Record<string, SpeechRound[]> = {
       promptQuestionEl: 'Χτύπα παλαμάκια καθώς τρέχουν οι 3 συλλαβές στη λέξη «κουτάλι» και βρες τη σωστή περιγραφή του!',
       targetEmoji: '🥄',
       options: [
-        { id: 'sp6-31', emoji: '🥄', labelEl: 'Κουτάλι: Με αυτό τρώμε τη σούπα (3 συλλαβές)', isCorrect: true },
+        { id: 'sp6-31', emoji: '🥄', labelEl: 'Κουτάλι: Με αυτό τρώμε τη σούπα', isCorrect: true },
         { id: 'sp6-32', emoji: '🪑', labelEl: 'Καρέκλα: Έπιπλο για να καθόμαστε', isCorrect: false },
         { id: 'sp6-33', emoji: '🖍️', labelEl: 'Κηρομπογιά: Ζωγραφίζουμε στο χαρτί', isCorrect: false },
       ],
@@ -301,7 +301,7 @@ const AGE_SPEECH_ROUNDS: Record<string, SpeechRound[]> = {
       promptQuestionEl: 'Χτύπα παλαμάκια καθώς τρέχουν οι 3 συλλαβές στη λέξη «πλανήτης» και βρες τη σωστή περιγραφή του!',
       targetEmoji: '🪐',
       options: [
-        { id: 'sp6-34', emoji: '🪐', labelEl: 'Πλανήτης: Γυρίζει γύρω από τον Ήλιο (3 συλλαβές)', isCorrect: true },
+        { id: 'sp6-34', emoji: '🪐', labelEl: 'Πλανήτης: Γυρίζει γύρω από τον Ήλιο', isCorrect: true },
         { id: 'sp6-35', emoji: '🌲', labelEl: 'Έλατο: Δέντρο του δάσους', isCorrect: false },
         { id: 'sp6-36', emoji: '🏠', labelEl: 'Σπίτι: Κτίριο στη γειτονιά', isCorrect: false },
       ],
@@ -315,9 +315,9 @@ const AGE_SPEECH_ROUNDS: Record<string, SpeechRound[]> = {
       promptQuestionEl: 'Χτύπα παλαμάκια καθώς τρέχουν οι 4 συλλαβές της σύνθετης λέξης «ποδήλατο» και βρες την ακριβή ετυμολογία και περιγραφή της:',
       targetEmoji: '🚲',
       options: [
-        { id: 'sp10-1', emoji: '🚲', labelEl: 'Ποδήλατο: Πόδι + Ελαύνω (Δίτροχο όχημα με πετάλια — 4 συλλαβές)', isCorrect: true },
-        { id: 'sp10-2', emoji: '🎒', labelEl: 'Σχολική Τσάντα: Μεταφορά τετραδίων (2 συλλαβές)', isCorrect: false },
-        { id: 'sp10-3', emoji: '✏️', labelEl: 'Μολύβι: Όργανο γραφής και σχεδίου (3 συλλαβές)', isCorrect: false },
+        { id: 'sp10-1', emoji: '🚲', labelEl: 'Ποδήλατο: Πόδι + Ελαύνω (Δίτροχο όχημα με πετάλια)', isCorrect: true },
+        { id: 'sp10-2', emoji: '🎒', labelEl: 'Σχολική Τσάντα: Μεταφορά τετραδίων', isCorrect: false },
+        { id: 'sp10-3', emoji: '✏️', labelEl: 'Μολύβι: Όργανο γραφής και σχεδίου', isCorrect: false },
       ],
     },
     {
@@ -339,7 +339,7 @@ const AGE_SPEECH_ROUNDS: Record<string, SpeechRound[]> = {
       promptQuestionEl: 'Χτύπα παλαμάκια καθώς τρέχουν οι 4 συλλαβές στη λέξη «συγκέντρωση» και βρες το ακριβές νόημά της:',
       targetEmoji: '🎯',
       options: [
-        { id: 'sp10-7', emoji: '🎯', labelEl: 'Συγκέντρωση: Εστιάζω προσεκτικά στον στόχο μου (4 συλλαβές)', isCorrect: true },
+        { id: 'sp10-7', emoji: '🎯', labelEl: 'Συγκέντρωση: Εστιάζω προσεκτικά στον στόχο μου', isCorrect: true },
         { id: 'sp10-8', emoji: '🏃', labelEl: 'Διασπορά: Απομακρύνομαι βιαστικά', isCorrect: false },
         { id: 'sp10-9', emoji: '😴', labelEl: 'Υπνηλία: Αποκοιμιέμαι χωρίς προσοχή', isCorrect: false },
       ],

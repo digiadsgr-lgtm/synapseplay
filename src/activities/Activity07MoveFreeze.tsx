@@ -133,6 +133,9 @@ export const Activity07MoveFreeze: React.FC<ActivityRunnerRenderProps> = ({
   const phase = activePhases[(currentRound - 1) % activePhases.length];
   const [goTaps, setGoTaps] = useState<number>(0);
   const [freezeElapsedMs, setFreezeElapsedMs] = useState<number>(0);
+  // The app cannot see the child's body: when the statue timer fills, an adult/child
+  // confirms with one tap (also proves someone is still in front of the screen).
+  const [freezeDone, setFreezeDone] = useState<boolean>(false);
 
   const advanceRef = useRef(advanceRound);
   advanceRef.current = advanceRound;
@@ -142,6 +145,7 @@ export const Activity07MoveFreeze: React.FC<ActivityRunnerRenderProps> = ({
   useEffect(() => {
     setGoTaps(0);
     setFreezeElapsedMs(0);
+    setFreezeDone(false);
     speakGreek(phase.spokenCueEl, settings.voiceEnabled, adaptiveProfile.speechRate);
   }, [currentRound, sessionSeed, phase.spokenCueEl, settings.voiceEnabled, adaptiveProfile.speechRate]);
 
@@ -149,7 +153,12 @@ export const Activity07MoveFreeze: React.FC<ActivityRunnerRenderProps> = ({
   // The child must NOT press anything while the stillness bar fills up to 100%!
   // If they stay still for diff.freezeHoldMs (~3s), the round completes automatically!
   useEffect(() => {
-    if (runnerPhase === 'PAUSED' || runnerPhase === 'COMPLETED' || phase.mode !== 'freeze') {
+    if (
+      runnerPhase === 'PAUSED' ||
+      runnerPhase === 'COMPLETED' ||
+      phase.mode !== 'freeze' ||
+      freezeDone
+    ) {
       return;
     }
 
@@ -159,18 +168,26 @@ export const Activity07MoveFreeze: React.FC<ActivityRunnerRenderProps> = ({
     }, stepMs);
 
     return () => window.clearInterval(interval);
-  }, [runnerPhase, phase.mode, currentRound]);
+  }, [runnerPhase, phase.mode, currentRound, freezeDone]);
 
   useEffect(() => {
     if (runnerPhase === 'PAUSED' || runnerPhase === 'COMPLETED' || phase.mode !== 'freeze') {
       return;
     }
-    if (freezeElapsedMs >= diff.freezeHoldMs) {
+    if (!freezeDone && freezeElapsedMs >= diff.freezeHoldMs) {
+      setFreezeDone(true);
+      playCalmTone('soft-step', settings.soundEnabled);
+    }
+  }, [runnerPhase, phase.mode, freezeElapsedMs, diff.freezeHoldMs, settings.soundEnabled, freezeDone]);
+
+  const handleFreezeConfirm = () => {
+    runDebounced(() => {
+      setFreezeDone(false);
       setFreezeElapsedMs(0);
       playCalmTone('complete', settings.soundEnabled);
       advanceRef.current(absorbedRef.current());
-    }
-  }, [runnerPhase, phase.mode, freezeElapsedMs, diff.freezeHoldMs, settings.soundEnabled]);
+    });
+  };
 
   const freezeProgressPct = Math.min(
     100,
@@ -184,6 +201,7 @@ export const Activity07MoveFreeze: React.FC<ActivityRunnerRenderProps> = ({
   const handleDrumPadTap = () => {
     runDebounced(() => {
       if (phase.mode === 'freeze') {
+        if (freezeDone) return;
         // Child impulsively tapped during RED STOP! Reset the stillness timer and guide gently:
         setFreezeElapsedMs(0);
         triggerGentleFeedback(
@@ -269,7 +287,7 @@ export const Activity07MoveFreeze: React.FC<ActivityRunnerRenderProps> = ({
           /* Live Stillness Progress Bar during FREEZE — Child wins by NOT touching anything! */
           <div className="space-y-2 pt-2 max-w-md mx-auto" data-testid="freeze-stillness-meter">
             <div className="flex items-center justify-between text-xs font-extrabold text-charcoal">
-              <span>🧘 Μπάρα Ακινησίας (Μην πατήσεις τίποτα!)</span>
+              <span>🧘 Χρόνος Αγάλματος</span>
               <span>{remainingFreezeSec} δευτ.</span>
             </div>
             <div className="w-full h-5 rounded-full bg-white border-2 border-terracotta-dark overflow-hidden p-0.5">
@@ -279,9 +297,25 @@ export const Activity07MoveFreeze: React.FC<ActivityRunnerRenderProps> = ({
                 style={{ width: `${freezeProgressPct}%` }}
               />
             </div>
-            <p className="text-xs font-bold text-charcoal-muted">
-              Κράτα τα χέρια σου ήρεμα μακριά από την οθόνη μέχρι να γεμίσει η πράσινη μπάρα!
-            </p>
+            {freezeDone ? (
+              <div className="space-y-2 pt-1" data-testid="freeze-confirm-panel">
+                <button
+                  type="button"
+                  data-testid="freeze-confirm-btn"
+                  onClick={handleFreezeConfirm}
+                  className="touch-target w-full px-6 py-4 rounded-3xl bg-sage text-white border-4 border-charcoal font-extrabold text-xl"
+                >
+                  🗿 Έμεινα άγαλμα!
+                </button>
+                <p className="text-xs font-bold text-charcoal-muted">
+                  Γονέα: η εφαρμογή δεν βλέπει το σώμα — επιβεβαιώστε εσείς ότι το παιδί έμεινε ακίνητο.
+                </p>
+              </div>
+            ) : (
+              <p className="text-xs font-bold text-charcoal-muted">
+                Μείνε ακίνητος σαν άγαλμα μέχρι να γεμίσει η μπάρα!
+              </p>
+            )}
           </div>
         )}
       </div>
