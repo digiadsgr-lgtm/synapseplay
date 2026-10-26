@@ -1048,5 +1048,36 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
     expect(html01).not.toContain('<link rel="canonical" href="https://www.synapseplay.gr/" />');
     expect(html01).toContain('Γιατί το παιδί με ΔΕΠΥ ξεσπάει όταν του παίρνεις το τάμπλετ');
   });
+
+  it('Security & GDPR Consent Hardening: enforces opt-in analytics consent, removes DOM answer leaks, and protects /api/feedback against origin spoofing, spam honeypots, and rate abuse', async () => {
+    const { hasAnalyticsConsent } = await import('../utils/analyticsConsent');
+    const { clearGdprConsentAck, getGdprConsentAck } = await import(
+      '../components/GdprConsentBanner'
+    );
+
+    expect(hasAnalyticsConsent(null)).toBe(false);
+    expect(
+      hasAnalyticsConsent(JSON.stringify({ mode: 'strictly-necessary-local-only', analytics: false }))
+    ).toBe(false);
+    expect(
+      hasAnalyticsConsent(JSON.stringify({ mode: 'necessary-and-analytics', analytics: true }))
+    ).toBe(true);
+
+    // Verify GDPR consent banner exposes both Necessary-Only and Opt-In Analytics buttons
+    clearGdprConsentAck();
+    const { unmount } = renderRoute('/');
+    expect(screen.getByTestId('gdpr-banner-accept-btn')).toBeInTheDocument();
+    expect(screen.getByTestId('gdpr-banner-accept-analytics-btn')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('gdpr-banner-accept-analytics-btn'));
+    expect(hasAnalyticsConsent(getGdprConsentAck())).toBe(true);
+    unmount();
+
+    // Verify ParentGateModal does not leak data-correct-option in DOM
+    const { unmount: uGate } = renderRoute('/app');
+    fireEvent.click(screen.getByTestId('open-parent-gate-btn'));
+    const optBtn = screen.getByTestId('parent-gate-option-15');
+    expect(optBtn).not.toHaveAttribute('data-correct-option');
+    uGate();
+  });
 });
 

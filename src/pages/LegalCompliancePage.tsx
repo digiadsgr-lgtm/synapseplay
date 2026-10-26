@@ -212,13 +212,14 @@ export const LegalCompliancePage: React.FC = () => {
 
             <div className="p-4 rounded-2xl bg-white border border-[#2C3539]/15 space-y-2">
               <h3 className="font-extrabold text-[#2C3539]">
-                ✉️ 2.4. Εθελοντική Υποβολή Παρατηρήσεων &amp; Αξιολόγησης (Άρθρο 6 παρ. 1α ΓΚΠΔ)
+                ✉️ 2.4. Εθελοντική Υποβολή Παρατηρήσεων (Resend Serverless Relay — Άρθρο 6 παρ. 1α ΓΚΠΔ)
               </h3>
               <p className="text-[#2C3539]/85 leading-relaxed">
                 Στο προστατευμένο Περιβάλλον Γονέα/Ειδικού παρέχεται προαιρετική φόρμα αποστολής
-                παρατηρήσεων και προτάσεων βελτίωσης. Η αποστολή γίνεται μόνο κατόπιν ρητής ενέργειας
-                του ενήλικα χρήστη και τα στοιχεία χρησιμοποιούνται αποκλειστικά για την τεχνική και
-                παιδαγωγική βελτίωση της εφαρμογής.
+                παρατηρήσεων. Η αποστολή γίνεται <strong>μόνο κατόπιν ρητής υποβολής</strong> από τον
+                ενήλικα χρήστη μέσω του εσωτερικού serverless endpoint (<code>/api/feedback</code>) με
+                πάροχο διεκπεραίωσης email την <strong>Resend</strong>, αποκλειστικά για την τεχνική
+                και παιδαγωγική βελτίωση της εφαρμογής.
               </p>
             </div>
           </div>
@@ -349,21 +350,30 @@ export const LegalCompliancePage: React.FC = () => {
 
           <div className="bg-[#FAF6EE] border-2 border-[#7A9A7B]/50 rounded-3xl p-6 space-y-3 text-sm leading-relaxed">
             <h2 className="text-lg sm:text-xl font-extrabold text-[#2C3539]">
-              6. Πολιτική Cookies &amp; Τοπικής Αποθήκευσης (ePrivacy)
+              6. Πολιτική Cookies, Τοπικής Αποθήκευσης &amp; Προαιρετικών Στατιστικών (ePrivacy)
             </h2>
             <p className="text-[#2C3539]/90">
-              Η ιστοσελίδα <strong>δεν χρησιμοποιεί</strong> διαφημιστικά cookies, cookies
-              προφίλ ή εργαλεία παρακολούθησης τρίτων (Zero Third-Party Tracking). Χρησιμοποιεί
-              αποκλειστικά τεχνικά απαραίτητη τοπική αποθήκευση στον browser σας:
+              Κατά την προεπιλογή (<strong>«Μόνο τα Απαραίτητα»</strong>), η ιστοσελίδα{' '}
+              <strong>δεν φορτώνει κανένα cookie ή script παρακολούθησης τρίτων</strong>. Τα
+              ανώνυμα στατιστικά επισκεψιμότητας και απόδοσης (<strong>Google Tag Manager</strong>{' '}
+              &amp; <strong>Vercel Web Analytics / Speed Insights</strong>) φορτώνονται{' '}
+              <strong>μόνο εφόσον επιλέξετε ρητά «Αποδοχή &amp; Στατιστικών»</strong> στο banner
+              συγκατάθεσης (και ανακαλούνται ανά πάσα στιγμή μέσω της «Οριστικής Διαγραφής» παραπάνω):
             </p>
             <ul className="text-xs font-bold space-y-1.5 text-[#2C3539]">
               <li>
-                • <code>IndexedDB (synapseplay_db)</code>: Τοπική αποθήκευση προφίλ, ρυθμίσεων &amp;
-                ιστορικού στη συσκευή.
+                • <code>IndexedDB (synapseplay_db)</code>: 100% τοπική αποθήκευση προφίλ παιδιών,
+                ρυθμίσεων &amp; ιστορικού στη συσκευή (Απολύτως Απαραίτητο — δεν μεταδίδεται ποτέ).
               </li>
               <li>
-                • <code>localStorage (synapseplay_gdpr_consent_v1)</code>: Απομνημόνευση ενημέρωσης
-                του μηνύματος GDPR.
+                • <code>localStorage (synapseplay_gdpr_consent_v1)</code>: Απομνημόνευση της επιλογής
+                συγκατάθεσης GDPR (<code>strictly-necessary-local-only</code> ή{' '}
+                <code>necessary-and-analytics</code>).
+              </li>
+              <li>
+                • <code>Google Tag Manager / Vercel Analytics</code> (Προαιρετικό — Opt-in):
+                Ενεργοποιείται αποκλειστικά κατόπιν ρητής συγκατάθεσης για ανώνυμη μέτρηση
+                επισκεψιμότητας και ταχύτητας φόρτωσης.
               </li>
             </ul>
           </div>

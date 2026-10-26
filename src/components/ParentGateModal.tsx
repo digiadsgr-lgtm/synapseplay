@@ -170,7 +170,6 @@ export const ParentGateModal: React.FC<ParentGateModalProps> = ({ onSuccess, onC
               key={opt}
               type="button"
               data-testid={`parent-gate-option-${opt}`}
-              data-correct-option={opt === challenge.answer ? 'true' : 'false'}
               onClick={() => handleOptionClick(opt)}
               className="touch-target py-3 px-4 rounded-2xl bg-white border-2 border-slate font-extrabold text-xl text-charcoal hover:bg-sage-surface hover:border-sage"
             >

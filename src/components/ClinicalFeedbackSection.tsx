@@ -70,6 +70,7 @@ export const ClinicalFeedbackSection: React.FC = () => {
   const [usabilityScore, setUsabilityScore] = useState<1 | 2 | 3 | 4 | 5>(5);
   const [clinicalScore, setClinicalScore] = useState<1 | 2 | 3 | 4 | 5>(5);
   const [commentEl, setCommentEl] = useState<string>('');
+  const [websiteHoneypot, setWebsiteHoneypot] = useState<string>('');
   const [submittedNotice, setSubmittedNotice] = useState<string | null>(null);
   const [copiedNotice, setCopiedNotice] = useState<boolean>(false);
   const [isSendingCloud, setIsSendingCloud] = useState<boolean>(false);
@@ -114,7 +115,7 @@ export const ClinicalFeedbackSection: React.FC = () => {
     setIsSendingCloud(true);
     setSubmittedNotice('⏳ Καταγράφηκε και αποστέλλεται αυτόματα στην ομάδα ανάπτυξης...');
 
-    const relayResult = await sendFeedbackSilentlyToOwner(payload);
+    const relayResult = await sendFeedbackSilentlyToOwner(payload, undefined, websiteHoneypot);
     setIsSendingCloud(false);
 
     if (relayResult.delivered) {
@@ -245,6 +246,20 @@ export const ClinicalFeedbackSection: React.FC = () => {
         data-testid="clinical-feedback-form"
         className="p-5 rounded-3xl bg-sand-light border-2 border-sand-dark space-y-4"
       >
+        {/* Anti-spam Honeypot (hidden from human users and screen readers) */}
+        <div aria-hidden="true" className="sr-only" style={{ position: 'absolute', left: '-9999px' }}>
+          <label htmlFor="feedback-website-honeypot">Website</label>
+          <input
+            id="feedback-website-honeypot"
+            name="website"
+            type="text"
+            tabIndex={-1}
+            autoComplete="off"
+            value={websiteHoneypot}
+            onChange={(e) => setWebsiteHoneypot(e.target.value)}
+          />
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Reviewer Role */}
           <div className="space-y-1.5">

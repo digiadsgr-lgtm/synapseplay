@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { hasAnalyticsConsent, loadGtmAfterConsent } from '../utils/analyticsConsent';
 
 const GDPR_ACK_STORAGE_KEY = 'synapseplay_gdpr_consent_v1';
 let memoryGdprConsentFallback: string | null = null;
@@ -44,16 +45,31 @@ export const GdprConsentBanner: React.FC = () => {
     const saved = getGdprConsentAck();
     if (!saved) {
       setIsVisible(true);
+    } else if (hasAnalyticsConsent(saved)) {
+      loadGtmAfterConsent();
     }
   }, []);
 
-  const handleAcceptNecessary = () => {
+  const handleAcceptNecessaryOnly = () => {
     setGdprConsentAck(
       JSON.stringify({
         acceptedAt: new Date().toISOString(),
         mode: 'strictly-necessary-local-only',
+        analytics: false,
       })
     );
+    setIsVisible(false);
+  };
+
+  const handleAcceptWithAnalytics = () => {
+    setGdprConsentAck(
+      JSON.stringify({
+        acceptedAt: new Date().toISOString(),
+        mode: 'necessary-and-analytics',
+        analytics: true,
+      })
+    );
+    loadGtmAfterConsent();
     setIsVisible(false);
   };
 
@@ -71,7 +87,7 @@ export const GdprConsentBanner: React.FC = () => {
           <div className="font-extrabold flex items-center gap-2 text-[#2C3539]">
             <span aria-hidden="true">🛡️</span>
             <span>
-              100% Συμμόρφωση GDPR &amp; Μηδενικά Cookies Παρακολούθησης (Privacy-by-Design)
+              Προστασία Δεδομένων GDPR &amp; Επιλογή Στατιστικών (Privacy-by-Design)
             </span>
           </div>
           <p className="text-[#2C3539]/85 leading-relaxed">
@@ -84,9 +100,10 @@ export const GdprConsentBanner: React.FC = () => {
             >
               DIGIADS
             </a>
-            ) <strong>δεν χρησιμοποιεί</strong> διαφημιστικά cookies ή trackers τρίτων. Τα προφίλ και
-            η πρόοδος των παιδιών αποθηκεύονται <strong>αποκλειστικά τοπικά στη συσκευή σας</strong>{' '}
-            (IndexedDB) με δυνατότητα οριστικής διαγραφής με 1 κλικ ανά πάσα στιγμή.
+            ) αποθηκεύει τα προφίλ και την πρόοδο των παιδιών{' '}
+            <strong>αποκλειστικά τοπικά στη συσκευή σας</strong> (IndexedDB). Τα ανώνυμα στατιστικά
+            επισκεψιμότητας (Google Tag Manager &amp; Vercel Analytics) ενεργοποιούνται{' '}
+            <strong>μόνο αν δώσετε ρητή συγκατάθεση</strong>.
           </p>
         </div>
 
@@ -101,10 +118,18 @@ export const GdprConsentBanner: React.FC = () => {
           <button
             type="button"
             data-testid="gdpr-banner-accept-btn"
-            onClick={handleAcceptNecessary}
+            onClick={handleAcceptNecessaryOnly}
+            className="touch-target px-4 py-2.5 rounded-2xl bg-white border-2 border-[#7A9A7B] text-[#2C3539] font-extrabold text-xs text-center flex items-center justify-center hover:bg-[#EFE8D8] transition-colors"
+          >
+            Μόνο τα Απαραίτητα
+          </button>
+          <button
+            type="button"
+            data-testid="gdpr-banner-accept-analytics-btn"
+            onClick={handleAcceptWithAnalytics}
             className="touch-target px-5 py-2.5 rounded-2xl bg-[#7A9A7B] text-white font-extrabold text-xs text-center flex items-center justify-center hover:opacity-95 transition-opacity"
           >
-            Κατανοητό &amp; Συνέχεια
+            Αποδοχή &amp; Στατιστικών
           </button>
         </div>
       </div>
