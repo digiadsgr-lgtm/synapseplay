@@ -27,6 +27,7 @@ import {
   validateAndParseLicenseKey,
 } from '../utils/licensingEngine';
 import { formatFeedbackReportText } from '../components/ClinicalFeedbackSection';
+import { getAllPrerenderRoutes, injectSeoIntoHtmlTemplate } from '../utils/seoEngine';
 import { saveSettings, wipeAllLocalData } from '../db/database';
 
 function renderRoute(route: string = '/') {
@@ -1014,6 +1015,38 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
       expect(screen.getByText(/Γεια σου, Γιώργο!/i)).toBeInTheDocument();
     });
     uHub();
+  });
+
+  it('Google Search Console Indexing Fix: pre-renders all 51 sitemap routes with self-referencing canonical tags and full semantic HTML', () => {
+    const routes = getAllPrerenderRoutes();
+    expect(routes).toHaveLength(51);
+    expect(routes).toContain('/articles/01-smooth-landing-screen-meltdowns');
+    expect(routes).toContain('/articles/09-fine-motor-writing-readiness');
+
+    const sampleTemplate = `<!doctype html><html><head><title>Default</title><meta name="description" content="" /><meta name="keywords" content="" /><link rel="canonical" href="https://www.synapseplay.gr/" /><link rel="alternate" hreflang="el-GR" href="https://www.synapseplay.gr/" /><link rel="alternate" hreflang="x-default" href="https://www.synapseplay.gr/" /><meta property="og:type" content="website" /><meta property="og:url" content="https://www.synapseplay.gr/" /><meta property="og:title" content="" /><meta property="og:description" content="" /><meta property="og:image" content="" /><meta name="twitter:title" content="" /><meta name="twitter:description" content="" /><meta name="twitter:image" content="" /></head><body><div id="root"></div></body></html>`;
+
+    const html09 = injectSeoIntoHtmlTemplate(
+      sampleTemplate,
+      '/articles/09-fine-motor-writing-readiness'
+    );
+    expect(html09).toContain(
+      '<link rel="canonical" href="https://www.synapseplay.gr/articles/09-fine-motor-writing-readiness" />'
+    );
+    expect(html09).toContain(
+      '<link rel="alternate" hreflang="el-GR" href="https://www.synapseplay.gr/articles/09-fine-motor-writing-readiness" />'
+    );
+    expect(html09).not.toContain('<link rel="canonical" href="https://www.synapseplay.gr/" />');
+    expect(html09).toContain('Όταν το παιδί κουράζεται αμέσως στο γράψιμο');
+
+    const html01 = injectSeoIntoHtmlTemplate(
+      sampleTemplate,
+      '/articles/01-smooth-landing-screen-meltdowns'
+    );
+    expect(html01).toContain(
+      '<link rel="canonical" href="https://www.synapseplay.gr/articles/01-smooth-landing-screen-meltdowns" />'
+    );
+    expect(html01).not.toContain('<link rel="canonical" href="https://www.synapseplay.gr/" />');
+    expect(html01).toContain('Γιατί το παιδί με ΔΕΠΥ ξεσπάει όταν του παίρνεις το τάμπλετ');
   });
 });
 

@@ -368,3 +368,196 @@ export function resolveRouteSeoMetadata(pathname: string): RouteSeoMetadata {
     },
   };
 }
+
+function escapeHtmlAttr(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+/**
+ * Returns all 51 canonical routes listed in public/sitemap.xml for build-time static HTML pre-rendering.
+ */
+export function getAllPrerenderRoutes(): string[] {
+  const coreRoutes = ['/', '/app', '/articles', '/parent', '/legal'];
+  const articleRoutes = ADHD_PARENT_AND_B2B_ARTICLES.map((a) => `/articles/${a.id}`);
+  const categoryRoutes = CATEGORIES.map((c) => `/category/${c.id}`);
+  const activityRoutes = ACTIVITIES.map((a) => `/activity/${a.id}`);
+  return [...coreRoutes, ...articleRoutes, ...categoryRoutes, ...activityRoutes];
+}
+
+/**
+ * Generates semantic Greek HTML body content for each route so that Googlebot Wave 1
+ * (initial HTTP crawl before JS execution) sees 100% unique content and self-referencing canonicals.
+ */
+export function buildStaticSeoBodyHtml(pathname: string): string {
+  const cleanPath = pathname === '/' ? '/' : pathname.replace(/\/+$/, '');
+
+  if (cleanPath.startsWith('/articles/')) {
+    const slug = cleanPath.replace('/articles/', '');
+    const article = ADHD_PARENT_AND_B2B_ARTICLES.find((a) => a.id === slug);
+    if (article) {
+      const takeawaysHtml = article.keyTakeawaysEl
+        .map((t) => `<li>${escapeHtmlAttr(t)}</li>`)
+        .join('');
+      const paragraphsHtml = article.fullSocialPostEl
+        .split('\n\n')
+        .filter((p) => p.trim().length > 0)
+        .map((p) => `<p>${escapeHtmlAttr(p.trim())}</p>`)
+        .join('');
+      return `<main data-prerendered-seo="article"><article><h1>${escapeHtmlAttr(
+        article.titleEl
+      )}</h1><p><strong>${escapeHtmlAttr(article.subtitleEl)}</strong></p><p>${escapeHtmlAttr(
+        article.seoMetaDescriptionEl
+      )}</p><section><h2>Βασικά Σημεία Κλινικής &amp; Παιδαγωγικής Καθοδήγησης</h2><ul>${takeawaysHtml}</ul></section><section>${paragraphsHtml}</section><nav><a href="/articles">← Όλα τα Άρθρα του Blog ΔΕΠΥ</a> | <a href="${escapeHtmlAttr(
+        article.relatedActivityRoute
+      )}">Δοκιμάστε τη Δραστηριότητα: ${escapeHtmlAttr(
+        article.relatedActivityLabelEl
+      )}</a> | <a href="/app">Είσοδος στην Εφαρμογή SynapsePlay</a></nav></article></main>`;
+    }
+  }
+
+  if (cleanPath === '/articles') {
+    const listHtml = ADHD_PARENT_AND_B2B_ARTICLES.map(
+      (art) =>
+        `<li><article><h2><a href="/articles/${art.id}">${escapeHtmlAttr(
+          art.titleEl
+        )}</a></h2><p>${escapeHtmlAttr(art.seoMetaDescriptionEl)}</p></article></li>`
+    ).join('');
+    return `<main data-prerendered-seo="articles-index"><h1>${escapeHtmlAttr(
+      BLOG_SEO_METADATA.blogHeadlineEl
+    )}</h1><p>${escapeHtmlAttr(
+      BLOG_SEO_METADATA.blogSubtitleEl
+    )}</p><ul>${listHtml}</ul><nav><a href="/">Αρχική Σελίδα SynapsePlay</a> | <a href="/app">Δωρεάν Δοκιμή Εφαρμογής</a></nav></main>`;
+  }
+
+  if (cleanPath.startsWith('/activity/')) {
+    const actId = cleanPath.replace('/activity/', '');
+    const act = getActivityById(actId);
+    if (act) {
+      return `<main data-prerendered-seo="activity"><article><h1>${escapeHtmlAttr(
+        `${act.code}. ${act.titleEl} (${act.titleEn})`
+      )}</h1><h2>${escapeHtmlAttr(act.subtitleEl)}</h2><p>${escapeHtmlAttr(
+        act.parentGuidanceEl
+      )}</p><p>Τομέας Εκτελεστικής Λειτουργίας: ${escapeHtmlAttr(
+        act.executiveDomain
+      )}</p><p>Διεπιστημονικές Ειδικότητες: ${escapeHtmlAttr(
+        act.specialistDisciplines.join(', ')
+      )}</p><nav><a href="/category/${act.categoryId}">Κατηγορία</a> | <a href="/app">Όλα τα Παιχνίδια ΔΕΠΥ</a> | <a href="/articles">Blog Γονέων ΔΕΠΥ</a></nav></article></main>`;
+    }
+  }
+
+  if (cleanPath.startsWith('/category/')) {
+    const catId = cleanPath.replace('/category/', '') as CategoryId;
+    const cat = getCategoryById(catId);
+    if (cat) {
+      const catActs = ACTIVITIES.filter((a) => a.categoryId === cat.id)
+        .map(
+          (a) =>
+            `<li><a href="/activity/${a.id}">${escapeHtmlAttr(
+              `${a.code}. ${a.titleEl}`
+            )}</a> — ${escapeHtmlAttr(a.subtitleEl)}</li>`
+        )
+        .join('');
+      return `<main data-prerendered-seo="category"><h1>${escapeHtmlAttr(
+        cat.titleEl
+      )}</h1><h2>${escapeHtmlAttr(cat.subtitleEl)}</h2><p>${escapeHtmlAttr(
+        cat.voicePromptEl
+      )}</p><ul>${catActs}</ul><nav><a href="/app">Περιβάλλον Παιδιού</a> | <a href="/">Αρχική</a></nav></main>`;
+    }
+  }
+
+  const seo = resolveRouteSeoMetadata(cleanPath);
+  return `<main data-prerendered-seo="page"><h1>${escapeHtmlAttr(
+    seo.title
+  )}</h1><p>${escapeHtmlAttr(
+    seo.description
+  )}</p><nav><a href="/">Αρχική Σελίδα</a> | <a href="/app">Περιβάλλον Παιδιού (20 Παιχνίδια ΔΕΠΥ)</a> | <a href="/articles">Blog «Μυαλά που Τρέχουν με Χίλια» (22 Άρθρα)</a> | <a href="/parent">Πίνακας Γονέων & Θεραπευτών</a> | <a href="/legal">Νομικό Κέντρο & GDPR</a></nav></main>`;
+}
+
+/**
+ * Injects route-specific <title>, <meta>, self-referencing <link rel="canonical">, hreflang,
+ * Schema.org JSON-LD, and semantic body HTML into the raw index.html template for static pre-rendering.
+ */
+export function injectSeoIntoHtmlTemplate(htmlTemplate: string, pathname: string): string {
+  const seo = resolveRouteSeoMetadata(pathname);
+  const escapedTitle = escapeHtmlAttr(seo.title);
+  const escapedDesc = escapeHtmlAttr(seo.description);
+  const escapedKeywords = escapeHtmlAttr(seo.keywords.join(', '));
+  const escapedCanonical = escapeHtmlAttr(seo.canonicalUrl);
+  const escapedOgImage = escapeHtmlAttr(seo.ogImage);
+
+  let html = htmlTemplate;
+
+  html = html.replace(/<title>[\s\S]*?<\/title>/i, `<title>${escapedTitle}</title>`);
+  html = html.replace(
+    /<meta\s+name="description"\s+content="[^"]*"\s*\/?>/i,
+    `<meta name="description" content="${escapedDesc}" />`
+  );
+  html = html.replace(
+    /<meta\s+name="keywords"\s+content="[^"]*"\s*\/?>/i,
+    `<meta name="keywords" content="${escapedKeywords}" />`
+  );
+  html = html.replace(
+    /<link\s+rel="canonical"\s+href="[^"]*"\s*\/?>/i,
+    `<link rel="canonical" href="${escapedCanonical}" />`
+  );
+  html = html.replace(
+    /<link\s+rel="alternate"\s+hreflang="el-GR"\s+href="[^"]*"\s*\/?>/i,
+    `<link rel="alternate" hreflang="el-GR" href="${escapedCanonical}" />`
+  );
+  html = html.replace(
+    /<link\s+rel="alternate"\s+hreflang="x-default"\s+href="[^"]*"\s*\/?>/i,
+    `<link rel="alternate" hreflang="x-default" href="${escapedCanonical}" />`
+  );
+  html = html.replace(
+    /<meta\s+property="og:type"\s+content="[^"]*"\s*\/?>/i,
+    `<meta property="og:type" content="${seo.ogType}" />`
+  );
+  html = html.replace(
+    /<meta\s+property="og:url"\s+content="[^"]*"\s*\/?>/i,
+    `<meta property="og:url" content="${escapedCanonical}" />`
+  );
+  html = html.replace(
+    /<meta\s+property="og:title"\s+content="[^"]*"\s*\/?>/i,
+    `<meta property="og:title" content="${escapedTitle}" />`
+  );
+  html = html.replace(
+    /<meta\s+property="og:description"\s+content="[^"]*"\s*\/?>/i,
+    `<meta property="og:description" content="${escapedDesc}" />`
+  );
+  html = html.replace(
+    /<meta\s+property="og:image"\s+content="[^"]*"\s*\/?>/i,
+    `<meta property="og:image" content="${escapedOgImage}" />`
+  );
+  html = html.replace(
+    /<meta\s+name="twitter:title"\s+content="[^"]*"\s*\/?>/i,
+    `<meta name="twitter:title" content="${escapedTitle}" />`
+  );
+  html = html.replace(
+    /<meta\s+name="twitter:description"\s+content="[^"]*"\s*\/?>/i,
+    `<meta name="twitter:description" content="${escapedDesc}" />`
+  );
+  html = html.replace(
+    /<meta\s+name="twitter:image"\s+content="[^"]*"\s*\/?>/i,
+    `<meta name="twitter:image" content="${escapedOgImage}" />`
+  );
+
+  // Inject static Schema.org JSON-LD right before </head> (idempotent replacement)
+  html = html.replace(
+    /\s*<script type="application\/ld\+json" id="static-route-jsonld">[\s\S]*?<\/script>/gi,
+    ''
+  );
+  const jsonLdScript = `\n    <script type="application/ld+json" id="static-route-jsonld">${JSON.stringify(
+    seo.jsonLd
+  )}</script>\n  </head>`;
+  html = html.replace(/\s*<\/head>/i, jsonLdScript);
+
+  // Inject static semantic HTML content inside <div id="root">...</div> (idempotent replacement)
+  const bodyHtml = buildStaticSeoBodyHtml(pathname);
+  html = html.replace(/<div id="root">[\s\S]*?<\/div>/i, `<div id="root">${bodyHtml}</div>`);
+
+  return html;
+}

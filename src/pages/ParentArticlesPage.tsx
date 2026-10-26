@@ -29,6 +29,19 @@ function upsertCanonicalLink(href: string) {
     document.head.appendChild(link);
   }
   link.setAttribute('href', href);
+
+  for (const lang of ['el-GR', 'x-default']) {
+    let alt = document.head.querySelector(
+      `link[rel="alternate"][hreflang="${lang}"]`
+    ) as HTMLLinkElement | null;
+    if (!alt) {
+      alt = document.createElement('link');
+      alt.setAttribute('rel', 'alternate');
+      alt.setAttribute('hreflang', lang);
+      document.head.appendChild(alt);
+    }
+    alt.setAttribute('href', href);
+  }
 }
 
 export const ParentArticlesPage: React.FC = () => {
