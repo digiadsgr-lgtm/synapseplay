@@ -15,14 +15,13 @@ export const TopBar: React.FC = () => {
 
   const isParentRoute = location.pathname.startsWith('/parent');
   const isChildHubRoute = location.pathname === '/app';
+  // Inside games/categories the child sees only: logo (→ games), break, parents (gated)
+  const isInGameRoute = !isParentRoute && !isChildHubRoute;
 
+  // The logo never leaves the child area (no route to the marketing site / payment links)
   const handleReturnToChild = () => {
     setParentUnlocked(false);
-    if (isChildHubRoute) {
-      navigate('/');
-    } else {
-      navigate('/app');
-    }
+    navigate('/app');
   };
 
   const handleGoToWebsiteHome = () => {
@@ -40,14 +39,15 @@ export const TopBar: React.FC = () => {
             type="button"
             onClick={handleReturnToChild}
             data-testid="nav-home-btn"
-            aria-label={isChildHubRoute ? 'Επιστροφή στην Αρχική Σελίδα' : 'Αρχική Οθόνη Παιδιού'}
-            title={isChildHubRoute ? 'Επιστροφή στην Αρχική Σελίδα (synapseplay.gr)' : 'Επιστροφή στα Παιχνίδια (/app)'}
+            aria-label="Αρχική Οθόνη Παιδιού"
+            title="Επιστροφή στα Παιχνίδια"
             className="touch-target px-2.5 py-1.5 sm:px-3.5 sm:py-2 rounded-xl sm:rounded-2xl bg-sage-surface border-2 border-sage text-charcoal font-extrabold flex items-center gap-1.5 sm:gap-2 hover:bg-sage hover:text-white transition-colors"
           >
             <SynapsePlayLogoMark sizeClassName="w-7 h-7 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl" />
             <span className="text-sm sm:text-base md:text-lg">SynapsePlay</span>
           </button>
 
+          {isParentRoute && (
           <button
             type="button"
             onClick={handleGoToWebsiteHome}
@@ -59,6 +59,7 @@ export const TopBar: React.FC = () => {
             <span aria-hidden="true">🏠</span>
             <span className="hidden sm:inline">Αρχική Σελίδα</span>
           </button>
+          )}
         </div>
 
         {/* Center: Compact Smooth Landing Ring */}
@@ -66,6 +67,7 @@ export const TopBar: React.FC = () => {
 
         {/* Right: Beginner Help, Child Break/Pause & Accidental-Access Gated Parent Area */}
         <div className="flex items-center gap-1.5 sm:gap-2">
+          {!isInGameRoute && (
           <button
             type="button"
             onClick={() => setShowBeginnerGuide(true)}
@@ -77,6 +79,7 @@ export const TopBar: React.FC = () => {
             <span className="text-base sm:text-lg" aria-hidden="true">🧭</span>
             <span className="text-[11px] sm:text-xs md:text-sm">Οδηγός</span>
           </button>
+          )}
 
           <button
             type="button"

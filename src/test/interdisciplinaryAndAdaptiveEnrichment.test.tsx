@@ -258,7 +258,9 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
   it('Dynamic Variety & Clinical RCT Engine: rotates game scenarios on shuffle/replay and renders clinical trials in Parent Dashboard', async () => {
     const { unmount } = renderRoute('/activity/01-visual-search');
 
-    // Inner-speech coaching cue (Meichenbaum CBT / Barkley) is active
+    // Inner-speech phrase is parent-facing: hidden from the child until the parent opens the tip box
+    expect(screen.queryByTestId('inner-speech-cue-pill')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('toggle-parent-coaching-tip-btn'));
     expect(screen.getByTestId('inner-speech-cue-pill')).toBeInTheDocument();
 
     const firstTarget = screen.getByTestId('visual-search-target-badge').textContent;
@@ -420,7 +422,7 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
     await saveSettings({ ageBand: '4-5' });
     const { unmount: u45 } = renderRoute('/activity/12-build-pattern');
     await waitFor(() => {
-      expect(screen.getByTestId('live-difficulty-calibration-bar')).toHaveAttribute(
+      expect(screen.getByTestId('shared-activity-runner')).toHaveAttribute(
         'data-difficulty-tier',
         '1'
       );
@@ -432,7 +434,7 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
     await saveSettings({ ageBand: '10-12' });
     const { unmount: u1012 } = renderRoute('/activity/12-build-pattern');
     await waitFor(() => {
-      expect(screen.getByTestId('live-difficulty-calibration-bar')).toHaveAttribute(
+      expect(screen.getByTestId('shared-activity-runner')).toHaveAttribute(
         'data-difficulty-tier',
         '5'
       );

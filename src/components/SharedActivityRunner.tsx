@@ -52,7 +52,7 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
   children,
 }) => {
   const navigate = useNavigate();
-  const { settings, updateSettings, activeProfile, logCompletedActivity, recordStrategyPreference } = useApp();
+  const { settings, activeProfile, logCompletedActivity, recordStrategyPreference } = useApp();
 
   const storageKey = `synapseplay_runner_${activity.id}`;
   const savedCheckpoint = (() => {
@@ -343,14 +343,15 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
 
   return (
     <main
-      className="max-w-5xl mx-auto px-2.5 py-3 sm:px-4 sm:py-6 space-y-3 sm:space-y-5"
+      className="max-w-5xl mx-auto px-2.5 py-2 sm:px-4 sm:py-3 space-y-2 sm:space-y-3"
       data-testid="shared-activity-runner"
       data-activity-id={activity.id}
       data-runner-phase={state.phase}
       data-age-band={ageBand}
+      data-difficulty-tier={difficultyProfile.tierLevel}
     >
       {/* Top Activity Navigation & Progress Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-4 bg-sand-light border-2 border-sand-dark rounded-2xl sm:rounded-3xl p-2.5 sm:p-4">
+      <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-3 bg-sand-light border-2 border-sand-dark rounded-2xl sm:rounded-3xl p-2 sm:p-2.5">
         <div className="flex items-center gap-2 sm:gap-3">
           <button
             type="button"
@@ -369,29 +370,14 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
               <h1 className="text-base sm:text-xl md:text-2xl font-extrabold text-charcoal">
                 {activity.code}. {activity.titleEl}
               </h1>
-              <label className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-sage-surface border border-sage text-[11px] sm:text-xs font-extrabold text-charcoal">
-                <span>Ηλικία:</span>
-                <select
-                  data-testid="runner-age-band-select"
-                  aria-label="Επιλογή Ηλικιακής Ομάδας"
-                  value={ageBand}
-                  onChange={(e) => void updateSettings({ ageBand: e.target.value as AgeBandId })}
-                  className="bg-transparent font-extrabold text-charcoal cursor-pointer focus:outline-none"
-                >
-                  <option value="4-5">4-5 ετών</option>
-                  <option value="5-6">5-6 ετών</option>
-                  <option value="6-8">6-8 ετών</option>
-                  <option value="8-10">8-10 ετών</option>
-                  <option value="10-12">10-12 ετών</option>
-                </select>
-              </label>
+              {/* Read-only: the age band is changed by the parent (hub / parent area), not inside the game */}
+              <span
+                data-testid="runner-age-band-badge"
+                className="inline-flex items-center px-2 py-0.5 rounded-full bg-sage-surface border border-sage text-[11px] sm:text-xs font-extrabold text-charcoal"
+              >
+                {ageBand} ετών
+              </span>
             </div>
-            <p className="hidden sm:block text-sm text-charcoal-muted">{activity.subtitleEl}</p>
-            {ageAdaptationText && (
-              <p className="hidden sm:block text-xs font-bold text-slate-dark mt-0.5" data-testid="age-adaptation-subtitle">
-                ✨ Προσαρμογή {ageBand}: {ageAdaptationText}
-              </p>
-            )}
           </div>
         </div>
 
@@ -439,76 +425,109 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
         </div>
       </div>
 
-      {/* Speech Synthesis Independent Visual + Audio Instruction Strip */}
+      {/* Compact instruction strip (one row on tablet) — the game stays above the fold */}
       <section
         aria-label="Οδηγίες Δραστηριότητας"
-        className="bg-white border-2 border-sage rounded-2xl sm:rounded-3xl p-3 sm:p-4 md:p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-2.5 sm:gap-4 shadow-sm"
+        className="bg-white border-2 border-sage rounded-2xl p-2 sm:p-3 space-y-2 shadow-sm"
       >
-        <div className="space-y-2 sm:space-y-3 flex-1 w-full">
-          <div className="flex items-center gap-2.5 sm:gap-3">
+        <div className="flex flex-col md:flex-row md:items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
             <button
               type="button"
               onClick={() => speakGreek(activity.voicePromptEl, true, adaptiveProfile.speechRate)}
               data-testid="replay-voice-prompt-btn"
               aria-label="Ακρόαση φωνητικής οδηγίας"
-              className="touch-target px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl sm:rounded-2xl bg-sage-surface border-2 border-sage text-charcoal font-bold text-xs sm:text-sm flex items-center gap-1.5 hover:bg-sage hover:text-white shrink-0"
+              className="touch-target px-3 py-1.5 rounded-xl sm:rounded-2xl bg-sage-surface border-2 border-sage text-charcoal font-bold text-xs sm:text-sm flex items-center gap-1.5 hover:bg-sage hover:text-white shrink-0"
             >
               <span className="text-lg sm:text-2xl" aria-hidden="true">🔊</span>
-              <span>Άκου Οδηγία</span>
+              <span className="hidden lg:inline">Άκου</span>
             </button>
-            <p
-              className="text-sm sm:text-base md:text-lg font-bold text-charcoal leading-snug"
-              data-testid="activity-voice-prompt-text"
-            >
-              {activity.voicePromptEl}
-            </p>
-          </div>
-
-          {/* Visual Pictogram Cues (Guarantees 100% playability without audio) */}
-          <div className="hidden sm:flex flex-wrap items-center gap-2" data-testid="visual-pictogram-cues">
-            {activity.cues.map((cue, index) => (
-              <div
-                key={cue.labelEl}
-                className="px-3 py-1 rounded-xl bg-sand border border-sand-dark flex items-center gap-1.5 text-xs sm:text-sm font-bold text-charcoal"
+            <div className="min-w-0 space-y-1">
+              <p
+                className="text-sm sm:text-base font-bold text-charcoal leading-snug"
+                data-testid="activity-voice-prompt-text"
               >
-                <span className="text-base sm:text-lg" aria-hidden="true">{cue.emoji}</span>
-                <span>
-                  {index + 1}. {cue.labelEl}
-                </span>
+                {activity.voicePromptEl}
+              </p>
+              {/* Visual Pictogram Cues (Guarantees 100% playability without audio) */}
+              <div className="hidden sm:flex flex-wrap items-center gap-1.5" data-testid="visual-pictogram-cues">
+                {activity.cues.map((cue, index) => (
+                  <span
+                    key={cue.labelEl}
+                    className="px-2 py-0.5 rounded-lg bg-sand border border-sand-dark inline-flex items-center gap-1 text-[11px] sm:text-xs font-bold text-charcoal"
+                  >
+                    <span aria-hidden="true">{cue.emoji}</span>
+                    <span>
+                      {index + 1}. {cue.labelEl}
+                    </span>
+                  </span>
+                ))}
               </div>
-            ))}
+            </div>
           </div>
 
-          {/* Inner-Speech Self-Coaching Cue & Live Age/Performance Difficulty Calibration */}
-          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-            <div
-              data-testid="inner-speech-cue-pill"
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-sage-surface/70 border border-sage text-[11px] sm:text-xs font-extrabold text-charcoal"
-            >
-              <span>{staircaseSnapshot.innerSpeechCueEl}</span>
-            </div>
+          {/* Controls: hint, seated mode, new set, parent tip (icon) */}
+          {!isCompleted && !isPaused && (
+            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 shrink-0">
+              <button
+                type="button"
+                onClick={handleRequestHint}
+                disabled={state.hintLevel === 2}
+                data-testid="hint-ladder-btn"
+                className="touch-target px-3 py-1.5 rounded-xl sm:rounded-2xl bg-terracotta-surface border-2 border-terracotta text-charcoal font-bold text-xs sm:text-sm flex items-center gap-1.5 hover:bg-terracotta hover:text-white disabled:opacity-60"
+              >
+                <span className="text-base sm:text-xl" aria-hidden="true">💡</span>
+                <span>
+                  {state.hintLevel === 0
+                    ? 'Βοήθεια (1/2)'
+                    : state.hintLevel === 1
+                    ? 'Περισσότερη Βοήθεια (2/2)'
+                    : 'Μέγιστη Βοήθεια Ενεργή'}
+                </span>
+              </button>
 
-            <div
-              data-testid="live-difficulty-calibration-bar"
-              data-difficulty-tier={difficultyProfile.tierLevel}
-              className="inline-flex flex-wrap items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-surface border border-slate text-[11px] sm:text-xs font-extrabold text-charcoal"
-            >
-              <span>🎯 {difficultyProfile.ageTierLabelEl}</span>
-              <span aria-hidden="true">•</span>
-              <span>{difficultyProfile.performanceStateLabelEl}</span>
-            </div>
+              {activity.supportsSeatedMode && (
+                <button
+                  type="button"
+                  onClick={() => toggleSeatedMode()}
+                  data-testid="toggle-seated-mode-btn"
+                  aria-pressed={state.seatedMode}
+                  className={`touch-target px-3 py-1.5 rounded-xl sm:rounded-2xl border-2 font-bold text-xs sm:text-sm flex items-center gap-1.5 ${
+                    state.seatedMode
+                      ? 'bg-slate text-white border-slate-dark'
+                      : 'bg-slate-surface text-charcoal border-slate'
+                  }`}
+                >
+                  <span className="text-base sm:text-xl" aria-hidden="true">🪑</span>
+                  <span>{state.seatedMode ? 'Καθιστή Εκδοχή: ΝΑΙ' : 'Καθιστή Εκδοχή'}</span>
+                </button>
+              )}
 
-            <button
-              type="button"
-              data-testid="toggle-parent-coaching-tip-btn"
-              onClick={() => setShowParentCoachingTip((v) => !v)}
-              aria-expanded={showParentCoachingTip}
-              className="touch-target px-2.5 py-1 rounded-xl bg-sand-light border border-sand-dark text-[11px] sm:text-xs font-extrabold text-charcoal hover:bg-sand flex items-center gap-1"
-            >
-              <span aria-hidden="true">👨‍👩‍👧</span>
-              <span>{showParentCoachingTip ? 'Κλείσιμο Συμβουλής' : 'Συμβουλή Γονέα'}</span>
-            </button>
-          </div>
+              <button
+                type="button"
+                onClick={handleShuffleVariation}
+                data-testid="shuffle-variation-btn"
+                aria-label="Άλλο σετ εικόνων"
+                title="Εναλλαγή σε νέο σετ ερωτήσεων και εικόνων"
+                className="touch-target px-3 py-1.5 rounded-xl sm:rounded-2xl bg-sand border-2 border-sand-dark text-charcoal font-bold text-xs sm:text-sm flex items-center gap-1.5 hover:bg-slate-surface"
+              >
+                <span className="text-base sm:text-xl" aria-hidden="true">🎲</span>
+              </button>
+
+              <button
+                type="button"
+                data-testid="toggle-parent-coaching-tip-btn"
+                onClick={() => setShowParentCoachingTip((v) => !v)}
+                aria-expanded={showParentCoachingTip}
+                aria-label={showParentCoachingTip ? 'Κλείσιμο Συμβουλής Γονέα' : 'Συμβουλή Γονέα'}
+                title="Συμβουλή Γονέα"
+                className="touch-target px-3 py-1.5 rounded-xl sm:rounded-2xl bg-sand-light border-2 border-sand-dark text-charcoal font-bold text-xs sm:text-sm flex items-center gap-1.5 hover:bg-sand"
+              >
+                <span className="text-base sm:text-xl" aria-hidden="true">👨‍👩‍👧</span>
+              </button>
+            </div>
+          )}
+        </div>
 
           {showParentCoachingTip && (
             <div
@@ -519,62 +538,29 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
                 👨‍👩‍👧 Πώς να βοηθήσετε το παιδί σε αυτό το παιχνίδι (χωρίς άγχος):
               </p>
               <p>{activity.parentGuidanceEl}</p>
+              {ageAdaptationText && (
+                <p data-testid="age-adaptation-subtitle">
+                  ✨ Προσαρμογή {ageBand}: {ageAdaptationText}
+                </p>
+              )}
+              <p data-testid="inner-speech-cue-pill">
+                🗣️ Φράση να πείτε μαζί: {staircaseSnapshot.innerSpeechCueEl.replace(/^💭 Εσωτερικός Λόγος(?: \([^)]*\))?: /, '')}
+              </p>
+              <p
+                data-testid="live-difficulty-calibration-bar"
+                data-difficulty-tier={difficultyProfile.tierLevel}
+                className="text-charcoal-muted"
+              >
+                🎯 {difficultyProfile.ageTierLabelEl} • {difficultyProfile.performanceStateLabelEl}
+              </p>
+              <p className="text-charcoal-muted">
+                Η ηλικία αλλάζει από την αρχική οθόνη ή την Περιοχή Γονέων.
+              </p>
               <p className="text-charcoal-muted">
                 💡 <strong>Πρακτική συμβουλή:</strong> Αφήστε το παιδί να δοκιμάσει με τον δικό του ρυθμό. Αν δυσκολευτεί, δείξτε του το κουμπί <strong>«💡 Βοήθεια»</strong> ή πατήστε <strong>«🔊 Άκου Οδηγία»</strong>.
               </p>
             </div>
           )}
-        </div>
-
-        {/* Unified Hint Ladder, Variety Shuffle & Seated Mode Controls */}
-        {!isCompleted && !isPaused && (
-          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 shrink-0 w-full md:w-auto">
-            <button
-              type="button"
-              onClick={handleShuffleVariation}
-              data-testid="shuffle-variation-btn"
-              title="Εναλλαγή σε νέο σετ ερωτήσεων και εικόνων"
-              className="touch-target px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl sm:rounded-2xl bg-sand border-2 border-sand-dark text-charcoal font-bold text-xs sm:text-sm flex items-center gap-1.5 hover:bg-slate-surface"
-            >
-              <span className="text-base sm:text-xl" aria-hidden="true">🎲</span>
-              <span>Νέα Παραλλαγή (#{(effectiveSessionSeed % 12) + 1})</span>
-            </button>
-
-            {activity.supportsSeatedMode && (
-              <button
-                type="button"
-                onClick={() => toggleSeatedMode()}
-                data-testid="toggle-seated-mode-btn"
-                aria-pressed={state.seatedMode}
-                className={`touch-target px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl sm:rounded-2xl border-2 font-bold text-xs sm:text-sm flex items-center gap-1.5 ${
-                  state.seatedMode
-                    ? 'bg-slate text-white border-slate-dark'
-                    : 'bg-slate-surface text-charcoal border-slate'
-                }`}
-              >
-                <span className="text-base sm:text-xl" aria-hidden="true">🪑</span>
-                <span>{state.seatedMode ? 'Καθιστή Εκδοχή: ΝΑΙ' : 'Καθιστή Εκδοχή'}</span>
-              </button>
-            )}
-
-            <button
-              type="button"
-              onClick={handleRequestHint}
-              disabled={state.hintLevel === 2}
-              data-testid="hint-ladder-btn"
-              className="touch-target px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl sm:rounded-2xl bg-terracotta-surface border-2 border-terracotta text-charcoal font-bold text-xs sm:text-sm flex items-center gap-1.5 hover:bg-terracotta hover:text-white disabled:opacity-60"
-            >
-              <span className="text-base sm:text-xl" aria-hidden="true">💡</span>
-              <span>
-                {state.hintLevel === 0
-                  ? 'Βοήθεια (1/2)'
-                  : state.hintLevel === 1
-                  ? 'Περισσότερη Βοήθεια (2/2)'
-                  : 'Μέγιστη Βοήθεια Ενεργή'}
-              </span>
-            </button>
-          </div>
-        )}
       </section>
 
       {/* Gentle Non-Punitive Feedback Banner */}
