@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { CheckoutLink } from '../components/CheckoutLink';
 import { useNavigate } from 'react-router-dom';
 import { ACTIVITIES, CATEGORIES, getActivitiesByCategory } from '../data/activitiesCatalog';
 import { AGE_BAND_PROTOCOLS, getAgeBandProtocol, type AgeBandId } from '../data/ageProtocols';
@@ -264,7 +265,7 @@ export const ChildHubPage: React.FC = () => {
               {profileCreationPermission.noticeEl}
             </p>
             <div className="flex flex-wrap items-center gap-2 shrink-0">
-              <a
+              <CheckoutLink
                 href={MONETIZATION_CONFIG.checkoutUrls.extraChildMonthly}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -273,8 +274,8 @@ export const ChildHubPage: React.FC = () => {
               >
                 <span>➕ Επιπλέον Προφίλ Παιδιού (1,99€ / μήνα)</span>
                 <span aria-hidden="true">↗️</span>
-              </a>
-              <a
+              </CheckoutLink>
+              <CheckoutLink
                 href={MONETIZATION_CONFIG.checkoutUrls.therapistAnnual}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -283,7 +284,7 @@ export const ChildHubPage: React.FC = () => {
               >
                 <span>🏥 Άδεια Θεραπευτή B2B</span>
                 <span aria-hidden="true">↗️</span>
-              </a>
+              </CheckoutLink>
             </div>
           </div>
         )}

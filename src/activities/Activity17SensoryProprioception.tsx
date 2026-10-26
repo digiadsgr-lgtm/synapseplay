@@ -62,7 +62,7 @@ const SENSORY_EXERCISES: ProprioceptiveExercise[] = [
   {
     emoji: '🦋🌬️',
     titleEl: 'Διάταση Θώρακα & Αναπνοή Πνευμονογαστρικής Ηρεμίας',
-    disciplineTagEl: 'Παιδοψυχιατρική (Polyvagal Regulation) & Φυσιατρική',
+    disciplineTagEl: 'Εργοθεραπεία & Φυσιατρική',
     standingInstructionEl:
       'Άνοιξε τα χέρια στο πλάι παίρνοντας βαθιά εισπνοή από τη μύτη και ένωσέ τα μπροστά με αργή εκπνοή!',
     seatedInstructionEl:

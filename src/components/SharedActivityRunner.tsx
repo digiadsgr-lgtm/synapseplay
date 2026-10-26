@@ -140,7 +140,7 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
     ]
   );
 
-  // Real-time Clinical Staircase & Inner-Speech Self-Guidance (Barkley / Meichenbaum / Kollins RCT)
+  // Inner-speech phrase for the parent box (inspired by self-instruction training)
   const staircaseSnapshot = useMemo(
     () =>
       computeClinicalStaircaseSnapshot({

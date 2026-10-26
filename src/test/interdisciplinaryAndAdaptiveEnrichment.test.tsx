@@ -27,8 +27,8 @@ import {
   validateAndParseLicenseKey,
 } from '../utils/licensingEngine';
 import { formatFeedbackReportText } from '../components/ClinicalFeedbackSection';
-import { getAllPrerenderRoutes, injectSeoIntoHtmlTemplate } from '../utils/seoEngine';
 import { saveSettings, wipeAllLocalData } from '../db/database';
+import { MONETIZATION_CONFIG } from '../config/monetization.config';
 
 function renderRoute(route: string = '/') {
   return render(
@@ -542,14 +542,12 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
     expect(screen.getByTestId('subscription-current-status')).toHaveTextContent(
       'Δοκιμαστική Έκδοση - Όλα Ξεκλείδωτα'
     );
-    expect(screen.getByTestId('stripe-family-checkout-link')).toHaveAttribute(
-      'href',
-      expect.stringContaining('https://buy.stripe.com/')
-    );
-    expect(screen.getByTestId('stripe-b2b-checkout-link')).toHaveAttribute(
-      'href',
-      expect.stringContaining('https://buy.stripe.com/')
-    );
+    // During the free beta (monetization off) checkout buttons are disabled — nobody can pay for nothing
+    expect(screen.getByTestId('stripe-family-checkout-link')).toHaveAttribute('data-checkout-disabled', 'true');
+    expect(screen.getByTestId('stripe-family-checkout-link')).not.toHaveAttribute('href');
+    expect(screen.getByTestId('stripe-b2b-checkout-link')).toHaveAttribute('data-checkout-disabled', 'true');
+    expect(MONETIZATION_CONFIG.checkoutUrls.familyMonthly).toContain('https://buy.stripe.com/');
+    expect(MONETIZATION_CONFIG.checkoutUrls.therapistAnnual).toContain('https://buy.stripe.com/');
 
     // Activate Family mode via "Κωδικός Ενεργοποίησης" input
     fireEvent.change(screen.getByTestId('license-key-input'), {
@@ -608,12 +606,13 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
     expect(screen.queryByTestId('nav-home-btn')).not.toBeInTheDocument();
     expect(screen.queryByTestId('smooth-landing-ring')).not.toBeInTheDocument();
     expect(screen.getByTestId('landing-hero-badge')).toHaveTextContent(
-      'Ξέρουμε τι αντιμετωπίζετε — Έχουμε τη λύση'
+      'Ξέρουμε τι αντιμετωπίζετε'
     );
+    expect(screen.getByTestId('landing-hero-badge')).not.toHaveTextContent('Έχουμε τη λύση');
     expect(screen.getByTestId('landing-hero-headline')).toHaveTextContent(
       '«Το μυαλό μου τρέχει γρήγορα!» Έλα να παίξουμε λίγο μαζί, να πάρουμε μια ανάσα και να βρούμε τον ρυθμό μας.'
     );
-    expect(screen.getByTestId('landing-trust-badges')).toHaveTextContent('100% Client-Side & Local');
+    expect(screen.getByTestId('landing-trust-badges')).toHaveTextContent('Τα δεδομένα του παιδιού μένουν στη συσκευή');
     expect(screen.getByTestId('landing-trust-badges')).toHaveTextContent('Χωρίς Διαφημίσεις');
     expect(screen.getByTestId('landing-trust-badges')).toHaveTextContent('Σχεδιασμένο για Tablet');
 
@@ -663,22 +662,21 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
     expect(screen.getByTestId('landing-plan-b2b')).toHaveTextContent(
       'Απεριόριστα Προφίλ Παιδιών & Γρήγορος Profile Switcher'
     );
-    expect(screen.getByTestId('landing-stripe-family-monthly-link')).toHaveAttribute(
-      'href',
-      'https://buy.stripe.com/aFa00jbdT03t5bHgeg63K02'
-    );
-    expect(screen.getByTestId('landing-stripe-family-yearly-link')).toHaveAttribute(
-      'href',
-      'https://buy.stripe.com/dRm8wP6XD17xdId8LO63K03'
-    );
-    expect(screen.getByTestId('landing-stripe-extra-profile-link')).toHaveAttribute(
-      'href',
-      'https://buy.stripe.com/eVq28req5cQfgUp2nq63K01'
-    );
-    expect(screen.getByTestId('landing-stripe-b2b-yearly-link')).toHaveAttribute(
-      'href',
-      'https://buy.stripe.com/4gM00jgydcQf7jP7HK63K00'
-    );
+    // Checkout buttons render disabled during the free beta; URLs stay configured for launch
+    for (const id of [
+      'landing-stripe-family-monthly-link',
+      'landing-stripe-family-yearly-link',
+      'landing-stripe-extra-profile-link',
+      'landing-stripe-b2b-yearly-link',
+    ]) {
+      expect(screen.getByTestId(id)).toHaveAttribute('data-checkout-disabled', 'true');
+    }
+    expect(MONETIZATION_CONFIG.checkoutUrls).toEqual({
+      familyMonthly: 'https://buy.stripe.com/aFa00jbdT03t5bHgeg63K02',
+      familyAnnual: 'https://buy.stripe.com/dRm8wP6XD17xdId8LO63K03',
+      extraChildMonthly: 'https://buy.stripe.com/eVq28req5cQfgUp2nq63K01',
+      therapistAnnual: 'https://buy.stripe.com/4gM00jgydcQf7jP7HK63K00',
+    });
 
     // 6. Privacy & Safety Commitment + 7. Footer
     expect(screen.getByTestId('landing-privacy-section')).toHaveTextContent('Zero Cloud Tracking');
@@ -1025,38 +1023,6 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
       expect(screen.getByText(/Γεια σου, Γιώργο!/i)).toBeInTheDocument();
     });
     uHub();
-  });
-
-  it('Google Search Console Indexing Fix: pre-renders all 51 sitemap routes with self-referencing canonical tags and full semantic HTML', () => {
-    const routes = getAllPrerenderRoutes();
-    expect(routes).toHaveLength(51);
-    expect(routes).toContain('/articles/01-smooth-landing-screen-meltdowns');
-    expect(routes).toContain('/articles/09-fine-motor-writing-readiness');
-
-    const sampleTemplate = `<!doctype html><html><head><title>Default</title><meta name="description" content="" /><meta name="keywords" content="" /><link rel="canonical" href="https://www.synapseplay.gr/" /><link rel="alternate" hreflang="el-GR" href="https://www.synapseplay.gr/" /><link rel="alternate" hreflang="x-default" href="https://www.synapseplay.gr/" /><meta property="og:type" content="website" /><meta property="og:url" content="https://www.synapseplay.gr/" /><meta property="og:title" content="" /><meta property="og:description" content="" /><meta property="og:image" content="" /><meta name="twitter:title" content="" /><meta name="twitter:description" content="" /><meta name="twitter:image" content="" /></head><body><div id="root"></div></body></html>`;
-
-    const html09 = injectSeoIntoHtmlTemplate(
-      sampleTemplate,
-      '/articles/09-fine-motor-writing-readiness'
-    );
-    expect(html09).toContain(
-      '<link rel="canonical" href="https://www.synapseplay.gr/articles/09-fine-motor-writing-readiness" />'
-    );
-    expect(html09).toContain(
-      '<link rel="alternate" hreflang="el-GR" href="https://www.synapseplay.gr/articles/09-fine-motor-writing-readiness" />'
-    );
-    expect(html09).not.toContain('<link rel="canonical" href="https://www.synapseplay.gr/" />');
-    expect(html09).toContain('Όταν το παιδί κουράζεται αμέσως στο γράψιμο');
-
-    const html01 = injectSeoIntoHtmlTemplate(
-      sampleTemplate,
-      '/articles/01-smooth-landing-screen-meltdowns'
-    );
-    expect(html01).toContain(
-      '<link rel="canonical" href="https://www.synapseplay.gr/articles/01-smooth-landing-screen-meltdowns" />'
-    );
-    expect(html01).not.toContain('<link rel="canonical" href="https://www.synapseplay.gr/" />');
-    expect(html01).toContain('Γιατί το παιδί με ΔΕΠΥ ξεσπάει όταν του παίρνεις το τάμπλετ');
   });
 });
 

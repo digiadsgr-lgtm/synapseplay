@@ -128,8 +128,8 @@ export interface ClinicalTrialReference {
 }
 
 /**
- * Evidence-Based Clinical Studies & Randomized Controlled Trials (RCTs)
- * underpinning the SynapsePlay FocusEngine 5+ Architecture.
+ * Background literature that INSPIRED the design. These studies did not evaluate SynapsePlay;
+ * keep this list framed as "inspiration", never as evidence of effectiveness.
  */
 export const CLINICAL_STUDIES_AND_TRIALS: ClinicalTrialReference[] = [
   {
@@ -138,7 +138,7 @@ export const CLINICAL_STUDIES_AND_TRIALS: ClinicalTrialReference[] = [
     journalOrSource: 'Psychological Bulletin / Guilford Press (Executive Functions Model)',
     clinicalFocusEl: 'Υβριδικό Μοντέλο Εκτελεστικών Λειτουργιών & Αναστολής Συμπεριφοράς στη ΔΕΠΥ',
     engineImplementationEl:
-      'Ενσωματώνει τους 4 πυλώνες του Barkley: (1) Αναστολή Παρόρμησης (Go/No-Go & 400ms Anti-Frustration Debounce), (2) Μη-Λεκτική & Λεκτική Εργαζόμενη Μνήμη, (3) Αυτορρύθμιση Συναισθήματος/Εγρήγορσης (Smooth Landing) και (4) Ανασύνθεση/Πράξη.',
+      'Έμπνευση: παιχνίδια που εξασκούν το «σταματώ πριν πατήσω», τη μνήμη εργασίας και την ήρεμη έξοδο από την οθόνη. Δεν πρόκειται για εφαρμογή του θεωρητικού μοντέλου ως παρέμβαση.',
     specialtiesInvolvedEl: ['Παιδοψυχίατροι', 'Παιδοψυχολόγοι', 'Εργοθεραπευτές'],
   },
   {
@@ -147,7 +147,7 @@ export const CLINICAL_STUDIES_AND_TRIALS: ClinicalTrialReference[] = [
     journalOrSource: 'The Lancet Digital Health (Multicenter Randomized Controlled Trial)',
     clinicalFocusEl: 'Δυναμικός Αλγόριθμος Κλιμάκωσης (Adaptive Staircase) στη Ζώνη Βέλτιστης Πρόκλησης (75%–85%)',
     engineImplementationEl:
-      'Η Αόρατη Μηχανή Σεναρίων προσαρμόζει σε πραγματικό χρόνο τους περισπασμούς, την ταχύτητα και τα επίπεδα υποστήριξης (scaffolding) ώστε το παιδί να μην εγκαταλείπει από ανία ή ματαίωση.',
+      'Έμπνευση: η δυσκολία προσαρμόζεται στην επίδοση του παιδιού. Η μελέτη αφορά άλλο προϊόν (AKL-T01 / EndeavorRx) — δεν αφορά το SynapsePlay.',
     specialtiesInvolvedEl: ['Παιδοψυχίατροι', 'Παιδοψυχολόγοι'],
   },
   {
@@ -156,7 +156,7 @@ export const CLINICAL_STUDIES_AND_TRIALS: ClinicalTrialReference[] = [
     journalOrSource: 'Journal of the American Academy of Child & Adolescent Psychiatry (JAACAP)',
     clinicalFocusEl: 'Μοντέλο Τριπλού Μονοπατιού ΔΕΠΥ (Εκτελεστικός Έλεγχος, Αποστροφή Αναμονής, Χρονική Επεξεργασία)',
     engineImplementationEl:
-      'Αντιμετωπίζει την Αποστροφή Αναμονής (Delay Aversion) με άμεση μη-τιμωρητική ανατροφοδότηση και τη δυσκολία Χρονικής Επεξεργασίας μέσω Μουσικοκινητικού Συγχρονισμού (Orff/Dalcroze).',
+      'Έμπνευση: σύντομοι γύροι, άμεση ήπια ανατροφοδότηση χωρίς ποινές και δραστηριότητες ρυθμού.',
     specialtiesInvolvedEl: ['Παιδοψυχίατροι', 'Μουσικοκινητική Αγωγή', 'Λογοθεραπευτές'],
   },
   {
@@ -165,7 +165,7 @@ export const CLINICAL_STUDIES_AND_TRIALS: ClinicalTrialReference[] = [
     journalOrSource: 'JAACAP (Multicenter RCT of Computerized Working Memory Training)',
     clinicalFocusEl: 'Κλινική Ενδυνάμωση Οπτικοχωρικής & Ακουστικής-Διαδοχικής Εργαζόμενης Μνήμης',
     engineImplementationEl:
-      'Κλιμακούμενη χωρητικότητα μνημονικών στοιχείων ανά ηλικιακή ζώνη (2 έως 6 στοιχεία) με πολυαισθητηριακή (οπτική + ακουστική) κωδικοποίηση.',
+      'Έμπνευση: παιχνίδια μνήμης με κλιμακούμενο αριθμό στοιχείων ανά ηλικία. Το SynapsePlay δεν αναπαράγει το πρόγραμμα εκπαίδευσης της μελέτης.',
     specialtiesInvolvedEl: ['Παιδοψυχολόγοι', 'Λογοθεραπευτές', 'Εργοθεραπευτές'],
   },
   {
@@ -174,7 +174,7 @@ export const CLINICAL_STUDIES_AND_TRIALS: ClinicalTrialReference[] = [
     journalOrSource: 'Journal of Autism and Developmental Disorders / Norton (Polyvagal Theory)',
     clinicalFocusEl: 'Αισθητηριακή Ολοκλήρωση (Ayres SI), Ιδιοδεκτική Βαθιά Πίεση & Ακουστική Πνευμονογαστρική Ρύθμιση',
     engineImplementationEl:
-      'Συνδυάζει ασκήσεις «Βαριάς Μυϊκής Εργασίας» (Heavy Work / Ισομετρική Πίεση) με προσωδιακή φωνητική εκφώνηση (0.86–0.94x) και αρμονικές συχνότητες 440Hz/554Hz.',
+      'Έμπνευση: δραστηριότητες κίνησης και «βαριάς μυϊκής εργασίας» και ήρεμος ρυθμός φωνής. Δεν πρόκειται για θεραπεία αισθητηριακής ολοκλήρωσης.',
     specialtiesInvolvedEl: ['Εργοθεραπευτές', 'Φυσίατροι', 'Θεατρική Αγωγή'],
   },
   {
@@ -183,7 +183,7 @@ export const CLINICAL_STUDIES_AND_TRIALS: ClinicalTrialReference[] = [
     journalOrSource: 'Child and Adolescent Psychiatric Clinics of North America',
     clinicalFocusEl: 'Εκπαίδευση Εσωτερικού Λόγου Αυτοκαθοδήγησης (Verbal Self-Instructional Training) & Οικογενειακή Γενίκευση',
     engineImplementationEl:
-      'Ενσωματώνει σύντομα λεκτικά πρότυπα αυτοκαθοδήγησης («Σταματώ – Παρατηρώ – Αναπνέω – Διαλέγω») και γέφυρες γενίκευσης στον πραγματικό χώρο του σπιτιού.',
+      'Έμπνευση: σύντομες φράσεις αυτοκαθοδήγησης («Σταματώ – Παρατηρώ – Αναπνέω – Διαλέγω») που μπορεί να πει ο γονιός μαζί με το παιδί.',
     specialtiesInvolvedEl: ['Παιδοψυχολόγοι', 'Κοινωνικοί Λειτουργοί', 'Λογοθεραπευτές'],
   },
 ];

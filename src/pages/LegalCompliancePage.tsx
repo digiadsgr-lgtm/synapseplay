@@ -352,20 +352,27 @@ export const LegalCompliancePage: React.FC = () => {
               6. Πολιτική Cookies &amp; Τοπικής Αποθήκευσης (ePrivacy)
             </h2>
             <p className="text-[#2C3539]/90">
-              Η ιστοσελίδα <strong>δεν χρησιμοποιεί</strong> διαφημιστικά cookies, cookies
-              προφίλ ή εργαλεία παρακολούθησης τρίτων (Zero Third-Party Tracking). Χρησιμοποιεί
-              αποκλειστικά τεχνικά απαραίτητη τοπική αποθήκευση στον browser σας:
+              Η ιστοσελίδα <strong>δεν χρησιμοποιεί</strong> διαφημιστικά cookies ή cookies
+              προφίλ. Εργαλεία στατιστικών (Google Tag Manager / Google Analytics) φορτώνουν{' '}
+              <strong>μόνο αν πατήσετε «Αποδοχή &amp; Στατιστικών»</strong>. Τεχνικά απαραίτητη τοπική
+              αποθήκευση στον browser σας:
             </p>
             <ul className="text-xs font-bold space-y-1.5 text-[#2C3539]">
               <li>
-                • <code>IndexedDB (synapseplay_db)</code>: Τοπική αποθήκευση προφίλ, ρυθμίσεων &amp;
+                • <code>IndexedDB (SynapsePlayLocalDB)</code>: Τοπική αποθήκευση προφίλ, ρυθμίσεων &amp;
                 ιστορικού στη συσκευή.
               </li>
               <li>
                 • <code>localStorage (synapseplay_gdpr_consent_v1)</code>: Απομνημόνευση ενημέρωσης
-                του μηνύματος GDPR.
+                της επιλογής σας για τα cookies/στατιστικά.
               </li>
             </ul>
+            <p className="text-[#2C3539]/90 text-xs">
+              <strong>Τρίτοι πάροχοι:</strong> Vercel (φιλοξενία ιστοσελίδας) · Google Tag Manager /
+              Analytics (μόνο με συγκατάθεση) · Resend (αποστολή email όταν στέλνετε φόρμα
+              παρατηρήσεων — μόνο τα στοιχεία που γράφετε στη φόρμα) · Stripe (μόνο αν μεταβείτε σε
+              σελίδα πληρωμής). Τα προφίλ και η πρόοδος των παιδιών δεν αποστέλλονται πουθενά.
+            </p>
           </div>
         </section>
 

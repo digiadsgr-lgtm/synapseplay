@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { CheckoutLink } from '../../components/CheckoutLink';
 import { Link, useNavigate } from 'react-router-dom';
 import { SynapsePlayLogoMark } from '../../components/SynapsePlayLogoMark';
 import { GdprConsentBanner } from '../../components/GdprConsentBanner';
@@ -246,7 +247,7 @@ export const LandingPage: React.FC = () => {
               >
                 <span aria-hidden="true">🤝</span>
                 <span>
-                  Για Γονείς, Ειδικούς Θεραπευτές & Παιδιά 4–12 ετών • Ξέρουμε τι αντιμετωπίζετε — Έχουμε τη λύση
+                  Για Γονείς, Ειδικούς Θεραπευτές & Παιδιά 4–12 ετών • Ξέρουμε τι αντιμετωπίζετε
                 </span>
               </span>
 
@@ -287,8 +288,8 @@ export const LandingPage: React.FC = () => {
                     🩺 Πώς βοηθά Γονείς &amp; Ειδικούς
                   </div>
                   <p className="text-xs sm:text-sm font-bold text-[#2C3539] leading-snug">
-                    Ένα έτοιμο, δοκιμασμένο εργαλείο για το σπίτι και το θεραπευτήριο που ηρεμεί το
-                    νευρικό σύστημα, προσαρμόζεται στην ηλικία και χτίζει συγκέντρωση στην πράξη.
+                    Ένα ήρεμο εργαλείο εξάσκησης για το σπίτι και το γραφείο του ειδικού, που
+                    προσαρμόζεται στην ηλικία και κάνει την εξάσκηση της συγκέντρωσης παιχνίδι.
                   </p>
                 </div>
               </div>
@@ -334,7 +335,7 @@ export const LandingPage: React.FC = () => {
           >
             <span className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#EFE8D8] border border-[#2C3539]/15">
               <span aria-hidden="true">🔒</span>
-              <span>100% Client-Side & Local</span>
+              <span>Τα δεδομένα του παιδιού μένουν στη συσκευή</span>
             </span>
             <span className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#EFE8D8] border border-[#2C3539]/15">
               <span aria-hidden="true">🌿</span>
@@ -751,7 +752,7 @@ export const LandingPage: React.FC = () => {
                 </Link>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                  <a
+                  <CheckoutLink
                     href={MONETIZATION_CONFIG.checkoutUrls.familyMonthly}
                     target="_blank"
                     rel="noopener noreferrer"
@@ -760,8 +761,8 @@ export const LandingPage: React.FC = () => {
                   >
                     <span>Εγγραφή στο Οικογενειακό — Μηνιαίο (4,99€)</span>
                     <span aria-hidden="true">↗️</span>
-                  </a>
-                  <a
+                  </CheckoutLink>
+                  <CheckoutLink
                     href={MONETIZATION_CONFIG.checkoutUrls.familyAnnual}
                     target="_blank"
                     rel="noopener noreferrer"
@@ -770,10 +771,10 @@ export const LandingPage: React.FC = () => {
                   >
                     <span>Εγγραφή στο Οικογενειακό — Ετήσιο (39,99€)</span>
                     <span aria-hidden="true">↗️</span>
-                  </a>
+                  </CheckoutLink>
                 </div>
 
-                <a
+                <CheckoutLink
                   href={MONETIZATION_CONFIG.checkoutUrls.extraChildMonthly}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -782,7 +783,7 @@ export const LandingPage: React.FC = () => {
                 >
                   <span>➕ Επιπλέον Προφίλ Παιδιού (1,99€ / μήνα)</span>
                   <span aria-hidden="true">↗️</span>
-                </a>
+                </CheckoutLink>
               </div>
             </div>
 
@@ -794,7 +795,7 @@ export const LandingPage: React.FC = () => {
               <div className="space-y-4">
                 <div className="flex items-center justify-between gap-2">
                   <span className="px-3 py-1 rounded-full bg-[#7A9A7B]/25 text-[#2C3539] text-xs font-extrabold">
-                    B2B / Κλινική Άδεια
+                    B2B / Άδεια Επαγγελματία
                   </span>
                   <span className="text-3xl" aria-hidden="true">
                     🏥
@@ -831,7 +832,7 @@ export const LandingPage: React.FC = () => {
               </div>
 
               <div className="space-y-3 pt-2">
-                <a
+                <CheckoutLink
                   href={MONETIZATION_CONFIG.checkoutUrls.therapistAnnual}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -840,7 +841,7 @@ export const LandingPage: React.FC = () => {
                 >
                   <span>Απόκτηση Άδειας Θεραπευτή B2B (299,00€ / έτος)</span>
                   <span aria-hidden="true">↗️</span>
-                </a>
+                </CheckoutLink>
 
                 <Link
                   to="/parent"
@@ -1146,8 +1147,8 @@ export const LandingPage: React.FC = () => {
                 <strong>100% Privacy-by-Design (Άρθρα 8, 17, 20 &amp; 25 ΓΚΠΔ):</strong> Το
                 SynapsePlay είναι παιδαγωγικό εργαλείο εξάσκησης εκτελεστικών λειτουργιών και
                 αυτορρύθμισης. Δεν αποτελεί ιατρική συσκευή, διαγνωστικό μέσο ή υποκατάστατο
-                εξατομικευμένης κλινικής θεραπείας. Δεν χρησιμοποιεί διαφημιστικά cookies ή trackers
-                τρίτων. Όλα τα προφίλ και τα στατιστικά αποθηκεύονται αποκλειστικά τοπικά στη
+                εξατομικευμένης κλινικής θεραπείας. Δεν χρησιμοποιεί διαφημιστικά cookies· στατιστικά
+                επισκεψιμότητας (Google Tag Manager) ενεργοποιούνται μόνο με τη συγκατάθεσή σας. Όλα τα προφίλ και τα στατιστικά αποθηκεύονται αποκλειστικά τοπικά στη
                 συσκευή (IndexedDB) και διαγράφονται ανά πάσα στιγμή με 1 κλικ από το Περιβάλλον
                 Γονέα ή από το{' '}
                 <Link to="/legal" className="font-extrabold text-[#4A6B82] underline">

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { CheckoutLink } from './CheckoutLink';
 import { useApp } from '../context/AppContext';
 import { MONETIZATION_CONFIG } from '../config/monetization.config';
 
@@ -171,7 +172,7 @@ export const SubscriptionManagementSection: React.FC = () => {
           </div>
           <div className="space-y-2">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <a
+              <CheckoutLink
                 href={MONETIZATION_CONFIG.checkoutUrls.familyMonthly}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -180,8 +181,8 @@ export const SubscriptionManagementSection: React.FC = () => {
               >
                 <span>Εγγραφή στο Οικογενειακό — Μηνιαίο (4,99€)</span>
                 <span aria-hidden="true">↗️</span>
-              </a>
-              <a
+              </CheckoutLink>
+              <CheckoutLink
                 href={MONETIZATION_CONFIG.checkoutUrls.familyAnnual}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -190,9 +191,9 @@ export const SubscriptionManagementSection: React.FC = () => {
               >
                 <span>Εγγραφή στο Οικογενειακό — Ετήσιο (39,99€)</span>
                 <span aria-hidden="true">↗️</span>
-              </a>
+              </CheckoutLink>
             </div>
-            <a
+            <CheckoutLink
               href={MONETIZATION_CONFIG.checkoutUrls.extraChildMonthly}
               target="_blank"
               rel="noopener noreferrer"
@@ -201,7 +202,7 @@ export const SubscriptionManagementSection: React.FC = () => {
             >
               <span>➕ Επιπλέον Προφίλ Παιδιού (1,99€ / μήνα)</span>
               <span aria-hidden="true">↗️</span>
-            </a>
+            </CheckoutLink>
           </div>
         </div>
 
@@ -215,7 +216,7 @@ export const SubscriptionManagementSection: React.FC = () => {
               προφίλ παιδιών και γρήγορη «Εναλλαγή Παιδιού» μεταξύ των συνεδριών.
             </p>
           </div>
-          <a
+          <CheckoutLink
             href={MONETIZATION_CONFIG.checkoutUrls.therapistAnnual}
             target="_blank"
             rel="noopener noreferrer"
@@ -224,7 +225,7 @@ export const SubscriptionManagementSection: React.FC = () => {
           >
             <span>Απόκτηση Άδειας Θεραπευτή (B2B — 299,00€ / έτος)</span>
             <span aria-hidden="true">↗️</span>
-          </a>
+          </CheckoutLink>
         </div>
       </div>
     </section>

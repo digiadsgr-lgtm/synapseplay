@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { CheckoutLink } from '../components/CheckoutLink';
 import { Link, useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { ACTIVITIES } from '../data/activitiesCatalog';
@@ -657,7 +658,7 @@ export const ParentDashboardPage: React.FC = () => {
                 {profileCreationPermission.noticeEl}
               </p>
               <div className="flex flex-wrap items-center gap-2 shrink-0">
-                <a
+                <CheckoutLink
                   href={MONETIZATION_CONFIG.checkoutUrls.extraChildMonthly}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -666,8 +667,8 @@ export const ParentDashboardPage: React.FC = () => {
                 >
                   <span>➕ Επιπλέον Προφίλ Παιδιού (1,99€ / μήνα)</span>
                   <span aria-hidden="true">↗️</span>
-                </a>
-                <a
+                </CheckoutLink>
+                <CheckoutLink
                   href={MONETIZATION_CONFIG.checkoutUrls.therapistAnnual}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -676,7 +677,7 @@ export const ParentDashboardPage: React.FC = () => {
                 >
                   <span>🏥 Άδεια Θεραπευτή B2B (299,00€ / έτος)</span>
                   <span aria-hidden="true">↗️</span>
-                </a>
+                </CheckoutLink>
               </div>
             </div>
           )}
@@ -758,7 +759,7 @@ export const ParentDashboardPage: React.FC = () => {
                   className="p-2.5 rounded-xl bg-white/90 border border-sage text-[11px] text-charcoal space-y-1"
                 >
                   <p className="font-extrabold text-sage-dark">
-                    {avatarEval.avatar.emoji} Θεραπευτικός Συνοδοιπόρος: {avatarEval.avatar.defaultNameEl} ({avatarEval.avatar.superpowerTitleEl})
+                    {avatarEval.avatar.emoji} Συνοδοιπόρος: {avatarEval.avatar.defaultNameEl} ({avatarEval.avatar.superpowerTitleEl})
                   </p>
                   <p className="text-charcoal-muted">{avatarEval.clinicalAssessmentEl}</p>
                 </div>
@@ -975,17 +976,18 @@ export const ParentDashboardPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Evidence-Based Clinical Studies & Randomized Controlled Trials (RCTs) */}
+      {/* Background reading that inspired the design (NOT evidence that SynapsePlay works) */}
       <section
         data-testid="clinical-studies-rct-section"
         className="bg-white border-2 border-sage rounded-3xl p-6 space-y-4"
       >
         <h2 className="text-xl font-extrabold text-charcoal">
-          🔬 Επιστημονική Τεκμηρίωση, Κλινικές Δοκιμές (RCTs) & Διεπιστημονική Ομάδα ΔΕΠΥ
+          📚 Σχετική Βιβλιογραφία που Ενέπνευσε τον Σχεδιασμό
         </h2>
         <p className="text-sm text-charcoal-muted">
-          Η μηχανή του SynapsePlay (FocusEngine 5+) βασίζεται σε διεθνείς τυχαιοποιημένες κλινικές
-          δοκιμές (RCTs) και νευροαναπτυξιακά μοντέλα για τη ΔΕΠΥ:
+          Οι παρακάτω εργασίες αποτέλεσαν έμπνευση για τον σχεδιασμό των παιχνιδιών. Το SynapsePlay{' '}
+          <strong>δεν έχει αξιολογηθεί σε κλινική μελέτη</strong> και δεν αναπαράγει τις
+          παρεμβάσεις που μελετήθηκαν σε αυτές. Είναι εργαλείο εξάσκησης, όχι θεραπεία.
         </p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {CLINICAL_STUDIES_AND_TRIALS.map((study) => (
