@@ -1,6 +1,7 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { resolveRouteSeoMetadata } from '../utils/seoEngine';
+// seoEngine pulls in all blog articles (~100KB text) → load it on demand, outside the main bundle
+type RouteSeoMetadata = ReturnType<typeof import('../utils/seoEngine').resolveRouteSeoMetadata>;
 
 function setOrCreateMeta(attrName: 'name' | 'property', attrValue: string, content: string) {
   if (typeof document === 'undefined') return;
@@ -38,44 +39,54 @@ declare global {
 
 export const SeoHeadManager: React.FC = () => {
   const location = useLocation();
-  const seo = resolveRouteSeoMetadata(location.pathname);
+  const [seo, setSeo] = useState<RouteSeoMetadata | null>(null);
 
   useEffect(() => {
     if (typeof document === 'undefined') return;
+    let alive = true;
+    void import('../utils/seoEngine').then(({ resolveRouteSeoMetadata }) => {
+      if (!alive) return;
+      const meta = resolveRouteSeoMetadata(location.pathname);
+      setSeo(meta);
 
-    document.title = seo.title;
-    setOrCreateMeta('name', 'description', seo.description);
-    setOrCreateMeta('name', 'keywords', seo.keywords.join(', '));
-    setOrCreateMeta('property', 'og:title', seo.title);
-    setOrCreateMeta('property', 'og:description', seo.description);
-    setOrCreateMeta('property', 'og:type', seo.ogType);
-    setOrCreateMeta('property', 'og:url', seo.canonicalUrl);
-    setOrCreateMeta('property', 'og:image', seo.ogImage);
-    setOrCreateMeta('property', 'og:locale', 'el_GR');
-    setOrCreateMeta('name', 'twitter:title', seo.title);
-    setOrCreateMeta('name', 'twitter:description', seo.description);
-    setOrCreateMeta('name', 'twitter:image', seo.ogImage);
+      document.title = meta.title;
+      setOrCreateMeta('name', 'description', meta.description);
+      setOrCreateMeta('name', 'keywords', meta.keywords.join(', '));
+      setOrCreateMeta('property', 'og:title', meta.title);
+      setOrCreateMeta('property', 'og:description', meta.description);
+      setOrCreateMeta('property', 'og:type', meta.ogType);
+      setOrCreateMeta('property', 'og:url', meta.canonicalUrl);
+      setOrCreateMeta('property', 'og:image', meta.ogImage);
+      setOrCreateMeta('property', 'og:locale', 'el_GR');
+      setOrCreateMeta('name', 'twitter:title', meta.title);
+      setOrCreateMeta('name', 'twitter:description', meta.description);
+      setOrCreateMeta('name', 'twitter:image', meta.ogImage);
 
-    setOrCreateLink('canonical', seo.canonicalUrl);
-    setOrCreateLink('alternate', seo.canonicalUrl, 'el-GR');
-    setOrCreateLink('alternate', seo.canonicalUrl, 'x-default');
+      setOrCreateLink('canonical', meta.canonicalUrl);
+      setOrCreateLink('alternate', meta.canonicalUrl, 'el-GR');
+      setOrCreateLink('alternate', meta.canonicalUrl, 'x-default');
 
-    // Push virtual pageview to Google Tag Manager dataLayer on SPA route change
-    if (typeof window !== 'undefined' && Array.isArray(window.dataLayer)) {
-      window.dataLayer.push({
-        event: 'virtual_pageview',
-        page_path: location.pathname,
-        page_title: seo.title,
-        page_location: seo.canonicalUrl,
-      });
-    }
-  }, [location.pathname, seo]);
+      // Push virtual pageview to Google Tag Manager dataLayer on SPA route change
+      if (typeof window !== 'undefined' && Array.isArray(window.dataLayer)) {
+        window.dataLayer.push({
+          event: 'virtual_pageview',
+          page_path: location.pathname,
+          page_title: meta.title,
+          page_location: meta.canonicalUrl,
+        });
+      }
+    });
+    return () => {
+      alive = false;
+    };
+  }, [location.pathname]);
 
+  if (!seo) return null;
   return (
     <script
       type="application/ld+json"
       data-testid="global-route-seo-jsonld"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(seo.jsonLd) }}
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(seo.jsonLd).replace(/</g, '\\u003c') }}
     />
   );
 };
