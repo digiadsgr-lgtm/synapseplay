@@ -491,9 +491,6 @@ export const ChildHubPage: React.FC = () => {
                   <span>{avatarEvaluation.evolutionBadgeEmoji}</span>
                   <span>{avatarEvaluation.evolutionTitleEl}</span>
                 </span>
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-slate-surface border border-slate text-xs font-extrabold text-charcoal">
-                  <span>Δείκτης Εστίασης: {avatarEvaluation.overallMasteryPct}%</span>
-                </span>
               </div>
               <h1 id="hub-welcome-heading" className="text-2xl md:text-3xl font-extrabold text-charcoal">
                 Γεια σου, {toGreekVocative(activeProfile.nickname)}! Τι θέλεις να παίξουμε σήμερα;

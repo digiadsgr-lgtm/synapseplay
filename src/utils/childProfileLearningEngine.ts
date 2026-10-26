@@ -433,9 +433,7 @@ export function evaluateChildAvatarProgress(
   const clinicalAssessmentEl =
     sessions === 0
       ? `Ο συνοδοιπόρος «${avatar.defaultNameEl}» (${avatar.emoji}) ενεργοποιεί τον τομέα «${DOMAIN_LABELS_EL[avatar.primaryDomain].labelEl}». ${avatar.clinicalRoleEl}`
-      : `Συνολικός Δείκτης Εξέλιξης ΔΕΠΥ: ${overallMasteryPct}% (${evolutionTitleEl}). Ισχυρότερη επίδοση: «${strongestDomainLabelEl}» (${Math.round(
-          sortedDesc[0][1] * 100
-        )}%). Επόμενος θεραπευτικός στόχος ενδυνάμωσης με τον συνοδοιπόρο «${avatar.defaultNameEl}»: «${growthTargetDomainLabelEl}».`;
+      : `${evolutionTitleEl}. Πιο άνετα μέχρι τώρα: «${strongestDomainLabelEl}». Προτείνεται περισσότερη εξάσκηση στο: «${growthTargetDomainLabelEl}». (Εκτίμηση της εφαρμογής από ακρίβεια και βοήθειες — όχι κλινική αξιολόγηση.)`;
 
   return {
     avatar,
@@ -545,6 +543,30 @@ function buildAdaptationSummary(
  * Trains the child's on-device learning model after completing an activity using
  * Exponential Moving Average (EMA) reinforcement updates.
  */
+/**
+ * Activities whose success the app CANNOT verify (body movement, real-world tasks).
+ * They count as played, but never change the domain estimates.
+ */
+export const SELF_REPORT_ACTIVITY_IDS: ReadonlySet<ActivityId> = new Set<ActivityId>([
+  '07-move-freeze',
+  '10-copy-animal',
+  '11-real-world-mission',
+  '17-sensory-proprioception',
+]);
+
+/** Go/No-Go activities: a wrong tap here is a real "commission error" (tap when you should wait). */
+export const INHIBITION_ACTIVITY_IDS: ReadonlySet<ActivityId> = new Set<ActivityId>([
+  '07-move-freeze',
+  '09-wait-signal',
+]);
+
+/** Share of correct responses: correct / (correct + wrong). null when nothing was measured. */
+export function computeAccuracy(completedRounds: number, errorsCount: number): number | null {
+  const total = completedRounds + errorsCount;
+  if (total <= 0) return null;
+  return completedRounds / total;
+}
+
 export function trainChildProfileOnActivityCompletion(
   profile: ChildMicroProfile,
   event: {
@@ -552,30 +574,38 @@ export function trainChildProfileOnActivityCompletion(
     hintsUsed: number;
     impulsiveTapsAbsorbed: number;
     durationSeconds: number;
+    /** Wrong responses (gentle nudges) during the activity. */
+    errorsCount?: number;
+    /** Correctly completed rounds (defaults to 3). */
+    completedRounds?: number;
     selectedStrategy?: 'time' | 'example' | 'retry' | null;
   }
 ): ChildMicroProfile {
   const prev = profile.learnedModel;
   const alpha = 0.35; // Continual learning rate
+  const errors = Math.max(0, event.errorsCount ?? 0);
+  const rounds = Math.max(1, event.completedRounds ?? 3);
+  const isSelfReport = SELF_REPORT_ACTIVITY_IDS.has(event.activityId);
 
-  // 1. Compute session mastery signal in [0.25, 0.98]
-  const rawMasterySignal =
-    1.0 - event.hintsUsed * 0.18 - Math.min(4, event.impulsiveTapsAbsorbed) * 0.08;
-  const sessionMasterySignal = clamp01(Math.max(0.25, rawMasterySignal));
+  // 1. Session signal = accuracy, reduced by hints (support needed). Range [0.1, 1].
+  //    Rapid double-taps are a touch-screen artefact and are NOT counted as errors.
+  const accuracy = computeAccuracy(rounds, errors) ?? 1;
+  const sessionMasterySignal = clamp01(Math.max(0.1, accuracy - event.hintsUsed * 0.1));
 
-  // 2. Update targeted domain mastery scores
+  // 2. Update targeted domain estimates (skipped for self-report activities)
   const targetDomains = ACTIVITY_DOMAIN_MAP[event.activityId] ?? ['visualAttention'];
   const updatedMastery: DomainMasteryScores = { ...prev.domainMastery };
-  for (const dom of targetDomains) {
-    const oldScore = updatedMastery[dom] ?? 0.5;
-    updatedMastery[dom] = clamp01((1 - alpha) * oldScore + alpha * sessionMasterySignal);
+  if (!isSelfReport) {
+    for (const dom of targetDomains) {
+      const oldScore = updatedMastery[dom] ?? 0.5;
+      updatedMastery[dom] = clamp01((1 - alpha) * oldScore + alpha * sessionMasterySignal);
+    }
   }
 
-  // 3. Update learned impulsivity & scaffolding need indices via EMA
-  const observedImpulsivity = Math.min(1.0, event.impulsiveTapsAbsorbed / 4);
-  const nextImpulsivity = clamp01(
-    (1 - alpha) * prev.impulsivityIndex + alpha * observedImpulsivity
-  );
+  // 3. Impulsivity = commission errors in Go/No-Go activities only (unchanged elsewhere)
+  const nextImpulsivity = INHIBITION_ACTIVITY_IDS.has(event.activityId)
+    ? clamp01((1 - alpha) * prev.impulsivityIndex + alpha * Math.min(1.0, errors / 3))
+    : prev.impulsivityIndex;
 
   const observedScaffoldingNeed = Math.min(1.0, event.hintsUsed / 2);
   const nextScaffoldingNeed = clamp01(

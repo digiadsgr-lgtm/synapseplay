@@ -127,6 +127,12 @@ export interface ActivitySessionLog {
   totalRounds: number;
   hintsUsed: number;
   impulsiveTapsAbsorbed: number;
+  /** Wrong responses during the activity (gentle nudges). Older logs: undefined. */
+  errorsCount?: number;
+  /** Median time from round start to correct answer (ms). Older logs: undefined. */
+  medianRoundMs?: number;
+  /** 'self-report' = the app cannot verify success (movement / real-world tasks). */
+  measurement?: 'measured' | 'self-report';
   seatedModeUsed: boolean;
   ageBand?: AgeBandId;
   adaptiveScenarioId?: AdaptiveScenarioId;

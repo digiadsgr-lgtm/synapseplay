@@ -189,8 +189,6 @@ export const CLINICAL_STUDIES_AND_TRIALS: ClinicalTrialReference[] = [
 ];
 
 export interface PsychometricStaircaseSnapshot {
-  inhibitoryControlPercent: number;
-  attentionalStabilityPercent: number;
   optimalZoneLabelEl: string;
   innerSpeechCueEl: string;
   clinicalTeamNoteEl: string;
@@ -219,14 +217,10 @@ export function computeClinicalStaircaseSnapshot(params: {
     variantNumber,
   } = params;
 
-  const inhibitoryControlPercent = Math.max(
-    55,
-    Math.min(100, 100 - absorbedImpulsiveTaps * 6 - gentleNudges * 4)
-  );
-  const attentionalStabilityPercent = Math.max(
-    60,
-    Math.min(100, 96 - hintsUsed * 5 - gentleNudges * 5 + completedRounds * 2)
-  );
+  // NOTE: the former "inhibitoryControlPercent / attentionalStabilityPercent" were invented
+  // formulas (floored at 55%/60%) and have been removed. Use computeAccuracy() on real data.
+  void absorbedImpulsiveTaps;
+  void hintsUsed;
 
   const innerSpeechPools: Record<AdaptiveScenarioId, string[]> = {
     SCENARIO_BALANCED_FLOW: [
@@ -270,14 +264,12 @@ export function computeClinicalStaircaseSnapshot(params: {
   const cueIdx = Math.max(0, variantNumber - 1 + completedRounds) % scenarioCues.length;
 
   return {
-    inhibitoryControlPercent,
-    attentionalStabilityPercent,
     optimalZoneLabelEl: `Ζώνη Βέλτιστης Πρόκλησης (ZPD ${ageBand} ετών) • Σετ #${variantNumber}`,
     innerSpeechCueEl: scenarioCues[cueIdx],
     clinicalTeamNoteEl:
-      inhibitoryControlPercent >= 85
-        ? 'Υψηλός αυτοέλεγχος & σταθερός ρυθμός απόκρισης (Barkley EF Target Zone).'
-        : 'Ενεργή υποστήριξη αναστολής παρόρμησης & μείωση οπτικού θορύβου (Sonuga-Barke Pathway).',
+      gentleNudges === 0
+        ? 'Χωρίς λάθη σε αυτή τη δραστηριότητα μέχρι τώρα.'
+        : `Λάθη σε αυτή τη δραστηριότητα: ${gentleNudges}.`,
   };
 }
 

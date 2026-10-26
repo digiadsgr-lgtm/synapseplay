@@ -125,10 +125,11 @@ export function evaluateInvisibleScenario(
     };
   }
 
-  // 2. Rapid impulsive tapping modulation (live or learned from child's historical profile)
+  // 2. Impulsive pattern = speed WITH errors. A fast correct answer is mastery, not impulsivity.
+  const hasErrors = telemetry.gentleNudgesInCurrentActivity >= 1;
+  const isFast = telemetry.lastResponseTimeMs > 0 && telemetry.lastResponseTimeMs < 750;
   if (
-    telemetry.absorbedImpulsiveTaps >= 2 ||
-    (telemetry.lastResponseTimeMs > 0 && telemetry.lastResponseTimeMs < 750) ||
+    (hasErrors && (isFast || telemetry.absorbedImpulsiveTaps >= 2)) ||
     (learned && learned.totalSessionsCompleted >= 1 && learned.impulsivityIndex >= 0.45)
   ) {
     return {

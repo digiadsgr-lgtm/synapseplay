@@ -16,7 +16,14 @@ import {
   computeClinicalStaircaseSnapshot,
   getAgeAndPerformanceDifficulty,
 } from '../utils/clinicalAdhdEngine';
-import { toGreekVocative } from '../utils/childProfileLearningEngine';
+import { SELF_REPORT_ACTIVITY_IDS, toGreekVocative } from '../utils/childProfileLearningEngine';
+
+function median(values: number[]): number | undefined {
+  if (values.length === 0) return undefined;
+  const sorted = [...values].sort((a, b) => a - b);
+  const mid = Math.floor(sorted.length / 2);
+  return sorted.length % 2 ? sorted[mid] : Math.round((sorted[mid - 1] + sorted[mid]) / 2);
+}
 
 export interface ActivityRunnerRenderProps {
   phase: RunnerPhase;
@@ -82,7 +89,9 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
 
   const startTimeRef = useRef<number>(Date.now());
   const roundStartRef = useRef<number>(Date.now());
-  const lastResponseMsRef = useRef<number>(0);
+  // State (not a ref) so the adaptive engine re-evaluates when a new response time arrives
+  const [lastResponseMs, setLastResponseMs] = React.useState<number>(0);
+  const roundDurationsRef = useRef<number[]>([]);
   const loggedCompletionRef = useRef<boolean>(false);
   const prevActivityIdRef = useRef<string>(activity.id);
   const [selectedStrategy, setSelectedStrategy] = React.useState<string | null>(null);
@@ -115,7 +124,7 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
         gentleNudgesInCurrentActivity: state.gentleNudgesCount,
         hintsUsedInCurrentActivity: state.totalHintsUsed,
         absorbedImpulsiveTaps: state.impulsiveTapsAbsorbed,
-        lastResponseTimeMs: lastResponseMsRef.current,
+        lastResponseTimeMs: lastResponseMs,
         seatedModeActive: state.seatedMode,
         learnedModel: activeProfile.learnedModel,
       }),
@@ -127,6 +136,7 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
       state.impulsiveTapsAbsorbed,
       state.seatedMode,
       activeProfile.learnedModel,
+      lastResponseMs,
     ]
   );
 
@@ -189,7 +199,8 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
       prevActivityIdRef.current = activity.id;
       startTimeRef.current = Date.now();
       roundStartRef.current = Date.now();
-      lastResponseMsRef.current = 0;
+      setLastResponseMs(0);
+      roundDurationsRef.current = [];
       loggedCompletionRef.current = false;
       setSelectedStrategy(null);
       setShowParentCoachingTip(false);
@@ -232,14 +243,16 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
   };
 
   const handleGentleFeedback = (messageEl: string) => {
-    lastResponseMsRef.current = Date.now() - roundStartRef.current;
+    setLastResponseMs(Date.now() - roundStartRef.current);
     recordGentleNudge(messageEl);
     playCalmTone('gentle-nudge', settings.soundEnabled);
     speakGreek(messageEl, settings.voiceEnabled, adaptiveProfile.speechRate);
   };
 
   const handleAdvanceRound = (impulsiveTapsInRound: number = 0) => {
-    lastResponseMsRef.current = Date.now() - roundStartRef.current;
+    const roundMs = Date.now() - roundStartRef.current;
+    setLastResponseMs(roundMs);
+    roundDurationsRef.current.push(roundMs);
     roundStartRef.current = Date.now();
     const isFinalRound = state.currentRound >= state.totalRounds;
     completeRound(impulsiveTapsInRound);
@@ -269,6 +282,9 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
           totalRounds: activity.totalRounds,
           hintsUsed: state.totalHintsUsed,
           impulsiveTapsAbsorbed: state.impulsiveTapsAbsorbed + impulsiveTapsInRound,
+          errorsCount: state.gentleNudgesCount,
+          medianRoundMs: median(roundDurationsRef.current),
+          measurement: SELF_REPORT_ACTIVITY_IDS.has(activity.id) ? 'self-report' : 'measured',
           seatedModeUsed: Boolean(activity.supportsSeatedMode && state.seatedMode),
           ageBand,
           adaptiveScenarioId: adaptiveProfile.scenarioId,
@@ -280,6 +296,7 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
   const handleRestart = () => {
     startTimeRef.current = Date.now();
     roundStartRef.current = Date.now();
+    roundDurationsRef.current = [];
     loggedCompletionRef.current = false;
     setSessionSeed((prev) => {
       const next = prev + 1;

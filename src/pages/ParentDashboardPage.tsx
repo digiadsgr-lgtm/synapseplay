@@ -22,6 +22,7 @@ import { ParentGateModal } from '../components/ParentGateModal';
 import { ClinicalFeedbackSection } from '../components/ClinicalFeedbackSection';
 import { SubscriptionManagementSection } from '../components/SubscriptionManagementSection';
 import { MONETIZATION_CONFIG } from '../config/monetization.config';
+import { formatLogAccuracy, summarizeRecentAccuracy } from '../utils/progressMetrics';
 
 export const ParentDashboardPage: React.FC = () => {
   const navigate = useNavigate();
@@ -684,6 +685,7 @@ export const ParentDashboardPage: React.FC = () => {
           {childProfiles.map((prof) => {
             const isSelected = prof.id === activeProfile.id;
             const avatarEval = evaluateChildAvatarProgress(prof);
+            const recent = summarizeRecentAccuracy(sessionLogs, prof.id, 10);
             const masteryEntries = Object.entries(prof.learnedModel.domainMastery) as Array<
               [ClinicalDomainKey, number]
             >;
@@ -714,7 +716,12 @@ export const ParentDashboardPage: React.FC = () => {
                       </div>
                       <p className="text-xs font-bold text-slate-dark">
                         Ηλικία {prof.ageBand} ετών • {prof.learnedModel.totalSessionsCompleted}{' '}
-                        ολοκληρωμένες συνεδρίες • Δείκτης Εξέλιξης: {avatarEval.overallMasteryPct}%
+                        ολοκληρωμένες συνεδρίες •{' '}
+                        <span data-testid={`parent-recent-accuracy-${prof.id}`}>
+                          {recent.accuracyPct === null
+                            ? 'Ακρίβεια: δεν υπάρχουν ακόμη μετρήσιμα παιχνίδια'
+                            : `Ακρίβεια (τελευταία ${recent.measuredCount} παιχνίδια): ${recent.accuracyPct}%`}
+                        </span>
                       </p>
                     </div>
                   </div>
@@ -756,8 +763,12 @@ export const ParentDashboardPage: React.FC = () => {
                   <p className="text-charcoal-muted">{avatarEval.clinicalAssessmentEl}</p>
                 </div>
 
-                {/* 6 Clinical Domain Mastery Progress Bars */}
+                {/* Domain practice estimates (app estimate, not a clinical measurement) */}
                 <div className="space-y-1.5 pt-1">
+                  <p className="text-[10px] font-bold text-charcoal-muted">
+                    Τάση εξάσκησης ανά τομέα — εκτίμηση της εφαρμογής από ακρίβεια και βοήθειες, όχι
+                    κλινική μέτρηση. Τα παιχνίδια κίνησης δεν μετρώνται.
+                  </p>
                   {masteryEntries.map(([domKey, score]) => {
                     const meta = DOMAIN_LABELS_EL[domKey];
                     const pct = Math.round(score * 100);
@@ -767,7 +778,6 @@ export const ParentDashboardPage: React.FC = () => {
                           <span>
                             {meta.emoji} {meta.labelEl}
                           </span>
-                          <span>{pct}%</span>
                         </div>
                         <div className="w-full h-2 rounded-full bg-white border border-sand-dark overflow-hidden">
                           <div
@@ -793,8 +803,8 @@ export const ParentDashboardPage: React.FC = () => {
               📊 Ιστορικό Δραστηριοτήτων ({sessionLogs.length})
             </h2>
             <p className="text-sm text-charcoal-muted">
-              Καταγραφή ολοκληρωμένων γύρων, χρήσης βοήθειας (Hint Ladder) και απορρόφησης διπλών
-              πατημάτων.
+              Καταγραφή γύρων, λαθών, βοηθειών και ακρίβειας ανά παιχνίδι. «Αυτοαναφορά» = παιχνίδια
+              κίνησης που η εφαρμογή δεν μπορεί να ελέγξει.
             </p>
           </div>
 
@@ -857,7 +867,8 @@ export const ParentDashboardPage: React.FC = () => {
                   <th className="py-3 px-2">Δραστηριότητα</th>
                   <th className="py-3 px-2">Γύροι</th>
                   <th className="py-3 px-2">Βοήθειες (Hints)</th>
-                  <th className="py-3 px-2">Απορροφημένα Διπλά Κλικ</th>
+                  <th className="py-3 px-2">Λάθη</th>
+                  <th className="py-3 px-2">Ακρίβεια</th>
                   <th className="py-3 px-2">Διάρκεια</th>
                   <th className="py-3 px-2">Ημερομηνία</th>
                 </tr>
@@ -870,7 +881,8 @@ export const ParentDashboardPage: React.FC = () => {
                       {log.completedRounds}/{log.totalRounds}
                     </td>
                     <td className="py-3 px-2">{log.hintsUsed}</td>
-                    <td className="py-3 px-2">{log.impulsiveTapsAbsorbed}</td>
+                    <td className="py-3 px-2">{typeof log.errorsCount === 'number' ? log.errorsCount : '—'}</td>
+                    <td className="py-3 px-2">{formatLogAccuracy(log)}</td>
                     <td className="py-3 px-2">{log.durationSeconds} δευτ.</td>
                     <td className="py-3 px-2 text-charcoal-muted">{log.dateKey}</td>
                   </tr>

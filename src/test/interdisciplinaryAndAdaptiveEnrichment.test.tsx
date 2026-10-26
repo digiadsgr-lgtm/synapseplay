@@ -113,11 +113,11 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
     expect(frustration.autoHintBoost).toBe(true);
     expect(frustration.distractorReductionRatio).toBe(0.5);
 
-    // 2. Impulsive rapid responder when absorbed double-taps >= 2
+    // 2. Impulsive pattern = fast responses WITH at least one error
     const impulsive = evaluateInvisibleScenario({
       ageBand: '6-8',
       completedRoundsCount: 1,
-      gentleNudgesInCurrentActivity: 0,
+      gentleNudgesInCurrentActivity: 1,
       hintsUsedInCurrentActivity: 0,
       absorbedImpulsiveTaps: 3,
       lastResponseTimeMs: 450,
@@ -728,7 +728,7 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
     }
     const advancedEval = evaluateChildAvatarProgress(profile);
     expect(advancedEval.evolutionLevel).toBeGreaterThanOrEqual(3);
-    expect(advancedEval.clinicalAssessmentEl).toContain('Συνολικός Δείκτης Εξέλιξης ΔΕΠΥ');
+    expect(advancedEval.clinicalAssessmentEl).toContain('όχι κλινική αξιολόγηση');
 
     // Interactive Companion Avatar Picker on Child Hub
     renderRoute('/app');

@@ -327,6 +327,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         hintsUsed: log.hintsUsed,
         impulsiveTapsAbsorbed: log.impulsiveTapsAbsorbed,
         durationSeconds: log.durationSeconds,
+        errorsCount: log.errorsCount ?? 0,
+        completedRounds: log.completedRounds,
       });
       setChildProfiles((prev) =>
         prev.map((p) => (p.id === trainedProfile.id ? trainedProfile : p))
