@@ -11,7 +11,9 @@ interface RoutineStep {
   labelEl: string;
 }
 
-const ROUTINES: Array<{ titleEl: string; steps: RoutineStep[]; displayOrder: number[] }> = [
+type RoutineRound = { titleEl: string; steps: RoutineStep[]; displayOrder: number[] };
+
+const ROUTINES: RoutineRound[] = [
   {
     titleEl: 'Ρουτίνα: Πλένω τα Δόντια μου',
     steps: [
@@ -140,7 +142,7 @@ const ROUTINES: Array<{ titleEl: string; steps: RoutineStep[]; displayOrder: num
   },
 ];
 
-const SENIOR_ROUTINES: typeof ROUTINES = [
+const SENIOR_ROUTINES: RoutineRound[] = [
   {
     titleEl: 'Οργάνωση Επιστημονικού Πειράματος (STEM)',
     steps: [

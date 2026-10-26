@@ -122,7 +122,7 @@ const AUDITORY_ROUNDS: AuditoryConceptRound[] = [
   },
 ];
 
-const SENIOR_AUDITORY_ROUNDS: typeof AUDITORY_ROUNDS = [
+const SENIOR_AUDITORY_ROUNDS: AuditoryConceptRound[] = [
   {
     conceptBadgeEl: 'Χρονική Αναστροφή (8-12 ετών): «Πριν... αλλά Αφού...»',
     spokenInstructionEl: 'Άκου προσεκτικά τη χρονική σειρά: ΠΡΙΝ ξεκινήσεις το πείραμα με το μικροσκόπιο, αλλά ΑΦΟΥ φορέσεις την εργαστηριακή ποδιά, τι πρέπει να ελέγξεις πρώτο από τα δύο;',

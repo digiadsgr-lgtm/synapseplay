@@ -135,7 +135,7 @@ const PRAXIS_ROUNDS: PraxisScenario[] = [
   },
 ];
 
-const SENIOR_PRAXIS_ROUNDS: typeof PRAXIS_ROUNDS = [
+const SENIOR_PRAXIS_ROUNDS: PraxisScenario[] = [
   {
     titleEl: 'Εκτελεστική Οργάνωση (8-12 ετών): Ιεράρχηση Απογευματινής Μελέτης',
     goalEmoji: '🗂️⏱️',

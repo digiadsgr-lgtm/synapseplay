@@ -148,7 +148,7 @@ const NARRATIVE_ROUNDS: NarrativePrompt[] = [
   },
 ];
 
-const SENIOR_NARRATIVE_ROUNDS: typeof NARRATIVE_ROUNDS = [
+const SENIOR_NARRATIVE_ROUNDS: NarrativePrompt[] = [
   {
     storyGoalEl: 'Σενάριο Αιτίας-Αποτελέσματος (8-12 ετών): Η σχολική ομάδα ρομποτικής βλέπει ότι ο αισθητήρας του ρομπότ δεν ανταποκρίνεται πριν την παρουσίαση. Ποια είναι η πιο ώριμη κίνηση;',
     whoCard: { emoji: '🤖', textEl: 'Η Ομάδα Ρομποτικής' },
