@@ -65,4 +65,14 @@ describe('Review fixes (27/10)', () => {
     // No "difficulty" descriptions inside the child's category cards
     expect(screen.getByTestId('category-cards-grid')).not.toHaveTextContent('Στην πράξη');
   });
+
+  it('analytics consent can be withdrawn from /legal without erasing children data', () => {
+    window.localStorage.setItem(
+      'synapseplay_gdpr_consent_v1',
+      JSON.stringify({ analytics: true, mode: 'necessary-plus-analytics' })
+    );
+    renderRoute('/legal');
+    fireEvent.click(screen.getByTestId('legal-change-cookie-choice-btn'));
+    expect(window.localStorage.getItem('synapseplay_gdpr_consent_v1')).toBeNull();
+  });
 });

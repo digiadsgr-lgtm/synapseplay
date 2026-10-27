@@ -36,6 +36,30 @@ export const LegalCompliancePage: React.FC = () => {
     URL.revokeObjectURL(url);
   };
 
+  // Withdraw / change analytics consent WITHOUT touching the children's data:
+  // forget the choice, remove analytics cookies, reload so GTM/analytics are unloaded
+  // and the consent banner is shown again.
+  const handleChangeCookieChoice = () => {
+    clearGdprConsentAck();
+    try {
+      const host = window.location.hostname;
+      const domains = ['', host, `.${host.replace(/^www\./, '')}`];
+      document.cookie.split(';').forEach((c) => {
+        const name = c.split('=')[0].trim();
+        if (/^(_ga|_gid|_gat|_gcl)/.test(name)) {
+          domains.forEach((d) => {
+            document.cookie = `${name}=; Max-Age=0; path=/${d ? `; domain=${d}` : ''}`;
+          });
+        }
+      });
+    } catch {
+      // ignore cookie errors
+    }
+    if (import.meta.env.MODE !== 'test') {
+      window.location.reload();
+    }
+  };
+
   const handleGdprRightToErasure = async () => {
     await wipeAllData();
     clearGdprConsentAck();
@@ -369,10 +393,21 @@ export const LegalCompliancePage: React.FC = () => {
             </ul>
             <p className="text-[#2C3539]/90 text-xs">
               <strong>Τρίτοι πάροχοι:</strong> Vercel (φιλοξενία ιστοσελίδας) · Google Tag Manager /
-              Analytics (μόνο με συγκατάθεση) · Resend (αποστολή email όταν στέλνετε φόρμα
-              παρατηρήσεων — μόνο τα στοιχεία που γράφετε στη φόρμα) · Stripe (μόνο αν μεταβείτε σε
-              σελίδα πληρωμής). Τα προφίλ και η πρόοδος των παιδιών δεν αποστέλλονται πουθενά.
+              Analytics και Vercel Analytics / Speed Insights (μόνο με συγκατάθεση) · Resend και
+              FormSubmit (αποστολή email όταν στέλνετε φόρμα παρατηρήσεων — μόνο τα στοιχεία που
+              γράφετε στη φόρμα) · Stripe (μόνο αν μεταβείτε σε σελίδα πληρωμής). Τα προφίλ και η
+              πρόοδος των παιδιών δεν αποστέλλονται πουθενά.
             </p>
+            {/* GDPR art. 7(3): withdrawing consent must be as easy as giving it —
+                without having to erase the children's data. */}
+            <button
+              type="button"
+              data-testid="legal-change-cookie-choice-btn"
+              onClick={handleChangeCookieChoice}
+              className="touch-target px-4 py-2.5 rounded-2xl bg-white border-2 border-[#4A6B82] text-[#2C3539] font-extrabold text-xs hover:bg-[#EFE8D8] transition-colors"
+            >
+              🍪 Αλλαγή επιλογών στατιστικών
+            </button>
           </div>
         </section>
 
