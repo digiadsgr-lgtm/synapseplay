@@ -9,7 +9,14 @@ import type {
 } from '../types/domain';
 import { useApp } from '../context/AppContext';
 import { getActivitiesByCategory } from '../data/activitiesCatalog';
-import { playCalmTone, speakGreek } from '../utils/soundAndSpeech';
+import {
+  nextPraisePhrase,
+  playCalmTone,
+  replayLastPrompt,
+  resetLastPrompt,
+  speakGreek,
+  stopSpeaking,
+} from '../utils/soundAndSpeech';
 import { useActivityRunnerMachine } from '../hooks/useActivityRunnerMachine';
 import { evaluateInvisibleScenario } from '../utils/adaptiveScenarioEngine';
 import {
@@ -243,6 +250,17 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
     }
   }, [state.phase, activity.voicePromptEl, settings.voiceEnabled, adaptiveProfile.speechRate]);
 
+  // Leaving the game or pausing it must silence the voice (it used to keep talking on the next screen)
+  useEffect(() => {
+    return () => {
+      stopSpeaking();
+      resetLastPrompt();
+    };
+  }, [activity.id]);
+  useEffect(() => {
+    if (state.phase === 'PAUSED') stopSpeaking();
+  }, [state.phase]);
+
   const handleRequestHint = () => {
     if (state.hintLevel >= 2 || state.phase === 'PAUSED' || state.phase === 'COMPLETED') {
       return;
@@ -250,26 +268,33 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
     const nextLevel: HintLevel = state.hintLevel === 0 ? 1 : 2;
     dispatchHint();
     playCalmTone('soft-step', settings.soundEnabled);
-    if (nextLevel === 1) {
-      speakGreek(
-        'Βοήθεια 1: Κοίτα το στοιχείο που ξεχωρίζει με το πλαίσιο!',
-        settings.voiceEnabled,
-        adaptiveProfile.speechRate
-      );
-    } else {
-      speakGreek(
-        'Βοήθεια 2: Λιγότερες επιλογές για να διαλέξεις με άνεση!',
-        settings.voiceEnabled,
-        adaptiveProfile.speechRate
-      );
-    }
+    // Neutral wording: the hint looks different in every game (highlight, fewer choices, …)
+    speakGreek(
+      nextLevel === 1 ? 'Σε βοηθάω λίγο.' : 'Σε βοηθάω κι άλλο. Τώρα είναι πιο εύκολο.',
+      settings.voiceEnabled,
+      adaptiveProfile.speechRate,
+      { kind: 'feedback' }
+    );
   };
 
+  // The same long correction spoken again and again is tiring: repeat it in a short form.
+  const lastFeedbackRef = useRef<{ text: string; at: number; repeats: number }>({ text: '', at: 0, repeats: 0 });
   const handleGentleFeedback = (messageEl: string) => {
     setLastResponseMs(Date.now() - roundStartRef.current);
     recordGentleNudge(messageEl);
     playCalmTone('gentle-nudge', settings.soundEnabled);
-    speakGreek(messageEl, settings.voiceEnabled, adaptiveProfile.speechRate);
+    const now = Date.now();
+    const last = lastFeedbackRef.current;
+    const isRepeat = last.text === messageEl && now - last.at < 30000;
+    const repeats = isRepeat ? last.repeats + 1 : 0;
+    lastFeedbackRef.current = { text: messageEl, at: now, repeats };
+    const SHORT_RETRY = ['Δοκίμασε ξανά.', 'Κοίτα πάλι, με την ησυχία σου.', 'Σχεδόν! Ξανά.'];
+    speakGreek(
+      isRepeat ? SHORT_RETRY[(repeats - 1) % SHORT_RETRY.length] : messageEl,
+      settings.voiceEnabled,
+      adaptiveProfile.speechRate,
+      { kind: 'feedback' }
+    );
   };
 
   const handleAdvanceRound = (impulsiveTapsInRound: number = 0) => {
@@ -280,15 +305,21 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
     const isFinalRound = state.currentRound >= state.totalRounds;
     completeRound(impulsiveTapsInRound);
 
+    lastFeedbackRef.current = { text: '', at: 0, repeats: 0 };
     if (!isFinalRound) {
       playCalmTone('chime', settings.soundEnabled);
-      // Every activity component speaks its next round's specific instruction automatically via useEffect
+      // Short, varied praise that is never cut: the next round's instruction waits behind it
+      speakGreek(nextPraisePhrase(), settings.voiceEnabled, adaptiveProfile.speechRate, {
+        protect: true,
+        kind: 'praise',
+      });
     } else {
       playCalmTone('complete', settings.soundEnabled);
       speakGreek(
-        `Συγχαρητήρια, ${toGreekVocative(activeProfile.nickname)}! Ολοκλήρωσες τη δραστηριότητα ${activity.titleEl} με ηρεμία!`,
+        `Μπράβο, ${toGreekVocative(activeProfile.nickname)}! Τα κατάφερες!`,
         settings.voiceEnabled,
-        adaptiveProfile.speechRate
+        adaptiveProfile.speechRate,
+        { protect: true, kind: 'praise' }
       );
       if (!loggedCompletionRef.current) {
         loggedCompletionRef.current = true;
@@ -457,7 +488,7 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
           <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
             <button
               type="button"
-              onClick={() => speakGreek(activity.voicePromptEl, true, adaptiveProfile.speechRate)}
+              onClick={() => replayLastPrompt(true, activity.voicePromptEl, adaptiveProfile.speechRate)}
               data-testid="replay-voice-prompt-btn"
               aria-label="Ακρόαση φωνητικής οδηγίας"
               className="touch-target px-3 py-1.5 rounded-xl sm:rounded-2xl bg-sage-surface border-2 border-sage text-charcoal font-bold text-xs sm:text-sm flex items-center gap-1.5 hover:bg-sage hover:text-white shrink-0"
@@ -581,7 +612,7 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
                 Η ηλικία αλλάζει από την αρχική οθόνη ή την Περιοχή Γονέων.
               </p>
               <p className="text-charcoal-muted">
-                💡 <strong>Πρακτική συμβουλή:</strong> Αφήστε το παιδί να δοκιμάσει με τον δικό του ρυθμό. Αν δυσκολευτεί, δείξτε του το κουμπί <strong>«💡 Βοήθεια»</strong> ή πατήστε <strong>«🔊 Άκου Οδηγία»</strong>.
+                💡 <strong>Πρακτική συμβουλή:</strong> Αφήστε το παιδί να δοκιμάσει με τον δικό του ρυθμό. Αν δυσκολευτεί, δείξτε του το κουμπί <strong>«💡 Βοήθεια»</strong> ή πατήστε <strong>«🔊 Άκου»</strong> για να ξανακούσει την οδηγία.
               </p>
             </div>
           )}
@@ -627,7 +658,7 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
           <div className="text-5xl" aria-hidden="true">⏸️🌿</div>
           <h2 className="text-2xl font-extrabold text-charcoal">Το παιχνίδι είναι σε παύση</h2>
           <p className="text-base text-charcoal-muted">
-            Πάρε όσον χρόνο χρειάζεσαι. Όταν θέλεις να συνεχίσουμε, πάτησε «Συνέχεια»!
+            Πάρε όσο χρόνο χρειάζεσαι. Όταν θέλεις να συνεχίσουμε, πάτησε «Συνέχεια»!
           </p>
           <button
             type="button"
