@@ -3,7 +3,7 @@ import type { ActivityRunnerRenderProps } from '../components/ActivityRunner';
 import { useDebouncedAction } from '../hooks/useDebouncedAction';
 import { speakGreek, playCalmTone } from '../utils/soundAndSpeech';
 import { useApp } from '../context/AppContext';
-import { rotateOptionsForSession, selectSessionRounds } from '../utils/clinicalAdhdEngine';
+import { reduceToTwoChoices, rotateOptionsForSession, selectSessionRounds } from '../utils/clinicalAdhdEngine';
 
 interface ListenRound {
   instructionEl: string;
@@ -229,7 +229,7 @@ export const Activity08ListenDo: React.FC<ActivityRunnerRenderProps> = ({
   const visibleOptions = useMemo(() => {
     let baseOpts = round.options;
     if (hintLevel === 2 || ageBand === '4-5' || adaptiveProfile.distractorReductionRatio >= 0.5) {
-      baseOpts = round.options.filter((o, i) => o.isTarget || i === 0);
+      baseOpts = reduceToTwoChoices(round.options, (o) => o.isTarget);
     } else if (ageBand === '8-10' || ageBand === '10-12' || adaptiveProfile.enrichChallenge) {
       baseOpts = [
         ...round.options,

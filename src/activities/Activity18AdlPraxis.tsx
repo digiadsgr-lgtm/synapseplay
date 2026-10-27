@@ -1,7 +1,7 @@
 import React, { useMemo, useEffect } from 'react';
 import type { ActivityRunnerRenderProps } from '../components/ActivityRunner';
 import { useDebouncedAction } from '../hooks/useDebouncedAction';
-import { rotateOptionsForSession, selectSessionRounds } from '../utils/clinicalAdhdEngine';
+import { reduceToTwoChoices, rotateOptionsForSession, selectSessionRounds } from '../utils/clinicalAdhdEngine';
 import { playCalmTone, speakGreek } from '../utils/soundAndSpeech';
 import { useApp } from '../context/AppContext';
 
@@ -205,7 +205,7 @@ export const Activity18AdlPraxis: React.FC<ActivityRunnerRenderProps> = ({
   const visibleOptions = useMemo(() => {
     const baseOpts =
       hintLevel === 2 || ageBand === '4-5' || adaptiveProfile.distractorReductionRatio >= 0.5
-        ? round.options.filter((o, i) => o.isCorrect || i === 0)
+        ? reduceToTwoChoices(round.options, (o) => o.isCorrect)
         : round.options;
     return rotateOptionsForSession(baseOpts, sessionSeed, currentRound);
   }, [round.options, hintLevel, ageBand, adaptiveProfile.distractorReductionRatio, sessionSeed, currentRound]);

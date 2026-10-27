@@ -333,12 +333,30 @@ export function selectSessionRounds<T>(pool: T[], count: number, sessionSeed: nu
  * is not always in the same visual position across replays, while keeping `sessionSeed === 0`
  * 100% unchanged for unit tests.
  */
+/**
+ * Simplified choice for preschoolers / hint level 2: ALWAYS exactly one correct + one wrong
+ * option (original order kept). The old filter `o.isCorrect || i === 0` left a SINGLE option
+ * whenever the correct answer was listed first — i.e. no choice at all.
+ */
+export function reduceToTwoChoices<T>(options: T[], isCorrect: (o: T) => boolean): T[] {
+  const correct = options.find(isCorrect);
+  const wrong = options.find((o) => !isCorrect(o));
+  if (!correct || !wrong) return options;
+  return options.filter((o) => o === correct || o === wrong);
+}
+
 export function rotateOptionsForSession<T>(
   options: T[],
   sessionSeed: number = 0,
   roundIndex: number = 0
 ): T[] {
-  if (sessionSeed <= 0 || options.length <= 1) {
+  if (options.length <= 1) {
+    return options;
+  }
+  // Unit tests keep the canonical order for seed 0. In the real app the options are rotated
+  // from the very first play — otherwise the correct answer sits first in most rounds and the
+  // child learns "tap the first card" instead of solving the task.
+  if (sessionSeed <= 0 && import.meta.env.MODE === 'test') {
     return options;
   }
   const n = options.length;

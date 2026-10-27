@@ -3,7 +3,7 @@ import type { ActivityRunnerRenderProps } from '../components/ActivityRunner';
 import { useDebouncedAction } from '../hooks/useDebouncedAction';
 import { playCalmTone, speakGreek, speakGreekSyllable } from '../utils/soundAndSpeech';
 import { useApp } from '../context/AppContext';
-import { rotateOptionsForSession, selectSessionRounds } from '../utils/clinicalAdhdEngine';
+import { reduceToTwoChoices, rotateOptionsForSession, selectSessionRounds } from '../utils/clinicalAdhdEngine';
 
 interface SpeechRound {
   wordEl: string;
@@ -456,6 +456,7 @@ const AGE_SPEECH_ROUNDS: Record<string, SpeechRound[]> = {
 };
 
 export const Activity13SpeechArticulation: React.FC<ActivityRunnerRenderProps> = ({
+  phase,
   currentRound,
   totalRounds,
   hintLevel,
@@ -505,8 +506,11 @@ export const Activity13SpeechArticulation: React.FC<ActivityRunnerRenderProps> =
 
   // Continuous Looping Karaoke Syllable Runner: steps through each syllable in rhythm continuously
   // so whenever the child finishes listening to the prompt and looks at the screen, the syllable is actively running!
+  // Runner paused (Παύση / Διάλειμμα / end of screen time) → no sound, no animation
+  const isRunnerHalted = phase === 'PAUSED' || phase === 'COMPLETED';
+
   useEffect(() => {
-    if (hintLevel === 2) {
+    if (hintLevel === 2 || isRunnerHalted) {
       setActiveKaraokeIdx(null);
       return;
     }
@@ -535,16 +539,12 @@ export const Activity13SpeechArticulation: React.FC<ActivityRunnerRenderProps> =
       if (speakSyllablesDuringRun) {
         speakGreek(round.spokenWordEl, settings.voiceEnabled, adaptiveProfile.speechRate);
       }
-      // Keep cycling the visual syllable runner continuously (0 -> 1 -> ... -> total-1 -> brief pause -> 0)
+      // Keep cycling the VISUAL syllable runner (0 -> 1 -> ... -> total-1 -> brief pause -> 0).
+      // Silent on purpose: an endless tone every 650 ms is over-stimulating (calm-design principle).
       let cycleStep = 0;
       loopIntervalId = window.setInterval(() => {
         const idx = cycleStep % (total + 1);
-        if (idx < total) {
-          setActiveKaraokeIdx(idx);
-          playCalmTone('pulse', settings.soundEnabled);
-        } else {
-          setActiveKaraokeIdx(null);
-        }
+        setActiveKaraokeIdx(idx < total ? idx : null);
         cycleStep += 1;
       }, stepIntervalMs);
     }, firstPassEndMs);
@@ -559,6 +559,7 @@ export const Activity13SpeechArticulation: React.FC<ActivityRunnerRenderProps> =
   }, [
     currentRound,
     hintLevel,
+    isRunnerHalted,
     karaokeRunId,
     speakSyllablesDuringRun,
     round.syllables,
@@ -602,7 +603,7 @@ export const Activity13SpeechArticulation: React.FC<ActivityRunnerRenderProps> =
   const visibleOptions = useMemo(() => {
     const baseOpts =
       hintLevel === 2 || ageBand === '4-5' || adaptiveProfile.distractorReductionRatio >= 0.5
-        ? round.options.filter((o, i) => o.isCorrect || i === 0)
+        ? reduceToTwoChoices(round.options, (o) => o.isCorrect)
         : round.options;
     return rotateOptionsForSession(baseOpts, sessionSeed, currentRound);
   }, [round.options, hintLevel, ageBand, adaptiveProfile.distractorReductionRatio, sessionSeed, currentRound]);

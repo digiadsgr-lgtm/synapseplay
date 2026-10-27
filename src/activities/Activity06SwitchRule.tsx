@@ -1,7 +1,7 @@
 import React, { useMemo, useEffect } from 'react';
 import type { ActivityRunnerRenderProps } from '../components/ActivityRunner';
 import { useDebouncedAction } from '../hooks/useDebouncedAction';
-import { rotateOptionsForSession, selectSessionRounds } from '../utils/clinicalAdhdEngine';
+import { reduceToTwoChoices, rotateOptionsForSession, selectSessionRounds } from '../utils/clinicalAdhdEngine';
 import { playCalmTone, speakGreek } from '../utils/soundAndSpeech';
 import { useApp } from '../context/AppContext';
 
@@ -249,7 +249,7 @@ export const Activity06SwitchRule: React.FC<ActivityRunnerRenderProps> = ({
   const visibleOptions = useMemo(() => {
     let baseOpts = round.options;
     if (hintLevel === 2 || ageBand === '4-5' || adaptiveProfile.distractorReductionRatio >= 0.5) {
-      baseOpts = round.options.filter((o, i) => o.isCorrect || i === 0);
+      baseOpts = reduceToTwoChoices(round.options, (o) => o.isCorrect);
     } else if (ageBand === '8-10' || ageBand === '10-12' || adaptiveProfile.enrichChallenge) {
       baseOpts = [
         ...round.options,

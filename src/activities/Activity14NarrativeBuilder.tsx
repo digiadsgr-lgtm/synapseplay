@@ -3,7 +3,7 @@ import type { ActivityRunnerRenderProps } from '../components/ActivityRunner';
 import { useDebouncedAction } from '../hooks/useDebouncedAction';
 import { speakGreek } from '../utils/soundAndSpeech';
 import { useApp } from '../context/AppContext';
-import { rotateOptionsForSession, selectSessionRounds } from '../utils/clinicalAdhdEngine';
+import { reduceToTwoChoices, rotateOptionsForSession, selectSessionRounds } from '../utils/clinicalAdhdEngine';
 
 interface NarrativePrompt {
   storyGoalEl: string;
@@ -239,7 +239,7 @@ export const Activity14NarrativeBuilder: React.FC<ActivityRunnerRenderProps> = (
   const visibleActions = useMemo(() => {
     const baseOpts =
       hintLevel === 2 || ageBand === '4-5' || adaptiveProfile.distractorReductionRatio >= 0.5
-        ? round.actionOptions.filter((o, i) => o.isCorrect || i === 0)
+        ? reduceToTwoChoices(round.actionOptions, (o) => o.isCorrect)
         : round.actionOptions;
     return rotateOptionsForSession(baseOpts, sessionSeed, currentRound);
   }, [round.actionOptions, hintLevel, ageBand, adaptiveProfile.distractorReductionRatio, sessionSeed, currentRound]);

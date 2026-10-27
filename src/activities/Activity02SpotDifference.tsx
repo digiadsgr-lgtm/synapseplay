@@ -3,7 +3,7 @@ import type { ActivityRunnerRenderProps } from '../components/ActivityRunner';
 import { useDebouncedAction } from '../hooks/useDebouncedAction';
 import { useApp } from '../context/AppContext';
 import { speakGreek } from '../utils/soundAndSpeech';
-import {
+import { reduceToTwoChoices,
   getAgeAndPerformanceDifficulty,
   rotateOptionsForSession,
   selectSessionRounds,
@@ -146,7 +146,7 @@ export const Activity02SpotDifference: React.FC<ActivityRunnerRenderProps> = ({
   const visibleSlots = useMemo(() => {
     let baseSlots = slots;
     if (diff.isSimplified) {
-      baseSlots = slots.filter((s, i) => s.isDifferent || i === 0);
+      baseSlots = reduceToTwoChoices(slots, (s) => s.isDifferent);
     } else if (ageBand === '5-6') {
       baseSlots = slots.slice(0, 3);
     } else if (ageBand === '8-10' || ageBand === '10-12' || diff.isAdvancedMastery) {

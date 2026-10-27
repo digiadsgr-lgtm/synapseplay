@@ -1,7 +1,7 @@
 import React, { useMemo, useEffect } from 'react';
 import type { ActivityRunnerRenderProps } from '../components/ActivityRunner';
 import { useDebouncedAction } from '../hooks/useDebouncedAction';
-import { rotateOptionsForSession, selectSessionRounds } from '../utils/clinicalAdhdEngine';
+import { reduceToTwoChoices, rotateOptionsForSession, selectSessionRounds } from '../utils/clinicalAdhdEngine';
 import { playCalmTone, speakGreek } from '../utils/soundAndSpeech';
 import { useApp } from '../context/AppContext';
 
@@ -381,7 +381,7 @@ export const Activity19EmotionalTheater: React.FC<ActivityRunnerRenderProps> = (
   const visibleOptions = useMemo(() => {
     const baseOpts =
       hintLevel === 2 || ageBand === '4-5' || adaptiveProfile.distractorReductionRatio >= 0.5
-        ? scene.options.filter((o, i) => o.isCalmSolution || i === 0)
+        ? reduceToTwoChoices(scene.options, (o) => o.isCalmSolution)
         : scene.options;
     return rotateOptionsForSession(baseOpts, sessionSeed, currentRound);
   }, [scene.options, hintLevel, ageBand, adaptiveProfile.distractorReductionRatio, sessionSeed, currentRound]);
