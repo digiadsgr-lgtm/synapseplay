@@ -22,7 +22,7 @@ const AUDITORY_ROUNDS: AuditoryConceptRound[] = [
     ],
   },
   {
-    conceptBadgeEl: 'Ακουστική Διάκριση Ελάχιστων Ζευγών: «Κότα» vs «Πόρτα»',
+    conceptBadgeEl: 'Λέξεις που μοιάζουν: «Κότα» ή «Πόρτα»',
     spokenInstructionEl: 'Άκου προσεκτικά τη λέξη «κότα». Ποια εικόνα δείχνει την κότα και όχι την πόρτα;',
     options: [
       { id: 'au2-1', emoji: '🚪', labelEl: 'Πόρτα', isCorrect: false },
@@ -40,7 +40,7 @@ const AUDITORY_ROUNDS: AuditoryConceptRound[] = [
     ],
   },
   {
-    conceptBadgeEl: 'Ακουστική Διάκριση: «Ρόδα» vs «Ρόδο»',
+    conceptBadgeEl: 'Λέξεις που μοιάζουν: «Ρόδα» ή «Ρόδο»',
     spokenInstructionEl: 'Άκου προσεκτικά τη λέξη «ρόδα». Ποια εικόνα δείχνει τη στρογγυλή ρόδα και όχι το ρόδο;',
     options: [
       { id: 'au4-1', emoji: '🦶', labelEl: 'Πόδι', isCorrect: false },
@@ -49,7 +49,7 @@ const AUDITORY_ROUNDS: AuditoryConceptRound[] = [
     ],
   },
   {
-    conceptBadgeEl: 'Ακουστική Διάκριση: «Τρένο» vs «Φρένο»',
+    conceptBadgeEl: 'Λέξεις που μοιάζουν: «Τρένο» ή «Φρένο»',
     spokenInstructionEl: 'Άκου καθαρά τη λέξη «τρένο». Ποια εικόνα δείχνει το τρένο στις ράγες;',
     options: [
       { id: 'au5-1', emoji: '🚂', labelEl: 'Τρένο', isCorrect: true },
@@ -58,7 +58,7 @@ const AUDITORY_ROUNDS: AuditoryConceptRound[] = [
     ],
   },
   {
-    conceptBadgeEl: 'Ακουστική Διάκριση: «Κάστρο» vs «Άστρο»',
+    conceptBadgeEl: 'Λέξεις που μοιάζουν: «Κάστρο» ή «Άστρο»',
     spokenInstructionEl: 'Άκου προσεκτικά τη λέξη «άστρο». Ποια εικόνα δείχνει το λαμπερό άστρο στον ουρανό;',
     options: [
       { id: 'au6-1', emoji: '🏰', labelEl: 'Κάστρο', isCorrect: false },
@@ -67,7 +67,7 @@ const AUDITORY_ROUNDS: AuditoryConceptRound[] = [
     ],
   },
   {
-    conceptBadgeEl: 'Ακουστική Διάκριση Ελάχιστων Ζευγών: «Σκάλα» vs «Μπάλα»',
+    conceptBadgeEl: 'Λέξεις που μοιάζουν: «Σκάλα» ή «Μπάλα»',
     spokenInstructionEl: 'Άκου προσεκτικά τη λέξη «σκάλα». Ποια εικόνα δείχνει τη σκάλα και όχι την μπάλα;',
     options: [
       { id: 'au7-1', emoji: '🪜', labelEl: 'Σκάλα', isCorrect: true },
@@ -85,7 +85,7 @@ const AUDITORY_ROUNDS: AuditoryConceptRound[] = [
     ],
   },
   {
-    conceptBadgeEl: 'Ακουστική Διάκριση: «Φύλλο» vs «Μήλο»',
+    conceptBadgeEl: 'Λέξεις που μοιάζουν: «Φύλλο» ή «Μήλο»',
     spokenInstructionEl: 'Άκου καθαρά τη λέξη «φύλλο». Ποια εικόνα δείχνει το πράσινο φύλλο του δέντρου;',
     options: [
       { id: 'au9-1', emoji: '🍎', labelEl: 'Μήλο', isCorrect: false },
@@ -103,7 +103,7 @@ const AUDITORY_ROUNDS: AuditoryConceptRound[] = [
     ],
   },
   {
-    conceptBadgeEl: 'Ακουστική Διάκριση: «Ψάρι» vs «Ζάρι»',
+    conceptBadgeEl: 'Λέξεις που μοιάζουν: «Ψάρι» ή «Ζάρι»',
     spokenInstructionEl: 'Άκου προσεκτικά τη λέξη «ψάρι». Ποια εικόνα δείχνει το ψάρι της θάλασσας και όχι το ζάρι;',
     options: [
       { id: 'au11-1', emoji: '🎲', labelEl: 'Ζάρι', isCorrect: false },
@@ -124,8 +124,8 @@ const AUDITORY_ROUNDS: AuditoryConceptRound[] = [
 
 const SENIOR_AUDITORY_ROUNDS: AuditoryConceptRound[] = [
   {
-    conceptBadgeEl: 'Χρονική Αναστροφή (8-12 ετών): «Πριν... αλλά Αφού...»',
-    spokenInstructionEl: 'Άκου προσεκτικά τη χρονική σειρά: ΠΡΙΝ ξεκινήσεις το πείραμα με το μικροσκόπιο, αλλά ΑΦΟΥ φορέσεις την εργαστηριακή ποδιά, τι πρέπει να ελέγξεις πρώτο από τα δύο;',
+    conceptBadgeEl: 'Χρονική σειρά: «αφού…»',
+    spokenInstructionEl: 'Άκου τη σειρά: Κοιτάζεις στο μικροσκόπιο ΑΦΟΥ φορέσεις την ποδιά του εργαστηρίου. Τι κάνεις πρώτα;',
     options: [
       { id: 'sau1-1', emoji: '🥼', labelEl: 'Πρώτα φοράω την εργαστηριακή ποδιά', isCorrect: true },
       { id: 'sau1-2', emoji: '🔬', labelEl: 'Πρώτα κοιτάζω στο μικροσκόπιο', isCorrect: false },
@@ -133,7 +133,7 @@ const SENIOR_AUDITORY_ROUNDS: AuditoryConceptRound[] = [
     ],
   },
   {
-    conceptBadgeEl: 'Ακουστική Διάκριση Παρομοίων Λέξεων (Παρώνυμα)',
+    conceptBadgeEl: 'Λέξεις που μοιάζουν',
     spokenInstructionEl: 'Άκου προσεκτικά τη λέξη: «Εξάρτημα» (όχι «Εξάρτηση»). Ποια κάρτα δείχνει το μηχανικό εξάρτημα;',
     options: [
       { id: 'sau2-1', emoji: '⚙️', labelEl: 'Εξάρτημα (Γρανάζι / κομμάτι μηχανισμού)', isCorrect: true },
@@ -143,7 +143,7 @@ const SENIOR_AUDITORY_ROUNDS: AuditoryConceptRound[] = [
   },
   {
     conceptBadgeEl: 'Σύνθετος Χωρικός Προσανατολισμός',
-    spokenInstructionEl: 'Επίλεξε τη διάταξη όπου η πυξίδα βρίσκεται ΑΡΙΣΤΕΡΑ από το τηλεσκόπιο αλλά ΔΕΞΙΑ από τον χάρτη!',
+    spokenInstructionEl: 'Διάλεξε τη διάταξη όπου η πυξίδα βρίσκεται ΑΡΙΣΤΕΡΑ από το τηλεσκόπιο αλλά ΔΕΞΙΑ από τον χάρτη!',
     options: [
       { id: 'sau3-1', emoji: '🗺️ 🧭 🔭', labelEl: 'Χάρτης ➔ Πυξίδα ➔ Τηλεσκόπιο', isCorrect: true },
       { id: 'sau3-2', emoji: '🧭 🗺️ 🔭', labelEl: 'Πυξίδα ➔ Χάρτης ➔ Τηλεσκόπιο', isCorrect: false },
@@ -151,8 +151,8 @@ const SENIOR_AUDITORY_ROUNDS: AuditoryConceptRound[] = [
     ],
   },
   {
-    conceptBadgeEl: 'Ακουστική Διάκριση Παρομοίων Λέξεων (Παρώνυμα)',
-    spokenInstructionEl: 'Άκου προσεκτικά τη λέξη: «Πυξίδα» (όχι «Πυρίτιδα» ούτε «Πινακίδα»). Ποια κάρτα ταιριάζει;',
+    conceptBadgeEl: 'Λέξεις που μοιάζουν',
+    spokenInstructionEl: 'Άκου προσεκτικά τη λέξη: «Πυξίδα» (όχι «Πυραμίδα» ούτε «Πινακίδα»). Ποια κάρτα ταιριάζει;',
     options: [
       { id: 'sau4-1', emoji: '🧭', labelEl: 'Πυξίδα (Όργανο προσανατολισμού)', isCorrect: true },
       { id: 'sau4-2', emoji: '🪧', labelEl: 'Πινακίδα (Επιγραφή δρόμου)', isCorrect: false },
@@ -178,6 +178,11 @@ const SENIOR_AUDITORY_ROUNDS: AuditoryConceptRound[] = [
     ],
   },
 ];
+
+/** The explanation in brackets («Ομπρέλα (Επειδή σήμερα βρέχει)», «Ιστορία (2ο στη σειρά…)») gave the answer away. */
+export function optionLabel(labelEl: string): string {
+  return labelEl.replace(/\s*\([^)]*\)/g, '').trim();
+}
 
 export const Activity15AuditoryDiscrimination: React.FC<ActivityRunnerRenderProps> = ({
   currentRound,
@@ -218,7 +223,7 @@ export const Activity15AuditoryDiscrimination: React.FC<ActivityRunnerRenderProp
         advanceRound(getAbsorbedCount());
       } else {
         triggerGentleFeedback(
-          `Επέλεξες «${labelEl}». Άκου ξανά την εντολή: ${round.spokenInstructionEl}`
+          `Όχι, αυτό είναι «${labelEl}». Άκου ξανά: ${round.spokenInstructionEl}`
         );
       }
     });
@@ -234,7 +239,7 @@ export const Activity15AuditoryDiscrimination: React.FC<ActivityRunnerRenderProp
         <button
           type="button"
           data-testid="auditory-replay-btn"
-          onClick={() => speakGreek(round.spokenInstructionEl, true, adaptiveProfile.speechRate)}
+          onClick={() => speakGreek(round.spokenInstructionEl, true, adaptiveProfile.speechRate, { force: true })}
           className="touch-target px-5 py-2.5 rounded-2xl bg-white border-2 border-slate font-extrabold text-charcoal inline-flex items-center gap-2 hover:bg-sand"
         >
           <span aria-hidden="true">👂</span>
@@ -253,7 +258,7 @@ export const Activity15AuditoryDiscrimination: React.FC<ActivityRunnerRenderProp
               key={opt.id}
               type="button"
               data-testid={opt.isCorrect ? 'auditory-discrimination-target' : `auditory-opt-${opt.id}`}
-              onClick={() => handleSelect(opt.isCorrect, opt.labelEl)}
+              onClick={() => handleSelect(opt.isCorrect, optionLabel(opt.labelEl))}
               className={`touch-target min-h-[120px] p-5 rounded-3xl border-4 flex flex-col items-center justify-center gap-2 ${
                 highlight
                   ? 'bg-sage-surface border-sage-dark ring-4 ring-sage/40'
@@ -261,7 +266,7 @@ export const Activity15AuditoryDiscrimination: React.FC<ActivityRunnerRenderProp
               }`}
             >
               <span className="text-4xl" aria-hidden="true">{opt.emoji}</span>
-              <span className="text-base font-extrabold text-charcoal">{opt.labelEl}</span>
+              <span className="text-base font-extrabold text-charcoal">{optionLabel(opt.labelEl)}</span>
             </button>
           );
         })}

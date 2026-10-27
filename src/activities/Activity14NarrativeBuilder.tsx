@@ -3,6 +3,7 @@ import type { ActivityRunnerRenderProps } from '../components/ActivityRunner';
 import { useDebouncedAction } from '../hooks/useDebouncedAction';
 import { speakGreek } from '../utils/soundAndSpeech';
 import { useApp } from '../context/AppContext';
+import { ReadAloudChip } from '../components/ReadAloudChip';
 import { reduceToTwoChoices, rotateOptionsForSession, selectSessionRounds } from '../utils/clinicalAdhdEngine';
 
 interface NarrativePrompt {
@@ -31,10 +32,10 @@ const NARRATIVE_ROUNDS: NarrativePrompt[] = [
     whereCard: { emoji: '🥣', textEl: 'δίπλα στο μπολ της κουζίνας' },
     actionOptions: [
       { id: 'nb2-1', emoji: '🚲', textEl: 'κάνει ποδήλατο στο πάρκο', isCorrect: false },
-      { id: 'nb2-2', emoji: '🥛', textEl: 'πίνει ήρεμα το φρέσκο του γάλα', isCorrect: true },
+      { id: 'nb2-2', emoji: '🥛', textEl: 'τρώει ήρεμα την τροφή του', isCorrect: true },
       { id: 'nb2-3', emoji: '📚', textEl: 'διαβάζει ένα βιβλίο', isCorrect: false },
     ],
-    fullSentenceEl: 'Το γατάκι δίπλα στο μπολ της κουζίνας πίνει ήρεμα το φρέσκο του γάλα!',
+    fullSentenceEl: 'Το γατάκι δίπλα στο μπολ της κουζίνας τρώει ήρεμα την τροφή του!',
   },
   {
     storyGoalEl: 'Ιστορία: Η φίλη μας θέλει να ζωγραφίσει ένα δέντρο. Τι επιλέγει;',
@@ -48,15 +49,15 @@ const NARRATIVE_ROUNDS: NarrativePrompt[] = [
     fullSentenceEl: 'Η μαθήτρια στο τραπέζι ζωγραφικής παίρνει τον πράσινο μαρκαδόρο και το χαρτί!',
   },
   {
-    storyGoalEl: 'Ιστορία: Ο σκυλάκος λερώθηκε με χώμα στον κήπο. Τι κάνει η οικογένεια;',
-    whoCard: { emoji: '🐶', textEl: 'Ο Σκυλάκος' },
+    storyGoalEl: 'Ιστορία: Το σκυλάκι λερώθηκε με χώμα στον κήπο. Τι γίνεται μετά;',
+    whoCard: { emoji: '🐶', textEl: 'Το Σκυλάκι' },
     whereCard: { emoji: '🛁', textEl: 'στο μπάνιο με το ζεστό νερό' },
     actionOptions: [
       { id: 'nb4-1', emoji: '🧼', textEl: 'πλένεται με αφρό και σκουπίζεται με την πετσέτα', isCorrect: true },
       { id: 'nb4-2', emoji: '🎸', textEl: 'παίζει ηλεκτρική κιθάρα', isCorrect: false },
       { id: 'nb4-3', emoji: '🚀', textEl: 'πετάει με πύραυλο στο φεγγάρι', isCorrect: false },
     ],
-    fullSentenceEl: 'Ο σκυλάκος στο μπάνιο με το ζεστό νερό πλένεται με αφρό και σκουπίζεται με την πετσέτα!',
+    fullSentenceEl: 'Το σκυλάκι στο μπάνιο με το ζεστό νερό πλένεται με αφρό και σκουπίζεται με την πετσέτα!',
   },
   {
     storyGoalEl: 'Ιστορία: Ο παππούς θέλει να φυτέψει ντομάτες. Τι κάνει;',
@@ -136,7 +137,7 @@ const NARRATIVE_ROUNDS: NarrativePrompt[] = [
     fullSentenceEl: 'Το ψύχραιμο παιδί στο τραπέζι της τραπεζαρίας παίρνει ένα πανάκι και σκουπίζει προσεκτικά το νερό!',
   },
   {
-    storyGoalEl: 'Ιστορία: Ο καπετάνιος βλέπει ότι πλησιάζει η νύχτα στη θάλασσα. Τι κάνει;',
+    storyGoalEl: 'Ιστορία: Ο καπετάνιος βλέπει ότι πέφτει η νύχτα στη θάλασσα. Τι κάνει;',
     whoCard: { emoji: '⛵', textEl: 'Ο Καπετάνιος' },
     whereCard: { emoji: '🌊', textEl: 'κοντά στο ήρεμο λιμάνι' },
     actionOptions: [
@@ -150,12 +151,12 @@ const NARRATIVE_ROUNDS: NarrativePrompt[] = [
 
 const SENIOR_NARRATIVE_ROUNDS: NarrativePrompt[] = [
   {
-    storyGoalEl: 'Σενάριο Αιτίας-Αποτελέσματος (8-12 ετών): Η σχολική ομάδα ρομποτικής βλέπει ότι ο αισθητήρας του ρομπότ δεν ανταποκρίνεται πριν την παρουσίαση. Ποια είναι η πιο ώριμη κίνηση;',
+    storyGoalEl: 'Σενάριο: Η σχολική ομάδα ρομποτικής βλέπει ότι ο αισθητήρας του ρομπότ δεν ανταποκρίνεται πριν την παρουσίαση. Ποια είναι η πιο ώριμη κίνηση;',
     whoCard: { emoji: '🤖', textEl: 'Η Ομάδα Ρομποτικής' },
     whereCard: { emoji: '🔬', textEl: 'στο σχολικό εργαστήριο τεχνολογίας' },
     actionOptions: [
       { id: 'snb1-1', emoji: '🔌', textEl: 'ελέγχει μεθοδικά τα καλώδια σύνδεσης και δοκιμάζει ξανά τον κώδικα', isCorrect: true },
-      { id: 'snb1-2', emoji: '💢', textEl: 'παρατάει το project και κατηγορεί τους συμμαθητές', isCorrect: false },
+      { id: 'snb1-2', emoji: '💢', textEl: 'παρατάει την εργασία και κατηγορεί τους συμμαθητές', isCorrect: false },
       { id: 'snb1-3', emoji: '🎲', textEl: 'πατάει τυχαία κουμπιά χωρίς να ελέγξει τις οδηγίες', isCorrect: false },
     ],
     fullSentenceEl: 'Η ομάδα ρομποτικής στο σχολικό εργαστήριο τεχνολογίας ελέγχει μεθοδικά τα καλώδια σύνδεσης και δοκιμάζει ξανά τον κώδικα!',
@@ -176,14 +177,14 @@ const SENIOR_NARRATIVE_ROUNDS: NarrativePrompt[] = [
     whoCard: { emoji: '🧑‍🎓', textEl: 'Ο Μαθητής' },
     whereCard: { emoji: '📚', textEl: 'στο γραφείο μελέτης του' },
     actionOptions: [
-      { id: 'snb3-1', emoji: '⏱️', textEl: 'ολοκληρώνει πρώτα την επανάληψη με πρόγραμμα και μετά επικοινωνεί με τους φίλους του', isCorrect: true },
+      { id: 'snb3-1', emoji: '⏱️', textEl: 'τελειώνει πρώτα την επανάληψη και μετά βρίσκει τους φίλους του', isCorrect: true },
       { id: 'snb3-2', emoji: '🎮', textEl: 'παίζει όλο το βράδυ αφήνοντας το βιβλίο κλειστό', isCorrect: false },
       { id: 'snb3-3', emoji: '😰', textEl: 'αγχώνεται χωρίς να ανοίξει καθόλου τις σημειώσεις του', isCorrect: false },
     ],
-    fullSentenceEl: 'Ο μαθητής στο γραφείο μελέτης του ολοκληρώνει πρώτα την επανάληψη με πρόγραμμα και μετά επικοινωνεί με τους φίλους του!',
+    fullSentenceEl: 'Ο μαθητής στο γραφείο μελέτης του τελειώνει πρώτα την επανάληψη και μετά βρίσκει τους φίλους του!',
   },
   {
-    storyGoalEl: 'Σενάριο Έρευνας: Η μαθήτρια ετοιμάζει εργασία για την προστασία της θαλάσσιας χελώνας Καρέτα-Καρέτα. Πώς ξεκινά;',
+    storyGoalEl: 'Σενάριο Έρευνας: Η μαθήτρια ετοιμάζει εργασία για την προστασία της θαλάσσιας χελώνας καρέτα καρέτα. Πώς ξεκινά;',
     whoCard: { emoji: '👩‍🔬', textEl: 'Η Ερευνήτρια Μαθήτρια' },
     whereCard: { emoji: '🏛️', textEl: 'στη σχολική βιβλιοθήκη' },
     actionOptions: [
@@ -225,7 +226,7 @@ export const Activity14NarrativeBuilder: React.FC<ActivityRunnerRenderProps> = (
       setWhoConfirmed(false);
       setWhereConfirmed(false);
     }
-    speakGreek(round.storyGoalEl, settings.voiceEnabled, adaptiveProfile.speechRate);
+    speakGreek(round.storyGoalEl.replace(/^(Ιστορία|Σενάριο[^:]*):\s*/, ''), settings.voiceEnabled, adaptiveProfile.speechRate);
   }, [
     currentRound,
     hintLevel,
@@ -247,11 +248,12 @@ export const Activity14NarrativeBuilder: React.FC<ActivityRunnerRenderProps> = (
   const handleActionPick = (isCorrect: boolean, textEl: string) => {
     runDebounced(() => {
       if (isCorrect) {
-        speakGreek(round.fullSentenceEl, settings.voiceEnabled, adaptiveProfile.speechRate);
+        // the whole sentence the child just built is heard to the end (never cut by the next round)
+        speakGreek(round.fullSentenceEl, settings.voiceEnabled, adaptiveProfile.speechRate, { protect: true, kind: 'praise' });
         advanceRound(getAbsorbedCount());
       } else {
         triggerGentleFeedback(
-          `Σκέψου την ιστορία: ταιριάζει το «${textEl}» με το «${round.whereCard.textEl}»;`
+          'Ταιριάζει αυτό με την ιστορία; Σκέψου ξανά.'
         );
       }
     });
@@ -278,7 +280,7 @@ export const Activity14NarrativeBuilder: React.FC<ActivityRunnerRenderProps> = (
         >
           <span className="text-4xl" aria-hidden="true">{round.whoCard.emoji}</span>
           <div>
-            <span className="text-xs font-extrabold uppercase">1. Ποιος; (Υποκείμενο)</span>
+            <span className="text-xs font-extrabold uppercase">1. Ποιος;</span>
             <p className="text-lg font-extrabold">{round.whoCard.textEl}</p>
           </div>
         </button>
@@ -298,7 +300,7 @@ export const Activity14NarrativeBuilder: React.FC<ActivityRunnerRenderProps> = (
         >
           <span className="text-4xl" aria-hidden="true">{round.whereCard.emoji}</span>
           <div>
-            <span className="text-xs font-extrabold uppercase">2. Πού; (Τόπος / Συνθήκη)</span>
+            <span className="text-xs font-extrabold uppercase">2. Πού;</span>
             <p className="text-lg font-extrabold">{round.whereCard.textEl}</p>
           </div>
         </button>
@@ -307,7 +309,7 @@ export const Activity14NarrativeBuilder: React.FC<ActivityRunnerRenderProps> = (
       {/* 3. ΤΙ ΚΑΝΕΙ (Action Resolution) */}
       <div className="space-y-3">
         <h3 className="text-base font-extrabold text-charcoal text-center">
-          3. Τι κάνει; (Διάλεξε τη συνέχεια που βγάζει νόημα):
+          3. Τι κάνει; Διάλεξε αυτό που ταιριάζει:
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {visibleActions.map((opt) => {
@@ -326,6 +328,9 @@ export const Activity14NarrativeBuilder: React.FC<ActivityRunnerRenderProps> = (
               >
                 <span className="text-4xl" aria-hidden="true">{opt.emoji}</span>
                 <span className="text-sm font-extrabold text-charcoal">{opt.textEl}</span>
+              {(ageBand === '4-5' || ageBand === '5-6') && (
+                <ReadAloudChip text={opt.textEl} rate={adaptiveProfile.speechRate} testId={`read-aloud-${opt.id}`} />
+              )}
               </button>
             );
           })}

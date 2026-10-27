@@ -46,12 +46,12 @@ const ROUTINES: RoutineRound[] = [
     steps: [
       { order: 1, emoji: '🪴', labelEl: 'Βάζω χώμα στη γλάστρα και φυτεύω το σποράκι' },
       { order: 2, emoji: '🚿', labelEl: 'Ποτίζω απαλά με λίγο νερό' },
-      { order: 3, emoji: '🌱', labelEl: 'Το φυτό μεγαλώνει στον ήλιο' },
+      { order: 3, emoji: '🌱', labelEl: 'Βάζω τη γλάστρα σε σημείο με ήλιο' },
     ],
     displayOrder: [3, 1, 2],
   },
   {
-    titleEl: 'Ρουτίνα: Ετοιμάζω το Τοστ μου',
+    titleEl: 'Ρουτίνα: Φτιάχνω ένα Σάντουιτς',
     steps: [
       { order: 1, emoji: '🍞', labelEl: 'Παίρνω δύο φέτες ψωμί' },
       { order: 2, emoji: '🧀', labelEl: 'Βάζω το τυρί ανάμεσα στις φέτες' },
@@ -63,7 +63,7 @@ const ROUTINES: RoutineRound[] = [
     titleEl: 'Ρουτίνα: Ετοιμάζομαι για Βραδινό Ύπνο',
     steps: [
       { order: 1, emoji: '👕', labelEl: 'Φοράω τις άνετες πιτζάμες μου' },
-      { order: 2, emoji: '📖', labelEl: 'Διαβάζουμε ένα ήρεμο παραμύθι' },
+      { order: 2, emoji: '📖', labelEl: 'Διαβάζω ένα ήρεμο παραμύθι' },
       { order: 3, emoji: '😴', labelEl: 'Κλείνω το φως και ξαπλώνω στο μαξιλάρι' },
     ],
     displayOrder: [3, 1, 2],
@@ -87,7 +87,7 @@ const ROUTINES: RoutineRound[] = [
     displayOrder: [3, 2, 1],
   },
   {
-    titleEl: 'Ρουτίνα: Στρώνω το Τραπέζι του Φαγητού',
+    titleEl: 'Ρουτίνα: Ώρα για Φαγητό',
     steps: [
       { order: 1, emoji: '🍽️', labelEl: 'Τοποθετώ τα πιάτα και τα κουτάλια στο τραπέζι' },
       { order: 2, emoji: '🍲', labelEl: 'Καθόμαστε όλοι μαζί και τρώμε ήρεμα' },
@@ -98,9 +98,9 @@ const ROUTINES: RoutineRound[] = [
   {
     titleEl: 'Ρουτίνα: Ετοιμάζομαι για Βροχερή Βόλτα',
     steps: [
-      { order: 1, emoji: '🧥', labelEl: 'Φοράω το αδιάβροχο μπουφάν μου' },
-      { order: 2, emoji: '👢', labelEl: 'Βάζω τις γαλότσες στα πόδια μου' },
-      { order: 3, emoji: '☂️', labelEl: 'Ανοίγω την ομπρέλα μου έξω από την πόρτα' },
+      { order: 1, emoji: '🧥', labelEl: 'Φοράω το αδιάβροχο και τις γαλότσες μου' },
+      { order: 2, emoji: '🚪', labelEl: 'Ανοίγω την πόρτα και βγαίνω έξω' },
+      { order: 3, emoji: '☂️', labelEl: 'Ανοίγω την ομπρέλα μου στη βροχή' },
     ],
     displayOrder: [3, 1, 2],
   },
@@ -114,7 +114,7 @@ const ROUTINES: RoutineRound[] = [
     displayOrder: [2, 3, 1],
   },
   {
-    titleEl: 'Ρουτίνα: Φτιάχνω Φυσικό Χυμό Πορτοκάλι',
+    titleEl: 'Ρουτίνα: Φτιάχνω Φρέσκο Χυμό Πορτοκαλιού',
     steps: [
       { order: 1, emoji: '🍊', labelEl: 'Πλένω και κόβω στη μέση τα πορτοκάλια' },
       { order: 2, emoji: '🥣', labelEl: 'Στύβω τα πορτοκάλια στον στίφτη' },
@@ -126,8 +126,8 @@ const ROUTINES: RoutineRound[] = [
     titleEl: 'Ρουτίνα: Φροντίζω το Κατοικίδιό μου',
     steps: [
       { order: 1, emoji: '🥣', labelEl: 'Βάζω καθαρό νερό και τροφή στο μπολ του' },
-      { order: 2, emoji: '🐕', labelEl: 'Το ζωάκι τρώει ήρεμα το φαγητό του' },
-      { order: 3, emoji: '🤍', labelEl: 'Το χαϊδεύω απαλά στην πλάτη' },
+      { order: 2, emoji: '🐕', labelEl: 'Αφήνω το ζωάκι να φάει ήρεμα' },
+      { order: 3, emoji: '🤍', labelEl: 'Όταν τελειώσει, το χαϊδεύω απαλά' },
     ],
     displayOrder: [2, 1, 3],
   },
@@ -223,13 +223,15 @@ export const Activity05OrderSteps: React.FC<ActivityRunnerRenderProps> = ({
   useEffect(() => {
     setSelectedOrders([]);
     speakGreek(
-      `${routine.titleEl}. Ποιο είναι το πρώτο βήμα;`,
+      `${routine.titleEl.replace(/^Ρουτίνα:\s*/, '')}. Τι κάνουμε πρώτα;`,
       settings.voiceEnabled,
       adaptiveProfile.speechRate
     );
   }, [currentRound, sessionSeed, routine.titleEl, settings.voiceEnabled, adaptiveProfile.speechRate]);
 
   const nextExpectedOrder = selectedOrders.length + 1;
+  // 4-5 year olds cannot read the cards: tapping the 🔊 on a card reads it (does not answer)
+  const readCard = (labelEl: string) => speakGreek(labelEl, true, adaptiveProfile.speechRate, { kind: 'feedback' });
 
   const handlePickStep = (step: RoutineStep) => {
     runDebounced(() => {
@@ -247,7 +249,9 @@ export const Activity05OrderSteps: React.FC<ActivityRunnerRenderProps> = ({
         }
       } else {
         triggerGentleFeedback(
-          `Σκέψου ήρεμα: τι κάνουμε στο Βήμα ${nextExpectedOrder} πριν από το «${step.labelEl}»;`
+          nextExpectedOrder === 1
+            ? 'Όχι ακόμα. Τι κάνουμε πρώτα απ’ όλα;'
+            : 'Όχι ακόμα. Τι κάνουμε αμέσως μετά;'
         );
       }
     });
@@ -288,7 +292,7 @@ export const Activity05OrderSteps: React.FC<ActivityRunnerRenderProps> = ({
           const isAlreadyPicked = selectedOrders.includes(step.order);
           const isNextHint =
             !isAlreadyPicked &&
-            (hintLevel >= 1 || ageBand === '4-5' || adaptiveProfile.autoHintBoost) &&
+            (hintLevel >= 1 || adaptiveProfile.autoHintBoost) &&
             step.order === nextExpectedOrder;
 
           return (
@@ -308,7 +312,22 @@ export const Activity05OrderSteps: React.FC<ActivityRunnerRenderProps> = ({
             >
               <span className="text-5xl" aria-hidden="true">{step.emoji}</span>
               <span className="text-base font-extrabold">{step.labelEl}</span>
-              {(isAlreadyPicked || hintLevel === 2 || ageBand === '4-5') && (
+              {ageBand === '4-5' && !isAlreadyPicked && (
+                <span
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`Άκου: ${step.labelEl}`}
+                  data-testid={`order-step-read-${step.order}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    readCard(step.labelEl);
+                  }}
+                  className="px-3 py-1 rounded-full bg-sand text-charcoal text-sm font-extrabold"
+                >
+                  🔊 Άκου
+                </span>
+              )}
+              {(isAlreadyPicked || hintLevel === 2) && (
                 <span className="px-3 py-1 rounded-full bg-sand text-charcoal text-xs font-extrabold">
                   Βήμα {step.order}
                 </span>

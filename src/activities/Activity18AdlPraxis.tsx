@@ -4,6 +4,7 @@ import { useDebouncedAction } from '../hooks/useDebouncedAction';
 import { reduceToTwoChoices, rotateOptionsForSession, selectSessionRounds } from '../utils/clinicalAdhdEngine';
 import { playCalmTone, speakGreek } from '../utils/soundAndSpeech';
 import { useApp } from '../context/AppContext';
+import { ReadAloudChip } from '../components/ReadAloudChip';
 
 interface PraxisScenario {
   titleEl: string;
@@ -98,7 +99,7 @@ const PRAXIS_ROUNDS: PraxisScenario[] = [
     goalEmoji: '🍞🍯',
     questionEl: 'Θέλεις να αλείψεις μέλι στη φέτα του ψωμιού σου. Πώς χρησιμοποιείς τα χέρια σου;',
     options: [
-      { id: 'px9-1', emoji: '🍞🥄', labelEl: 'Το ένα χέρι κρατάει σταθερό το πιάτο/ψωμί και το άλλο απλώνει απαλά το μέλι', isCorrect: true },
+      { id: 'px9-1', emoji: '🍞🥄', labelEl: 'Το ένα χέρι κρατάει σταθερό το ψωμί και το άλλο απλώνει απαλά το μέλι', isCorrect: true },
       { id: 'px9-2', emoji: '🌀', labelEl: 'Πετάω τη φέτα ψηλά στον αέρα', isCorrect: false },
       { id: 'px9-3', emoji: '📏', labelEl: 'Αλείφω με τον σχολικό χάρακα', isCorrect: false },
     ],
@@ -137,7 +138,7 @@ const PRAXIS_ROUNDS: PraxisScenario[] = [
 
 const SENIOR_PRAXIS_ROUNDS: PraxisScenario[] = [
   {
-    titleEl: 'Εκτελεστική Οργάνωση (8-12 ετών): Ιεράρχηση Απογευματινής Μελέτης',
+    titleEl: 'Οργάνωση: Τι Διαβάζω Πρώτα;',
     goalEmoji: '🗂️⏱️',
     questionEl: 'Έχεις 3 εργασίες για αύριο: ένα απαιτητικό κεφάλαιο Μαθηματικών, μια σύντομη αντιγραφή και την προετοιμασία της τσάντας. Ποια στρατηγική αξιοποιεί καλύτερα την ενέργειά σου;',
     options: [
@@ -147,7 +148,7 @@ const SENIOR_PRAXIS_ROUNDS: PraxisScenario[] = [
     ],
   },
   {
-    titleEl: 'Εκτελεστική Αυτονομία: Σχολικό Project με Προθεσμία 5 Ημερών',
+    titleEl: 'Οργάνωση: Σχολική Εργασία σε 5 Μέρες',
     goalEmoji: '📅📊',
     questionEl: 'Ο εκπαιδευτικός αναθέτει μια εργασία Φυσικής που παραδίδεται την Παρασκευή. Πώς την οργανώνεις χωρίς άγχος;',
     options: [
@@ -159,7 +160,7 @@ const SENIOR_PRAXIS_ROUNDS: PraxisScenario[] = [
   {
     titleEl: 'Ψηφιακή Αυτορρύθμιση: Συγκέντρωση την Ώρα της Μελέτης',
     goalEmoji: '🔕📚',
-    questionEl: 'Καθώς διαβάζεις Ιστορία, ακούς συνεχώς ειδοποιήσεις από ομαδική συνομιλία στο τάμπλετ (Tablet). Τι κάνεις;',
+    questionEl: 'Καθώς διαβάζεις Ιστορία, ακούς συνεχώς ειδοποιήσεις από ομαδική συνομιλία στο τάμπλετ. Τι κάνεις;',
     options: [
       { id: 'spx3-1', emoji: '🔕🎯', labelEl: 'Ενεργοποιώ τη λειτουργία «Μην Ενοχλείτε» μέχρι να ολοκληρώσω το κεφάλαιο μελέτης', isCorrect: true },
       { id: 'spx3-2', emoji: '📱🔄', labelEl: 'Διακόπτω το διάβασμα κάθε 30 δευτερόλεπτα για να απαντάω στα μηνύματα', isCorrect: false },
@@ -217,7 +218,7 @@ export const Activity18AdlPraxis: React.FC<ActivityRunnerRenderProps> = ({
         advanceRound(getAbsorbedCount());
       } else {
         triggerGentleFeedback(
-          `Σκέψου πρακτικά: μας βοηθάει το «${labelEl}» σε αυτή την καθημερινή ρουτίνα; Δοκίμασε ξανά!`
+          'Αυτό δεν βοηθάει. Σκέψου τι θα έκανες στ’ αλήθεια.'
         );
       }
     });
@@ -248,6 +249,9 @@ export const Activity18AdlPraxis: React.FC<ActivityRunnerRenderProps> = ({
             >
               <span className="text-4xl" aria-hidden="true">{opt.emoji}</span>
               <span className="text-sm font-extrabold text-charcoal">{opt.labelEl}</span>
+              {(ageBand === '4-5' || ageBand === '5-6') && (
+                <ReadAloudChip text={opt.labelEl} rate={adaptiveProfile.speechRate} testId={`read-aloud-${opt.id}`} />
+              )}
             </button>
           );
         })}

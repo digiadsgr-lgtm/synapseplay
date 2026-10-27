@@ -3,6 +3,7 @@ import type { ActivityRunnerRenderProps } from '../components/ActivityRunner';
 import { useDebouncedAction } from '../hooks/useDebouncedAction';
 import {
   getAgeAndPerformanceDifficulty,
+  reduceToTwoChoices,
   rotateOptionsForSession,
   selectSessionRounds,
 } from '../utils/clinicalAdhdEngine';
@@ -200,7 +201,7 @@ export const Activity03VisualMemory: React.FC<ActivityRunnerRenderProps> = ({
     setObsElapsedMs(0);
     setPeekCardId(null);
     speakGreek(
-      'Κοίτα καλά τις κάρτες και θυμήσου πού βρίσκεται η καθεμία!',
+      'Κοίτα καλά τις κάρτες και θυμήσου πού είναι η καθεμία.',
       settings.voiceEnabled,
       adaptiveProfile.speechRate
     );
@@ -225,7 +226,7 @@ export const Activity03VisualMemory: React.FC<ActivityRunnerRenderProps> = ({
       setIsHidden(true);
       playCalmTone('soft-step', settings.soundEnabled);
       speakGreek(
-        `Πού κρύφτηκε: ${roundData.targetLabelEl};`,
+        `Πού κρύφτηκε; ${roundData.targetLabelEl}.`,
         settings.voiceEnabled,
         adaptiveProfile.speechRate
       );
@@ -244,7 +245,8 @@ export const Activity03VisualMemory: React.FC<ActivityRunnerRenderProps> = ({
   const visibleCards = useMemo(() => {
     let baseCards = roundData.cards;
     if (diff.isSimplified) {
-      baseCards = roundData.cards.filter((c, idx) => c.isTarget || idx === 0);
+      // target + one other card (before: when the target was the 1st card, a single card was shown)
+      baseCards = reduceToTwoChoices(roundData.cards, (c) => c.isTarget);
     } else if (ageBand === '8-10' || ageBand === '10-12' || diff.isAdvancedMastery) {
       const extraPool = [
         { id: `extra1-${currentRound}`, emoji: '🧭', labelEl: 'Πυξίδα', isTarget: false },
@@ -269,7 +271,7 @@ export const Activity03VisualMemory: React.FC<ActivityRunnerRenderProps> = ({
     runDebounced(() => {
       if (!isHidden) {
         triggerGentleFeedback(
-          'Κοίτα πρώτα όλες τις κάρτες! Σε λίγα δευτερόλεπτα γυρίζουν ανάποδα για να βρεις πού κρύφτηκε ο στόχος!'
+          'Περίμενε! Πρώτα κοιτάμε όλες τις κάρτες.'
         );
         return;
       }
@@ -282,7 +284,7 @@ export const Activity03VisualMemory: React.FC<ActivityRunnerRenderProps> = ({
         setIsHidden(false);
         setObsElapsedMs(0);
         triggerGentleFeedback(
-          `Εκεί ήταν «${card.labelEl}». Δες ξανά τις κάρτες προσεκτικά — θα γυρίσουν αυτόματα σε λίγο!`
+          `Εκεί ήταν: ${card.labelEl}. Κοίτα ξανά τις κάρτες.`
         );
       }
     });
@@ -308,10 +310,10 @@ export const Activity03VisualMemory: React.FC<ActivityRunnerRenderProps> = ({
                 <span className="text-3xl" aria-hidden="true">👀🧠</span>
                 <div>
                   <p className="text-base md:text-lg font-extrabold text-charcoal">
-                    Απομνημόνευσε ΟΛΕΣ τις κάρτες και τις θέσεις τους!
+                    Θυμήσου πού είναι κάθε κάρτα!
                   </p>
                   <p className="text-xs font-bold text-slate-dark">
-                    Μόλις γυρίσουν ανάποδα θα σου αποκαλύψουμε ποια εικόνα ψάχνουμε!
+                    Όταν γυρίσουν, θα σου πω ποια ψάχνουμε.
                   </p>
                 </div>
               </div>
@@ -328,7 +330,7 @@ export const Activity03VisualMemory: React.FC<ActivityRunnerRenderProps> = ({
             className="touch-target px-4 py-2 rounded-2xl bg-white border-2 border-slate text-charcoal text-xs font-extrabold flex items-center gap-1.5 hover:bg-sand"
           >
             <span aria-hidden="true">{isHidden ? '👀' : '🙈'}</span>
-            <span>{isHidden ? 'Δείξε ξανά για λίγο' : 'Είμαι Έτοιμος — Κρύψε Τώρα'}</span>
+            <span>{isHidden ? 'Δείξε ξανά για λίγο' : 'Έτοιμο! Κρύψε τις κάρτες'}</span>
           </button>
         </div>
 
@@ -336,7 +338,7 @@ export const Activity03VisualMemory: React.FC<ActivityRunnerRenderProps> = ({
         {!isHidden && (
           <div className="space-y-1">
             <div className="flex justify-between text-xs font-extrabold text-slate-dark">
-              <span>⏳ Χρόνος Παρατήρησης Καρτών</span>
+              <span>⏳ Κοιτάμε</span>
               <span>{((diff.memoryObservationMs - obsElapsedMs) / 1000).toFixed(1)} δευτ.</span>
             </div>
             <div className="w-full h-3 rounded-full bg-white border border-slate overflow-hidden">

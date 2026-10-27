@@ -96,7 +96,7 @@ const SCENES: SceneSlot[][] = [
     { id: 's13-1', leftEmoji: '🎨', rightEmoji: '🎨', labelEl: 'Παλέτα Χρωμάτων', isDifferent: false },
     { id: 's13-2', leftEmoji: '🖌️', rightEmoji: '✂️', labelEl: 'Εργαλείο', leftLabelEl: 'Πινέλο', rightLabelEl: 'Ψαλίδι', isDifferent: true },
     { id: 's13-3', leftEmoji: '🖼️', rightEmoji: '🖼️', labelEl: 'Κάδρο', isDifferent: false },
-    { id: 's13-4', leftEmoji: '📐', rightEmoji: '📐', labelEl: 'Χάρακας', isDifferent: false },
+    { id: 's13-4', leftEmoji: '📐', rightEmoji: '📐', labelEl: 'Γνώμονας', isDifferent: false },
   ],
   [
     { id: 's14-1', leftEmoji: '🐢', rightEmoji: '🐸', labelEl: 'Λίμνη', leftLabelEl: 'Χελώνα', rightLabelEl: 'Βατραχάκι', isDifferent: true },
@@ -161,13 +161,17 @@ export const Activity02SpotDifference: React.FC<ActivityRunnerRenderProps> = ({
     return rotateOptionsForSession(baseSlots, sessionSeed, currentRound);
   }, [slots, diff.isSimplified, diff.isAdvancedMastery, ageBand, currentRound, sessionSeed]);
 
+  // From 6 years the difference must be SEEN in the pictures: the names under the
+  // pictures used to reveal it (left «Ήλιος», right «Φεγγάρι»). Names stay for 4-6 and with a hint.
+  const showLabels = ageBand === '4-5' || ageBand === '5-6' || hintLevel >= 1;
+
   const handleRightCardClick = (slot: SceneSlot) => {
     runDebounced(() => {
       if (slot.isDifferent) {
         advanceRound(getAbsorbedCount());
       } else {
         triggerGentleFeedback(
-          `Το στοιχείο «${slot.labelEl}» είναι ίδιο και στις δύο εικόνες. Ψάξε ποιο άλλαξε!`
+          'Αυτό είναι ίδιο και στις δύο εικόνες. Ψάξε τι άλλαξε!'
         );
       }
     });
@@ -192,7 +196,7 @@ export const Activity02SpotDifference: React.FC<ActivityRunnerRenderProps> = ({
                   className="touch-target min-h-[88px] sm:min-h-[96px] p-3 sm:p-4 rounded-2xl bg-sand border-2 border-sand-dark flex flex-col items-center justify-center gap-1 hover:border-slate"
                 >
                   <span className="text-4xl sm:text-5xl" aria-hidden="true">{slot.leftEmoji}</span>
-                  <span className="text-xs font-bold text-charcoal-muted text-center">{displayLabel}</span>
+                  {showLabels && <span className="text-xs font-bold text-charcoal-muted text-center">{displayLabel}</span>}
                 </button>
               );
             })}
@@ -222,7 +226,7 @@ export const Activity02SpotDifference: React.FC<ActivityRunnerRenderProps> = ({
                   }`}
                 >
                   <span className="text-4xl sm:text-5xl" aria-hidden="true">{slot.rightEmoji}</span>
-                  <span className="text-xs font-bold text-charcoal text-center">{displayLabel}</span>
+                  {showLabels && <span className="text-xs font-bold text-charcoal text-center">{displayLabel}</span>}
                 </button>
               );
             })}

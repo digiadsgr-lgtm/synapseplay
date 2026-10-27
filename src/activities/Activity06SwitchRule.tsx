@@ -151,7 +151,7 @@ const RULE_ROUNDS: RuleRound[] = [
 const SENIOR_RULE_ROUNDS: RuleRound[] = [
   {
     ruleType: 'color',
-    ruleTitleEl: 'Κανόνας Α (Επιστημονική Κατηγορία): Αγνόησε το χρώμα και διάλεξε το όργανο αστρονομίας!',
+    ruleTitleEl: 'Κανόνας: Αγνόησε το χρώμα και διάλεξε το όργανο αστρονομίας!',
     targetEmoji: '🪐',
     targetDescriptionEl: 'Στόχος: Παρατήρηση Πλανητών & Διαστήματος',
     options: [
@@ -162,7 +162,7 @@ const SENIOR_RULE_ROUNDS: RuleRound[] = [
   },
   {
     ruleType: 'shape',
-    ruleTitleEl: '🔄 Αλλαγή Κανόνα (Αντίθετη Ιδιότητα): Διάλεξε το ΑΝΤΙΘΕΤΟ σε ταχύτητα κίνησης!',
+    ruleTitleEl: '🔄 Αλλαγή κανόνα! Διάλεξε το ΑΝΤΙΘΕΤΟ στην ταχύτητα!',
     targetEmoji: '🚀',
     targetDescriptionEl: 'Στόχος Αναφοράς: Υπερηχητικός Πύραυλος (Μέγιστη Ταχύτητα)',
     options: [
@@ -173,7 +173,7 @@ const SENIOR_RULE_ROUNDS: RuleRound[] = [
   },
   {
     ruleType: 'color',
-    ruleTitleEl: '🔄 Αλλαγή Κανόνα (Υλικό Κατασκευής): Αγνόησε τη χρήση και διάλεξε το αντικείμενο από ΞΥΛΟ!',
+    ruleTitleEl: '🔄 Αλλαγή κανόνα! Αγνόησε τη χρήση και διάλεξε αυτό που είναι από ΞΥΛΟ!',
     targetEmoji: '🎸',
     targetDescriptionEl: 'Στόχος Αναφοράς: Ακουστική Ξύλινη Κιθάρα',
     options: [
@@ -184,9 +184,9 @@ const SENIOR_RULE_ROUNDS: RuleRound[] = [
   },
   {
     ruleType: 'shape',
-    ruleTitleEl: '🔄 Αλλαγή Κανόνα (Πηγή Ενέργειας): Διάλεξε τι λειτουργεί ΧΩΡΙΣ ηλεκτρισμό ή μπαταρία!',
+    ruleTitleEl: '🔄 Αλλαγή κανόνα! Διάλεξε αυτό που λειτουργεί ΧΩΡΙΣ ρεύμα ή μπαταρία!',
     targetEmoji: '🧭',
-    targetDescriptionEl: 'Στόχος Αναφοράς: Μαγνητική Πυξίδα Πεδίου',
+    targetDescriptionEl: 'Πυξίδα',
     options: [
       { id: 'sr4-1', emoji: '🔦', labelEl: 'Φακός Μπαταρίας', isCorrect: false },
       { id: 'sr4-2', emoji: '🚲', labelEl: 'Ποδήλατο (Κινείται με μυϊκή ενέργεια)', isCorrect: true },
@@ -195,7 +195,7 @@ const SENIOR_RULE_ROUNDS: RuleRound[] = [
   },
   {
     ruleType: 'color',
-    ruleTitleEl: 'Κανόνας Α (Βιολογικό Περιβάλλον): Αγνόησε το χρώμα και διάλεξε το θαλάσσιο θηλαστικό!',
+    ruleTitleEl: 'Κανόνας: Αγνόησε το χρώμα και διάλεξε το θηλαστικό της θάλασσας!',
     targetEmoji: '🌊',
     targetDescriptionEl: 'Στόχος: Θαλάσσιο Οικοσύστημα',
     options: [
@@ -206,16 +206,32 @@ const SENIOR_RULE_ROUNDS: RuleRound[] = [
   },
   {
     ruleType: 'shape',
-    ruleTitleEl: '🔄 Αλλαγή Κανόνα (Αντίθετη Θερμοκρασία): Διάλεξε το ΑΝΤΙΘΕΤΟ σε θερμοκρασία!',
+    ruleTitleEl: '🔄 Αλλαγή κανόνα! Διάλεξε το ΑΝΤΙΘΕΤΟ στη θερμοκρασία!',
     targetEmoji: '🌋',
     targetDescriptionEl: 'Στόχος Αναφοράς: Ενεργό Ηφαίστειο (Υψηλή Θερμότητα)',
     options: [
       { id: 'sr6-1', emoji: '☀️', labelEl: 'Καυτός Ήλιος (Ίδια θερμότητα — παγίδα!)', isCorrect: false },
-      { id: 'sr6-2', emoji: '🧊', labelEl: 'Παγόβουνο / Κύβος Πάγου (Αντίθετη Θερμοκρασία)', isCorrect: true },
+      { id: 'sr6-2', emoji: '🧊', labelEl: 'Παγάκι', isCorrect: true },
       { id: 'sr6-3', emoji: '⛰️', labelEl: 'Βραχώδες Βουνό (Ίδιο σχήμα — παγίδα!)', isCorrect: false },
     ],
   },
 ];
+
+/**
+ * Option labels must not give the answer away: «Πράσινο Βατραχάκι» in a «green» round,
+ * «Σαλιγκάρι (… — Αντίθετο!)» or «(… — παγίδα!)» in the senior rounds. The child must look
+ * at the picture and apply the rule. (audit 10/2026)
+ */
+const GIVEAWAY_ADJECTIVE =
+  /^(Πράσινο|Πράσινη|Πράσινος|Κόκκινο|Κόκκινη|Κίτρινο|Κίτρινη|Κίτρινος|Μπλε|Πορτοκαλί|Στρογγυλό|Στρογγυλή|Τριγωνικός|Τριγωνική|Τετράγωνο|Λαμπερό|Καμπύλο|Μαύρο|Μακρόστενη|Ξύλινη|Μεταλλική|Πλαστικά|Καυτός)\s+/;
+export function neutralOptionLabel(labelEl: string): string {
+  const noParens = labelEl.replace(/\s*\([^)]*\)/g, '').trim();
+  const stripped = noParens.replace(GIVEAWAY_ADJECTIVE, '');
+  return stripped.charAt(0).toUpperCase() + stripped.slice(1);
+}
+export function cleanTargetDescription(text: string): string {
+  return text.replace(/^Στόχος(?: Αναφοράς)?:\s*/, '').replace(/\s*\([^)]*\)/g, '').trim();
+}
 
 export const Activity06SwitchRule: React.FC<ActivityRunnerRenderProps> = ({
   currentRound,
@@ -240,7 +256,7 @@ export const Activity06SwitchRule: React.FC<ActivityRunnerRenderProps> = ({
   // Announce the active sorting rule aloud on every round so rule switches (Color <-> Shape) are crystal clear
   useEffect(() => {
     speakGreek(
-      `${round.ruleTitleEl}. ${round.targetDescriptionEl}`,
+      `${round.ruleTitleEl}. ${cleanTargetDescription(round.targetDescriptionEl)}`,
       settings.voiceEnabled,
       adaptiveProfile.speechRate
     );
@@ -280,9 +296,9 @@ export const Activity06SwitchRule: React.FC<ActivityRunnerRenderProps> = ({
         advanceRound(getAbsorbedCount());
       } else {
         triggerGentleFeedback(
-          `Προσοχή στον ενεργό κανόνα! Τώρα ταιριάζουμε με βάση το ${
-            round.ruleType === 'color' ? 'χρώμα' : 'σχήμα'
-          }, όχι το «${labelEl}».`
+          isSeniorAge
+            ? 'Όχι. Διάβασε ξανά τον κανόνα επάνω.'
+            : `Όχι. Τώρα ψάχνουμε το ίδιο ${round.ruleType === 'color' ? 'χρώμα' : 'σχήμα'}.`
         );
       }
     });
@@ -300,12 +316,12 @@ export const Activity06SwitchRule: React.FC<ActivityRunnerRenderProps> = ({
         }`}
       >
         <div className="text-3xl" aria-hidden="true">
-          {round.ruleType === 'color' ? '🎨 Κανόνας Χρώματος' : '⭐ Κανόνας Σχήματος'}
+          {isSeniorAge ? '🧠 Κανόνας' : round.ruleType === 'color' ? '🎨 Κανόνας Χρώματος' : '⭐ Κανόνας Σχήματος'}
         </div>
         <h2 className="text-xl font-extrabold text-charcoal">{round.ruleTitleEl}</h2>
         <div className="inline-flex items-center gap-3 px-5 py-2.5 rounded-2xl bg-white border-2 border-charcoal/20">
           <span className="text-4xl" aria-hidden="true">{round.targetEmoji}</span>
-          <span className="font-extrabold text-lg text-charcoal">{round.targetDescriptionEl}</span>
+          <span className="font-extrabold text-lg text-charcoal">{cleanTargetDescription(round.targetDescriptionEl)}</span>
         </div>
       </div>
 
@@ -318,7 +334,7 @@ export const Activity06SwitchRule: React.FC<ActivityRunnerRenderProps> = ({
               key={opt.id}
               type="button"
               data-testid={opt.isCorrect ? 'switch-rule-target' : `switch-rule-opt-${opt.id}`}
-              onClick={() => handleOptionSelect(opt.isCorrect, opt.labelEl)}
+              onClick={() => handleOptionSelect(opt.isCorrect, neutralOptionLabel(opt.labelEl))}
               className={`touch-target min-h-[120px] p-5 rounded-3xl border-4 flex flex-col items-center justify-center gap-2 ${
                 highlight
                   ? 'bg-sage-surface border-sage-dark ring-4 ring-sage/40'
@@ -326,7 +342,7 @@ export const Activity06SwitchRule: React.FC<ActivityRunnerRenderProps> = ({
               }`}
             >
               <span className="text-5xl" aria-hidden="true">{opt.emoji}</span>
-              <span className="text-base font-extrabold text-charcoal">{opt.labelEl}</span>
+              <span className="text-base font-extrabold text-charcoal">{neutralOptionLabel(opt.labelEl)}</span>
             </button>
           );
         })}

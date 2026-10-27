@@ -44,7 +44,7 @@ export const CategoryPage: React.FC = () => {
 
         <button
           type="button"
-          onClick={() => speakGreek(category.voicePromptEl, true)}
+          onClick={() => speakGreek(category.voicePromptEl, true, 0.92, { force: true })}
           className="touch-target px-4 py-2 rounded-2xl bg-sage-surface border-2 border-sage text-charcoal font-bold flex items-center gap-2"
         >
           <span aria-hidden="true">🔊</span>
@@ -67,7 +67,7 @@ export const CategoryPage: React.FC = () => {
                 </span>
                 <button
                   type="button"
-                  onClick={() => speakGreek(activity.voicePromptEl, true)}
+                  onClick={() => speakGreek(activity.voicePromptEl, true, 0.92, { force: true })}
                   aria-label={`Άκουσε οδηγία για ${activity.titleEl}`}
                   className="touch-target px-3 py-1.5 rounded-xl bg-sand-light border border-sand-dark text-charcoal font-bold"
                 >

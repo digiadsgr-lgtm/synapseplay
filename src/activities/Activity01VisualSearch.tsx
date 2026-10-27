@@ -52,7 +52,7 @@ const ROUNDS: SearchRoundConfig[] = [
     target: { emoji: '🦉', labelEl: 'Σοφή Κουκουβάγια' },
     grid: [
       { id: '4-1', emoji: '🐿️', labelEl: 'Σκιουράκι', isTarget: false },
-      { id: '4-2', emoji: '🦔', labelEl: 'Σκατζόχοιρος', isTarget: false },
+      { id: '4-2', emoji: '🦔', labelEl: 'Σκαντζόχοιρος', isTarget: false },
       { id: '4-3', emoji: '🦉', labelEl: 'Σοφή Κουκουβάγια', isTarget: true },
       { id: '4-4', emoji: '🦌', labelEl: 'Ελάφι', isTarget: false },
       { id: '4-5', emoji: '🍄', labelEl: 'Μανιτάρι', isTarget: false },
@@ -122,7 +122,7 @@ const ROUNDS: SearchRoundConfig[] = [
       { id: '10-3', emoji: '🐰', labelEl: 'Κουνελάκι', isTarget: false },
       { id: '10-4', emoji: '🦌', labelEl: 'Ελαφάκι', isTarget: false },
       { id: '10-5', emoji: '🐿️', labelEl: 'Σκιουράκι', isTarget: false },
-      { id: '10-6', emoji: '🦔', labelEl: 'Σκατζόχοιρος', isTarget: false },
+      { id: '10-6', emoji: '🦔', labelEl: 'Σκαντζόχοιρος', isTarget: false },
     ],
   },
   {
@@ -202,7 +202,7 @@ export const Activity01VisualSearch: React.FC<ActivityRunnerRenderProps> = ({
 
   useEffect(() => {
     speakGreek(
-      `Κοίτα τον στόχο επάνω και βρες το: ${roundData.target.labelEl}!`,
+      `Ψάξε και βρες: ${roundData.target.labelEl}!`,
       settings.voiceEnabled,
       adaptiveProfile.speechRate
     );
@@ -246,7 +246,7 @@ export const Activity01VisualSearch: React.FC<ActivityRunnerRenderProps> = ({
           advanceRound(getAbsorbedCount());
         } else {
           triggerGentleFeedback(
-            `Αυτό είναι «${labelEl}». Κοίτα ξανά τον στόχο επάνω: ψάχνουμε «${roundData.target.labelEl}»!`
+            `Αυτό είναι: ${labelEl}. Ψάχνουμε: ${roundData.target.labelEl}.`
           );
         }
       });
@@ -279,9 +279,10 @@ export const Activity01VisualSearch: React.FC<ActivityRunnerRenderProps> = ({
           data-testid="visual-search-target-badge"
           onClick={() =>
             speakGreek(
-              `Ψάχνουμε: ${roundData.target.labelEl}`,
+              `Ψάχνουμε: ${roundData.target.labelEl}.`,
               true,
-              adaptiveProfile.speechRate
+              adaptiveProfile.speechRate,
+              { force: true }
             )
           }
           className="touch-target px-5 py-3 rounded-2xl bg-white border-2 border-slate flex items-center gap-3 shadow-sm hover:bg-sand-light cursor-pointer"

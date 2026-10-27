@@ -4,6 +4,7 @@ import { useDebouncedAction } from '../hooks/useDebouncedAction';
 import { reduceToTwoChoices, rotateOptionsForSession, selectSessionRounds } from '../utils/clinicalAdhdEngine';
 import { playCalmTone, speakGreek } from '../utils/soundAndSpeech';
 import { useApp } from '../context/AppContext';
+import { ReadAloudChip } from '../components/ReadAloudChip';
 
 interface TheaterScene {
   sceneEmoji: string;
@@ -324,9 +325,9 @@ const THEATER_SCENES: TheaterScene[] = [
   },
   {
     sceneEmoji: '🎭🌅',
-    titleEl: 'Σκηνή: Ώρα να Κλείσει η Οθόνη (Smooth Landing)',
+    titleEl: 'Σκηνή: Ώρα να Κλείσει η Οθόνη',
     storyEl:
-      'Ο Δακτύλιος Ομαλής Αποσύνδεσης δείχνει ότι το παιχνίδι ολοκληρώθηκε και το ζωάκι πάει για ύπνο.',
+      'Ο κύκλος του χρόνου γέμισε: το παιχνίδι τελείωσε και το ζωάκι πάει για ύπνο.',
     theatricalPromptEl:
       'Θεατρική Δράση: Κάνε ένα μεγάλο τέντωμα 🙆 και διάλεξε τι θα κάνεις:',
     options: [
@@ -372,7 +373,7 @@ export const Activity19EmotionalTheater: React.FC<ActivityRunnerRenderProps> = (
 
   useEffect(() => {
     speakGreek(
-      `${scene.titleEl}. ${scene.storyEl}`,
+      `${scene.titleEl.replace(/^Σκηνή:\s*/, '')}. ${scene.storyEl}`,
       settings.voiceEnabled,
       adaptiveProfile.speechRate
     );
@@ -393,7 +394,7 @@ export const Activity19EmotionalTheater: React.FC<ActivityRunnerRenderProps> = (
         advanceRound(getAbsorbedCount());
       } else {
         triggerGentleFeedback(
-          'Στο Θέατρο της Αυτορρύθμισης ψάχνουμε τη λύση που κρατάει εμάς και τους φίλους μας ήρεμους και ασφαλείς!'
+          'Αυτό δεν είναι ήρεμη λύση. Ποια λύση κρατάει όλους ήρεμους και ασφαλείς;'
         );
       }
     });
@@ -428,6 +429,9 @@ export const Activity19EmotionalTheater: React.FC<ActivityRunnerRenderProps> = (
             >
               <span className="text-4xl" aria-hidden="true">{opt.emoji}</span>
               <span className="text-sm font-extrabold text-charcoal">{opt.labelEl}</span>
+              {(ageBand === '4-5' || ageBand === '5-6') && (
+                <ReadAloudChip text={opt.labelEl} rate={adaptiveProfile.speechRate} testId={`read-aloud-${opt.id}`} />
+              )}
             </button>
           );
         })}

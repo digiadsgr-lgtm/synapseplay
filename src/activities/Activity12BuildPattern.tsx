@@ -77,6 +77,21 @@ export const Activity12BuildPattern: React.FC<ActivityRunnerRenderProps> = ({
 
   const [builtBlocks, setBuiltBlocks] = useState<BlockColor[]>([]);
 
+  // 8-12: copying a pattern that is always visible was too easy and boring.
+  // The pattern is shown for a few seconds, then hidden: build it from memory («👀 Δείξε ξανά» helps).
+  const buildsFromMemory = (ageBand === '8-10' || ageBand === '10-12') && hintLevel === 0;
+  const [modelVisible, setModelVisible] = useState<boolean>(true);
+  useEffect(() => {
+    setModelVisible(true);
+    if (!buildsFromMemory) return;
+    const t = window.setTimeout(() => setModelVisible(false), 4000);
+    return () => window.clearTimeout(t);
+  }, [currentRound, sessionSeed, buildsFromMemory]);
+  const peekModel = () => {
+    setModelVisible(true);
+    window.setTimeout(() => setModelVisible(false), 2000);
+  };
+
   useEffect(() => {
     if (hintLevel === 2) {
       setBuiltBlocks(targetPattern.slice(0, targetPattern.length - 1));
@@ -87,7 +102,9 @@ export const Activity12BuildPattern: React.FC<ActivityRunnerRenderProps> = ({
 
   useEffect(() => {
     speakGreek(
-      'Κοίτα το πρότυπο μοτίβο και βάλε τα τουβλάκια με την ίδια ακριβώς σειρά!',
+      ageBand === '8-10' || ageBand === '10-12'
+        ? 'Κοίτα καλά το σχέδιο. Σε λίγο κρύβεται και το φτιάχνεις από μνήμης!'
+        : 'Φτιάξε το ίδιο σχέδιο με τα τουβλάκια!',
       settings.voiceEnabled,
       adaptiveProfile.speechRate
     );
@@ -113,7 +130,9 @@ export const Activity12BuildPattern: React.FC<ActivityRunnerRenderProps> = ({
       } else {
         const expectedBlock = PALETTE.find((b) => b.id === nextExpectedColor)!;
         triggerGentleFeedback(
-          `Στο σημείο ${builtBlocks.length + 1} του σχεδίου χρειαζόμαστε «${expectedBlock.labelEl}»!`
+          buildsFromMemory && !modelVisible
+            ? 'Όχι αυτό. Πάτα «Δείξε ξανά» αν θέλεις να δεις το σχέδιο.'
+            : `Στη θέση ${builtBlocks.length + 1} θέλουμε: ${expectedBlock.labelEl.toLowerCase()}.`
         );
       }
     });
@@ -131,16 +150,28 @@ export const Activity12BuildPattern: React.FC<ActivityRunnerRenderProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Left: Target Pattern Blueprint */}
         <div className="p-5 rounded-3xl bg-white border-2 border-sand-dark space-y-3 text-center">
-          <h2 className="text-lg font-extrabold text-charcoal">Πρότυπο Μοτίβο</h2>
+          <h2 className="text-lg font-extrabold text-charcoal">Το σχέδιο</h2>
+          {buildsFromMemory && !modelVisible && (
+            <button
+              type="button"
+              data-testid="pattern-peek-btn"
+              onClick={peekModel}
+              className="touch-target px-4 py-2 rounded-2xl bg-white border-2 border-slate font-extrabold text-sm"
+            >
+              👀 Δείξε ξανά
+            </button>
+          )}
           <div className="flex items-center justify-center gap-3">
             {targetPattern.map((c, idx) => {
               const block = PALETTE.find((b) => b.id === c)!;
               return (
                 <div
                   key={`target-${idx}`}
-                  className={`w-20 h-20 rounded-2xl border-4 flex flex-col items-center justify-center ${block.bgClass}`}
+                  className={`w-20 h-20 rounded-2xl border-4 flex flex-col items-center justify-center ${
+                    modelVisible ? block.bgClass : 'bg-sand-light border-sand-dark text-charcoal'
+                  }`}
                 >
-                  <span className="text-2xl" aria-hidden="true">{block.emoji}</span>
+                  <span className="text-2xl" aria-hidden="true">{modelVisible ? block.emoji : '❓'}</span>
                   <span className="text-xs font-extrabold">{idx + 1}</span>
                 </div>
               );
