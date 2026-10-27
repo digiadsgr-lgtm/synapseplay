@@ -82,6 +82,12 @@ export const Activity04SequenceMemory: React.FC<ActivityRunnerRenderProps> = ({
     timersRef.current = [];
   }, []);
 
+  // Demo pace per age: each symbol stays lit long enough to SEE it and to HEAR its name
+  // (speakGreek cancels the previous utterance, so 450 ms steps cut every word but the last).
+  const demoStepMs =
+    ageBand === '4-5' ? 1200 : ageBand === '5-6' ? 1100 : ageBand === '6-8' ? 950 : 800;
+  const demoOnMs = Math.round(demoStepMs * 0.75);
+
   const playDemonstration = useCallback(() => {
     clearDemoTimers();
     setIsDemonstrating(true);
@@ -95,18 +101,18 @@ export const Activity04SequenceMemory: React.FC<ActivityRunnerRenderProps> = ({
         if (tileObj) {
           speakGreek(tileObj.labelEl, settings.voiceEnabled, adaptiveProfile.speechRate);
         }
-      }, idx * 450 + 100);
+      }, idx * demoStepMs + 100);
 
       const tOff = window.setTimeout(() => {
         setActiveFlashId(null);
         if (idx === targetSequence.length - 1) {
           setIsDemonstrating(false);
         }
-      }, idx * 450 + 380);
+      }, idx * demoStepMs + 100 + demoOnMs);
 
       timersRef.current.push(tOn, tOff);
     });
-  }, [targetSequence, settings.soundEnabled, settings.voiceEnabled, adaptiveProfile.speechRate, clearDemoTimers]);
+  }, [targetSequence, settings.soundEnabled, settings.voiceEnabled, adaptiveProfile.speechRate, clearDemoTimers, demoStepMs, demoOnMs]);
 
   useEffect(() => {
     setUserProgress([]);

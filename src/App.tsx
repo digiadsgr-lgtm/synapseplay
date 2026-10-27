@@ -17,12 +17,21 @@ import {
 } from '@route-pages';
 
 const AppShell: React.FC = () => {
-  const { isBreakActive, setBreakActive } = useApp();
+  const { isBreakActive, setBreakActive, setScreenTimeTracking } = useApp();
   const location = useLocation();
   const isLandingRoute =
     location.pathname === '/' ||
     location.pathname.startsWith('/legal') ||
     location.pathname.startsWith('/articles');
+  // Child's screen time is consumed only in the child area (hub, categories, games)
+  const isChildRoute =
+    location.pathname === '/app' ||
+    location.pathname.startsWith('/category/') ||
+    location.pathname.startsWith('/activity/');
+
+  useEffect(() => {
+    setScreenTimeTracking(isChildRoute);
+  }, [isChildRoute, setScreenTimeTracking]);
 
   // Global Escape key listener to toggle Break/Pause cleanly
   useEffect(() => {

@@ -58,6 +58,7 @@ export const ParentDashboardPage: React.FC = () => {
   if (!isParentUnlocked) {
     return (
       <main className="max-w-xl mx-auto px-4 py-12" data-testid="parent-locked-barrier">
+        <h1 className="sr-only">Πίνακας Γονέων &amp; Θεραπευτών — SynapsePlay</h1>
         <ParentGateModal
           onSuccess={() => setParentUnlocked(true)}
           onCancel={() => navigate('/app')}
@@ -222,8 +223,9 @@ export const ParentDashboardPage: React.FC = () => {
             <strong>
               Δεν αποτελεί ιατρική συσκευή, διαγνωστικό τεστ ή κλινική θεραπεία ΔΕΠΥ.
             </strong>{' '}
-            Όλα τα δεδομένα αποθηκεύονται αποκλειστικά τοπικά στη συσκευή σας (IndexedDB) χωρίς
-            απομακρυσμένο διακομιστή, αναλυτικά trackers ή διαφημίσεις.
+            Τα προφίλ και η πρόοδος των παιδιών αποθηκεύονται αποκλειστικά τοπικά στη συσκευή σας
+            (IndexedDB) και δεν αποστέλλονται πουθενά. Χωρίς διαφημίσεις· στατιστικά επισκεψιμότητας
+            μόνο αν τα έχετε αποδεχτεί.
           </p>
         </div>
       </section>

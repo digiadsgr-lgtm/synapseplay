@@ -43,6 +43,10 @@ export const SeoHeadManager: React.FC = () => {
 
   useEffect(() => {
     if (typeof document === 'undefined') return;
+    // The build-time prerender (scripts/prerender-seo-routes.mjs) puts a static JSON-LD in <head>
+    // for crawlers. Once the app runs, React owns structured data → drop the static copy so the
+    // page never carries duplicate (or stale, after SPA navigation) FAQPage/BlogPosting blocks.
+    document.getElementById('static-route-jsonld')?.remove();
     let alive = true;
     void import('../utils/seoEngine').then(({ resolveRouteSeoMetadata }) => {
       if (!alive) return;
@@ -82,6 +86,8 @@ export const SeoHeadManager: React.FC = () => {
   }, [location.pathname]);
 
   if (!seo) return null;
+  // /articles pages render their own Blog/BlogPosting JSON-LD (ParentArticlesPage) → avoid a duplicate
+  if (location.pathname.startsWith('/articles')) return null;
   return (
     <script
       type="application/ld+json"

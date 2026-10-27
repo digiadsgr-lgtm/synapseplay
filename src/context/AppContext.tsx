@@ -20,6 +20,7 @@ import {
   saveChildProfile,
   saveSettings,
   setTodayUsageSeconds,
+  getTodayDateKey,
   wipeAllLocalData,
   importBackup,
   type SynapsePlayBackup,
@@ -84,6 +85,11 @@ interface AppContextValue {
   wipeAllData: () => Promise<void>;
   extendSessionForParent: (extraMinutes: number) => Promise<void>;
   simulateTimeStateForDemo: (state: 'normal' | 'warning' | 'depleted') => void;
+  /**
+   * Screen time counts ONLY while the child area is on screen (set by AppShell from the route)
+   * and the page is visible. Landing, blog, legal and the Parent Area do not consume it.
+   */
+  setScreenTimeTracking: (active: boolean) => void;
 }
 
 const AppContext = createContext<AppContextValue | undefined>(undefined);
@@ -99,6 +105,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [sessionLogs, setSessionLogs] = useState<ActivitySessionLog[]>([]);
   const [feedbackEntries, setFeedbackEntries] = useState<ClinicalFeedbackEntry[]>([]);
   const [warningAnnounced, setWarningAnnounced] = useState<boolean>(false);
+  const [isScreenTimeRoute, setScreenTimeTracking] = useState<boolean>(true);
+  const [isPageVisible, setIsPageVisible] = useState<boolean>(
+    () => typeof document === 'undefined' || document.visibilityState !== 'hidden'
+  );
+  // Date the elapsed counter belongs to → reset at midnight (tablets left on overnight)
+  const usageDateKeyRef = React.useRef<string>(getTodayDateKey());
 
   useEffect(() => {
     let mounted = true;
@@ -155,18 +167,36 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Tick session timer every 1 second unless paused/break or already depleted
   useEffect(() => {
-    if (isBreakActive || isSessionDepleted) return;
+    if (typeof document === 'undefined') return;
+    const onVisibility = () => setIsPageVisible(document.visibilityState !== 'hidden');
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => document.removeEventListener('visibilitychange', onVisibility);
+  }, []);
+
+  useEffect(() => {
+    if (isBreakActive || !isScreenTimeRoute || !isPageVisible) return;
 
     const timer = window.setInterval(() => {
+      const todayKey = getTodayDateKey();
+      if (todayKey !== usageDateKeyRef.current) {
+        // New day: start from zero (also lifts yesterday's "depleted" state)
+        usageDateKeyRef.current = todayKey;
+        setWarningAnnounced(false);
+        setElapsedSeconds(0);
+        void setTodayUsageSeconds(0);
+        return;
+      }
+      if (isSessionDepleted) return;
       setElapsedSeconds((prev) => {
         const next = prev + 1;
-        void setTodayUsageSeconds(next);
+        // Persist every 5 s (not every second) to spare IndexedDB writes
+        if (next % 5 === 0) void setTodayUsageSeconds(next);
         return next;
       });
     }, 1000);
 
     return () => window.clearInterval(timer);
-  }, [isBreakActive, isSessionDepleted]);
+  }, [isBreakActive, isSessionDepleted, isScreenTimeRoute, isPageVisible]);
 
   // Trigger gentle 2-minute advance calm reminder once
   useEffect(() => {
@@ -483,6 +513,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         wipeAllData,
         extendSessionForParent,
         simulateTimeStateForDemo,
+        setScreenTimeTracking,
       }}
     >
       {children}

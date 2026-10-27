@@ -140,6 +140,254 @@ export const ChildHubPage: React.FC = () => {
 
   return (
     <main className="max-w-5xl mx-auto px-4 py-6 space-y-6" data-testid="child-hub-page">
+      {/* Welcoming Child Banner + Personalized Continual-Learning Recommendation */}
+      <section
+        aria-labelledby="hub-welcome-heading"
+        className="bg-sand-light border-2 border-sand-dark rounded-3xl p-6 space-y-4 shadow-sm"
+      >
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 text-center sm:text-left">
+            <button
+              type="button"
+              data-testid="toggle-avatar-companion-picker-btn"
+              onClick={() => setIsChangingAvatar((v) => !v)}
+              title="Πάτησε για να αλλάξεις τον Θεραπευτικό Συνοδοιπόρο σου!"
+              className="touch-target w-20 h-20 rounded-3xl bg-sage-surface border-3 border-sage flex flex-col items-center justify-center shrink-0 hover:scale-105 transition-transform shadow-sm"
+            >
+              <span className="text-4xl leading-none" aria-hidden="true">
+                {activeProfile.avatarEmoji}
+              </span>
+              <span className="text-[10px] font-extrabold text-sage-dark mt-1">
+                Αλλαγή ✨
+              </span>
+            </button>
+            <div>
+              <div className="flex flex-wrap items-center gap-2 mb-1">
+                <span
+                  data-testid="companion-evolution-badge"
+                  className="inline-flex items-center gap-1 px-3 py-0.5 rounded-full bg-white border border-sage text-xs font-extrabold text-sage-dark"
+                >
+                  <span>{avatarEvaluation.evolutionBadgeEmoji}</span>
+                  <span>{avatarEvaluation.evolutionTitleEl}</span>
+                </span>
+              </div>
+              <h1 id="hub-welcome-heading" className="text-2xl md:text-3xl font-extrabold text-charcoal">
+                Γεια σου, {toGreekVocative(activeProfile.nickname)}! Τι θέλεις να παίξουμε σήμερα;
+              </h1>
+              <p
+                className="text-xs font-extrabold text-sage-dark mt-1"
+                data-testid="companion-superpower-banner"
+              >
+                {avatarEvaluation.childEncouragementEl}
+              </p>
+              {showQuickStepsBanner && (
+                <a
+                  href="#hub-parent-zone"
+                  data-testid="hub-first-time-parent-link"
+                  className="inline-block mt-1.5 text-xs font-extrabold text-slate-dark underline underline-offset-2"
+                >
+                  👨‍👩‍👧 Πρώτη φορά; Οδηγίες για τον γονιό ↓
+                </a>
+              )}
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() =>
+              speakGreek(
+                `Γεια σου, ${toGreekVocative(activeProfile.nickname)}! ${avatarEvaluation.avatar.coachingTipEl} Διάλεξε μία από τις τέσσερις ομάδες παιχνιδιών για να ξεκινήσουμε.`,
+                true,
+                activeProfile.learnedModel.optimalSpeechRate
+              )
+            }
+            data-testid="hub-voice-welcome-btn"
+            aria-label="Άκουσε το καλωσόρισμα"
+            className="touch-target px-5 py-3 rounded-2xl bg-white border-2 border-sage text-charcoal font-bold flex items-center gap-2 hover:bg-sage-surface shrink-0"
+          >
+            <span className="text-2xl" aria-hidden="true">🔊</span>
+            <span>Άκου</span>
+          </button>
+        </div>
+
+        {/* Interactive Companion Picker & ADHD Superpower Explorer */}
+        {isChangingAvatar && (
+          <div
+            data-testid="companion-avatar-picker-panel"
+            className="p-4 rounded-2xl bg-white border-2 border-sage space-y-3"
+          >
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-extrabold text-charcoal">
+                🦄 Διάλεξε τον Αγαπημένο σου Συνοδοιπόρο Εστίασης (Ζώα & Φανταστικοί Ήρωες):
+              </h2>
+              <button
+                type="button"
+                onClick={() => setIsChangingAvatar(false)}
+                className="px-3 py-1 rounded-xl bg-sand text-xs font-extrabold text-charcoal"
+              >
+                Έτοιμο ✓
+              </button>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-8 gap-2">
+              {AVATAR_PRESETS.map((preset) => {
+                const isCurrent = activeProfile.avatarEmoji === preset.emoji;
+                return (
+                  <button
+                    key={preset.emoji}
+                    type="button"
+                    data-testid={`switch-avatar-btn-${preset.emoji}`}
+                    onClick={() => {
+                      void updateProfileAvatar(activeProfile.id, preset.emoji);
+                      speakGreek(
+                        `${preset.defaultNameEl}! ${preset.coachingTipEl}`,
+                        settings.voiceEnabled,
+                        activeProfile.learnedModel.optimalSpeechRate
+                      );
+                    }}
+                    className={`p-2.5 rounded-2xl border-2 flex flex-col items-center text-center gap-1 transition-all ${
+                      isCurrent
+                        ? 'bg-sage-surface border-charcoal ring-2 ring-sage scale-105'
+                        : 'bg-sand-light border-sand-dark hover:bg-white'
+                    }`}
+                  >
+                    <span className="text-3xl" aria-hidden="true">
+                      {preset.emoji}
+                    </span>
+                    <span className="text-[11px] font-extrabold text-charcoal leading-tight">
+                      {preset.defaultNameEl}
+                    </span>
+                    <span className="text-[9px] font-bold text-slate-dark leading-tight">
+                      {DOMAIN_LABELS_EL[preset.primaryDomain].emoji}{' '}
+                      {preset.category === 'fantasy' ? 'Φαντασία' : 'Ζωάκι'}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Personalized Activity Recommendation from Child's Continual Learning Model */}
+        <div
+          data-testid="personalized-recommendation-card"
+          className="p-4 rounded-2xl bg-white border-2 border-sage flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+        >
+          <div className="flex items-center gap-3">
+            <span className="text-4xl" aria-hidden="true">{recommendation.activity.pictogram}</span>
+            <div>
+              <span className="inline-block px-2.5 py-0.5 rounded-full bg-sage-surface text-[11px] font-extrabold text-sage-dark border border-sage">
+                🌟 Προσωπική Πρόταση Προσαρμοσμένη σε Εσένα
+              </span>
+              <p className="text-base font-extrabold text-charcoal mt-0.5">
+                {recommendation.activity.code}. {recommendation.activity.titleEl}
+              </p>
+              <p className="text-xs text-charcoal-muted">{recommendation.reasonEl}</p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            data-testid="play-recommended-activity-btn"
+            onClick={() => navigate(`/activity/${recommendation.activity.id}`)}
+            className="touch-target px-5 py-2.5 rounded-2xl bg-sage-dark text-white font-extrabold text-sm flex items-center gap-2 hover:bg-sage shrink-0"
+          >
+            <span aria-hidden="true">▶️</span>
+            <span>Παίξε Τώρα</span>
+          </button>
+        </div>
+      </section>
+
+      {/* Maximum 4 Primary Categories */}
+      <section aria-label="Οι 4 Βασικές Κατηγορίες Δραστηριοτήτων">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6" data-testid="category-cards-grid">
+          {CATEGORIES.map((category) => {
+            const activities = getActivitiesByCategory(category.id);
+            return (
+              <div
+                key={category.id}
+                data-testid={`category-card-${category.id}`}
+                className={`rounded-3xl border-4 p-6 flex flex-col justify-between gap-5 shadow-sm transition-transform ${category.accentColorClass}`}
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-center gap-4">
+                    <span className="text-5xl select-none" aria-hidden="true">
+                      {category.pictogram}
+                    </span>
+                    <div>
+                      <span
+                        className={`inline-block px-3 py-0.5 rounded-full text-xs font-extrabold uppercase tracking-wider mb-1 ${category.badgeBgClass}`}
+                      >
+                        Ομάδα {category.groupCode} • {activities.length} Παιχνίδια
+                      </span>
+                      <h2 className="text-2xl font-extrabold text-charcoal">{category.titleEl}</h2>
+                      <p className="text-sm font-bold text-charcoal-muted">{category.subtitleEl}</p>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      speakGreek(
+                        category.voicePromptEl,
+                        true,
+                        activeProfile.learnedModel.optimalSpeechRate
+                      )
+                    }
+                    aria-label={`Άκουσε περιγραφή για ${category.titleEl}`}
+                    className="touch-target px-3.5 py-2 rounded-2xl bg-white/90 border-2 border-charcoal/20 text-charcoal font-bold flex items-center justify-center hover:bg-white"
+                  >
+                    <span className="text-2xl" aria-hidden="true">🔊</span>
+                  </button>
+                </div>
+
+                {/* Activity Mini Pictogram Preview */}
+                <div className="flex flex-wrap items-center gap-2">
+                  {activities.map((act) => (
+                    <span
+                      key={act.id}
+                      className="px-3 py-1.5 rounded-xl bg-white/80 border border-charcoal/15 text-xs font-bold text-charcoal flex items-center gap-1.5"
+                    >
+                      <span aria-hidden="true">{act.pictogram}</span>
+                      <span>{act.titleEl}</span>
+                    </span>
+                  ))}
+                </div>
+
+                {/* Single Clear Primary Action per Category Card */}
+                <button
+                  type="button"
+                  data-testid={`open-category-${category.id}`}
+                  onClick={() => handleCategorySelect(category.id, category.voicePromptEl)}
+                  className="touch-target w-full py-4 px-6 rounded-2xl bg-charcoal text-white font-extrabold text-lg flex items-center justify-center gap-3 hover:bg-slate-dark transition-colors"
+                >
+                  <span>Παίξε «{category.titleEl}»</span>
+                  <span aria-hidden="true">➡️</span>
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* ------------------------------------------------------------------
+          Parent zone: everything adult-facing lives BELOW the games, so the child's
+          first screen is the greeting + "Παίξε Τώρα" + the 4 groups.
+          ------------------------------------------------------------------ */}
+      <section
+        id="hub-parent-zone"
+        aria-labelledby="hub-parent-zone-heading"
+        data-testid="hub-parent-zone"
+        className="space-y-4 pt-4 border-t-2 border-dashed border-sand-dark scroll-mt-24"
+      >
+        <h2
+          id="hub-parent-zone-heading"
+          className="text-lg md:text-xl font-extrabold text-charcoal flex items-center gap-2"
+        >
+          <span aria-hidden="true">👨‍👩‍👧</span>
+          <span>Για τον γονιό</span>
+        </h2>
+
       {/* Beginner-Friendly 3-Step Quick Onboarding Strip */}
       <section
         aria-label="Γρήγορος Οδηγός για Αρχάριους Γονείς"
@@ -462,237 +710,36 @@ export const ChildHubPage: React.FC = () => {
         )}
       </section>
 
-      {/* Welcoming Child Banner + Personalized Continual-Learning Recommendation */}
-      <section
-        aria-labelledby="hub-welcome-heading"
-        className="bg-sand-light border-2 border-sand-dark rounded-3xl p-6 space-y-4 shadow-sm"
-      >
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <button
-              type="button"
-              data-testid="toggle-avatar-companion-picker-btn"
-              onClick={() => setIsChangingAvatar((v) => !v)}
-              title="Πάτησε για να αλλάξεις τον Θεραπευτικό Συνοδοιπόρο σου!"
-              className="touch-target w-20 h-20 rounded-3xl bg-sage-surface border-3 border-sage flex flex-col items-center justify-center shrink-0 hover:scale-105 transition-transform shadow-sm"
-            >
-              <span className="text-4xl leading-none" aria-hidden="true">
-                {activeProfile.avatarEmoji}
-              </span>
-              <span className="text-[10px] font-extrabold text-sage-dark mt-1">
-                Αλλαγή ✨
-              </span>
-            </button>
-            <div>
-              <div className="flex flex-wrap items-center gap-2 mb-1">
-                <span
-                  data-testid="companion-evolution-badge"
-                  className="inline-flex items-center gap-1 px-3 py-0.5 rounded-full bg-white border border-sage text-xs font-extrabold text-sage-dark"
-                >
-                  <span>{avatarEvaluation.evolutionBadgeEmoji}</span>
-                  <span>{avatarEvaluation.evolutionTitleEl}</span>
-                </span>
-              </div>
-              <h1 id="hub-welcome-heading" className="text-2xl md:text-3xl font-extrabold text-charcoal">
-                Γεια σου, {toGreekVocative(activeProfile.nickname)}! Τι θέλεις να παίξουμε σήμερα;
-              </h1>
-              <p className="text-sm font-bold text-slate-dark" data-testid="active-profile-adaptation-summary">
-                🧠 {activeProfile.learnedModel.adaptationSummaryEl}
-              </p>
-              <p
-                className="text-xs font-extrabold text-sage-dark mt-1"
-                data-testid="companion-superpower-banner"
-              >
-                {avatarEvaluation.childEncouragementEl}
-              </p>
-            </div>
-          </div>
-
-          <button
-            type="button"
-            onClick={() =>
-              speakGreek(
-                `Γεια σου, ${toGreekVocative(activeProfile.nickname)}! ${avatarEvaluation.avatar.coachingTipEl} Διάλεξε μία από τις τέσσερις ομάδες παιχνιδιών για να ξεκινήσουμε.`,
-                true,
-                activeProfile.learnedModel.optimalSpeechRate
-              )
-            }
-            data-testid="hub-voice-welcome-btn"
-            aria-label="Άκουσε το καλωσόρισμα"
-            className="touch-target px-5 py-3 rounded-2xl bg-white border-2 border-sage text-charcoal font-bold flex items-center gap-2 hover:bg-sage-surface shrink-0"
-          >
-            <span className="text-2xl" aria-hidden="true">🔊</span>
-            <span>Άκου</span>
-          </button>
-        </div>
-
-        {/* Interactive Companion Picker & ADHD Superpower Explorer */}
-        {isChangingAvatar && (
-          <div
-            data-testid="companion-avatar-picker-panel"
-            className="p-4 rounded-2xl bg-white border-2 border-sage space-y-3"
-          >
-            <div className="flex items-center justify-between">
-              <h2 className="text-sm font-extrabold text-charcoal">
-                🦄 Διάλεξε τον Αγαπημένο σου Συνοδοιπόρο Εστίασης (Ζώα & Φανταστικοί Ήρωες):
-              </h2>
-              <button
-                type="button"
-                onClick={() => setIsChangingAvatar(false)}
-                className="px-3 py-1 rounded-xl bg-sand text-xs font-extrabold text-charcoal"
-              >
-                Έτοιμο ✓
-              </button>
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-8 gap-2">
-              {AVATAR_PRESETS.map((preset) => {
-                const isCurrent = activeProfile.avatarEmoji === preset.emoji;
-                return (
-                  <button
-                    key={preset.emoji}
-                    type="button"
-                    data-testid={`switch-avatar-btn-${preset.emoji}`}
-                    onClick={() => {
-                      void updateProfileAvatar(activeProfile.id, preset.emoji);
-                      speakGreek(
-                        `${preset.defaultNameEl}! ${preset.coachingTipEl}`,
-                        settings.voiceEnabled,
-                        activeProfile.learnedModel.optimalSpeechRate
-                      );
-                    }}
-                    className={`p-2.5 rounded-2xl border-2 flex flex-col items-center text-center gap-1 transition-all ${
-                      isCurrent
-                        ? 'bg-sage-surface border-charcoal ring-2 ring-sage scale-105'
-                        : 'bg-sand-light border-sand-dark hover:bg-white'
-                    }`}
-                  >
-                    <span className="text-3xl" aria-hidden="true">
-                      {preset.emoji}
-                    </span>
-                    <span className="text-[11px] font-extrabold text-charcoal leading-tight">
-                      {preset.defaultNameEl}
-                    </span>
-                    <span className="text-[9px] font-bold text-slate-dark leading-tight">
-                      {DOMAIN_LABELS_EL[preset.primaryDomain].emoji}{' '}
-                      {preset.category === 'fantasy' ? 'Φαντασία' : 'Ζωάκι'}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* Personalized Activity Recommendation from Child's Continual Learning Model */}
-        <div
-          data-testid="personalized-recommendation-card"
-          className="p-4 rounded-2xl bg-white border-2 border-sage flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+        <p
+          className="text-sm font-bold text-slate-dark px-1"
+          data-testid="active-profile-adaptation-summary"
         >
-          <div className="flex items-center gap-3">
-            <span className="text-4xl" aria-hidden="true">{recommendation.activity.pictogram}</span>
-            <div>
-              <span className="inline-block px-2.5 py-0.5 rounded-full bg-sage-surface text-[11px] font-extrabold text-sage-dark border border-sage">
-                🌟 Προσωπική Πρόταση Προσαρμοσμένη σε Εσένα
-              </span>
-              <p className="text-base font-extrabold text-charcoal mt-0.5">
-                {recommendation.activity.code}. {recommendation.activity.titleEl}
-              </p>
-              <p className="text-xs text-charcoal-muted">{recommendation.reasonEl}</p>
-            </div>
-          </div>
+          🧠 {activeProfile.learnedModel.adaptationSummaryEl}
+        </p>
 
-          <button
-            type="button"
-            data-testid="play-recommended-activity-btn"
-            onClick={() => navigate(`/activity/${recommendation.activity.id}`)}
-            className="touch-target px-5 py-2.5 rounded-2xl bg-sage-dark text-white font-extrabold text-sm flex items-center gap-2 hover:bg-sage shrink-0"
-          >
-            <span aria-hidden="true">▶️</span>
-            <span>Παίξε Τώρα</span>
-          </button>
-        </div>
-      </section>
-
-      {/* Maximum 4 Primary Categories */}
-      <section aria-label="Οι 4 Βασικές Κατηγορίες Δραστηριοτήτων">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6" data-testid="category-cards-grid">
-          {CATEGORIES.map((category) => {
-            const activities = getActivitiesByCategory(category.id);
-            return (
-              <div
-                key={category.id}
-                data-testid={`category-card-${category.id}`}
-                className={`rounded-3xl border-4 p-6 flex flex-col justify-between gap-5 shadow-sm transition-transform ${category.accentColorClass}`}
-              >
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex items-center gap-4">
-                    <span className="text-5xl select-none" aria-hidden="true">
-                      {category.pictogram}
-                    </span>
-                    <div>
-                      <span
-                        className={`inline-block px-3 py-0.5 rounded-full text-xs font-extrabold uppercase tracking-wider mb-1 ${category.badgeBgClass}`}
-                      >
-                        Ομάδα {category.groupCode} • {activities.length} Παιχνίδια
-                      </span>
-                      <h2 className="text-2xl font-extrabold text-charcoal">{category.titleEl}</h2>
-                      <p className="text-sm font-bold text-charcoal-muted">{category.subtitleEl}</p>
-                    </div>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() =>
-                      speakGreek(
-                        category.voicePromptEl,
-                        true,
-                        activeProfile.learnedModel.optimalSpeechRate
-                      )
-                    }
-                    aria-label={`Άκουσε περιγραφή για ${category.titleEl}`}
-                    className="touch-target px-3.5 py-2 rounded-2xl bg-white/90 border-2 border-charcoal/20 text-charcoal font-bold flex items-center justify-center hover:bg-white"
-                  >
-                    <span className="text-2xl" aria-hidden="true">🔊</span>
-                  </button>
-                </div>
-
-                {/* Plain-Language Everyday Parent Benefit */}
-                {EVERYDAY_CATEGORY_BENEFITS_EL[category.id] && (
-                  <p
-                    data-testid={`category-everyday-benefit-${category.id}`}
-                    className="p-3 rounded-2xl bg-white/90 border border-charcoal/15 text-xs font-bold text-charcoal leading-relaxed"
-                  >
-                    {EVERYDAY_CATEGORY_BENEFITS_EL[category.id]}
-                  </p>
-                )}
-
-                {/* Activity Mini Pictogram Preview */}
-                <div className="flex flex-wrap items-center gap-2">
-                  {activities.map((act) => (
-                    <span
-                      key={act.id}
-                      className="px-3 py-1.5 rounded-xl bg-white/80 border border-charcoal/15 text-xs font-bold text-charcoal flex items-center gap-1.5"
-                    >
-                      <span aria-hidden="true">{act.pictogram}</span>
-                      <span>{act.titleEl}</span>
-                    </span>
-                  ))}
-                </div>
-
-                {/* Single Clear Primary Action per Category Card */}
-                <button
-                  type="button"
-                  data-testid={`open-category-${category.id}`}
-                  onClick={() => handleCategorySelect(category.id, category.voicePromptEl)}
-                  className="touch-target w-full py-4 px-6 rounded-2xl bg-charcoal text-white font-extrabold text-lg flex items-center justify-center gap-3 hover:bg-slate-dark transition-colors"
+        {/* Which group helps with what (moved here from the child's category cards) */}
+        <div
+          data-testid="hub-parent-category-guide"
+          className="bg-white border-2 border-sand-dark rounded-3xl p-4 md:p-5 space-y-2"
+        >
+          <h3 className="text-sm md:text-base font-extrabold text-charcoal">
+            Ποια ομάδα παιχνιδιών ταιριάζει σε τι
+          </h3>
+          <ul className="space-y-1.5">
+            {CATEGORIES.map((category) =>
+              EVERYDAY_CATEGORY_BENEFITS_EL[category.id] ? (
+                <li
+                  key={category.id}
+                  data-testid={`category-everyday-benefit-${category.id}`}
+                  className="text-xs font-bold text-charcoal leading-relaxed"
                 >
-                  <span>Παίξε «{category.titleEl}»</span>
-                  <span aria-hidden="true">➡️</span>
-                </button>
-              </div>
-            );
-          })}
+                  <span aria-hidden="true">{category.pictogram}</span>{' '}
+                  <strong>{category.titleEl}:</strong>{' '}
+                  {EVERYDAY_CATEGORY_BENEFITS_EL[category.id].replace(/^💡 Στην πράξη: /, '')}
+                </li>
+              ) : null
+            )}
+          </ul>
         </div>
       </section>
 
@@ -706,8 +753,8 @@ export const ChildHubPage: React.FC = () => {
           υποστήριξης και εξάσκησης δεξιοτήτων.
         </p>
         <p>
-          ΔΕΝ αποτελεί ιατρική συσκευή, διαγνωστικό εργαλείο ή κλινική θεραπεία ΔΕΠΥ. 100% τοπική
-          λειτουργία στη συσκευή χωρίς διαφημίσεις ή ιχνηλάτες.
+          ΔΕΝ αποτελεί ιατρική συσκευή, διαγνωστικό εργαλείο ή κλινική θεραπεία ΔΕΠΥ. Τα δεδομένα του
+          παιδιού μένουν στη συσκευή· χωρίς διαφημίσεις, στατιστικά μόνο με συγκατάθεση.
         </p>
       </footer>
       {showBeginnerModal && (

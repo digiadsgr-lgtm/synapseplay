@@ -459,14 +459,18 @@ export const ParentArticlesPage: React.FC = () => {
                   </time>
                 </div>
 
-                <h2
-                  itemProp="headline"
-                  className="text-xl sm:text-2xl md:text-3xl font-extrabold text-[#2C3539] leading-snug"
-                >
+                {/* Single-article view: the title is the page's <h1> (SEO: exactly one h1 per page) */}
+                {React.createElement(
+                  activeSingleArticle ? 'h1' : 'h2',
+                  {
+                    itemProp: 'headline',
+                    className:
+                      'text-xl sm:text-2xl md:text-3xl font-extrabold text-[#2C3539] leading-snug',
+                  },
                   <Link to={`/articles/${art.id}`} className="hover:text-[#4A6B82] transition-colors">
                     {art.titleEl}
                   </Link>
-                </h2>
+                )}
 
                 <p itemProp="description" className="text-sm sm:text-base font-bold text-[#4A6B82]">
                   {art.subtitleEl}

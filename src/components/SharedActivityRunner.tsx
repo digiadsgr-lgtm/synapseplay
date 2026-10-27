@@ -52,7 +52,14 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
   children,
 }) => {
   const navigate = useNavigate();
-  const { settings, activeProfile, logCompletedActivity, recordStrategyPreference } = useApp();
+  const {
+    settings,
+    activeProfile,
+    logCompletedActivity,
+    recordStrategyPreference,
+    isBreakActive,
+    isSessionDepleted,
+  } = useApp();
 
   const storageKey = `synapseplay_runner_${activity.id}`;
   const savedCheckpoint = (() => {
@@ -211,6 +218,22 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
   useEffect(() => {
     toggleSeatedMode(settings.seatedModeDefault);
   }, [settings.seatedModeDefault, toggleSeatedMode]);
+
+  // Global "Διάλειμμα" or Smooth-Landing depletion must freeze the game underneath
+  // (stream/freeze/memory timers check phase === 'PAUSED'). Resume only if WE paused it.
+  const pausedByOverlayRef = useRef<boolean>(false);
+  const isOverlayActive = isBreakActive || isSessionDepleted;
+  useEffect(() => {
+    if (isOverlayActive) {
+      if (state.phase === 'ACTIVE_ROUND' || state.phase === 'ROUND_FEEDBACK') {
+        pausedByOverlayRef.current = true;
+        pauseActivity();
+      }
+    } else if (pausedByOverlayRef.current) {
+      pausedByOverlayRef.current = false;
+      if (state.phase === 'PAUSED') resumeActivity();
+    }
+  }, [isOverlayActive, state.phase, pauseActivity, resumeActivity]);
 
   useEffect(() => {
     // Only speak generic overview on INTRO phase; during ACTIVE_ROUND each activity speaks its exact per-round instruction
