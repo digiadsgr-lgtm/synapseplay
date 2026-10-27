@@ -3,6 +3,7 @@ import type { ActivityRunnerRenderProps } from '../components/ActivityRunner';
 import { useDebouncedAction } from '../hooks/useDebouncedAction';
 import { playCalmTone, speakGreek } from '../utils/soundAndSpeech';
 import { useApp } from '../context/AppContext';
+import { useSpokenPrompt } from '../hooks/useSpokenPrompt';
 import { selectSessionRounds } from '../utils/clinicalAdhdEngine';
 
 interface AnimalPose {
@@ -17,73 +18,73 @@ const ANIMAL_POSES: AnimalPose[] = [
     emoji: '🦩',
     nameEl: 'Ισορροπία Πελαργού',
     standingPromptEl: 'Στάσου με ίσιο κορμό, άνοιξε τα χέρια σαν φτερά και σήκωσε ελαφρά το ένα πόδι για 3 δευτερόλεπτα!',
-    seatedPromptEl: 'Καθιστός/ή στην καρέκλα, άνοιξε πλατιά τα χέρια σαν φτερά πελαργού και κράτησέ τα σταθερά!',
+    seatedPromptEl: 'Κάθισε στην καρέκλα, άνοιξε πλατιά τα χέρια σαν φτερά πελαργού και κράτησέ τα σταθερά!',
   },
   {
     emoji: '🐻',
     nameEl: 'Αργά Βήματα Αρκούδας',
     standingPromptEl: 'Κάνε 3 αργά, ήρεμα και σταθερά βήματα στο δωμάτιο σαν μεγάλη ήρεμη αρκούδα!',
-    seatedPromptEl: 'Καθιστός/ή, ακούμπησε εναλλάξ αργά τις παλάμες σου στα γόνατα με σταθερό ρυθμό!',
+    seatedPromptEl: 'Από την καρέκλα, ακούμπησε εναλλάξ αργά τις παλάμες σου στα γόνατα με σταθερό ρυθμό!',
   },
   {
     emoji: '🐢',
     nameEl: 'Καβούκι Χελώνας',
     standingPromptEl: 'Αγκάλιασε τους ώμους σου απαλά και πάρε μια βαθιά, ήρεμη ανάσα σαν χελωνάκι!',
-    seatedPromptEl: 'Καθιστός/ή, αγκάλιασε απαλά τους ώμους σου και βγάλε αργά τον αέρα!',
+    seatedPromptEl: 'Από την καρέκλα, αγκάλιασε απαλά τους ώμους σου και βγάλε αργά τον αέρα!',
   },
   {
     emoji: '🦒',
     nameEl: 'Ψηλός Λαιμός Καμηλοπάρδαλης',
     standingPromptEl: 'Τέντωσε τα χέρια ψηλά προς τον ουρανό σαν καμηλοπάρδαλη που φτάνει τα φύλλα του δέντρου!',
-    seatedPromptEl: 'Καθιστός/ή με ίσια πλάτη, τέντωσε ήρεμα τα δύο χέρια ψηλά και μέτρησε 3 ανάσες!',
+    seatedPromptEl: 'Κάθισε με ίσια πλάτη και τέντωσε ήρεμα τα δύο χέρια ψηλά όσο μετράμε ως το 3!',
   },
   {
     emoji: '🦀',
     nameEl: 'Πλάγια Κίνηση Καβουριού',
     standingPromptEl: 'Λύγισε λίγο τα γόνατα, άνοιξε τους αγκώνες και κάνε 2 μικρά πλάγια βήματα με έλεγχο!',
-    seatedPromptEl: 'Καθιστός/ή, άνοιξε και κλείσε ρυθμικά τις παλάμες σαν δαγκάνες καβουριού 3 φορές!',
+    seatedPromptEl: 'Από την καρέκλα, άνοιξε και κλείσε ρυθμικά τις παλάμες σαν δαγκάνες καβουριού 3 φορές!',
   },
   {
     emoji: '🦋',
     nameEl: 'Ήρεμα Φτερά Πεταλούδας',
     standingPromptEl: 'Ακούμπησε τα δάχτυλα στους ώμους και κάνε 3 αργούς κύκλους με τους αγκώνες σου!',
-    seatedPromptEl: 'Καθιστός/ή, κάνε 3 αργές, ήρεμες κινήσεις στους ώμους σαν φτερά πεταλούδας!',
+    seatedPromptEl: 'Από την καρέκλα, κάνε 3 αργές, ήρεμες κινήσεις στους ώμους σαν φτερά πεταλούδας!',
   },
   {
     emoji: '🐘',
     nameEl: 'Σταθερά Βήματα Ελέφαντα',
     standingPromptEl: 'Πίεσε εναλλάξ δυνατά τα πέλματά σου στο πάτωμα σαν ήρεμος, δυνατός ελέφαντας!',
-    seatedPromptEl: 'Καθιστός/ή, πίεσε σταθερά και τα δύο πέλματα στο πάτωμα μετρώντας 3 ήρεμες ανάσες!',
+    seatedPromptEl: 'Από την καρέκλα, πίεσε σταθερά και τα δύο πέλματα στο πάτωμα όσο μετράμε ως το 3!',
   },
   {
     emoji: '🐱',
     nameEl: 'Τέντωμα Ήρεμης Γάτας',
     standingPromptEl: 'Τέντωσε απαλά τα χέρια μπροστά και καμάρωσε την πλάτη σου σαν γατούλα που ξυπνάει!',
-    seatedPromptEl: 'Καθιστός/ή, πλέξε τα δάχτυλα και τέντωσε τις παλάμες μπροστά με βαθιά εκπνοή!',
+    seatedPromptEl: 'Από την καρέκλα, πλέξε τα δάχτυλα και τέντωσε τις παλάμες μπροστά με βαθιά εκπνοή!',
   },
   {
     emoji: '🦅',
     nameEl: 'Άνοιγμα Φτερών Αετού',
     standingPromptEl: 'Άνοιξε αργά τα χέρια στο πλάι στο ύψος των ώμων και κράτα ισορροπία με ίσια πλάτη!',
-    seatedPromptEl: 'Καθιστός/ή, άνοιξε πλατιά τα χέρια στο πλάι και νιώσε το στήθος σου να ανοίγει ήρεμα!',
+    seatedPromptEl: 'Από την καρέκλα, άνοιξε πλατιά τα χέρια στο πλάι και νιώσε το στήθος σου να ανοίγει ήρεμα!',
   },
   {
     emoji: '🐸',
     nameEl: 'Κάθισμα Ισορροπίας Βατράχου',
     standingPromptEl: 'Λύγισε απαλά τα γόνατα, ακούμπησε τα χέρια στη μέση και κράτα σταθερή ισορροπία!',
-    seatedPromptEl: 'Καθιστός/ή, σήκωσε ελαφρά τις φτέρνες πατώντας στις μύτες των ποδιών για 3 χρόνους!',
+    seatedPromptEl: 'Από την καρέκλα, σήκωσε ελαφρά τις φτέρνες πατώντας στις μύτες των ποδιών όσο μετράμε ως το 3!',
   },
   {
     emoji: '🦢',
     nameEl: 'Αρχοντικός Κύκνος στη Λίμνη',
     standingPromptEl: 'Σήκωσε ψηλά το πηγούνι, κατέβασε τους ώμους και ένωσε τις παλάμες μπροστά στο στήθος!',
-    seatedPromptEl: 'Καθιστός/ή, ένωσε τις παλάμες μπροστά στο στήθος και μάκρυνε τον λαιμό σου ήρεμα!',
+    seatedPromptEl: 'Από την καρέκλα, ένωσε τις παλάμες μπροστά στο στήθος και μάκρυνε τον λαιμό σου ήρεμα!',
   },
   {
     emoji: '🐨',
     nameEl: 'Σφιχτή Αγκαλιά Κοάλα',
     standingPromptEl: 'Σταύρωσε τα χέρια και δώσε στον εαυτό σου μια σφιχτή, ζεστή αγκαλιά σαν κοάλα στο δέντρο!',
-    seatedPromptEl: 'Καθιστός/ή, αγκάλιασε σφιχτά τον κορμό σου και νιώσε τους ώμους σου να χαλαρώνουν!',
+    seatedPromptEl: 'Από την καρέκλα, αγκάλιασε σφιχτά τον κορμό σου και νιώσε τους ώμους σου να χαλαρώνουν!',
   },
 ];
 
@@ -114,24 +115,28 @@ export const Activity10CopyAnimal: React.FC<ActivityRunnerRenderProps> = ({
   const activePromptEl = seatedMode ? pose.seatedPromptEl : pose.standingPromptEl;
 
   useEffect(() => {
-    setCountsDone(hintLevel === 2 || ageBand === '4-5' ? 2 : 0);
+    setCountsDone(0);
   }, [currentRound, hintLevel, ageBand, sessionSeed]);
 
-  useEffect(() => {
-    speakGreek(`${pose.nameEl}. ${activePromptEl}`, settings.voiceEnabled, adaptiveProfile.speechRate);
-  }, [currentRound, pose.nameEl, activePromptEl, sessionSeed, settings.voiceEnabled, adaptiveProfile.speechRate]);
+  // The count starts only AFTER the child has heard the whole instruction
+  // (before: «Ένα» was spoken 2.4 s after the start and cut the instruction in half).
+  const heard = useSpokenPrompt(`${pose.nameEl}. ${activePromptEl}`, {
+    enabled: settings.voiceEnabled,
+    rate: adaptiveProfile.speechRate,
+    resetKey: `${currentRound}-${sessionSeed}`,
+  });
 
   // Automatic Hands-Free Rhythm Metronome (ticks while child holds the physical animal pose)
   useEffect(() => {
-    if (phase === 'PAUSED' || phase === 'COMPLETED') return;
-    const delayMs = countsDone === 0 ? 2400 : 1800;
+    if (phase === 'PAUSED' || phase === 'COMPLETED' || !heard) return;
+    const delayMs = 2000; // ~ one calm breath per count
     const timer = window.setTimeout(() => {
       const next = countsDone + 1;
       playCalmTone(next >= 3 ? 'complete' : 'soft-step', settings.soundEnabled);
-      if (next === 1) speakGreek('Ένα', settings.voiceEnabled, adaptiveProfile.speechRate);
-      if (next === 2) speakGreek('Δύο', settings.voiceEnabled, adaptiveProfile.speechRate);
+      if (next === 1) speakGreek('Ένα', settings.voiceEnabled, adaptiveProfile.speechRate, { kind: 'count' });
+      if (next === 2) speakGreek('Δύο', settings.voiceEnabled, adaptiveProfile.speechRate, { kind: 'count' });
       if (next >= 3) {
-        speakGreek('Τρία! Μπράβο!', settings.voiceEnabled, adaptiveProfile.speechRate);
+        speakGreek('Τρία!', settings.voiceEnabled, adaptiveProfile.speechRate, { kind: 'count', protect: true });
         setCountsDone(0);
         advanceRef.current(absorbedRef.current());
       } else {
@@ -139,7 +144,7 @@ export const Activity10CopyAnimal: React.FC<ActivityRunnerRenderProps> = ({
       }
     }, delayMs);
     return () => window.clearTimeout(timer);
-  }, [phase, countsDone, currentRound, settings.soundEnabled, settings.voiceEnabled, adaptiveProfile.speechRate]);
+  }, [phase, heard, countsDone, currentRound, settings.soundEnabled, settings.voiceEnabled, adaptiveProfile.speechRate]);
 
   const handleCountTap = () => {
     runDebounced(() => {

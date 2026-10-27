@@ -76,6 +76,7 @@ export const Activity04SequenceMemory: React.FC<ActivityRunnerRenderProps> = ({
   const [activeFlashId, setActiveFlashId] = useState<string | null>(null);
   const [isDemonstrating, setIsDemonstrating] = useState<boolean>(false);
   const timersRef = useRef<number[]>([]);
+  const earlyTapsRef = useRef<number>(0);
 
   const clearDemoTimers = useCallback(() => {
     timersRef.current.forEach((t) => window.clearTimeout(t));
@@ -99,7 +100,7 @@ export const Activity04SequenceMemory: React.FC<ActivityRunnerRenderProps> = ({
         setActiveFlashId(tileId);
         playCalmTone('soft-step', settings.soundEnabled);
         if (tileObj) {
-          speakGreek(tileObj.labelEl, settings.voiceEnabled, adaptiveProfile.speechRate);
+          speakGreek(tileObj.labelEl, settings.voiceEnabled, adaptiveProfile.speechRate, { kind: 'syllable' });
         }
       }, idx * demoStepMs + 100);
 
@@ -107,6 +108,8 @@ export const Activity04SequenceMemory: React.FC<ActivityRunnerRenderProps> = ({
         setActiveFlashId(null);
         if (idx === targetSequence.length - 1) {
           setIsDemonstrating(false);
+          // clear cue that it is the child's turn (before: the demo just stopped, in silence)
+          speakGreek('Τώρα εσύ!', settings.voiceEnabled, adaptiveProfile.speechRate, { interrupt: false });
         }
       }, idx * demoStepMs + 100 + demoOnMs);
 
@@ -116,6 +119,7 @@ export const Activity04SequenceMemory: React.FC<ActivityRunnerRenderProps> = ({
 
   useEffect(() => {
     setUserProgress([]);
+    earlyTapsRef.current = 0;
     playDemonstration();
     return () => clearDemoTimers();
   }, [currentRound, sessionSeed, playDemonstration, clearDemoTimers]);
@@ -125,11 +129,11 @@ export const Activity04SequenceMemory: React.FC<ActivityRunnerRenderProps> = ({
   const handleTilePress = useCallback(
     (tileId: string) => {
       runDebounced(() => {
-        // If child already saw the sequence and taps the correct first tile, stop demo timers gracefully
+        // Taps while the symbols are still being shown are ignored (not errors):
+        // before, one impatient tap cut the demo short and was taken as the answer.
         if (isDemonstrating) {
-          clearDemoTimers();
-          setActiveFlashId(null);
-          setIsDemonstrating(false);
+          earlyTapsRef.current += 1;
+          return;
         }
 
         if (tileId === nextExpectedTileId) {
@@ -137,13 +141,13 @@ export const Activity04SequenceMemory: React.FC<ActivityRunnerRenderProps> = ({
           const updated = [...userProgress, tileId];
           setUserProgress(updated);
           if (updated.length === targetSequence.length) {
-            advanceRound(getAbsorbedCount());
+            advanceRound(getAbsorbedCount() + earlyTapsRef.current);
           }
         } else {
           // Non-punitive: no streak loss, reset current round sequence input gently
           setUserProgress([]);
           triggerGentleFeedback(
-            'Δεν πειράζει! Ας ξεκινήσουμε τη σειρά αυτού του βήματος από την αρχή ήρεμα.'
+            'Δεν πειράζει! Ξεκινάμε τη σειρά από την αρχή.'
           );
         }
       });
@@ -187,7 +191,6 @@ export const Activity04SequenceMemory: React.FC<ActivityRunnerRenderProps> = ({
               const showCue =
                 isEntered ||
                 hintLevel >= 2 ||
-                ageBand === '4-5' ||
                 ((hintLevel === 1 || adaptiveProfile.autoHintBoost) && idx === 0);
               return (
                 <div

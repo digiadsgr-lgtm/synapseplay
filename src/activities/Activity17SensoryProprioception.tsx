@@ -3,6 +3,7 @@ import type { ActivityRunnerRenderProps } from '../components/ActivityRunner';
 import { useDebouncedAction } from '../hooks/useDebouncedAction';
 import { playCalmTone, speakGreek } from '../utils/soundAndSpeech';
 import { useApp } from '../context/AppContext';
+import { useSpokenPrompt } from '../hooks/useSpokenPrompt';
 import { selectSessionRounds } from '../utils/clinicalAdhdEngine';
 
 interface ProprioceptiveExercise {
@@ -16,16 +17,16 @@ interface ProprioceptiveExercise {
 const SENSORY_EXERCISES: ProprioceptiveExercise[] = [
   {
     emoji: '🐘👐',
-    titleEl: 'Ισομετρική Πίεση Παλαμών (Βαθιά Πίεση / Heavy Work)',
+    titleEl: 'Οι Δυνατές Παλάμες',
     disciplineTagEl: 'Εργοθεραπεία (Αισθητηριακή Ολοκλήρωση Ayres) & Φυσιατρική',
     standingInstructionEl:
-      'Ένωσε τις παλάμες σου μπροστά στο στήθος και πίεσέ τες σταθερά μεταξύ τους για 3 ήρεμους ρυθμούς!',
+      'Ένωσε τις παλάμες σου μπροστά στο στήθος και πίεσέ τες σταθερά μεταξύ τους όσο μετράμε ως το 3!',
     seatedInstructionEl:
-      'Καθιστός/ή με τα πέλματα σταθερά στο πάτωμα, ένωσε τις παλάμες και πίεσέ τες απαλά για 3 ρυθμούς!',
+      'Κάθισε με τα πέλματα σταθερά στο πάτωμα, ένωσε τις παλάμες και πίεσέ τες απαλά όσο μετράμε ως το 3!',
   },
   {
     emoji: '🪑💪',
-    titleEl: 'Εργονομική Ευθυγράμμιση Κορμού & Αποφόρτιση Ώμων',
+    titleEl: 'Ώμοι Πάνω, Ώμοι Κάτω',
     disciplineTagEl: 'Φυσιατρική Στάση Σώματος & Ιδιοδεκτικότητα Κορμού',
     standingInstructionEl:
       'Σήκωσε τους ώμους ψηλά προς τα αυτιά στην εισπνοή και άφησέ τους να κατέβουν χαλαρά στην εκπνοή!',
@@ -34,93 +35,93 @@ const SENSORY_EXERCISES: ProprioceptiveExercise[] = [
   },
   {
     emoji: '🐻🧘',
-    titleEl: 'Σφιχτή Αγκαλιά Αρκούδας (Αυτορρύθμιση Βαθιάς Πίεσης)',
+    titleEl: 'Σφιχτή Αγκαλιά Αρκούδας',
     disciplineTagEl: 'Εργοθεραπεία & Παιδοψυχιατρική Αποφόρτιση Διέγερσης',
     standingInstructionEl:
       'Σταύρωσε τα χέρια και αγκάλιασε σφιχτά τους ώμους σου δίνοντας σταθερή, ήρεμη πίεση στο σώμα!',
     seatedInstructionEl:
-      'Καθιστός/ή αναπαυτικά, αγκάλιασε τους ώμους σου και μέτρησε 3 ήρεμες εκπνοές!',
+      'Κάθισε αναπαυτικά, αγκάλιασε τους ώμους σου και βγάλε αργά τον αέρα όσο μετράμε ως το 3!',
   },
   {
     emoji: '🌳🦶',
-    titleEl: 'Ρίζες Δέντρου στο Πάτωμα (Ιδιοδεκτική Γείωση Κάτω Άκρων)',
+    titleEl: 'Ρίζες Δέντρου στο Πάτωμα',
     disciplineTagEl: 'Φυσιατρική & Εργοθεραπεία (Στασική Σταθερότητα)',
     standingInstructionEl:
       'Πίεσε σταθερά και τα δύο πέλματα στο πάτωμα σαν βαθιές ρίζες δέντρου και νιώσε τα πόδια σου δυνατά!',
     seatedInstructionEl:
-      'Καθιστός/ή με γωνία 90 μοιρών στα γόνατα, πίεσε σταθερά τα πέλματα στο πάτωμα για 3 ήρεμους ρυθμούς!',
+      'Κάθισε με γωνία 90 μοιρών στα γόνατα και πίεσε σταθερά τα πέλματα στο πάτωμα όσο μετράμε ως το 3!',
   },
   {
     emoji: '🧱🤲',
-    titleEl: 'Σπρώχνω τον Αόρατο Τοίχο (Ισομετρική Ενδυνάμωση Άνω Άκρων)',
+    titleEl: 'Σπρώχνω τον Αόρατο Τοίχο',
     disciplineTagEl: 'Εργοθεραπεία (Ayres SI Heavy Work) & Φυσιατρική',
     standingInstructionEl:
       'Τέντωσε τα χέρια μπροστά (ή σε έναν αληθινό τοίχο) και σπρώξε σταθερά με ήρεμη εκπνοή!',
     seatedInstructionEl:
-      'Ακούμπησε τις παλάμες πάνω στο τραπέζι και δώσε σταθερή, ήρεμη πίεση προς τα κάτω για 3 ρυθμούς!',
+      'Ακούμπησε τις παλάμες πάνω στο τραπέζι και δώσε σταθερή, ήρεμη πίεση προς τα κάτω όσο μετράμε ως το 3!',
   },
   {
     emoji: '🦋🌬️',
-    titleEl: 'Διάταση Θώρακα & Αναπνοή Πνευμονογαστρικής Ηρεμίας',
+    titleEl: 'Ανοίγω σαν Λουλούδι',
     disciplineTagEl: 'Εργοθεραπεία & Φυσιατρική',
     standingInstructionEl:
       'Άνοιξε τα χέρια στο πλάι παίρνοντας βαθιά εισπνοή από τη μύτη και ένωσέ τα μπροστά με αργή εκπνοή!',
     seatedInstructionEl:
-      'Καθιστός/ή με ίσιο κορμό, άνοιξε ελαφρά τους αγκώνες στην εισπνοή και χαλάρωσε στην εκπνοή!',
+      'Κάθισε με ίσιο κορμό, άνοιξε ελαφρά τους αγκώνες στην εισπνοή και χαλάρωσε στην εκπνοή!',
   },
   {
     emoji: '🍋✊',
-    titleEl: 'Στύβω τα Αόρατα Λεμόνια (Προοδευτική Μυϊκή Χαλάρωση Jacobson)',
+    titleEl: 'Στύβω τα Αόρατα Λεμόνια',
     disciplineTagEl: 'Παιδοψυχολογία & Εργοθεραπεία (Μυϊκή Αποφόρτιση Άκρων Χειρών)',
     standingInstructionEl:
       'Σφίξε απαλά τις παλάμες σου σαν να στύβεις δύο λεμόνια στην εισπνοή και άνοιξε χαλαρά τα δάχτυλα στην εκπνοή!',
     seatedInstructionEl:
-      'Καθιστός/ή με τους πήχεις στο τραπέζι, σφίξε απαλά τις γροθιές σου και άφησέ τες να χαλαρώσουν τελείως!',
+      'Κάθισε με τους πήχεις στο τραπέζι, σφίξε απαλά τις γροθιές σου και άφησέ τες να χαλαρώσουν τελείως!',
   },
   {
     emoji: '🪶🌬️',
-    titleEl: 'Αναπνοή του Φτερού (Παρατεταμένη Εκπνοή Ηρεμίας)',
+    titleEl: 'Η Ανάσα του Φτερού',
     disciplineTagEl: 'Παιδοψυχιατρική & Λογοθεραπεία (Έλεγχος Αναπνευστικής Ροής)',
     standingInstructionEl:
       'Πάρε ήρεμη εισπνοή από τη μύτη και φύσηξε απαλά από το στόμα σαν να κρατάς ένα πούπουλο στον αέρα!',
     seatedInstructionEl:
-      'Καθιστός/ή με ίσια πλάτη, φύσηξε αργά και σταθερά μπροστά σου για 3 ήρεμους χρόνους!',
+      'Κάθισε με ίσια πλάτη, φύσηξε αργά και σταθερά μπροστά σου όσο μετράμε ως το 3!',
   },
   {
     emoji: '🏔️🦵',
-    titleEl: 'Σταθερό Βουνό (Ισομετρική Ενεργοποίηση Τετρακεφάλων & Κορμού)',
+    titleEl: 'Σταθερό Βουνό',
     disciplineTagEl: 'Φυσιατρική & Εργοθεραπεία (Κεντρική Σταθερότητα Κορμού)',
     standingInstructionEl:
       'Στάσου ίσια σαν ψηλό βουνό, σφίξε απαλά την κοιλιά και τα πόδια σου και κράτα σταθερή στάση!',
     seatedInstructionEl:
-      'Καθιστός/ή, ακούμπησε τις παλάμες στους μηρούς σου και δώσε ήρεμη, σταθερή πίεση προς τα κάτω!',
+      'Από την καρέκλα, ακούμπησε τις παλάμες στους μηρούς σου και δώσε ήρεμη, σταθερή πίεση προς τα κάτω!',
   },
   {
     emoji: '🌊🫧',
-    titleEl: 'Αναπνοή της Κοιλιάς (Διαφραγματικός Ρυθμός)',
+    titleEl: 'Η Κοιλιά Μπαλόνι',
     disciplineTagEl: 'Παιδοψυχολογία & Παιδοψυχιατρική (Αυτόνομη Ρύθμιση)',
     standingInstructionEl:
       'Βάλε τις παλάμες στην κοιλιά σου: νιώσε τη να φουσκώνει απαλά σαν μπαλόνι στην εισπνοή και να ξεφουσκώνει στην εκπνοή!',
     seatedInstructionEl:
-      'Καθιστός/ή αναπαυτικά, ακούμπησε τις παλάμες στην κοιλιά και μέτρησε 3 ήρεμες διαφραγματικές ανάσες!',
+      'Κάθισε αναπαυτικά, ακούμπησε τις παλάμες στην κοιλιά και ανάπνευσε ήρεμα όσο μετράμε ως το 3!',
   },
   {
     emoji: '🦒✨',
-    titleEl: 'Επιμήκυνση Σπονδυλικής Στήλης (Αυχενική & Θωρακική Ευθυγράμμιση)',
+    titleEl: 'Ψηλώνω σαν Κλωστή',
     disciplineTagEl: 'Φυσιατρική Εργονομία & Σωματική Επίγνωση',
     standingInstructionEl:
       'Φαντάσου μια αόρατη κλωστή στην κορυφή του κεφαλιού που σε ψηλώνει ήρεμα προς το ταβάνι με χαλαρούς ώμους!',
     seatedInstructionEl:
-      'Καθιστός/ή στην καρέκλα, μάκρυνε απαλά τον αυχένα σου προς τα πάνω κρατώντας το πηγούνι ελαφρά μέσα!',
+      'Κάθισε στην καρέκλα και μάκρυνε απαλά τον αυχένα σου προς τα πάνω κρατώντας το πηγούνι ελαφρά μέσα!',
   },
   {
     emoji: '🤲🪨',
-    titleEl: 'Ζεστή Πέτρα στις Παλάμες (Απτική & Ιδιοδεκτική Συγκέντρωση)',
+    titleEl: 'Ζεστή Πέτρα στις Παλάμες',
     disciplineTagEl: 'Εργοθεραπεία (Αισθητηριακή Εστίαση & Γείωση)',
     standingInstructionEl:
       'Τρίψε απαλά τις δύο παλάμες μεταξύ τους μέχρι να ζεσταθούν και κράτησέ τες ενωμένες στο κέντρο του στήθους!',
     seatedInstructionEl:
-      'Καθιστός/ή, τρίψε απαλά τις παλάμες σου και ακούμπησέ τες ζεστές και ήρεμες πάνω στο τραπέζι!',
+      'Από την καρέκλα, τρίψε απαλά τις παλάμες σου και ακούμπησέ τες ζεστές και ήρεμες πάνω στο τραπέζι!',
   },
 ];
 
@@ -151,24 +152,27 @@ export const Activity17SensoryProprioception: React.FC<ActivityRunnerRenderProps
   const activeInstructionEl = seatedMode ? item.seatedInstructionEl : item.standingInstructionEl;
 
   useEffect(() => {
-    setPulsesCompleted(hintLevel === 2 || ageBand === '4-5' ? 2 : 0);
+    setPulsesCompleted(0);
   }, [currentRound, hintLevel, ageBand, sessionSeed]);
 
-  useEffect(() => {
-    speakGreek(activeInstructionEl, settings.voiceEnabled, adaptiveProfile.speechRate);
-  }, [currentRound, activeInstructionEl, sessionSeed, settings.voiceEnabled, adaptiveProfile.speechRate]);
+  // The count starts only AFTER the child has heard the whole instruction
+  const heard = useSpokenPrompt(activeInstructionEl, {
+    enabled: settings.voiceEnabled,
+    rate: adaptiveProfile.speechRate,
+    resetKey: `${currentRound}-${sessionSeed}`,
+  });
 
   // Automatic Hands-Free Proprioceptive Metronome (ticks while child presses palms/feet)
   useEffect(() => {
-    if (phase === 'PAUSED' || phase === 'COMPLETED') return;
-    const delayMs = pulsesCompleted === 0 ? 2400 : 1800;
+    if (phase === 'PAUSED' || phase === 'COMPLETED' || !heard) return;
+    const delayMs = 2000; // ~ one calm breath per count
     const timer = window.setTimeout(() => {
       const next = pulsesCompleted + 1;
       playCalmTone(next >= 3 ? 'complete' : 'soft-step', settings.soundEnabled);
-      if (next === 1) speakGreek('Ένα', settings.voiceEnabled, adaptiveProfile.speechRate);
-      if (next === 2) speakGreek('Δύο', settings.voiceEnabled, adaptiveProfile.speechRate);
+      if (next === 1) speakGreek('Ένα', settings.voiceEnabled, adaptiveProfile.speechRate, { kind: 'count' });
+      if (next === 2) speakGreek('Δύο', settings.voiceEnabled, adaptiveProfile.speechRate, { kind: 'count' });
       if (next >= 3) {
-        speakGreek('Τρία! Μπράβο!', settings.voiceEnabled, adaptiveProfile.speechRate);
+        speakGreek('Τρία!', settings.voiceEnabled, adaptiveProfile.speechRate, { kind: 'count', protect: true });
         setPulsesCompleted(0);
         advanceRef.current(absorbedRef.current());
       } else {
@@ -176,7 +180,7 @@ export const Activity17SensoryProprioception: React.FC<ActivityRunnerRenderProps
       }
     }, delayMs);
     return () => window.clearTimeout(timer);
-  }, [phase, pulsesCompleted, currentRound, settings.soundEnabled, settings.voiceEnabled, adaptiveProfile.speechRate]);
+  }, [phase, heard, pulsesCompleted, currentRound, settings.soundEnabled, settings.voiceEnabled, adaptiveProfile.speechRate]);
 
   const handleProprioceptivePulse = () => {
     runDebounced(() => {

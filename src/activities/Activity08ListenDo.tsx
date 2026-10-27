@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import type { ActivityRunnerRenderProps } from '../components/ActivityRunner';
 import { useDebouncedAction } from '../hooks/useDebouncedAction';
 import { speakGreek, playCalmTone } from '../utils/soundAndSpeech';
 import { useApp } from '../context/AppContext';
+import { useSpokenPrompt } from '../hooks/useSpokenPrompt';
 import { reduceToTwoChoices, rotateOptionsForSession, selectSessionRounds } from '../utils/clinicalAdhdEngine';
 
 interface ListenRound {
@@ -67,7 +68,7 @@ const LISTEN_ROUNDS: ListenRound[] = [
     ],
   },
   {
-    instructionEl: 'Άκου πρώτα μέχρι το τέλος: Πού βάζουμε τα τετράδιά μας για το σχολείο; Πάτησε τη σχολική τσάντα!',
+    instructionEl: 'Άκου ως το τέλος: Πού βάζουμε τα τετράδιά μας για το σχολείο; Πάτησε τη σχολική τσάντα!',
     pictogramCue: '🏫 ⏳ ➡️ 🎒',
     options: [
       { id: 'l7-1', emoji: '🎒', labelEl: 'Σχολική Τσάντα', isTarget: true },
@@ -112,7 +113,7 @@ const LISTEN_ROUNDS: ListenRound[] = [
     ],
   },
   {
-    instructionEl: 'Άκου ήρεμα μέχρι την τελευταία λέξη: Πού ξαπλώνουμε το βράδυ για να κοιμηθούμε; Πάτησε το κρεβάτι!',
+    instructionEl: 'Άκου ήρεμα ως την τελευταία λέξη: Πού ξαπλώνουμε το βράδυ για να κοιμηθούμε; Πάτησε το κρεβάτι!',
     pictogramCue: '🌙 ⏳ ➡️ 🛏️',
     options: [
       { id: 'l12-1', emoji: '🪑', labelEl: 'Καρέκλα', isTarget: false },
@@ -124,7 +125,7 @@ const LISTEN_ROUNDS: ListenRound[] = [
 
 const SENIOR_LISTEN_ROUNDS: ListenRound[] = [
   {
-    instructionEl: 'Άκου ολόκληρη την εντολή πριν πατήσεις: ΜΗΝ πατήσεις το όχημα με τις ρόδες ούτε το ελικόπτερο· επίλεξε το επιστημονικό όργανο που παρατηρεί τους πλανήτες!',
+    instructionEl: 'Άκου ολόκληρη την εντολή πριν πατήσεις: ΜΗΝ πατήσεις το όχημα με τις ρόδες ούτε το ελικόπτερο· διάλεξε το επιστημονικό όργανο που παρατηρεί τους πλανήτες!',
     pictogramCue: '🚫🚗 🚫🚁 ➡️ 🔭',
     options: [
       { id: 'sl1-1', emoji: '🚗', labelEl: 'Αυτοκίνητο', isTarget: false },
@@ -133,7 +134,7 @@ const SENIOR_LISTEN_ROUNDS: ListenRound[] = [
     ],
   },
   {
-    instructionEl: 'Πρόσεξε την ανατροπή στο τέλος: Αν και η κιθάρα και το τύμπανο παίζουν μουσική, εσύ επίλεξε το όργανο προσανατολισμού που δείχνει τον Βορρά!',
+    instructionEl: 'Πρόσεξε την ανατροπή στο τέλος: Αν και η κιθάρα και το τύμπανο παίζουν μουσική, εσύ διάλεξε το όργανο προσανατολισμού που δείχνει τον Βορρά!',
     pictogramCue: '🚫🎸 🚫🥁 ➡️ 🧭',
     options: [
       { id: 'sl2-1', emoji: '🎸', labelEl: 'Κιθάρα', isTarget: false },
@@ -142,7 +143,7 @@ const SENIOR_LISTEN_ROUNDS: ListenRound[] = [
     ],
   },
   {
-    instructionEl: 'Άκου μέχρι την τελευταία λέξη: Αγνόησε τα αντικείμενα που χρειάζονται ηλεκτρικό ρεύμα και επίλεξε το τετράδιο εργαστηρίου!',
+    instructionEl: 'Άκου μέχρι την τελευταία λέξη: Αγνόησε τα αντικείμενα που χρειάζονται ηλεκτρικό ρεύμα και διάλεξε το τετράδιο εργαστηρίου!',
     pictogramCue: '🚫💻 🚫📺 ➡️ 📓',
     options: [
       { id: 'sl3-1', emoji: '💻', labelEl: 'Υπολογιστής', isTarget: false },
@@ -160,7 +161,7 @@ const SENIOR_LISTEN_ROUNDS: ListenRound[] = [
     ],
   },
   {
-    instructionEl: 'Άκου προσεκτικά: Αν η Γη γυρίζει γύρω από τον Ήλιο, επίλεξε το αντικείμενο που φοράμε στο κεφάλι για ασφάλεια στο ποδήλατο!',
+    instructionEl: 'Άκου ως το τέλος: Πριν ανέβεις στο ποδήλατο, ποιο από αυτά φοράς στο κεφάλι για να είσαι ασφαλής;',
     pictogramCue: '🌍☀️ ➡️ 🪖',
     options: [
       { id: 'sl5-1', emoji: '🎒', labelEl: 'Σακίδιο Πλάτης', isTarget: false },
@@ -169,7 +170,7 @@ const SENIOR_LISTEN_ROUNDS: ListenRound[] = [
     ],
   },
   {
-    instructionEl: 'Πρόσεξε: ΜΗΝ διαλέξεις το φρούτο ούτε το λουλούδι· επίλεξε το εργαστηριακό όργανο που μεγεθύνει τα κύτταρα!',
+    instructionEl: 'Πρόσεξε: ΜΗΝ διαλέξεις το φρούτο ούτε το λουλούδι· διάλεξε το εργαστηριακό όργανο που μεγεθύνει τα κύτταρα!',
     pictogramCue: '🚫🍎 🚫🌻 ➡️ 🔬',
     options: [
       { id: 'sl6-1', emoji: '🍎', labelEl: 'Κόκκινο Μήλο', isTarget: false },
@@ -199,32 +200,27 @@ export const Activity08ListenDo: React.FC<ActivityRunnerRenderProps> = ({
     [listenPool, totalRounds, sessionSeed]
   );
   const round = activeRounds[(currentRound - 1) % activeRounds.length];
-  const [isListeningFinished, setIsListeningFinished] = useState<boolean>(false);
-  const [listenProgressMs, setListenProgressMs] = useState<number>(0);
+  // Ages 6+: the riddle no longer ends with the answer («…Πάτησε την ομπρέλα!») —
+  // the child has to understand it. The 4-5 band keeps the answer as a language model.
+  const spokenInstructionEl = useMemo(
+    () => (ageBand === '4-5' ? round.instructionEl : round.instructionEl.replace(/\s*Πάτησε [^!.;]+[!.]?\s*$/, '')),
+    [ageBand, round.instructionEl]
+  );
 
+  // «Τώρα διάλεξε» appears when the voice has really FINISHED the riddle
+  // (before: after a fixed 900 ms, while the voice was still speaking for 6-9 seconds).
+  const isListeningFinished = useSpokenPrompt(spokenInstructionEl, {
+    enabled: settings.voiceEnabled,
+    rate: adaptiveProfile.speechRate,
+    resetKey: `${currentRound}-${sessionSeed}`,
+  });
+  const earlyTapsRef = useRef<number>(0);
   useEffect(() => {
-    setIsListeningFinished(false);
-    setListenProgressMs(0);
-    speakGreek(round.instructionEl, settings.voiceEnabled, adaptiveProfile.speechRate);
-  }, [currentRound, sessionSeed, round.instructionEl, settings.voiceEnabled, adaptiveProfile.speechRate]);
-
+    earlyTapsRef.current = 0;
+  }, [currentRound, sessionSeed]);
   useEffect(() => {
-    if (isListeningFinished || phase === 'PAUSED' || phase === 'COMPLETED') return;
-    const interval = window.setInterval(() => {
-      setListenProgressMs((prev) => prev + 100);
-    }, 100);
-    return () => window.clearInterval(interval);
-  }, [isListeningFinished, phase, currentRound]);
-
-  useEffect(() => {
-    if (isListeningFinished || phase === 'PAUSED' || phase === 'COMPLETED') return;
-    if (listenProgressMs >= 900) {
-      setIsListeningFinished(true);
-      playCalmTone('soft-step', settings.soundEnabled);
-    }
-  }, [isListeningFinished, phase, listenProgressMs, settings.soundEnabled]);
-
-  const listenPct = Math.min(100, Math.round((listenProgressMs / 900) * 100));
+    if (isListeningFinished) playCalmTone('soft-step', settings.soundEnabled);
+  }, [isListeningFinished, settings.soundEnabled]);
 
   const visibleOptions = useMemo(() => {
     let baseOpts = round.options;
@@ -250,15 +246,15 @@ export const Activity08ListenDo: React.FC<ActivityRunnerRenderProps> = ({
   const handleSelect = (isTarget: boolean, labelEl: string) => {
     runDebounced(() => {
       if (!isListeningFinished) {
-        triggerGentleFeedback(
-          'Περίμενε μια στιγμή να ανάψει το πράσινο σήμα «Τώρα Διάλεξε!» πριν πατήσεις.'
-        );
+        // Silent: a spoken correction here would cut the riddle the child must hear.
+        earlyTapsRef.current += 1;
+        playCalmTone('gentle-nudge', settings.soundEnabled);
         return;
       }
       if (isTarget) {
-        advanceRound(getAbsorbedCount());
+        advanceRound(getAbsorbedCount() + earlyTapsRef.current);
       } else {
-        triggerGentleFeedback(`Διάλεξες «${labelEl}». Δες ξανά το εικονίδιο της οδηγίας επάνω!`);
+        triggerGentleFeedback(`Όχι, αυτό είναι «${labelEl}». Άκου ξανά το αίνιγμα.`);
       }
     });
   };
@@ -277,9 +273,9 @@ export const Activity08ListenDo: React.FC<ActivityRunnerRenderProps> = ({
           {isListeningFinished ? round.pictogramCue : '👂 ⏳ ➡️ ❓'}
         </div>
         <p className="text-base sm:text-lg font-extrabold text-charcoal">
-          {isListeningFinished
-            ? round.instructionEl
-            : 'Άκου προσεκτικά το αίνιγμα μέχρι να ολοκληρωθεί...'}
+          {isListeningFinished || !settings.voiceEnabled
+            ? spokenInstructionEl
+            : 'Άκου προσεκτικά το αίνιγμα ως το τέλος…'}
         </p>
         <div className="flex flex-wrap items-center justify-center gap-2">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border-2 border-charcoal/20 text-xs sm:text-sm font-extrabold">
@@ -288,23 +284,14 @@ export const Activity08ListenDo: React.FC<ActivityRunnerRenderProps> = ({
           <button
             type="button"
             data-testid="listen-do-replay-btn"
-            onClick={() => speakGreek(round.instructionEl, true, adaptiveProfile.speechRate)}
+            onClick={() => speakGreek(spokenInstructionEl, true, adaptiveProfile.speechRate, { force: true })}
             className="px-3.5 py-1.5 rounded-full bg-white border-2 border-slate text-xs font-extrabold text-charcoal hover:bg-sand-surface"
           >
             🔊 Άκου ξανά το αίνιγμα
           </button>
         </div>
 
-        {!isListeningFinished && (
-          <div className="max-w-xs mx-auto pt-2 space-y-1">
-            <div className="w-full h-2.5 bg-white rounded-full overflow-hidden border border-slate">
-              <div
-                className="h-full bg-slate transition-all duration-100"
-                style={{ width: `${listenPct}%` }}
-              />
-            </div>
-          </div>
-        )}
+
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 max-w-2xl mx-auto">

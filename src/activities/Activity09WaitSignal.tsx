@@ -7,6 +7,7 @@ import {
 } from '../utils/clinicalAdhdEngine';
 import { playCalmTone, speakGreek } from '../utils/soundAndSpeech';
 import { useApp } from '../context/AppContext';
+import { useSpokenPrompt } from '../hooks/useSpokenPrompt';
 
 const IS_TEST_MODE = import.meta.env.MODE === 'test';
 
@@ -172,20 +173,25 @@ export const Activity09WaitSignal: React.FC<ActivityRunnerRenderProps> = ({
       setStepIndex(streamItems.length - 1);
     } else {
       setStepIndex(0);
-      speakGreek(
-        'Περίμενε με ήρεμα χέρια και πάτησε μόνο όταν εμφανιστεί το χρυσό αστέρι!',
-        settings.voiceEnabled,
-        adaptiveProfile.speechRate
-      );
     }
-  }, [currentRound, hintLevel, sessionSeed, streamItems.length, settings.voiceEnabled, adaptiveProfile.speechRate]);
+  }, [currentRound, hintLevel, sessionSeed, streamItems.length]);
+
+  // The pictures start moving only after the rule has been heard
+  // (before: the stream — and sometimes the star — ran while the rule was still being spoken).
+  const heard = useSpokenPrompt('Πάτα μόνο όταν δεις το χρυσό αστέρι!', {
+    enabled: settings.voiceEnabled,
+    rate: adaptiveProfile.speechRate,
+    resetKey: `${currentRound}-${sessionSeed}`,
+    active: hintLevel !== 2,
+  });
+  const streamRunning = heard || hintLevel === 2;
 
   const currentItem = streamItems[stepIndex % streamItems.length] ?? streamItems[0];
 
   // 100% Automatic Continuous Performance Task (CPT) stream progression!
   // Objects appear automatically on screen with a live progress bar; no manual "Next" button required.
   useEffect(() => {
-    if (phase === 'PAUSED' || phase === 'COMPLETED' || hintLevel === 2) return;
+    if (phase === 'PAUSED' || phase === 'COMPLETED' || hintLevel === 2 || !streamRunning) return;
 
     if (!currentItem.hasStarCue) {
       const tickMs = 100;
@@ -204,7 +210,7 @@ export const Activity09WaitSignal: React.FC<ActivityRunnerRenderProps> = ({
       }, responseWindowMs);
       return () => window.clearTimeout(recycleTimer);
     }
-  }, [phase, hintLevel, stepIndex, currentItem.hasStarCue, isCueGuided, diff.cptIntervalMs]);
+  }, [phase, hintLevel, stepIndex, currentItem.hasStarCue, isCueGuided, diff.cptIntervalMs, streamRunning]);
 
   useEffect(() => {
     if (
@@ -223,11 +229,7 @@ export const Activity09WaitSignal: React.FC<ActivityRunnerRenderProps> = ({
     // Audio "go" cue only for guided ages / hints — older children must detect the star visually
     if (streamItems[nextIdx]?.hasStarCue && isCueGuided) {
       playCalmTone('soft-step', settings.soundEnabled);
-      speakGreek(
-        'Χρυσό αστέρι! Πάτησε τώρα!',
-        settings.voiceEnabled,
-        adaptiveProfile.speechRate
-      );
+      speakGreek('Τώρα!', settings.voiceEnabled, adaptiveProfile.speechRate, { kind: 'feedback' });
     }
   }, [
     phase,
@@ -256,9 +258,7 @@ export const Activity09WaitSignal: React.FC<ActivityRunnerRenderProps> = ({
       } else {
         // Reset current non-star wait timer slightly and remind child to wait for the Golden Star
         setStepElapsedMs(0);
-        triggerGentleFeedback(
-          'Ήρεμα χεράκια ✋ — περιμένουμε το Χρυσό Αστέρι 🌟'
-        );
+        triggerGentleFeedback('Όχι ακόμα! Περιμένουμε το χρυσό αστέρι.');
       }
     });
   };
@@ -267,7 +267,7 @@ export const Activity09WaitSignal: React.FC<ActivityRunnerRenderProps> = ({
     <div className="space-y-6 text-center max-w-xl mx-auto" data-testid="activity-09-wait-signal">
       <div className="p-4 rounded-2xl bg-slate-surface border-2 border-slate space-y-2.5">
         <p className="font-extrabold text-charcoal text-lg">
-          Κανόνας: Κοιτάζω τις εικόνες που αλλάζουν μόνες τους και πατάω ΜΟΝΟ όταν εμφανιστεί το Χρυσό Αστέρι 🌟!
+          Πατάω μόνο όταν δω το χρυσό αστέρι 🌟
         </p>
 
         {/* Live Automatic Stream Progress Bar */}

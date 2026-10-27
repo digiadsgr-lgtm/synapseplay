@@ -5,8 +5,9 @@ import {
   getAgeAndPerformanceDifficulty,
   selectSessionRounds,
 } from '../utils/clinicalAdhdEngine';
-import { playCalmTone, speakGreek } from '../utils/soundAndSpeech';
+import { playCalmTone } from '../utils/soundAndSpeech';
 import { useApp } from '../context/AppContext';
+import { useSpokenPrompt } from '../hooks/useSpokenPrompt';
 
 interface PulsePhase {
   mode: 'go' | 'freeze';
@@ -146,8 +147,15 @@ export const Activity07MoveFreeze: React.FC<ActivityRunnerRenderProps> = ({
     setGoTaps(0);
     setFreezeElapsedMs(0);
     setFreezeDone(false);
-    speakGreek(phase.spokenCueEl, settings.voiceEnabled, adaptiveProfile.speechRate);
-  }, [currentRound, sessionSeed, phase.spokenCueEl, settings.voiceEnabled, adaptiveProfile.speechRate]);
+  }, [currentRound, sessionSeed]);
+
+  // The stillness bar starts filling only AFTER the «ΣΤΟΠ» instruction has been heard
+  // (before: the 3-second bar was full while the voice was still explaining the rule).
+  const heard = useSpokenPrompt(phase.spokenCueEl, {
+    enabled: settings.voiceEnabled,
+    rate: adaptiveProfile.speechRate,
+    resetKey: `${currentRound}-${sessionSeed}`,
+  });
 
   // Live Statue Stillness Timer during FREEZE phase:
   // The child must NOT press anything while the stillness bar fills up to 100%!
@@ -157,7 +165,8 @@ export const Activity07MoveFreeze: React.FC<ActivityRunnerRenderProps> = ({
       runnerPhase === 'PAUSED' ||
       runnerPhase === 'COMPLETED' ||
       phase.mode !== 'freeze' ||
-      freezeDone
+      freezeDone ||
+      !heard
     ) {
       return;
     }
@@ -168,7 +177,7 @@ export const Activity07MoveFreeze: React.FC<ActivityRunnerRenderProps> = ({
     }, stepMs);
 
     return () => window.clearInterval(interval);
-  }, [runnerPhase, phase.mode, currentRound, freezeDone]);
+  }, [runnerPhase, phase.mode, currentRound, freezeDone, heard]);
 
   useEffect(() => {
     if (runnerPhase === 'PAUSED' || runnerPhase === 'COMPLETED' || phase.mode !== 'freeze') {
@@ -205,7 +214,7 @@ export const Activity07MoveFreeze: React.FC<ActivityRunnerRenderProps> = ({
         // Child impulsively tapped during RED STOP! Reset the stillness timer and guide gently:
         setFreezeElapsedMs(0);
         triggerGentleFeedback(
-          'Ώπα! Το φανάρι είναι ΚΟΚΚΙΝΟ ΣΤΟΠ 🛑! Κράτα τα χεράκια σου ακίνητα χωρίς να πατάς το τύμπανο μέχρι να γεμίσει η μπάρα!'
+          'Ώπα! Είναι κόκκινο. Ακίνητα χεράκια μέχρι να γεμίσει η μπάρα!'
         );
         return;
       }
@@ -313,7 +322,7 @@ export const Activity07MoveFreeze: React.FC<ActivityRunnerRenderProps> = ({
               </div>
             ) : (
               <p className="text-xs font-bold text-charcoal-muted">
-                Μείνε ακίνητος σαν άγαλμα μέχρι να γεμίσει η μπάρα!
+                {heard ? 'Γίνε άγαλμα μέχρι να γεμίσει η μπάρα!' : '🎧 Άκου πρώτα…'}
               </p>
             )}
           </div>
