@@ -1,98 +1,66 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import type { ActivityRunnerRenderProps } from '../components/ActivityRunner';
 import { useDebouncedAction } from '../hooks/useDebouncedAction';
-import { playCalmTone, speakGreek } from '../utils/soundAndSpeech';
+import { isSpeechGateInstant, playCalmTone, speakGreek } from '../utils/soundAndSpeech';
 import { useApp } from '../context/AppContext';
 import { selectSessionRounds } from '../utils/clinicalAdhdEngine';
 
+/**
+ * «Ο Μαέστρος» — listen, then repeat.
+ *
+ * Before (audit 10/2026): the child was told to clap AND to press buttons at the same time,
+ * the «rest» had both a button and an automatic timer, nothing was ever played to the child
+ * (no model rhythm), and the texts used words like «παρτιτούρα», «μουσικοκινητικό μέτρο».
+ * No child understood what to do.
+ *
+ * Now every round is the classic music-therapy loop:
+ *   1. The maestro PLAYS the rhythm: each beat lights up with its own sound
+ *      (👏 = clap sound, 🦵 = low knee «thud», 🤫 = silence).
+ *   2. «Τώρα εσύ!» → the child taps 👏 / 🦵 in the same order. The buttons ARE the instrument.
+ *      On 🤫 the child must NOT tap: waiting quietly is the inhibition exercise.
+ *   3. A wrong beat → the maestro simply plays it again.
+ */
+
 type PercussionMove = 'clap' | 'knees' | 'rest';
 
-interface RhythmPatternRound {
-  tempoTitleEl: string;
-  tempoDescEl: string;
-  pattern: PercussionMove[];
-}
-
 const MOVE_META: Record<PercussionMove, { emoji: string; labelEl: string; colorClass: string }> = {
-  clap: {
-    emoji: '👏',
-    labelEl: 'Παλαμάκι',
-    colorClass: 'bg-sage-surface border-sage-dark text-charcoal',
-  },
-  knees: {
-    emoji: '🦵👐',
-    labelEl: 'Άγγιγμα στα Γόνατα',
-    colorClass: 'bg-slate-surface border-slate-dark text-charcoal',
-  },
-  rest: {
-    emoji: '🤫🌿',
-    labelEl: 'Μουσική Παύση (Σιωπή)',
-    colorClass: 'bg-terracotta-surface border-terracotta-dark text-charcoal',
-  },
+  clap: { emoji: '👏', labelEl: 'Παλαμάκι', colorClass: 'bg-sage-surface border-sage-dark text-charcoal' },
+  knees: { emoji: '🦵', labelEl: 'Γόνατα', colorClass: 'bg-slate-surface border-slate-dark text-charcoal' },
+  rest: { emoji: '🤫', labelEl: 'Σιωπή', colorClass: 'bg-terracotta-surface border-terracotta-dark text-charcoal' },
 };
 
-const RHYTHM_ROUNDS: RhythmPatternRound[] = [
-  {
-    tempoTitleEl: 'Ρυθμός: Αργός Βηματισμός Χελώνας 🐢',
-    tempoDescEl: 'Ακολούθησε το μουσικοκινητικό μέτρο: Παλαμάκι ➔ Γόνατα ➔ Μουσική Παύση!',
-    pattern: ['clap', 'knees', 'rest'],
-  },
-  {
-    tempoTitleEl: 'Ρυθμός: Σταθερός Παλμός 🚶',
-    tempoDescEl: 'Συγχρόνισε τα χέρια με το μοτίβο: Γόνατα ➔ Παλαμάκι ➔ Γόνατα!',
-    pattern: ['knees', 'clap', 'knees'],
-  },
-  {
-    tempoTitleEl: 'Ρυθμός: Αυτορρύθμιση & Σιωπή 🎼',
-    tempoDescEl: 'Ξεκίνα με Παλαμάκι, κράτα τη Μουσική Παύση και ολοκλήρωσε στα Γόνατα!',
-    pattern: ['clap', 'rest', 'knees'],
-  },
-  {
-    tempoTitleEl: 'Ρυθμός: Ηχώ του Δάσους 🌲',
-    tempoDescEl: 'Ακολούθησε την παρτιτούρα: Γόνατα ➔ Μουσική Παύση ➔ Παλαμάκι!',
-    pattern: ['knees', 'rest', 'clap'],
-  },
-  {
-    tempoTitleEl: 'Ρυθμός: Ήρεμο Κύμα Θάλασσας 🌊',
-    tempoDescEl: 'Ξεκίνα με Μουσική Παύση (εισπνοή), συνέχισε στα Γόνατα και κλείσε με Παλαμάκι!',
-    pattern: ['rest', 'knees', 'clap'],
-  },
-  {
-    tempoTitleEl: 'Ρυθμός: Διπλός Παλμός & Σιωπή 🥁',
-    tempoDescEl: 'Χτύπα Παλαμάκι ➔ Παλαμάκι ➔ και κράτα Μουσική Παύση!',
-    pattern: ['clap', 'clap', 'rest'],
-  },
-  {
-    tempoTitleEl: 'Ρυθμός: Βήματα στη Βροχή (Andante) 🌧️',
-    tempoDescEl: 'Ακολούθησε το μέτρο: Γόνατα ➔ Γόνατα ➔ Παλαμάκι!',
-    pattern: ['knees', 'knees', 'clap'],
-  },
-  {
-    tempoTitleEl: 'Ρυθμός: Το Εκκρεμές του Ρολογιού 🕰️',
-    tempoDescEl: 'Συγχρόνισε τις κινήσεις: Παλαμάκι ➔ Γόνατα ➔ Παλαμάκι!',
-    pattern: ['clap', 'knees', 'clap'],
-  },
-  {
-    tempoTitleEl: 'Ρυθμός: Πνοή του Ανέμου (Adagio) 🍃',
-    tempoDescEl: 'Ξεκίνα με Μουσική Παύση, χτύπα Παλαμάκι και ολοκλήρωσε στα Γόνατα!',
-    pattern: ['rest', 'clap', 'knees'],
-  },
-  {
-    tempoTitleEl: 'Ρυθμός: Χτύπος της Καρδιάς 💓',
-    tempoDescEl: 'Ακολούθησε τον παλμό: Γόνατα ➔ Γόνατα ➔ Μουσική Παύση!',
-    pattern: ['knees', 'knees', 'rest'],
-  },
-  {
-    tempoTitleEl: 'Ρυθμός: Πρωινό Ξύπνημα Πουλιών 🐦',
-    tempoDescEl: 'Ξεκίνα με Μουσική Παύση, χτύπα Παλαμάκι και ξανά Παλαμάκι!',
-    pattern: ['rest', 'clap', 'clap'],
-  },
-  {
-    tempoTitleEl: 'Ρυθμός: Ορχήστρα Αυτοελέγχου 🎻',
-    tempoDescEl: 'Χτύπα στα Γόνατα, κράτα Μουσική Παύση και ολοκλήρωσε στα Γόνατα!',
-    pattern: ['knees', 'rest', 'knees'],
-  },
+const RHYTHM_PATTERNS: PercussionMove[][] = [
+  ['clap', 'knees', 'rest'],
+  ['knees', 'clap', 'knees'],
+  ['clap', 'rest', 'knees'],
+  ['knees', 'rest', 'clap'],
+  ['rest', 'knees', 'clap'],
+  ['clap', 'clap', 'rest'],
+  ['knees', 'knees', 'clap'],
+  ['clap', 'knees', 'clap'],
+  ['rest', 'clap', 'knees'],
+  ['knees', 'knees', 'rest'],
+  ['rest', 'clap', 'clap'],
+  ['knees', 'rest', 'knees'],
 ];
+
+/** Pattern length grows with age: 2 beats (4-5) → 5 beats (10-12). */
+export function buildRhythmForAge(base: PercussionMove[], ageBand: string, enrich: boolean): PercussionMove[] {
+  if (ageBand === '4-5') {
+    const sounds = base.filter((m) => m !== 'rest');
+    const two = sounds.length >= 2 ? sounds.slice(0, 2) : (['clap', 'knees'] as PercussionMove[]);
+    return two[0] === two[1] ? [two[0], two[0] === 'clap' ? 'knees' : 'clap'] : two;
+  }
+  if (ageBand === '5-6') return base;
+  if (ageBand === '6-8') return enrich ? [...base, base[0] === 'rest' ? 'clap' : base[0]] : base;
+  const four: PercussionMove[] = [...base, base[0] === 'rest' ? 'clap' : base[0]];
+  if (ageBand === '10-12' || enrich) return [...four, base[1] === 'rest' ? 'knees' : base[1]];
+  return four;
+}
+
+const BEAT_MS: Record<string, number> = { '4-5': 1000, '5-6': 900, '6-8': 800, '8-10': 700, '10-12': 650 };
+
+type Stage = 'intro' | 'demo' | 'turn';
 
 export const Activity20MusicKineticRhythm: React.FC<ActivityRunnerRenderProps> = ({
   phase,
@@ -108,151 +76,220 @@ export const Activity20MusicKineticRhythm: React.FC<ActivityRunnerRenderProps> =
   const { settings } = useApp();
   const { runDebounced, getAbsorbedCount } = useDebouncedAction();
   const activeRounds = useMemo(
-    () => selectSessionRounds(RHYTHM_ROUNDS, totalRounds, sessionSeed),
+    () => selectSessionRounds(RHYTHM_PATTERNS, totalRounds, sessionSeed),
     [totalRounds, sessionSeed]
   );
-  const round = activeRounds[(currentRound - 1) % activeRounds.length];
+  const pattern = useMemo(
+    () =>
+      buildRhythmForAge(
+        activeRounds[(currentRound - 1) % activeRounds.length],
+        ageBand,
+        Boolean(adaptiveProfile.enrichChallenge)
+      ),
+    [activeRounds, currentRound, ageBand, adaptiveProfile.enrichChallenge]
+  );
+  const beatMs = BEAT_MS[ageBand] ?? 800;
+  const restMs = Math.round(beatMs * 1.3);
+  const isYoung = ageBand === '4-5' || ageBand === '5-6';
+  const halted = phase === 'PAUSED' || phase === 'COMPLETED';
+
+  const [stage, setStage] = useState<Stage>('intro');
+  const [demoBeat, setDemoBeat] = useState<number | null>(null);
+  const [demoRun, setDemoRun] = useState<number>(0);
   const [stepIdx, setStepIdx] = useState<number>(0);
-  const [restSilenceMs, setRestSilenceMs] = useState<number>(0);
-  const advanceRef = useRef(advanceRound);
-  advanceRef.current = advanceRound;
-  const absorbedRef = useRef(getAbsorbedCount);
-  absorbedRef.current = getAbsorbedCount;
+  const [restRun, setRestRun] = useState<number>(0);
+  const earlyTapsRef = useRef<number>(0);
 
+  // 1. Round start: one short instruction, THEN the maestro plays
   useEffect(() => {
-    setStepIdx(hintLevel === 2 ? round.pattern.length - 1 : 0);
-    setRestSilenceMs(0);
-  }, [currentRound, hintLevel, round.pattern.length, sessionSeed]);
+    let alive = true;
+    setStage('intro');
+    setStepIdx(0);
+    setDemoBeat(null);
+    earlyTapsRef.current = 0;
+    const intro =
+      currentRound === 1
+        ? pattern.includes('rest')
+          ? 'Παλαμάκι, γόνατα και σιωπή! Κοίτα και άκου τον μαέστρο.'
+          : 'Παλαμάκι και γόνατα! Κοίτα και άκου τον μαέστρο.'
+        : 'Άκου τον μαέστρο.';
+    const startDemo = () => {
+      if (!alive) return;
+      setStage('demo');
+      setDemoRun((r) => r + 1);
+    };
+    const spoken = speakGreek(intro, settings.voiceEnabled, adaptiveProfile.speechRate);
+    if (isSpeechGateInstant()) startDemo();
+    else void spoken.then(startDemo);
+    return () => {
+      alive = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentRound, sessionSeed]);
 
+  // 2. The maestro plays the rhythm (restarts from the beginning after a pause)
   useEffect(() => {
-    speakGreek(round.tempoDescEl, settings.voiceEnabled, adaptiveProfile.speechRate);
-  }, [currentRound, round.tempoDescEl, sessionSeed, settings.voiceEnabled, adaptiveProfile.speechRate]);
+    if (stage !== 'demo' || halted) return;
+    const timers: number[] = [];
+    pattern.forEach((mv, i) => {
+      timers.push(
+        window.setTimeout(() => {
+          setDemoBeat(i);
+          if (mv !== 'rest') playCalmTone(mv, settings.soundEnabled);
+        }, 300 + i * beatMs)
+      );
+    });
+    timers.push(
+      window.setTimeout(() => {
+        setDemoBeat(null);
+        setStepIdx(0);
+        setStage('turn');
+        speakGreek('Τώρα εσύ!', settings.voiceEnabled, adaptiveProfile.speechRate);
+      }, 300 + pattern.length * beatMs + 250)
+    );
+    return () => timers.forEach((t) => window.clearTimeout(t));
+  }, [stage, demoRun, halted, pattern, beatMs, settings.soundEnabled, settings.voiceEnabled, adaptiveProfile.speechRate]);
 
-  const expectedMove = round.pattern[stepIdx];
+  const expectedMove = pattern[stepIdx];
 
-  // Genuine Musical Rest (Silence): automatically advances after 1600ms of not tapping clap/knees
+  const completeStep = useCallback(() => {
+    if (stepIdx + 1 >= pattern.length) {
+      setStage('intro');
+      advanceRound(getAbsorbedCount() + earlyTapsRef.current);
+    } else {
+      setStepIdx((s) => s + 1);
+    }
+  }, [stepIdx, pattern.length, advanceRound, getAbsorbedCount]);
+
+  const completeStepRef = useRef(completeStep);
+  completeStepRef.current = completeStep;
+
+  // 3. Silence beat: the child waits without tapping → it passes by itself
   useEffect(() => {
-    if (expectedMove !== 'rest' || phase === 'PAUSED' || phase === 'COMPLETED') {
-      setRestSilenceMs(0);
+    if (stage !== 'turn' || halted || expectedMove !== 'rest') return;
+    const t = window.setTimeout(() => {
+      playCalmTone('soft-step', settings.soundEnabled);
+      completeStepRef.current();
+    }, restMs);
+    return () => window.clearTimeout(t);
+  }, [stage, halted, expectedMove, stepIdx, restRun, restMs, settings.soundEnabled]);
+
+  const replayDemo = () => {
+    setStepIdx(0);
+    setStage('demo');
+    setDemoRun((r) => r + 1);
+  };
+
+  const handleMovePress = (move: Exclude<PercussionMove, 'rest'>) => {
+    if (stage !== 'turn') {
+      // Tapping while the maestro plays: not an error, just counted as an impulsive tap
+      earlyTapsRef.current += 1;
       return;
     }
-    const timer = window.setTimeout(() => {
-      const next = restSilenceMs + 100;
-      if (next >= 1600) {
-        playCalmTone('soft-step', settings.soundEnabled);
-        setRestSilenceMs(0);
-        if (stepIdx + 1 >= round.pattern.length) {
-          setStepIdx(0);
-          advanceRef.current(absorbedRef.current());
-        } else {
-          setStepIdx((s) => s + 1);
-        }
-      } else {
-        setRestSilenceMs(next);
-      }
-    }, 100);
-    return () => window.clearTimeout(timer);
-  }, [expectedMove, phase, restSilenceMs, stepIdx, round.pattern.length, settings.soundEnabled]);
-
-  const restPct = Math.min(100, Math.round((restSilenceMs / 1600) * 100));
-
-  const handleMovePress = (move: PercussionMove) => {
     runDebounced(() => {
-      if (move === expectedMove) {
-        playCalmTone(move === 'rest' ? 'soft-step' : 'pulse', settings.soundEnabled);
-        setRestSilenceMs(0);
-        if (stepIdx + 1 >= round.pattern.length) {
-          setStepIdx(0);
-          advanceRound(getAbsorbedCount());
-        } else {
-          setStepIdx((s) => s + 1);
-        }
-      } else {
-        if (expectedMove === 'rest') {
-          setRestSilenceMs(0);
-        }
-        const expectedLabel = MOVE_META[expectedMove].labelEl;
-        triggerGentleFeedback(
-          `Κοίτα την παρτιτούρα του Μαέστρου: στον χρόνο ${stepIdx + 1} έχουμε «${expectedLabel}»!`
-        );
+      playCalmTone(move, settings.soundEnabled);
+      if (expectedMove === 'rest') {
+        setRestRun((r) => r + 1); // restart the silence
+        triggerGentleFeedback('Σσσ! Εδώ είναι η σιωπή. Περίμενε χωρίς να πατήσεις.');
+        return;
       }
+      if (move === expectedMove) {
+        completeStep();
+        return;
+      }
+      triggerGentleFeedback(`Ο μαέστρος έκανε ${MOVE_META[expectedMove].labelEl.toLowerCase()}. Άκου τον ξανά!`);
+      window.setTimeout(replayDemo, 2800); // after the short correction has been heard
     });
   };
 
-  return (
-    <div className="space-y-6 text-center" data-testid="activity-20-music-kinetic-rhythm">
-      <div className="p-5 rounded-3xl bg-white border-2 border-sand-dark space-y-3">
-        <h2 className="text-xl md:text-2xl font-extrabold text-charcoal">{round.tempoTitleEl}</h2>
-        <p className="text-sm font-bold text-charcoal-muted">{round.tempoDescEl}</p>
+  // Rhythm slots: during the child's turn the symbols stay visible only for the young ages or with a hint
+  const showSymbolsInTurn = isYoung || hintLevel >= 1;
+  const highlightNext = hintLevel >= 2 || (ageBand === '4-5' && hintLevel >= 1);
 
-        {/* Visual Musical Score */}
-        <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
-          {round.pattern.map((mv, idx) => {
+  return (
+    <div
+      className="space-y-5 text-center"
+      data-testid="activity-20-music-kinetic-rhythm"
+      data-stage={stage}
+      data-next-move={stage === 'turn' ? expectedMove : ''}
+      data-pattern={pattern.join(',')}
+    >
+      <div className="p-4 sm:p-5 rounded-3xl bg-white border-2 border-sand-dark space-y-3">
+        <h2 className="text-xl md:text-2xl font-extrabold text-charcoal" data-testid="rhythm-stage-title">
+          {stage === 'turn' ? '🙋 Τώρα εσύ! Με την ίδια σειρά.' : '🎼 Ο μαέστρος παίζει… κοίτα και άκου!'}
+        </h2>
+
+        <div className="flex flex-wrap items-center justify-center gap-3" aria-live="polite">
+          {pattern.map((mv, idx) => {
             const meta = MOVE_META[mv];
-            const isDone = idx < stepIdx;
-            const isCurrent = idx === stepIdx;
+            const isDemoNow = stage === 'demo' && demoBeat === idx;
+            const isDone = stage === 'turn' && idx < stepIdx;
+            const isCurrent = stage === 'turn' && idx === stepIdx;
+            const visible = stage !== 'turn' || isDone || showSymbolsInTurn || (isCurrent && mv === 'rest');
             return (
               <div
                 key={`${mv}-${idx}`}
                 data-testid={`rhythm-score-slot-${idx}`}
-                className={`px-5 py-3 rounded-2xl border-4 flex flex-col items-center gap-1 ${
-                  isDone
+                className={`w-20 h-20 sm:w-24 sm:h-24 rounded-2xl border-4 flex flex-col items-center justify-center transition-all ${
+                  isDemoNow
+                    ? 'bg-ochre border-charcoal scale-110'
+                    : isDone
                     ? 'bg-sage text-white border-sage-dark'
                     : isCurrent
-                    ? 'bg-slate text-white border-charcoal scale-105'
-                    : 'bg-sand-light text-charcoal border-sand-dark'
+                    ? 'bg-slate-surface border-charcoal'
+                    : 'bg-sand-light border-sand-dark'
                 }`}
               >
-                <span className="text-3xl" aria-hidden="true">{meta.emoji}</span>
-                <span className="text-xs font-extrabold">
-                  {idx + 1}. {meta.labelEl}
-                </span>
+                <span className="text-4xl" aria-hidden="true">{visible ? meta.emoji : '❓'}</span>
+                <span className="text-xs font-extrabold">{visible ? meta.labelEl : idx + 1}</span>
               </div>
             );
           })}
         </div>
 
-        {/* Live Musical Rest (Silence) Meter */}
-        {expectedMove === 'rest' && (
-          <div className="max-w-sm mx-auto pt-2 space-y-1">
-            <div className="flex justify-between text-xs font-extrabold text-terracotta-dark px-1">
-              <span>🤫 Κράτα Μουσική Σιωπή (προχωράει αυτόματα)...</span>
-              <span>{restPct}%</span>
-            </div>
-            <div className="w-full h-3 bg-sand-light rounded-full overflow-hidden border border-terracotta-dark">
-              <div
-                className="h-full bg-terracotta-dark transition-all duration-100"
-                style={{ width: `${restPct}%` }}
-              />
-            </div>
-          </div>
+        {stage === 'turn' && expectedMove === 'rest' && (
+          <p className="text-base font-extrabold text-terracotta-dark" data-testid="rhythm-rest-cue">
+            🤫 Σιωπή! Μην πατήσεις τίποτα…
+          </p>
         )}
       </div>
 
-      {/* Body Percussion Controls */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-2xl mx-auto">
-        {(['clap', 'knees', 'rest'] as PercussionMove[]).map((mv) => {
+      {/* The two «instruments» */}
+      <div className="grid grid-cols-2 gap-4 max-w-xl mx-auto">
+        {(['clap', 'knees'] as const).map((mv) => {
           const meta = MOVE_META[mv];
-          const highlight =
-            (hintLevel >= 1 || ageBand === '4-5' || adaptiveProfile.autoHintBoost) &&
-            mv === expectedMove;
+          const highlight = stage === 'turn' && highlightNext && mv === expectedMove;
           return (
             <button
               key={mv}
               type="button"
               data-testid={`music-kinetic-btn-${mv}`}
               onClick={() => handleMovePress(mv)}
-              className={`touch-target min-h-[120px] p-5 rounded-3xl border-4 flex flex-col items-center justify-center gap-2 ${
-                highlight
-                  ? 'bg-sage-surface border-charcoal ring-4 ring-sage/50 scale-105'
-                  : `${meta.colorClass} hover:opacity-90`
-              }`}
+              aria-label={meta.labelEl}
+              className={`touch-target min-h-[140px] p-5 rounded-3xl border-4 flex flex-col items-center justify-center gap-2 transition-all ${
+                stage !== 'turn' ? 'opacity-60 ' : ''
+              }${highlight ? 'bg-sage-surface border-charcoal ring-4 ring-sage/50 scale-105' : `${meta.colorClass} hover:opacity-90`}`}
             >
-              <span className="text-5xl" aria-hidden="true">{meta.emoji}</span>
-              <span className="text-base font-extrabold">{meta.labelEl}</span>
+              <span className="text-6xl" aria-hidden="true">{meta.emoji}</span>
+              <span className="text-lg font-extrabold">{meta.labelEl}</span>
             </button>
           );
         })}
+      </div>
+
+      <div className="flex flex-wrap items-center justify-center gap-3 text-sm">
+        <span className="px-3 py-1.5 rounded-full bg-terracotta-surface border border-terracotta-dark font-bold">
+          🤫 = σιωπή: περιμένω χωρίς να πατήσω
+        </span>
+        <button
+          type="button"
+          data-testid="rhythm-replay-btn"
+          onClick={replayDemo}
+          disabled={stage !== 'turn'}
+          className="touch-target px-4 py-2 rounded-2xl bg-white border-2 border-slate font-extrabold disabled:opacity-50"
+        >
+          🔁 Δείξε μου ξανά
+        </button>
       </div>
     </div>
   );

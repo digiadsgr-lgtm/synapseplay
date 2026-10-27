@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import type { ActivityRunnerRenderProps } from '../components/ActivityRunner';
 import { useDebouncedAction } from '../hooks/useDebouncedAction';
-import { playCalmTone, speakGreek, speakGreekSyllable } from '../utils/soundAndSpeech';
+import { isSpeechGateInstant, playCalmTone, speakGreek, syllableForSpeech } from '../utils/soundAndSpeech';
 import { useApp } from '../context/AppContext';
-import { reduceToTwoChoices, rotateOptionsForSession, selectSessionRounds } from '../utils/clinicalAdhdEngine';
+import { rotateOptionsForSession, selectSessionRounds } from '../utils/clinicalAdhdEngine';
 
 interface SpeechRound {
   wordEl: string;
@@ -187,9 +187,9 @@ const AGE_SPEECH_ROUNDS: Record<string, SpeechRound[]> = {
       ],
     },
     {
-      wordEl: 'Θά-λα-σσα',
+      wordEl: 'Θά-λασ-σα',
       spokenWordEl: 'θάλασσα',
-      syllables: ['θά', 'λα', 'σσα'],
+      syllables: ['θά', 'λασ', 'σα'],
       promptQuestionEl: 'Χτύπα παλαμάκια καθώς τρέχουν οι 3 συλλαβές στη λέξη «θάλασσα» και βρες τη σωστή περιγραφή της!',
       targetEmoji: '🌊',
       options: [
@@ -340,7 +340,7 @@ const AGE_SPEECH_ROUNDS: Record<string, SpeechRound[]> = {
       targetEmoji: '🎯',
       options: [
         { id: 'sp10-7', emoji: '🎯', labelEl: 'Συγκέντρωση: Εστιάζω προσεκτικά στον στόχο μου', isCorrect: true },
-        { id: 'sp10-8', emoji: '🏃', labelEl: 'Διασπορά: Απομακρύνομαι βιαστικά', isCorrect: false },
+        { id: 'sp10-8', emoji: '🏃', labelEl: 'Διάσπαση: Η προσοχή μου πετάει από το ένα στο άλλο', isCorrect: false },
         { id: 'sp10-9', emoji: '😴', labelEl: 'Υπνηλία: Αποκοιμιέμαι χωρίς προσοχή', isCorrect: false },
       ],
     },
@@ -369,13 +369,13 @@ const AGE_SPEECH_ROUNDS: Record<string, SpeechRound[]> = {
       ],
     },
     {
-      wordEl: 'Αυ-το-ρρύ-θμι-ση',
+      wordEl: 'Αυ-τορ-ρύθ-μι-ση',
       spokenWordEl: 'αυτορρύθμιση',
-      syllables: ['αυ', 'το', 'ρρύ', 'θμι', 'ση'],
+      syllables: ['αυ', 'τορ', 'ρύθ', 'μι', 'ση'],
       promptQuestionEl: 'Χτύπα παλαμάκια καθώς τρέχουν οι 5 συλλαβές στη λέξη «αυτορρύθμιση» και επίλεξε τι σημαίνει στην πράξη:',
       targetEmoji: '🧭',
       options: [
-        { id: 'sp10-16', emoji: '🧭', labelEl: 'Αυτορρύθμιση: Κυβερνώ ήρεμα τις κινήσεις και τη σκέψη μου', isCorrect: true },
+        { id: 'sp10-16', emoji: '🧭', labelEl: 'Αυτορρύθμιση: Ελέγχω ήρεμα τις κινήσεις και τη σκέψη μου', isCorrect: true },
         { id: 'sp10-17', emoji: '🎲', labelEl: 'Παρορμητικότητα: Πατάω στην τύχη χωρίς σχέδιο', isCorrect: false },
         { id: 'sp10-18', emoji: '🛑', labelEl: 'Εγκατάλειψη: Σταματάω να προσπαθώ', isCorrect: false },
       ],
@@ -417,9 +417,9 @@ const AGE_SPEECH_ROUNDS: Record<string, SpeechRound[]> = {
       ],
     },
     {
-      wordEl: 'Εν-συν-αί-σθη-ση',
+      wordEl: 'Εν-συ-ναί-σθη-ση',
       spokenWordEl: 'ενσυναίσθηση',
-      syllables: ['εν', 'συν', 'αί', 'σθη', 'ση'],
+      syllables: ['εν', 'συ', 'ναί', 'σθη', 'ση'],
       promptQuestionEl: 'Χτύπα παλαμάκια καθώς τρέχουν οι 5 συλλαβές στη λέξη «ενσυναίσθηση» και βρες την ακριβή της σημασία:',
       targetEmoji: '💛',
       options: [
@@ -455,6 +455,26 @@ const AGE_SPEECH_ROUNDS: Record<string, SpeechRound[]> = {
   ],
 };
 
+/** «Ποδήλατο: Πόδι + Ελαύνω (…)» → «Πόδι + Ελαύνω (…)»: the option must not contain the answer word. */
+export function definitionWithoutWord(labelEl: string): string {
+  const stripped = labelEl.replace(/^[^:]+:\s*/, '');
+  return stripped.charAt(0).toUpperCase() + stripped.slice(1);
+}
+
+type Step = 'listen' | 'clap' | 'meaning';
+
+/**
+ * «Το Μικρόφωνο των Συλλαβών» — syllable segmentation by clapping (audit 10/2026 rewrite).
+ *
+ * Before: a timer «clapped» by itself («Μπράβο! 2/2» with no child action), the picture choice
+ * was trivial (the word was printed and spoken), and the older options started with the answer.
+ *
+ * Now:
+ *  - 4-5 / 5-6 (guided): the syllables are visible; every 👏 lights the next one and says it.
+ *  - 6-8: the child decides how many claps the word has, then presses «✓ Τελείωσα».
+ *    Wrong count → the app claps it together with the child (syllables light up one by one).
+ *  - 8-12: same counting, then «Τι σημαίνει;» with definitions that no longer contain the word.
+ */
 export const Activity13SpeechArticulation: React.FC<ActivityRunnerRenderProps> = ({
   phase,
   currentRound,
@@ -469,288 +489,253 @@ export const Activity13SpeechArticulation: React.FC<ActivityRunnerRenderProps> =
   const { settings } = useApp();
   const { runDebounced, getAbsorbedCount } = useDebouncedAction();
 
-  // Age 8-10 and 10-12 both receive the 4-to-6 syllable phonological & semantic challenge pool
   const tierKey =
     ageBand === '4-5' || ageBand === '5-6'
       ? '4-5'
       : ageBand === '8-10' || ageBand === '10-12' || adaptiveProfile.enrichChallenge
       ? '10-12'
       : '6-8';
-
   const pool = AGE_SPEECH_ROUNDS[tierKey];
   const activeRounds = useMemo(
     () => selectSessionRounds(pool, totalRounds, sessionSeed),
     [pool, totalRounds, sessionSeed]
   );
   const round = activeRounds[(currentRound - 1) % activeRounds.length];
+  const total = round.syllables.length;
+  const isGuided = tierKey === '4-5' || hintLevel >= 1;
+  const asksMeaning = tierKey === '10-12';
+  const voice = settings.voiceEnabled;
+  const rate = adaptiveProfile.speechRate;
 
-  const [clappedCount, setClappedCount] = useState<number>(0);
-  const [activeKaraokeIdx, setActiveKaraokeIdx] = useState<number | null>(null);
-  const [karaokeRunId, setKaraokeRunId] = useState<number>(0);
-  const [speakSyllablesDuringRun, setSpeakSyllablesDuringRun] = useState<boolean>(false);
+  const [step, setStep] = useState<Step>('listen');
+  const [claps, setClaps] = useState<number>(0);
+  const [litIdx, setLitIdx] = useState<number | null>(null);
+  const demoTokenRef = useRef<number>(0);
 
-  useEffect(() => {
-    setClappedCount(hintLevel === 2 ? round.syllables.length : 0);
-    setActiveKaraokeIdx(0);
-    setSpeakSyllablesDuringRun(false);
-    speakGreek(round.promptQuestionEl, settings.voiceEnabled, adaptiveProfile.speechRate);
-  }, [
-    currentRound,
-    hintLevel,
-    round.syllables.length,
-    round.promptQuestionEl,
-    sessionSeed,
-    settings.voiceEnabled,
-    adaptiveProfile.speechRate,
-  ]);
-
-  // Continuous Looping Karaoke Syllable Runner: steps through each syllable in rhythm continuously
-  // so whenever the child finishes listening to the prompt and looks at the screen, the syllable is actively running!
-  // Runner paused (Παύση / Διάλειμμα / end of screen time) → no sound, no animation
-  const isRunnerHalted = phase === 'PAUSED' || phase === 'COMPLETED';
-
-  useEffect(() => {
-    if (hintLevel === 2 || isRunnerHalted) {
-      setActiveKaraokeIdx(null);
-      return;
-    }
-
-    const total = round.syllables.length;
-    const initialDelayMs = speakSyllablesDuringRun ? 180 : 750;
-    const stepIntervalMs = 650;
-    const timers: number[] = [];
-    let loopIntervalId: number | null = null;
-
-    // First sweep: steps 0..total-1 and increments clappedCount up to total
+  /** Says the word syllable by syllable, lighting each box IN SYNC with the voice, then the whole word. */
+  const playSyllableDemo = async (): Promise<void> => {
+    const token = ++demoTokenRef.current;
     for (let i = 0; i < total; i++) {
-      const t = window.setTimeout(() => {
-        setActiveKaraokeIdx(i);
-        setClappedCount((prev) => Math.max(prev, i + 1));
-        playCalmTone('pulse', settings.soundEnabled);
-        if (speakSyllablesDuringRun) {
-          speakGreekSyllable(round.syllables[i], settings.voiceEnabled, adaptiveProfile.speechRate);
-        }
-      }, initialDelayMs + i * stepIntervalMs);
-      timers.push(t);
+      if (demoTokenRef.current !== token) return;
+      setLitIdx(i);
+      playCalmTone('clap', settings.soundEnabled);
+      await speakGreek(syllableForSpeech(round.syllables[i]), voice, rate, { interrupt: i === 0, kind: 'syllable' });
+      await new Promise((r) => window.setTimeout(r, 180));
     }
+    if (demoTokenRef.current !== token) return;
+    setLitIdx(null);
+    await speakGreek(round.spokenWordEl, voice, rate, { interrupt: false, kind: 'syllable' });
+  };
 
-    const firstPassEndMs = initialDelayMs + total * stepIntervalMs + 200;
-    const endTimer = window.setTimeout(() => {
-      if (speakSyllablesDuringRun) {
-        speakGreek(round.spokenWordEl, settings.voiceEnabled, adaptiveProfile.speechRate);
-      }
-      // Keep cycling the VISUAL syllable runner (0 -> 1 -> ... -> total-1 -> brief pause -> 0).
-      // Silent on purpose: an endless tone every 650 ms is over-stimulating (calm-design principle).
-      let cycleStep = 0;
-      loopIntervalId = window.setInterval(() => {
-        const idx = cycleStep % (total + 1);
-        setActiveKaraokeIdx(idx < total ? idx : null);
-        cycleStep += 1;
-      }, stepIntervalMs);
-    }, firstPassEndMs);
-    timers.push(endTimer);
-
-    return () => {
-      timers.forEach((id) => window.clearTimeout(id));
-      if (loopIntervalId !== null) {
-        window.clearInterval(loopIntervalId);
-      }
-    };
-  }, [
-    currentRound,
-    hintLevel,
-    isRunnerHalted,
-    karaokeRunId,
-    speakSyllablesDuringRun,
-    round.syllables,
-    round.spokenWordEl,
-    sessionSeed,
-    settings.soundEnabled,
-    settings.voiceEnabled,
-    adaptiveProfile.speechRate,
-  ]);
-
-  const allClapped = clappedCount >= round.syllables.length;
-
-  const handleClapSyllable = () => {
-    runDebounced(() => {
-      const currentTargetIdx = clappedCount < round.syllables.length ? clappedCount : 0;
-      const syl = round.syllables[currentTargetIdx];
-      setActiveKaraokeIdx(currentTargetIdx);
-      playCalmTone('pulse', settings.soundEnabled);
-      // Uses dedicated syllable phonetic synthesis so single syllables are NEVER spelled out as letters
-      speakGreekSyllable(syl, settings.voiceEnabled, adaptiveProfile.speechRate);
-      setClappedCount((c) => {
-        const base = c >= round.syllables.length ? 0 : c;
-        const next = base + 1;
-        if (next === round.syllables.length) {
-          window.setTimeout(() => {
-            speakGreek(round.spokenWordEl, settings.voiceEnabled, adaptiveProfile.speechRate);
-          }, 380);
-        }
-        return next;
+  useEffect(() => {
+    demoTokenRef.current += 1;
+    setClaps(0);
+    setLitIdx(null);
+    setStep('listen');
+    let alive = true;
+    const prompt = isGuided
+      ? `${round.spokenWordEl}! Χτύπα ένα παλαμάκι για κάθε κομμάτι της λέξης.`
+      : `${round.spokenWordEl}! Πόσα παλαμάκια έχει; Χτύπα τα και πάτα «Τελείωσα».`;
+    const spoken = speakGreek(prompt, voice, rate);
+    if (isSpeechGateInstant()) setStep('clap');
+    else
+      void spoken.then(() => {
+        if (alive) setStep('clap');
       });
+    return () => {
+      alive = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentRound, sessionSeed, round.spokenWordEl, isGuided]);
+
+  useEffect(() => {
+    if (phase === 'PAUSED' || phase === 'COMPLETED') demoTokenRef.current += 1;
+  }, [phase]);
+
+  const finishClapping = async () => {
+    await speakGreek(round.spokenWordEl, voice, rate, { protect: true, kind: 'syllable' });
+    if (asksMeaning) {
+      setStep('meaning');
+      speakGreek(`Τι σημαίνει ${round.spokenWordEl};`, voice, rate);
+    } else {
+      advanceRound(getAbsorbedCount());
+    }
+  };
+
+  const handleClap = () => {
+    if (step === 'listen') setStep('clap'); // the child may start before the voice ends
+    if (step === 'meaning') return;
+    runDebounced(() => {
+      playCalmTone('clap', settings.soundEnabled);
+      if (isGuided) {
+        const idx = Math.min(claps, total - 1);
+        setLitIdx(idx);
+        speakGreek(syllableForSpeech(round.syllables[idx]), voice, rate, { kind: 'syllable' });
+        const next = claps + 1;
+        setClaps(next);
+        if (next >= total) {
+          window.setTimeout(() => {
+            setLitIdx(null);
+            void finishClapping();
+          }, 450);
+        }
+      } else {
+        setClaps((c) => Math.min(c + 1, 9));
+      }
     });
   };
 
-  const handleRestartKaraokeRun = () => {
-    setClappedCount(0);
-    setActiveKaraokeIdx(0);
-    setSpeakSyllablesDuringRun(true);
-    setKaraokeRunId((r) => r + 1);
+  const handleDone = () => {
+    runDebounced(() => {
+      if (claps === total) {
+        void playSyllableDemo().then(() => {
+          if (asksMeaning) {
+            setStep('meaning');
+            speakGreek(`Τι σημαίνει ${round.spokenWordEl};`, voice, rate);
+          } else {
+            advanceRound(getAbsorbedCount());
+          }
+        });
+        return;
+      }
+      setClaps(0);
+      triggerGentleFeedback(
+        claps < total ? 'Λίγα παλαμάκια. Ας τα χτυπήσουμε μαζί!' : 'Πολλά παλαμάκια. Ας τα χτυπήσουμε μαζί!'
+      );
+      window.setTimeout(() => void playSyllableDemo(), 1800);
+    });
   };
 
-  const visibleOptions = useMemo(() => {
-    const baseOpts =
-      hintLevel === 2 || ageBand === '4-5' || adaptiveProfile.distractorReductionRatio >= 0.5
-        ? reduceToTwoChoices(round.options, (o) => o.isCorrect)
-        : round.options;
-    return rotateOptionsForSession(baseOpts, sessionSeed, currentRound);
-  }, [round.options, hintLevel, ageBand, adaptiveProfile.distractorReductionRatio, sessionSeed, currentRound]);
+  const meaningOptions = useMemo(
+    () => rotateOptionsForSession(round.options, sessionSeed, currentRound),
+    [round.options, sessionSeed, currentRound]
+  );
 
-  const handleSelectOption = (isCorrect: boolean, labelEl: string) => {
+  const handleMeaning = (isCorrect: boolean) => {
     runDebounced(() => {
       if (isCorrect) {
-        // Even if the child clapped physically in the room instead of pressing the syllable button,
-        // celebrate and advance immediately!
-        setClappedCount(round.syllables.length);
-        setActiveKaraokeIdx(null);
-        speakGreek(round.spokenWordEl, settings.voiceEnabled, adaptiveProfile.speechRate);
         advanceRound(getAbsorbedCount());
       } else {
-        triggerGentleFeedback(
-          `Άκου ξανά καθαρά: ψάχνουμε την κάρτα για τη λέξη «${round.spokenWordEl}», όχι «${labelEl}».`
-        );
+        triggerGentleFeedback(`Όχι ακριβώς. Άκου ξανά τη λέξη «${round.spokenWordEl}» και σκέψου τι σημαίνει.`);
       }
     });
   };
 
   return (
-    <div className="space-y-3 text-center" data-testid="activity-13-speech-articulation">
-      {/* Syllabic Rhythm & Articulation Stage */}
-      <div className="p-3 sm:p-4 rounded-3xl bg-sage-surface border-4 border-sage space-y-2">
-        <div className="text-3xl sm:text-4xl" aria-hidden="true">{round.targetEmoji}</div>
-        <div className="flex flex-wrap items-center justify-center gap-2.5 sm:gap-3">
-          <h2 className="text-xl sm:text-2xl font-extrabold text-charcoal">{round.wordEl}</h2>
+    <div
+      className="space-y-4 text-center"
+      data-testid="activity-13-speech-articulation"
+      data-step={step}
+      data-syllables={total}
+    >
+      <div className="p-4 sm:p-5 rounded-3xl bg-sage-surface border-4 border-sage space-y-3">
+        <div className="text-5xl" aria-hidden="true">{round.targetEmoji}</div>
+        <div className="flex flex-wrap items-center justify-center gap-3">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-charcoal" data-testid="speech-word">
+            {isGuided ? round.wordEl : round.spokenWordEl}
+          </h2>
           <button
             type="button"
             data-testid="speech-word-listen-btn"
-            onClick={() => speakGreek(round.spokenWordEl, true, adaptiveProfile.speechRate)}
-            className="px-3 py-1.5 rounded-xl bg-white border-2 border-sage text-xs font-extrabold text-charcoal hover:bg-sage hover:text-white"
+            onClick={() => speakGreek(round.spokenWordEl, true, rate, { kind: 'syllable' })}
+            className="px-3 py-1.5 rounded-xl bg-white border-2 border-sage text-sm font-extrabold text-charcoal hover:bg-sage hover:text-white"
           >
-            🔊 Άκου τη λέξη «{round.spokenWordEl}»
+            🔊 Άκου
           </button>
         </div>
-        <p className="text-sm sm:text-base font-bold text-charcoal">{round.promptQuestionEl}</p>
 
-        {/* Live Continuous Rhythm Cue Banner so child & parent see the running syllable beat immediately */}
-        <div
-          data-testid="live-syllable-runner-banner"
-          className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-ochre-surface border-2 border-ochre text-xs sm:text-sm font-extrabold text-charcoal"
-        >
-          <span aria-hidden="true">👏</span>
-          <span>
-            {activeKaraokeIdx !== null && round.syllables[activeKaraokeIdx]
-              ? `Τρέχει τώρα η συλλαβή «${round.syllables[activeKaraokeIdx].toUpperCase()}» (${activeKaraokeIdx + 1}/${round.syllables.length}) — Χτύπα παλαμάκι!`
-              : `Ο ρυθμός συλλαβών επαναλαμβάνεται — Χτύπα παλαμάκι σε κάθε φωτισμένη συλλαβή!`}
-          </span>
-        </div>
+        {step !== 'meaning' && (
+          <p className="text-base font-bold text-charcoal">
+            {isGuided ? '👏 Ένα παλαμάκι για κάθε κομμάτι της λέξης' : '👏 Πόσα παλαμάκια έχει η λέξη;'}
+          </p>
+        )}
 
-        {/* Interactive Karaoke Syllable Runner Boxes (auto-runs in continuous rhythm AND each box is directly clickable!) */}
-        <div
-          className="flex flex-wrap items-center justify-center gap-2.5 sm:gap-3 pt-1"
-          data-testid="speech-karaoke-syllable-track"
-        >
-          {round.syllables.map((syl, idx) => {
-            const isClapped = idx < clappedCount;
-            const isCurrentlyRunning = activeKaraokeIdx === idx;
+        {/* Syllable boxes: visible for guided play, after a correct count, or during «Δείξε μου» */}
+        <div className="flex flex-wrap items-center justify-center gap-2.5" data-testid="speech-karaoke-syllable-track">
+          {(isGuided || litIdx !== null || step === 'meaning'
+            ? round.syllables
+            : Array.from({ length: claps }, () => '👏')
+          ).map((syl, idx) => {
+            const isLit = litIdx === idx;
+            const isDone = isGuided && idx < claps;
             return (
-              <button
+              <span
                 key={`${syl}-${idx}`}
-                type="button"
                 data-testid={`syllable-box-${idx}`}
-                data-karaoke-active={isCurrentlyRunning ? 'true' : 'false'}
-                onClick={() => {
-                  setActiveKaraokeIdx(idx);
-                  speakGreekSyllable(syl, true, adaptiveProfile.speechRate);
-                  setClappedCount((c) => Math.max(c, idx + 1));
-                }}
-                className={`relative overflow-hidden px-4 py-2.5 sm:px-5 sm:py-3 rounded-2xl border-3 font-extrabold text-lg sm:text-xl transition-all cursor-pointer ${
-                  isCurrentlyRunning
-                    ? 'bg-ochre text-charcoal border-charcoal scale-110 ring-4 ring-ochre/40'
-                    : isClapped
-                    ? 'bg-sage-dark text-white border-charcoal scale-105'
-                    : 'bg-white text-charcoal border-sand-dark hover:border-sage'
+                data-karaoke-active={isLit ? 'true' : 'false'}
+                className={`px-4 py-2.5 rounded-2xl border-4 font-extrabold text-xl transition-all ${
+                  isLit
+                    ? 'bg-ochre text-charcoal border-charcoal scale-110'
+                    : isDone || step === 'meaning'
+                    ? 'bg-sage-dark text-white border-charcoal'
+                    : 'bg-white text-charcoal border-sand-dark'
                 }`}
               >
-                <span className="inline-flex items-center gap-1.5">
-                  <span className="text-xs opacity-75">{idx + 1}.</span>
-                  <span>{syl}</span>
-                  {(isCurrentlyRunning || isClapped) && (
-                    <span className="text-base" aria-hidden="true">👏</span>
-                  )}
-                </span>
-                {isCurrentlyRunning && (
-                  <span
-                    data-testid="syllable-runner-bar"
-                    className="absolute bottom-0 left-0 right-0 h-1.5 bg-charcoal/80"
-                    aria-hidden="true"
-                  />
-                )}
-              </button>
+                {syl}
+              </span>
             );
           })}
         </div>
 
-        <div className="pt-1 flex flex-wrap items-center justify-center gap-2.5">
-          <button
-            type="button"
-            data-testid="speech-clap-syllable-btn"
-            onClick={handleClapSyllable}
-            className="touch-target px-5 py-2.5 sm:px-6 sm:py-3 rounded-2xl bg-slate text-white font-extrabold text-base sm:text-lg inline-flex items-center gap-2 hover:bg-slate-dark"
-          >
-            <span aria-hidden="true">👏</span>
-            <span>
-              {allClapped
-                ? `Μπράβο! (${round.syllables.length}/${round.syllables.length} Συλλαβές)`
-                : `Χτύπα Συλλαβή (${clappedCount}/${round.syllables.length})`}
-            </span>
-          </button>
-
-          <button
-            type="button"
-            data-testid="speech-auto-run-syllables-btn"
-            onClick={handleRestartKaraokeRun}
-            className="touch-target px-4 py-2.5 sm:px-5 sm:py-3 rounded-2xl bg-white border-2 border-slate text-charcoal font-extrabold text-xs sm:text-sm inline-flex items-center gap-1.5 hover:bg-sand-surface"
-          >
-            <span aria-hidden="true">▶️</span>
-            <span>Τρέξε & Άκου τις Συλλαβές με Ρυθμό</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Phonological Target Selection */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3 max-w-2xl mx-auto">
-        {visibleOptions.map((opt) => {
-          const highlight = (hintLevel >= 1 || adaptiveProfile.autoHintBoost) && opt.isCorrect;
-          return (
+        {step !== 'meaning' && (
+          <div className="flex flex-wrap items-center justify-center gap-3 pt-1">
             <button
-              key={opt.id}
               type="button"
-              data-testid={opt.isCorrect ? 'speech-articulation-target' : `speech-opt-${opt.id}`}
-              onClick={() => handleSelectOption(opt.isCorrect, opt.labelEl)}
-              className={`touch-target min-h-[96px] sm:min-h-[116px] p-4 sm:p-5 rounded-3xl border-4 flex flex-col items-center justify-center gap-1.5 sm:gap-2 ${
-                highlight
-                  ? 'bg-sage-surface border-sage-dark ring-4 ring-sage/40'
-                  : 'bg-white border-sand-dark hover:border-slate'
-              }`}
+              data-testid="speech-clap-syllable-btn"
+              onClick={handleClap}
+              className="touch-target min-w-[180px] px-6 py-4 rounded-3xl bg-slate text-white font-extrabold text-xl inline-flex items-center justify-center gap-2 hover:bg-slate-dark"
             >
-              <span className="text-3xl sm:text-4xl" aria-hidden="true">{opt.emoji}</span>
-              <span className="text-sm sm:text-base font-extrabold text-charcoal">{opt.labelEl}</span>
+              <span className="text-3xl" aria-hidden="true">👏</span>
+              <span>Παλαμάκι{isGuided ? ` (${claps}/${total})` : ''}</span>
             </button>
-          );
-        })}
+            {!isGuided && (
+              <button
+                type="button"
+                data-testid="speech-clap-done-btn"
+                onClick={handleDone}
+                disabled={claps === 0}
+                className="touch-target px-6 py-4 rounded-3xl bg-sage-dark text-white font-extrabold text-xl disabled:opacity-50"
+              >
+                ✓ Τελείωσα ({claps})
+              </button>
+            )}
+            <button
+              type="button"
+              data-testid="speech-auto-run-syllables-btn"
+              onClick={() => {
+                setClaps(0);
+                void playSyllableDemo();
+              }}
+              className="touch-target px-4 py-3 rounded-2xl bg-white border-2 border-slate text-charcoal font-extrabold text-sm"
+            >
+              ▶️ Δείξε μου
+            </button>
+          </div>
+        )}
       </div>
+
+      {step === 'meaning' && (
+        <div className="space-y-3" data-testid="speech-meaning-step">
+          <p className="text-lg font-extrabold text-charcoal">Τι σημαίνει «{round.spokenWordEl}»;</p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-3xl mx-auto">
+            {meaningOptions.map((opt) => (
+              <button
+                key={opt.id}
+                type="button"
+                data-testid={opt.isCorrect ? 'speech-articulation-target' : `speech-opt-${opt.id}`}
+                onClick={() => handleMeaning(opt.isCorrect)}
+                className={`touch-target min-h-[96px] p-4 rounded-3xl border-4 flex flex-col items-center justify-center gap-2 ${
+                  hintLevel >= 2 && opt.isCorrect
+                    ? 'bg-sage-surface border-sage-dark ring-4 ring-sage/40'
+                    : 'bg-white border-sand-dark hover:border-slate'
+                }`}
+              >
+                <span className="text-sm sm:text-base font-extrabold text-charcoal">{definitionWithoutWord(opt.labelEl)}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
