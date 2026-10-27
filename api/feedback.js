@@ -51,8 +51,14 @@ export default async function handler(req, res) {
     return res.status(405).json({ ok: false });
   }
 
-  const origin = req.headers.origin || '';
-  if (origin && !ALLOWED_ORIGINS.has(origin)) {
+  // P1: accept ONLY requests coming from the site. Browsers always send Origin on POST;
+  // requests without Origin/Referer (curl, scripts, bots) are rejected.
+  const origin = String(req.headers.origin || '');
+  const referer = String(req.headers.referer || '');
+  const fromSite =
+    ALLOWED_ORIGINS.has(origin) ||
+    [...ALLOWED_ORIGINS].some((o) => referer === o || referer.startsWith(o + '/'));
+  if (!fromSite) {
     return res.status(403).json({ ok: false });
   }
 
@@ -140,7 +146,10 @@ export default async function handler(req, res) {
     const originHeader = req.headers.origin || 'https://www.synapseplay.gr';
     const refererHeader = req.headers.referer || 'https://www.synapseplay.gr/parent';
 
-    const formSubmitResp = await fetch(`https://formsubmit.co/ajax/${recipientEmail}`, {
+    // P2: optional FormSubmit alias (same inbox, but the address is not exposed).
+    // Without FORMSUBMIT_ALIAS the behaviour is unchanged (e-mail address).
+    const formSubmitTarget = process.env.FORMSUBMIT_ALIAS || recipientEmail;
+    const formSubmitResp = await fetch(`https://formsubmit.co/ajax/${formSubmitTarget}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

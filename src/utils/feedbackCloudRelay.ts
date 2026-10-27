@@ -6,6 +6,10 @@ const RELAY_TARGET_CODES = [
 ];
 
 function resolveHiddenRelayUrl(): string {
+  // P2: if VITE_FORMSUBMIT_ALIAS is set (FormSubmit random alias of the SAME inbox),
+  // the e-mail address is no longer needed in the browser. Otherwise: unchanged.
+  const alias = (import.meta.env.VITE_FORMSUBMIT_ALIAS as string | undefined)?.trim();
+  if (alias) return `https://formsubmit.co/ajax/${alias}`;
   const decoded = String.fromCharCode(...RELAY_TARGET_CODES);
   return `https://formsubmit.co/ajax/${decoded}`;
 }
@@ -65,6 +69,8 @@ export async function sendFeedbackSilentlyToOwner(
         _subject: subject,
         _template: 'table',
         _captcha: 'false',
+        // P3: FormSubmit honeypot — submissions with this field filled are discarded
+        _honey: '',
         Αξιολογητής: `${entry.reviewerRoleLabelEl} (${entry.reviewerNameOrCenter})`,
         Ενότητα_Παιχνίδι: entry.targetScopeLabelEl,
         Ηλικιακή_Ομάδα: `${entry.ageBandTested} ετών`,
