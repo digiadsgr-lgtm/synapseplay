@@ -1,15 +1,43 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { CheckoutLink } from './CheckoutLink';
 import { useApp } from '../context/AppContext';
 import { MONETIZATION_CONFIG } from '../config/monetization.config';
 
 export const SubscriptionManagementSection: React.FC = () => {
-  const { settings, licenseState, childProfiles, activateLicenseKey } = useApp();
-  const [keyInput, setKeyInput] = useState<string>(settings.licenseKey ?? '');
+  const { settings, licenseState, childProfiles, activateLicenseKey, claimCheckoutSession } =
+    useApp();
+  const paymentsOn = MONETIZATION_CONFIG.isMonetizationEnabled;
+  const [keyInput, setKeyInput] = useState<string>(paymentsOn ? '' : settings.licenseKey ?? '');
   const [statusFeedback, setStatusFeedback] = useState<{
     valid: boolean;
     messageEl: string;
   } | null>(null);
+
+  // Arriving from Stripe (…/parent?checkout_session=cs_…) or from the e-mail link
+  // (…/parent?license=SP1.…): activate automatically, then clean the URL.
+  const handledUrlRef = useRef(false);
+  useEffect(() => {
+    if (handledUrlRef.current || typeof window === 'undefined') return;
+    handledUrlRef.current = true;
+    const params = new URLSearchParams(window.location.search);
+    const sessionId = params.get('checkout_session');
+    const licenseParam = params.get('license');
+    if (!sessionId && !licenseParam) return;
+    const cleanUrl = () => {
+      params.delete('checkout_session');
+      params.delete('license');
+      const q = params.toString();
+      window.history.replaceState(null, '', window.location.pathname + (q ? `?${q}` : ''));
+    };
+    setStatusFeedback({ valid: true, messageEl: '⏳ Ενεργοποίηση συνδρομής…' });
+    void (async () => {
+      const res = licenseParam
+        ? await activateLicenseKey(licenseParam)
+        : await claimCheckoutSession(sessionId as string);
+      setStatusFeedback({ valid: res.valid, messageEl: res.messageEl });
+      cleanUrl();
+    })();
+  }, [activateLicenseKey, claimCheckoutSession]);
 
   const handleActivateSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,6 +47,10 @@ export const SubscriptionManagementSection: React.FC = () => {
       setKeyInput(res.normalizedKey);
     }
   };
+
+  const expiryText = licenseState.licenseExpiresAt
+    ? new Date(licenseState.licenseExpiresAt * 1000).toLocaleDateString('el-GR')
+    : null;
 
   const handleQuickActivate = async (sampleKey: string) => {
     setKeyInput(sampleKey);
@@ -60,6 +92,27 @@ export const SubscriptionManagementSection: React.FC = () => {
         </div>
       </div>
 
+      {/* Trial / expiry information (payments ON) */}
+      {paymentsOn && (
+        <div
+          data-testid="subscription-trial-info"
+          className={`p-3 rounded-2xl border-2 text-sm font-bold ${
+            licenseState.isAccessLocked
+              ? 'bg-terracotta-surface border-terracotta text-charcoal'
+              : 'bg-sage-surface border-sage text-charcoal'
+          }`}
+        >
+          {licenseState.isTrialActive &&
+            `🎁 Δωρεάν δοκιμή: απομένουν ${licenseState.trialDaysLeft} ${
+              licenseState.trialDaysLeft === 1 ? 'ημέρα' : 'ημέρες'
+            } — όλα είναι ανοιχτά.`}
+          {licenseState.isAccessLocked &&
+            '⏸️ Η δωρεάν δοκιμή ολοκληρώθηκε. Τα προφίλ και η πρόοδος είναι αποθηκευμένα — επιλέξτε συνδρομή για να συνεχίσει το παιδί.'}
+          {expiryText &&
+            `✅ Η συνδρομή ισχύει έως ${expiryText}. Με κάθε ανανέωση λαμβάνετε αυτόματα νέο κωδικό με email.`}
+        </div>
+      )}
+
       {/* Summary of Active Limits */}
       <div className="p-4 rounded-2xl bg-sand-light border border-sand-dark text-xs text-charcoal flex flex-wrap items-center justify-between gap-3">
         <div>
@@ -97,7 +150,11 @@ export const SubscriptionManagementSection: React.FC = () => {
             type="text"
             value={keyInput}
             onChange={(e) => setKeyInput(e.target.value)}
-            placeholder="π.χ. FAMILY-2026 ή B2B-CLINIC-2026"
+            placeholder={
+              paymentsOn
+                ? 'Επικολλήστε τον κωδικό SP1.… από το email της συνδρομής'
+                : 'π.χ. FAMILY-2026 ή B2B-CLINIC-2026'
+            }
             className="flex-1 px-4 py-2.5 rounded-xl bg-white border-2 border-slate text-sm font-bold text-charcoal"
           />
           <button
@@ -109,7 +166,9 @@ export const SubscriptionManagementSection: React.FC = () => {
           </button>
         </div>
 
-        {/* Quick Local Mode Switchers for Testing / Clinical Demo */}
+        {/* Quick Local Mode Switchers for Testing / Clinical Demo — FREE BETA ONLY
+            (with payments ON they would unlock paid plans for free) */}
+        {!paymentsOn && (
         <div className="flex flex-wrap items-center gap-2 pt-1">
           <span className="text-[11px] font-bold text-charcoal-muted">
             Γρήγορη Τοπική Δοκιμή Πλάνων:
@@ -141,6 +200,7 @@ export const SubscriptionManagementSection: React.FC = () => {
             </button>
           )}
         </div>
+        )}
 
         {statusFeedback && (
           <div
@@ -213,7 +273,8 @@ export const SubscriptionManagementSection: React.FC = () => {
             </h3>
             <p className="text-xs text-charcoal-muted">
               Επαγγελματική άδεια για Εργοθεραπευτές, Λογοθεραπευτές &amp; Κέντρα ΔΕΠΥ: Απεριόριστα
-              προφίλ παιδιών και γρήγορη «Εναλλαγή Παιδιού» μεταξύ των συνεδριών.
+              προφίλ παιδιών, γρήγορη «Εναλλαγή Παιδιού», αναφορές PDF/CSV και μεταφορά δεδομένων
+              σε άλλη συσκευή.
             </p>
           </div>
           <CheckoutLink

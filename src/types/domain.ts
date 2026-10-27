@@ -140,7 +140,7 @@ export interface ActivitySessionLog {
   childNickname?: string;
 }
 
-export type LicenseTier = 'dev-unlocked' | 'family' | 'b2b';
+export type LicenseTier = 'dev-unlocked' | 'family' | 'b2b' | 'trial' | 'expired';
 
 export interface AppSettings {
   id: string; // always 'default'
@@ -154,6 +154,10 @@ export interface AppSettings {
   seatedModeDefault: boolean;
   licenseTier?: LicenseTier; // default 'dev-unlocked' when ENABLE_PAYWALL = false
   licenseKey?: string;
+  /** Signed licence codes (SP1.…) issued after Stripe payments — verified offline. */
+  licenseTokens?: string[];
+  /** First use with payments enabled → start of the 14-day free trial (ISO). */
+  trialStartedAt?: string;
 }
 
 export interface DailyUsageRecord {

@@ -31,6 +31,7 @@ import {
   trainChildProfileOnActivityCompletion,
 } from '../utils/childProfileLearningEngine';
 import {
+  ENABLE_PAYWALL,
   checkProfileCreationPermission,
   resolveEffectiveLicenseState,
   validateAndParseLicenseKey,
@@ -38,6 +39,11 @@ import {
   type LicenseKeyValidationResult,
   type ProfileCreationPermission,
 } from '../utils/licensingEngine';
+import {
+  isSignedLicenseToken,
+  verifyLicenseToken,
+  type VerifiedLicense,
+} from '../utils/licenseToken';
 import { getAgeBandProtocol } from '../data/ageProtocols';
 import { playCalmTone, speakGreek } from '../utils/soundAndSpeech';
 
@@ -47,6 +53,10 @@ interface AppContextValue {
   licenseState: EffectiveLicenseState;
   profileCreationPermission: ProfileCreationPermission;
   activateLicenseKey: (rawKey: string) => Promise<LicenseKeyValidationResult>;
+  /** After a Stripe payment: exchange the checkout session for a signed licence. */
+  claimCheckoutSession: (sessionId: string) => Promise<LicenseKeyValidationResult>;
+  /** Licences verified on this device (signed codes). */
+  verifiedLicenses: VerifiedLicense[];
   childProfiles: ChildMicroProfile[];
   activeProfile: ChildMicroProfile;
   switchChildProfile: (profileId: string) => Promise<void>;
@@ -106,6 +116,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [feedbackEntries, setFeedbackEntries] = useState<ClinicalFeedbackEntry[]>([]);
   const [warningAnnounced, setWarningAnnounced] = useState<boolean>(false);
   const [isScreenTimeRoute, setScreenTimeTracking] = useState<boolean>(true);
+  const [settingsLoaded, setSettingsLoaded] = useState<boolean>(false);
+  const [verifiedLicenses, setVerifiedLicenses] = useState<VerifiedLicense[]>([]);
   const [isPageVisible, setIsPageVisible] = useState<boolean>(
     () => typeof document === 'undefined' || document.visibilityState !== 'hidden'
   );
@@ -129,6 +141,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setSessionLogs(loadedLogs);
       setChildProfiles(loadedProfiles);
       setFeedbackEntries(loadedFeedback);
+      setSettingsLoaded(true);
     }
     init();
     return () => {
@@ -227,19 +240,95 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     [activeProfile]
   );
 
+  // Verify stored signed licences (offline) whenever they change
+  const licenseTokensKey = (settings.licenseTokens ?? []).join('|');
+  useEffect(() => {
+    let alive = true;
+    const tokens = settings.licenseTokens ?? [];
+    void Promise.all(tokens.map((t) => verifyLicenseToken(t))).then((results) => {
+      if (!alive) return;
+      setVerifiedLicenses(results.flatMap((r) => (r.ok ? [r.license] : [])));
+    });
+    return () => {
+      alive = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [licenseTokensKey]);
+
+  // Payments ON: the 14-day trial starts at the first use on this device
+  useEffect(() => {
+    if (ENABLE_PAYWALL && settingsLoaded && !settings.trialStartedAt) {
+      void updateSettings({ trialStartedAt: new Date().toISOString() });
+    }
+  }, [settingsLoaded, settings.trialStartedAt, updateSettings]);
+
   const licenseState = useMemo(
-    () => resolveEffectiveLicenseState(settings),
-    [settings.licenseTier, settings.licenseKey]
+    () => resolveEffectiveLicenseState(settings, ENABLE_PAYWALL, { verifiedLicenses }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [settings.licenseTier, settings.licenseKey, settings.trialStartedAt, verifiedLicenses]
   );
 
   const profileCreationPermission = useMemo(
-    () => checkProfileCreationPermission(childProfiles.length, settings),
-    [childProfiles.length, settings.licenseTier, settings.licenseKey]
+    () =>
+      checkProfileCreationPermission(childProfiles.length, settings, ENABLE_PAYWALL, {
+        verifiedLicenses,
+      }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [childProfiles.length, settings.licenseTier, settings.licenseKey, settings.trialStartedAt, verifiedLicenses]
   );
 
   const activateLicenseKey = useCallback(
     async (rawKey: string): Promise<LicenseKeyValidationResult> => {
-      const result = validateAndParseLicenseKey(rawKey);
+      // Signed licence from a Stripe payment (SP1.…)
+      if (isSignedLicenseToken(rawKey)) {
+        const res = await verifyLicenseToken(rawKey);
+        if (!res.ok) {
+          return {
+            valid: false,
+            tier: null,
+            normalizedKey: '',
+            messageEl:
+              res.reason === 'no-public-key'
+                ? 'Η επαλήθευση κωδικών δεν έχει ρυθμιστεί ακόμη σε αυτή την έκδοση.'
+                : res.reason === 'no-crypto'
+                ? 'Ο browser της συσκευής δεν υποστηρίζει ασφαλή επαλήθευση. Ενημερώστε τον browser.'
+                : 'Ο κωδικός δεν είναι έγκυρος. Αντιγράψτε τον ολόκληρο από το email της συνδρομής.',
+          };
+        }
+        const lic = res.license;
+        const nowSec = Date.now() / 1000;
+        if (lic.exp <= nowSec) {
+          return {
+            valid: false,
+            tier: null,
+            normalizedKey: '',
+            messageEl:
+              'Ο κωδικός έχει λήξει. Με κάθε ανανέωση της συνδρομής λαμβάνετε νέο κωδικό με email.',
+          };
+        }
+        // Keep only still-valid codes (max 10), newest last, no duplicates
+        const kept = (settings.licenseTokens ?? []).filter((t) => t !== lic.token);
+        const stillValid = verifiedLicenses
+          .filter((v) => kept.includes(v.token) && v.exp > nowSec)
+          .map((v) => v.token);
+        await updateSettings({ licenseTokens: [...stillValid, lic.token].slice(-10) });
+        const until = new Date(lic.exp * 1000).toLocaleDateString('el-GR');
+        const label =
+          lic.plan === 'b2b'
+            ? 'η Άδεια Θεραπευτή (B2B)'
+            : lic.plan === 'extra'
+            ? `${lic.n > 1 ? `${lic.n} επιπλέον προφίλ` : '1 επιπλέον προφίλ'} παιδιού`
+            : 'το Οικογενειακό Πλάνο';
+        return {
+          valid: true,
+          tier: lic.plan === 'b2b' ? 'b2b' : 'family',
+          normalizedKey: '',
+          messageEl: `Ενεργοποιήθηκε ${label} — ισχύει έως ${until}.`,
+        };
+      }
+
+      // Free beta only: demo prefixes (FAMILY-…, B2B-…, DEV)
+      const result = validateAndParseLicenseKey(rawKey, ENABLE_PAYWALL);
       if (result.valid && result.tier) {
         await updateSettings({
           licenseTier: result.tier,
@@ -248,7 +337,36 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
       return result;
     },
-    [updateSettings]
+    [updateSettings, settings.licenseTokens, verifiedLicenses]
+  );
+
+  const claimCheckoutSession = useCallback(
+    async (sessionId: string): Promise<LicenseKeyValidationResult> => {
+      try {
+        const r = await fetch(`/api/license-claim?session_id=${encodeURIComponent(sessionId)}`);
+        const data = (await r.json().catch(() => ({}))) as { ok?: boolean; token?: string; reason?: string };
+        if (r.ok && data.ok && data.token) {
+          return await activateLicenseKey(data.token);
+        }
+        return {
+          valid: false,
+          tier: null,
+          normalizedKey: '',
+          messageEl:
+            data.reason === 'not-paid'
+              ? 'Η πληρωμή δεν έχει ολοκληρωθεί ακόμη. Δοκιμάστε ξανά σε λίγο ή χρησιμοποιήστε τον κωδικό από το email.'
+              : 'Δεν ήταν δυνατή η αυτόματη ενεργοποίηση. Θα λάβετε τον κωδικό με email σε λίγα λεπτά.',
+        };
+      } catch {
+        return {
+          valid: false,
+          tier: null,
+          normalizedKey: '',
+          messageEl: 'Χωρίς σύνδεση στο διαδίκτυο. Χρησιμοποιήστε τον κωδικό από το email όταν συνδεθείτε.',
+        };
+      }
+    },
+    [activateLicenseKey]
   );
 
   const switchChildProfile = useCallback(
@@ -488,6 +606,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         licenseState,
         profileCreationPermission,
         activateLicenseKey,
+        claimCheckoutSession,
+        verifiedLicenses,
         childProfiles,
         activeProfile,
         switchChildProfile,

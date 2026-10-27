@@ -1,5 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { useApp } from '../context/AppContext';
+import { CheckoutLink } from './CheckoutLink';
+import { MONETIZATION_CONFIG } from '../config/monetization.config';
 import type { AgeBandId } from '../data/ageProtocols';
 import { exportBackup, parseBackup, type SynapsePlayBackup } from '../db/database';
 import {
@@ -17,7 +19,8 @@ const AGE_OPTIONS: AgeBandId[] = ['4-5', '5-6', '6-8', '8-10', '10-12'];
  * and backup / restore for moving data between devices (until cloud sync exists).
  */
 export const ProfessionalToolsSection: React.FC = () => {
-  const { childProfiles, sessionLogs, updateChildProfileDetails, restoreBackup } = useApp();
+  const { childProfiles, sessionLogs, updateChildProfileDetails, restoreBackup, licenseState } =
+    useApp();
   const [nameDrafts, setNameDrafts] = useState<Record<string, string>>({});
   const [pendingBackup, setPendingBackup] = useState<SynapsePlayBackup | null>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -72,6 +75,29 @@ export const ProfessionalToolsSection: React.FC = () => {
     );
     setPendingBackup(null);
   };
+
+  // Reports / CSV / backup are part of the Therapist (B2B) licence (also open in trial & free beta)
+  if (!licenseState.canUseProTools) {
+    return (
+      <section
+        data-testid="professional-tools-locked"
+        className="bg-white border-2 border-slate rounded-3xl p-6 space-y-3"
+      >
+        <h2 className="text-xl font-extrabold text-charcoal">🗂️ Αναφορές, CSV & Μεταφορά Δεδομένων</h2>
+        <p className="text-sm text-charcoal-muted">
+          Η αναφορά για εκτύπωση/PDF, η εξαγωγή CSV και το αντίγραφο ασφαλείας για μεταφορά σε άλλη
+          συσκευή περιλαμβάνονται στην <strong>Άδεια Θεραπευτή (B2B)</strong>.
+        </p>
+        <CheckoutLink
+          href={MONETIZATION_CONFIG.checkoutUrls.therapistAnnual}
+          data-testid="pro-tools-upgrade-link"
+          className="touch-target inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-sage-dark text-white text-sm font-extrabold"
+        >
+          🏥 Άδεια Θεραπευτή (B2B)
+        </CheckoutLink>
+      </section>
+    );
+  }
 
   return (
     <section
