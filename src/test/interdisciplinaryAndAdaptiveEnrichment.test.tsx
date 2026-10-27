@@ -79,7 +79,9 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
         '10-12'
       );
     });
-    expect(screen.getByTestId('activity-13-speech-articulation')).toHaveTextContent('Πο-δή-λα-το');
+    // 10-12: the child must find the number of claps alone (the word is not pre-split)
+    expect(screen.getByTestId('activity-13-speech-articulation')).toHaveTextContent('ποδήλατο');
+    expect(screen.getByTestId('activity-13-speech-articulation')).toHaveAttribute('data-syllables', '4');
   });
 
   it('Requirement C: Renders all 8 Interdisciplinary Protocols (OT, Physiatry, SLT, Psychology, Psychiatry, Social Work, Music-Kinetic, Theater) in Parent Dashboard', async () => {
@@ -140,17 +142,41 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
     expect(mastery.enrichChallenge).toBe(true);
   });
 
-  it('Requirement E (Speech Therapy Games 13, 14, 15): completes Phonological Syllables, Narrative Builder & Auditory Discrimination', () => {
+  it('Requirement E (Speech Therapy Games 13, 14, 15): completes Phonological Syllables, Narrative Builder & Auditory Discrimination', async () => {
     vi.useFakeTimers();
 
-    // Activity 13: Speech Articulation & Syllables
+    // Activity 13: the child claps once per syllable and says how many («✓ Τελείωσα»)
     const { unmount: u13 } = renderRoute('/activity/13-speech-articulation');
+    // nothing is clapped automatically any more
+    act(() => {
+      vi.advanceTimersByTime(4000);
+    });
+    expect(screen.queryByTestId('speech-clap-done-btn')).toHaveTextContent('(0)');
     for (let r = 1; r <= 3; r++) {
-      // Use Hint Level 2 to auto-clap syllables and complete
-      fireEvent.click(screen.getByTestId('hint-ladder-btn'));
-      fireEvent.click(screen.getByTestId('hint-ladder-btn'));
-      vi.advanceTimersByTime(450);
-      fireEvent.click(screen.getByTestId('speech-articulation-target'));
+      const n = Number(screen.getByTestId('activity-13-speech-articulation').getAttribute('data-syllables'));
+      for (let c = 0; c < n; c++) {
+        act(() => {
+          vi.advanceTimersByTime(450);
+        });
+        fireEvent.click(screen.getByTestId('speech-clap-syllable-btn'));
+      }
+      act(() => {
+        vi.advanceTimersByTime(450);
+      });
+      fireEvent.click(screen.getByTestId('speech-clap-done-btn'));
+      // the app claps the syllables back in sync with the voice, then moves on
+      await act(async () => {
+        for (let i = 0; i < 10; i++) {
+          await vi.advanceTimersByTimeAsync(300);
+        }
+      });
+      // 8-12: second step «Τι σημαίνει;»
+      if (screen.queryByTestId('speech-meaning-step')) {
+        fireEvent.click(screen.getByTestId('speech-articulation-target'));
+        await act(async () => {
+          await vi.advanceTimersByTimeAsync(500);
+        });
+      }
     }
     expect(screen.getByTestId('activity-complete-screen')).toBeInTheDocument();
     u13();
@@ -195,10 +221,10 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
     // Activity 17: Sensory Integration & Physiatry Postural Grounding
     const { unmount: u17 } = renderRoute('/activity/17-sensory-proprioception');
     for (let r = 1; r <= 3; r++) {
-      fireEvent.click(screen.getByTestId('hint-ladder-btn'));
-      fireEvent.click(screen.getByTestId('hint-ladder-btn'));
-      vi.advanceTimersByTime(450);
-      fireEvent.click(screen.getByTestId('proprioception-pulse-btn'));
+      for (let c = 0; c < 3; c++) {
+        vi.advanceTimersByTime(450);
+        fireEvent.click(screen.getByTestId('proprioception-pulse-btn'));
+      }
     }
     expect(screen.getByTestId('activity-complete-screen')).toBeInTheDocument();
     u17();
@@ -223,12 +249,27 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
 
     // Activity 20: Music-Kinetic Tempo & Body Percussion
     const { unmount: u20 } = renderRoute('/activity/20-music-kinetic-rhythm');
-    const roundMoves: Array<'rest' | 'knees'> = ['rest', 'knees', 'knees'];
     for (let r = 0; r < 3; r++) {
-      fireEvent.click(screen.getByTestId('hint-ladder-btn'));
-      fireEvent.click(screen.getByTestId('hint-ladder-btn'));
-      vi.advanceTimersByTime(450);
-      fireEvent.click(screen.getByTestId(`music-kinetic-btn-${roundMoves[r]}`));
+      const stage = screen.getByTestId('activity-20-music-kinetic-rhythm');
+      // taps while the maestro plays are ignored
+      fireEvent.click(screen.getByTestId('music-kinetic-btn-clap'));
+      expect(screen.queryByTestId('gentle-feedback-banner')).not.toBeInTheDocument();
+      // the maestro plays the rhythm first
+      act(() => {
+        vi.advanceTimersByTime(6000);
+      });
+      expect(stage).toHaveAttribute('data-stage', 'turn');
+      const moves = (stage.getAttribute('data-pattern') || '').split(',');
+      for (const mv of moves) {
+        if (mv === 'rest') {
+          act(() => {
+            vi.advanceTimersByTime(1200); // silence passes by itself
+          });
+        } else {
+          vi.advanceTimersByTime(450);
+          fireEvent.click(screen.getByTestId(`music-kinetic-btn-${mv}`));
+        }
+      }
     }
     expect(screen.getByTestId('activity-complete-screen')).toBeInTheDocument();
     u20();
@@ -702,7 +743,7 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
 
     // Verify speech normalization for abbreviations, phoneme hints, and ratios
     expect(normalizeGreekForSpeech('Χταπόδι (Αρχίζει με Χ) σε 3 δευτ. (1/2)')).toContain(
-      'αρχίζει με τη φωνούλα χου'
+      'αρχίζει με τη φωνούλα χχχ'
     );
     expect(normalizeGreekForSpeech('Χταπόδι (Αρχίζει με Χ) σε 3 δευτ. (1/2)')).toContain(
       'δευτερόλεπτα'
@@ -882,15 +923,12 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
   it('Field Evaluation Report Fixes (#1 & #2): Automatic Karaoke Syllable Runner, Age 8-10 Challenge, Emoji-Label Parity, and Distinct Activity 08 Riddles', async () => {
     vi.useFakeTimers();
 
-    // 1. Automatic Karaoke Syllable Runner in Activity 13: syllables run automatically across the screen in rhythm!
+    // 1. Activity 13 (audit 10/2026): claps are counted ONLY when the child claps — no automatic «Μπράβο 3/3»
     const { unmount: u13 } = renderRoute('/activity/13-speech-articulation');
-    expect(screen.getByTestId('speech-clap-syllable-btn')).toHaveTextContent('0/3');
-
-    // Advance through the automatic syllable runner (750ms initial + 3 * 650ms)
     act(() => {
       vi.advanceTimersByTime(2800);
     });
-    expect(screen.getByTestId('speech-clap-syllable-btn')).toHaveTextContent('Μπράβο! (3/3 Συλλαβές)');
+    expect(screen.getByTestId('speech-clap-syllable-btn')).not.toHaveTextContent('Μπράβο');
     u13();
 
     // 2. Age 8-10 receives 4-syllable compound challenge words in Activity 13 right from Round 1 (no boredom!)
@@ -900,38 +938,31 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
     await waitFor(() => {
       expect(screen.getByTestId('shared-activity-runner')).toHaveAttribute('data-age-band', '8-10');
     });
-    expect(screen.getByTestId('activity-13-speech-articulation')).toHaveTextContent('Πο-δή-λα-το');
-    expect(screen.getByTestId('speech-articulation-target')).toHaveTextContent('🚲');
-    expect(screen.getByTestId('speech-articulation-target')).toHaveTextContent('Ποδήλατο');
+    expect(screen.getByTestId('activity-13-speech-articulation')).toHaveTextContent('ποδήλατο');
+    expect(screen.getByTestId('activity-13-speech-articulation')).toHaveAttribute('data-syllables', '4');
     u810();
 
     // 3. Activity 02 (Spot the Difference) shows exact single-object labels matching each emoji ('Ήλιος' vs 'Φεγγάρι')
     const { unmount: u02 } = renderRoute('/activity/02-spot-difference');
-    expect(screen.getByTestId('difference-item-target')).toHaveTextContent('Φεγγάρι');
+    // from 6 years the names are hidden (they revealed the difference); the accessible name stays exact
+    expect(screen.getByTestId('difference-item-target')).toHaveAttribute('aria-label', expect.stringContaining('Φεγγάρι'));
     expect(screen.getByTestId('difference-item-target')).not.toHaveTextContent('Ήλιος / Φεγγάρι');
     u02();
 
     // 4. Activity 08 (Listen & Do) uses distinct auditory riddles & mystery cards while listening
     const { unmount: u08 } = renderRoute('/activity/08-listen-do');
-    expect(screen.getByTestId('listen-do-target')).toHaveTextContent('Άκου πρώτα...');
+    // (no speech engine in unit tests → the «heard» gate opens at once and the real cards show)
+    expect(screen.getByTestId('listen-status-ready')).toBeInTheDocument();
     u08();
   });
 
   it('Age 8-10 (9-Year-Old) Senior Calibration & Continuous Looping Karaoke Runner: serves STEM/Executive challenges and loops syllable runner continuously', async () => {
     vi.useFakeTimers();
 
-    // 1. Continuous Looping Karaoke Runner in Activity 13: keeps cycling active syllable even after 4+ seconds!
+    // 1. Activity 13 «Δείξε μου»: the syllables light up one by one IN SYNC with the voice
     const { unmount: uLoop } = renderRoute('/activity/13-speech-articulation');
-    expect(screen.getByTestId('live-syllable-runner-banner')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('speech-auto-run-syllables-btn'));
     expect(screen.getByTestId('syllable-box-0')).toHaveAttribute('data-karaoke-active', 'true');
-
-    // Advance past the first sweep (3500ms) -> runner continues looping to syllable 0 or 1!
-    act(() => {
-      vi.advanceTimersByTime(3600);
-    });
-    expect(screen.getByTestId('live-syllable-runner-banner')).toHaveTextContent(
-      /Τρέχει τώρα η συλλαβή|Ο ρυθμός συλλαβών επαναλαμβάνεται/
-    );
     uLoop();
     vi.useRealTimers();
 
@@ -964,11 +995,11 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
     });
     u14();
 
-    // Activity 15: Senior Temporal Inversion ("ΠΡΙΝ... αλλά ΑΦΟΥ...")
+    // Activity 15: Senior temporal order («αφού…»)
     const { unmount: u15 } = renderRoute('/activity/15-auditory-discrimination');
     await waitFor(() => {
       expect(screen.getByTestId('activity-15-auditory-discrimination')).toHaveTextContent(
-        'Χρονική Αναστροφή (8-12 ετών)'
+        'Χρονική σειρά'
       );
     });
     u15();
@@ -977,7 +1008,7 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
     const { unmount: u18 } = renderRoute('/activity/18-adl-praxis');
     await waitFor(() => {
       expect(screen.getByTestId('activity-18-adl-praxis')).toHaveTextContent(
-        'Ιεράρχηση Απογευματινής Μελέτης'
+        'Τι Διαβάζω Πρώτα;'
       );
     });
     u18();

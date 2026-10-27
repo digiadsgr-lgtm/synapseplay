@@ -69,7 +69,7 @@ describe('Gate 3 — Remaining 8 Activities (02, 03, 05, 06, 08, 09, 10, 12) & F
 
     // Picking Step 2 before Step 1 triggers gentle prompt
     fireEvent.click(screen.getByTestId('order-step-card-2'));
-    expect(screen.getByTestId('gentle-feedback-banner')).toHaveTextContent('Βήμα 1');
+    expect(screen.getByTestId('gentle-feedback-banner')).toHaveTextContent('Όχι ακόμα');
 
     // Complete all 3 routines in order 1 -> 2 -> 3
     for (let r = 1; r <= 3; r++) {
@@ -114,18 +114,19 @@ describe('Gate 3 — Remaining 8 Activities (02, 03, 05, 06, 08, 09, 10, 12) & F
     vi.useFakeTimers();
     renderActivity('08-listen-do');
 
-    // Impulsive tap before 900ms listening window triggers calm wait prompt
-    expect(screen.getByTestId('listen-status-waiting')).toBeInTheDocument();
-    fireEvent.click(screen.getByTestId('listen-do-target'));
-    expect(screen.getByTestId('gentle-feedback-banner')).toHaveTextContent('Περίμενε μια στιγμή');
-
-    // Complete 3 rounds after waiting 950ms for instruction completion (100ms progress ticks)
+    // «Τώρα διάλεξε» opens when the riddle has been spoken to the end
+    // (in unit tests there is no speech engine, so the gate opens at once — see useSpokenPrompt)
+    expect(screen.getByTestId('listen-status-ready')).toBeInTheDocument();
+    // a wrong choice gets a short correction
+    const wrong = screen.getAllByRole('button').find((b) => b.getAttribute('data-testid')?.startsWith('listen-do-opt-'));
+    if (wrong) {
+      fireEvent.click(wrong);
+      expect(screen.getByTestId('gentle-feedback-banner')).toHaveTextContent('Άκου ξανά');
+    }
     for (let r = 1; r <= 3; r++) {
-      for (let tick = 0; tick < 10; tick++) {
-        act(() => {
-          vi.advanceTimersByTime(100);
-        });
-      }
+      act(() => {
+        vi.advanceTimersByTime(450);
+      });
       expect(screen.getByTestId('listen-status-ready')).toBeInTheDocument();
       fireEvent.click(screen.getByTestId('listen-do-target'));
     }
@@ -141,7 +142,7 @@ describe('Gate 3 — Remaining 8 Activities (02, 03, 05, 06, 08, 09, 10, 12) & F
     // Tapping before Star cue triggers calm feedback
     expect(screen.getByTestId('signal-stage-waiting')).toBeInTheDocument();
     fireEvent.click(screen.getByTestId('wait-signal-tap-btn'));
-    expect(screen.getByTestId('gentle-feedback-banner')).toHaveTextContent('Χρυσό Αστέρι');
+    expect(screen.getByTestId('gentle-feedback-banner')).toHaveTextContent('χρυσό αστέρι');
 
     // Stream advances automatically past non-cue items to reach Star cue in Round 1
     for (let tick = 0; tick < 60; tick++) {
@@ -173,14 +174,14 @@ describe('Gate 3 — Remaining 8 Activities (02, 03, 05, 06, 08, 09, 10, 12) & F
 
     // Toggle Seated Mode and verify prompt updates
     fireEvent.click(screen.getByTestId('toggle-seated-mode-btn'));
-    expect(screen.getByTestId('animal-pose-prompt')).toHaveTextContent('Καθιστός');
+    expect(screen.getByTestId('animal-pose-prompt')).toHaveTextContent('καρέκλα');
 
-    // Complete 3 rounds (using Hint Level 2 on each round so 1 rhythm tap finishes the pose)
+    // Complete 3 rounds: the pose is held for a count of 3 (the button counts along with the child)
     for (let r = 1; r <= 3; r++) {
-      fireEvent.click(screen.getByTestId('hint-ladder-btn'));
-      fireEvent.click(screen.getByTestId('hint-ladder-btn'));
-      vi.advanceTimersByTime(450);
-      fireEvent.click(screen.getByTestId('copy-animal-rhythm-btn'));
+      for (let c = 0; c < 3; c++) {
+        vi.advanceTimersByTime(450);
+        fireEvent.click(screen.getByTestId('copy-animal-rhythm-btn'));
+      }
     }
 
     expect(screen.getByTestId('activity-complete-screen')).toBeInTheDocument();

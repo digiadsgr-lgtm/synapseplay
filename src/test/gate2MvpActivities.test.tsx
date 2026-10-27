@@ -78,8 +78,10 @@ describe('Gate 2 (MVP Milestone) — Child Hub Navigation & Activities 01, 04, 0
     vi.useFakeTimers();
     renderApp('/activity/04-sequence-memory');
 
-    // Wait for initial demonstration to finish
-    vi.advanceTimersByTime(1500);
+    // Wait for initial demonstration to finish (taps during the demo are ignored)
+    act(() => {
+      vi.advanceTimersByTime(2500);
+    });
 
     // Pressing wrong symbol ('wave' instead of 'sun') triggers non-punitive feedback and stays on Round 1
     fireEvent.click(screen.getByTestId('sequence-tile-wave'));
@@ -94,7 +96,9 @@ describe('Gate 2 (MVP Milestone) — Child Hub Navigation & Activities 01, 04, 0
     expect(screen.getByTestId('round-pebble-2')).toHaveTextContent('2');
 
     // Complete Round 2 sequence: ['leaf', 'wave', 'sun']
-    vi.advanceTimersByTime(2000);
+    act(() => {
+      vi.advanceTimersByTime(3200);
+    });
     fireEvent.click(screen.getByTestId('sequence-tile-leaf'));
     vi.advanceTimersByTime(450);
     fireEvent.click(screen.getByTestId('sequence-tile-wave'));
@@ -103,7 +107,9 @@ describe('Gate 2 (MVP Milestone) — Child Hub Navigation & Activities 01, 04, 0
     expect(screen.getByTestId('round-pebble-3')).toHaveTextContent('3');
 
     // Complete Round 3 sequence: ['wave', 'star', 'leaf']
-    vi.advanceTimersByTime(2000);
+    act(() => {
+      vi.advanceTimersByTime(3200);
+    });
     fireEvent.click(screen.getByTestId('sequence-tile-wave'));
     vi.advanceTimersByTime(450);
     fireEvent.click(screen.getByTestId('sequence-tile-star'));
@@ -135,7 +141,7 @@ describe('Gate 2 (MVP Milestone) — Child Hub Navigation & Activities 01, 04, 0
     // Impulsively tapping GO during FREEZE triggers calm feedback without locking screen
     vi.advanceTimersByTime(450);
     fireEvent.click(screen.getByTestId('move-freeze-go-btn'));
-    expect(screen.getByTestId('gentle-feedback-banner')).toHaveTextContent('ΣΤΟΠ');
+    expect(screen.getByTestId('gentle-feedback-banner')).toHaveTextContent('κόκκινο');
 
     // Hint Level 2 hides the distractor GO button during FREEZE phase
     fireEvent.click(screen.getByTestId('hint-ladder-btn'));
