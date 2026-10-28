@@ -5,6 +5,7 @@ import { TopBar } from './components/TopBar';
 import { BreakPauseModal } from './components/BreakPauseModal';
 import { SmoothLandingDepletedOverlay } from './components/SmoothLandingRing';
 import { SeoHeadManager } from './components/SeoHeadManager';
+import { IncomingLinkPage } from './components/IncomingLinkPage';
 // Route pages are code-split in production (see src/routes/lazyPages.tsx)
 import {
   ChildHubPage,
@@ -69,6 +70,8 @@ const AppShell: React.FC = () => {
           <Route path="/category/:categoryId" element={<CategoryPage />} />
           <Route path="/activity/:activityId" element={<ActivityPage />} />
           <Route path="/parent" element={<ParentDashboardPage />} />
+          <Route path="/plan" element={<IncomingLinkPage kind="plan" />} />
+          <Route path="/receive" element={<IncomingLinkPage kind="progress" />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
         </Suspense>

@@ -4,7 +4,12 @@ import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 import { getGdprConsentAck } from './components/GdprConsentBanner';
 import { hasAnalyticsConsent, loadGtmAfterConsent } from './utils/analyticsConsent';
+import { captureIncomingLink } from './utils/incomingLinks';
 import './index.css';
+
+// Σύνδεσμοι προγράμματος/προόδου: τα δεδομένα του #fragment φυλάγονται και σβήνονται
+// από τη διεύθυνση ΠΡΙΝ φορτώσουν στατιστικά.
+captureIncomingLink();
 
 if (hasAnalyticsConsent(getGdprConsentAck())) {
   loadGtmAfterConsent();

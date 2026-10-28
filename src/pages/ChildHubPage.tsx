@@ -16,6 +16,11 @@ import {
 import { MONETIZATION_CONFIG } from '../config/monetization.config';
 import { speakGreek } from '../utils/soundAndSpeech';
 import { BeginnerQuickStartModal } from '../components/BeginnerQuickStartModal';
+import {
+  HubGardenCard,
+  HubPendingMissions,
+  HubWeeklyPractice,
+} from '../components/ChildHubHomePractice';
 
 const EVERYDAY_CATEGORY_BENEFITS_EL: Record<string, string> = {
   'detective-eyes':
@@ -269,6 +274,9 @@ export const ChildHubPage: React.FC = () => {
           </div>
         )}
 
+        {/* Το πρόγραμμα του θεραπευτή έχει προτεραιότητα έναντι της αυτόματης πρότασης */}
+        {activeProfile.practicePlan && <HubWeeklyPractice />}
+
         {/* Personalized Activity Recommendation from Child's Continual Learning Model */}
         <div
           data-testid="personalized-recommendation-card"
@@ -297,7 +305,14 @@ export const ChildHubPage: React.FC = () => {
             <span>Παίξε Τώρα</span>
           </button>
         </div>
+
+        {/* Πρόγραμμα θεραπευτή ή παιχνίδι της εβδομάδας + αποστολές που περιμένουν τον γονιό */}
+        {!activeProfile.practicePlan && <HubWeeklyPractice />}
+        <HubPendingMissions />
       </section>
+
+      {/* Ο κήπος του παιδιού (ήρεμος κόσμος που μεγαλώνει) */}
+      <HubGardenCard />
 
       {/* Maximum 4 Primary Categories */}
       <section aria-label="Οι 4 Βασικές Κατηγορίες Δραστηριοτήτων">

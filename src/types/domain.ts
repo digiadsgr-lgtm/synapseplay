@@ -162,6 +162,18 @@ export interface AppSettings {
   trialStartedAt?: string;
   /** Κωδικός κέντρου (4 χαρ.) για τους κωδικούς παιδιών που εκδίδει αυτή η συσκευή θεραπευτή. */
   centerCode?: string;
+  /**
+   * Συσκευή θεραπευτή: κλειδιά για την κρυπτογραφημένη πρόοδο από γονείς (ECDH P-256).
+   * Το ιδιωτικό κλειδί ΔΕΝ φεύγει ποτέ από τη συσκευή (δεν μπαίνει ούτε στο αντίγραφο ασφαλείας).
+   */
+  therapistInboxKey?: {
+    publicJwk: JsonWebKey;
+    privateJwk: JsonWebKey;
+    kid: string;
+    createdAt: string;
+  };
+  /** Όνομα θεραπευτή/κέντρου όπως το βλέπει ο γονιός στο πρόγραμμα. */
+  therapistLabel?: string;
 }
 
 export interface DailyUsageRecord {

@@ -1,4 +1,5 @@
 import type { ActivityDefinition, ActivityId, AgeBandId } from '../types/domain';
+import type { HomeMissionRecord, ParentCheckIn, PracticePlan } from '../types/homePractice';
 
 export type ClinicalDomainKey =
   | 'visualAttention'
@@ -38,6 +39,14 @@ export interface ChildMicroProfile {
   learnedModel: ChildAdaptiveLearningModel;
   /** Κωδικός παιδιού από τον θεραπευτή (ΚΚΚΚ-ΠΠΠΠ-Ε) — βλ. utils/childCode.ts */
   childCode?: string;
+  /** Πρόγραμμα της εβδομάδας από τον θεραπευτή (QR / σύνδεσμος). */
+  practicePlan?: PracticePlan;
+  /** Αποστολές στο σπίτι (εκτός οθόνης) που επιβεβαιώνει ο γονιός. */
+  homeMissions?: HomeMissionRecord[];
+  /** Ερωτηματολόγιο γονιού ανά 4 εβδομάδες. */
+  parentCheckIns?: ParentCheckIn[];
+  /** Τελευταία αποστολή προόδου στον θεραπευτή (ISO). */
+  progressSentAt?: string;
 }
 
 export const DOMAIN_LABELS_EL: Record<ClinicalDomainKey, { labelEl: string; emoji: string }> = {

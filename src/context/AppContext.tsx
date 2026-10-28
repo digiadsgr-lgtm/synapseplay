@@ -48,6 +48,18 @@ import {
   type VerifiedLicense,
 } from '../utils/licenseToken';
 import { getAgeBandProtocol } from '../data/ageProtocols';
+import type {
+  HomeMissionRecord,
+  HomeMissionStatus,
+  ParentCheckIn,
+  PracticePlan,
+} from '../types/homePractice';
+import type { HomeMissionTemplate } from '../utils/homeMissions';
+import { mergeById } from '../utils/parentCheckIn';
+import type { DecodedProgress, TherapistInboxKey } from '../utils/secureProgress';
+import { PROGRESS_FORMAT, PROGRESS_VERSION } from '../db/database';
+
+const MAX_MISSION_HISTORY = 400;
 import { playCalmTone, speakGreek } from '../utils/soundAndSpeech';
 
 interface AppContextValue {
@@ -83,6 +95,24 @@ interface AppContextValue {
   /** Κωδικός κέντρου αυτής της συσκευής (δημιουργείται την πρώτη φορά). */
   ensureCenterCode: () => Promise<string>;
   deleteChildProfile: (profileId: string) => Promise<void>;
+  /** Αποστολή στο σπίτι: το παιδί τη δέχεται στο τέλος του παιχνιδιού. */
+  acceptHomeMission: (
+    template: HomeMissionTemplate,
+    textEl: string,
+    activityId?: ActivitySessionLog['activityId']
+  ) => Promise<HomeMissionRecord>;
+  /** Ο γονιός επιβεβαιώνει (έγινε) ή την αφήνει (όχι σήμερα). */
+  resolveHomeMission: (profileId: string, missionRecordId: string, status: HomeMissionStatus) => Promise<void>;
+  /** Πρόγραμμα της εβδομάδας από τον θεραπευτή (null = αφαίρεση). */
+  setPracticePlan: (profileId: string, plan: PracticePlan | null) => Promise<void>;
+  addParentCheckIn: (profileId: string, answers: ParentCheckIn['answers']) => Promise<void>;
+  markProgressSent: (profileId: string) => Promise<void>;
+  /** Θεραπευτής: κλειδί για την κρυπτογραφημένη πρόοδο (δημιουργείται την πρώτη φορά). */
+  ensureTherapistInboxKey: () => Promise<TherapistInboxKey>;
+  /** Θεραπευτής: προσθέτει την κρυπτογραφημένη πρόοδο (καταγραφές, αποστολές, ερωτηματολόγια). */
+  importDecodedProgress: (
+    progress: DecodedProgress
+  ) => Promise<{ added: number; created: boolean; nickname: string; missions: number; checkIns: number }>;
   recordStrategyPreference: (strategyId: 'time' | 'example' | 'retry') => Promise<void>;
   elapsedSeconds: number;
   remainingRatio: number; // 1.0 (full) down to 0.0 (depleted)
@@ -508,6 +538,133 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return centerCode;
   }, [settings.centerCode, verifiedLicenses, updateSettings]);
 
+  // Πάντα η τελευταία λίστα προφίλ (για αλλαγές που γίνονται αμέσως μετά από εκπαίδευση προφίλ)
+  const profilesRef = React.useRef<ChildMicroProfile[]>(childProfiles);
+  profilesRef.current = childProfiles;
+
+  const patchProfile = useCallback(
+    async (profileId: string, change: (p: ChildMicroProfile) => ChildMicroProfile) => {
+      const target = profilesRef.current.find((p) => p.id === profileId);
+      if (!target) return null;
+      const updated = change(target);
+      profilesRef.current = profilesRef.current.map((p) => (p.id === profileId ? updated : p));
+      setChildProfiles(profilesRef.current);
+      setChildProfiles(await saveChildProfile(updated));
+      return updated;
+    },
+    []
+  );
+
+  const acceptHomeMission = useCallback(
+    async (template: HomeMissionTemplate, textEl: string, activityId?: ActivitySessionLog['activityId']) => {
+      const profileId = activeProfile.id;
+      const now = new Date();
+      const record: HomeMissionRecord = {
+        id: `hm-${now.getTime().toString(36)}-${Math.random().toString(36).slice(2, 6)}`,
+        missionId: template.id,
+        emoji: template.emoji,
+        textEl,
+        activityId,
+        offeredAt: now.toISOString(),
+        dateKey: getTodayDateKey(),
+        status: 'accepted',
+      };
+      await patchProfile(profileId, (p) => ({
+        ...p,
+        homeMissions: [...(p.homeMissions ?? []), record].slice(-MAX_MISSION_HISTORY),
+      }));
+      return record;
+    },
+    [activeProfile.id, patchProfile]
+  );
+
+  const resolveHomeMission = useCallback(
+    async (profileId: string, missionRecordId: string, status: HomeMissionStatus) => {
+      await patchProfile(profileId, (p) => ({
+        ...p,
+        homeMissions: (p.homeMissions ?? []).map((m) =>
+          m.id === missionRecordId ? { ...m, status, resolvedAt: new Date().toISOString() } : m
+        ),
+      }));
+      if (status === 'done') playCalmTone('complete', settings.soundEnabled);
+    },
+    [patchProfile, settings.soundEnabled]
+  );
+
+  const setPracticePlan = useCallback(
+    async (profileId: string, plan: PracticePlan | null) => {
+      await patchProfile(profileId, (p) => {
+        const next = { ...p };
+        if (plan) next.practicePlan = { ...plan, receivedAt: new Date().toISOString() };
+        else delete next.practicePlan;
+        // Ο κωδικός του προγράμματος γίνεται ο κωδικός του παιδιού, αν δεν υπήρχε (ή ήταν «χωρίς θεραπευτή»)
+        if (plan && (!p.childCode || p.childCode.startsWith('SELF-'))) next.childCode = plan.childCode;
+        return next;
+      });
+    },
+    [patchProfile]
+  );
+
+  const addParentCheckIn = useCallback(
+    async (profileId: string, answers: ParentCheckIn['answers']) => {
+      const entry: ParentCheckIn = {
+        id: `ci-${Date.now().toString(36)}`,
+        dateKey: getTodayDateKey(),
+        answers,
+      };
+      await patchProfile(profileId, (p) => ({
+        ...p,
+        parentCheckIns: [...(p.parentCheckIns ?? []), entry].slice(-60),
+      }));
+    },
+    [patchProfile]
+  );
+
+  const markProgressSent = useCallback(
+    async (profileId: string) => {
+      await patchProfile(profileId, (p) => ({ ...p, progressSentAt: new Date().toISOString() }));
+    },
+    [patchProfile]
+  );
+
+  const ensureTherapistInboxKey = useCallback(async () => {
+    if (settings.therapistInboxKey) return settings.therapistInboxKey;
+    const { generateTherapistInboxKey } = await import('../utils/secureProgress');
+    const key = await generateTherapistInboxKey();
+    await updateSettings({ therapistInboxKey: key });
+    return key;
+  }, [settings.therapistInboxKey, updateSettings]);
+
+  const importDecodedProgress = useCallback(
+    async (progress: DecodedProgress) => {
+      const res = await importChildProgress({
+        format: PROGRESS_FORMAT,
+        version: PROGRESS_VERSION,
+        exportedAt: progress.sentAt,
+        childCode: progress.childCode,
+        profile: { nickname: progress.nickname, avatarEmoji: progress.avatarEmoji, ageBand: progress.ageBand },
+        sessionLogs: progress.sessionLogs,
+      });
+      profilesRef.current = res.profiles;
+      const updated = await patchProfile(res.profile.id, (p) => ({
+        ...p,
+        homeMissions: mergeById(p.homeMissions, progress.homeMissions, MAX_MISSION_HISTORY),
+        parentCheckIns: mergeById(p.parentCheckIns, progress.parentCheckIns, 60),
+        progressSentAt: progress.sentAt,
+      }));
+      if (!updated) setChildProfiles(res.profiles);
+      setSessionLogs(await getSessionLogs());
+      return {
+        added: res.added,
+        created: res.created,
+        nickname: res.profile.nickname,
+        missions: progress.homeMissions.filter((m) => m.status === 'done').length,
+        checkIns: progress.parentCheckIns.length,
+      };
+    },
+    [patchProfile]
+  );
+
   const deleteChildProfile = useCallback(
     async (profileId: string) => {
       if (childProfiles.length <= 1) return;
@@ -655,6 +812,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         importProgressFile,
         ensureCenterCode,
         deleteChildProfile,
+        acceptHomeMission,
+        resolveHomeMission,
+        setPracticePlan,
+        addParentCheckIn,
+        markProgressSent,
+        ensureTherapistInboxKey,
+        importDecodedProgress,
         recordStrategyPreference,
         elapsedSeconds,
         remainingRatio,

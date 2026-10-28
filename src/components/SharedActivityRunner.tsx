@@ -24,6 +24,8 @@ import {
   getAgeAndPerformanceDifficulty,
 } from '../utils/clinicalAdhdEngine';
 import { SELF_REPORT_ACTIVITY_IDS, toGreekVocative } from '../utils/childProfileLearningEngine';
+import { AfterActivityHome } from './AfterActivityHome';
+import type { AfterSessionInput } from '../utils/afterSessionTalk';
 
 function median(values: number[]): number | undefined {
   if (values.length === 0) return undefined;
@@ -107,6 +109,7 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
   const [lastResponseMs, setLastResponseMs] = React.useState<number>(0);
   const roundDurationsRef = useRef<number[]>([]);
   const loggedCompletionRef = useRef<boolean>(false);
+  const [completionTalk, setCompletionTalk] = React.useState<AfterSessionInput | null>(null);
   const prevActivityIdRef = useRef<string>(activity.id);
   const [selectedStrategy, setSelectedStrategy] = React.useState<string | null>(null);
   const [showParentCoachingTip, setShowParentCoachingTip] = React.useState<boolean>(false);
@@ -327,6 +330,14 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
           1,
           Math.round((Date.now() - startTimeRef.current) / 1000)
         );
+        setCompletionTalk({
+          activityId: activity.id,
+          hintsUsed: state.totalHintsUsed,
+          errorsCount: state.gentleNudgesCount,
+          impulsiveTapsAbsorbed: state.impulsiveTapsAbsorbed + impulsiveTapsInRound,
+          durationSeconds,
+          totalRounds: activity.totalRounds,
+        });
         void logCompletedActivity({
           activityId: activity.id,
           activityTitleEl: activity.titleEl,
@@ -722,6 +733,10 @@ export const SharedActivityRunner: React.FC<SharedActivityRunnerProps> = ({
               ))}
             </div>
           </div>
+
+          {completionTalk && completionTalk.activityId === activity.id && (
+            <AfterActivityHome key={`${activity.id}-${effectiveSessionSeed}`} talk={completionTalk} />
+          )}
 
           <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
             <button

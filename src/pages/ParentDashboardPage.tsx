@@ -26,6 +26,8 @@ import { ProfessionalToolsSection } from '../components/ProfessionalToolsSection
 import { MONETIZATION_CONFIG } from '../config/monetization.config';
 import { PRICE_B2B_YEAR_EL, PRICE_EXTRA_CHILD_YEAR_EL } from '../config/pricing';
 import { ShareProgressWithTherapist } from '../components/ShareProgressWithTherapist';
+import { HomePracticeParentSection } from '../components/HomePracticeParentSection';
+import { TherapistHomePracticeSection } from '../components/TherapistHomePracticeSection';
 import { formatLogAccuracy, summarizeRecentAccuracy } from '../utils/progressMetrics';
 
 export const ParentDashboardPage: React.FC = () => {
@@ -562,6 +564,8 @@ export const ParentDashboardPage: React.FC = () => {
       {/* Subscription & Licensing Management Section ("Διαχείριση Συνδρομής") */}
       <SubscriptionManagementSection />
 
+      <HomePracticeParentSection />
+
       <ShareProgressWithTherapist />
 
       {/* Clinical & Parent Evaluation, Observations & Suggestions Hub */}
@@ -803,6 +807,8 @@ export const ParentDashboardPage: React.FC = () => {
 
       {/* Profiles editing, PDF/CSV reports, backup & restore */}
       <ProfessionalToolsSection />
+
+      <TherapistHomePracticeSection />
 
       {/* Activity Session Logs & One-Click Data Wipe */}
       <section className="bg-white border-2 border-sand-dark rounded-3xl p-6 space-y-5">

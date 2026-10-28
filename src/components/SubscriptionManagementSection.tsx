@@ -4,6 +4,7 @@ import { useApp } from '../context/AppContext';
 import { MONETIZATION_CONFIG } from '../config/monetization.config';
 import { PRICE_B2B_YEAR_EL } from '../config/pricing';
 import { ChildCodeCheckout } from './ChildCodeCheckout';
+import { BILLING_PORTAL_LOGIN_URL, RENEWAL_REMINDER_DAYS } from '../config/billingPortal';
 
 export const SubscriptionManagementSection: React.FC = () => {
   const {
@@ -125,6 +126,28 @@ export const SubscriptionManagementSection: React.FC = () => {
             '⏸️ Η δωρεάν δοκιμή ολοκληρώθηκε. Τα προφίλ και η πρόοδος είναι αποθηκευμένα — επιλέξτε συνδρομή για να συνεχίσει το παιδί.'}
           {expiryText &&
             `✅ Η συνδρομή ισχύει έως ${expiryText}. Με κάθε ανανέωση λαμβάνετε αυτόματα νέο κωδικό με email.`}
+        </div>
+      )}
+
+      {/* Τιμή χωρίς παγίδες: υπενθύμιση πριν την ανανέωση + ακύρωση με ένα κλικ (Stripe Customer Portal) */}
+      {paymentsOn && BILLING_PORTAL_LOGIN_URL && (
+        <div
+          data-testid="subscription-no-traps"
+          className="p-3 rounded-2xl bg-white border-2 border-sage text-sm text-charcoal flex flex-col sm:flex-row sm:items-center gap-3"
+        >
+          <p className="flex-1">
+            📧 {RENEWAL_REMINDER_DAYS} ημέρες πριν από κάθε ανανέωση σας στέλνουμε email. Χωρίς κρυφές χρεώσεις: η
+            ακύρωση γίνεται με ένα κλικ και η πρόσβαση συνεχίζει ως το τέλος της περιόδου που πληρώσατε.
+          </p>
+          <a
+            href={BILLING_PORTAL_LOGIN_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            data-testid="billing-portal-link"
+            className="touch-target px-4 py-2 rounded-xl bg-white border-2 border-slate text-sm font-extrabold text-charcoal shrink-0 text-center"
+          >
+            ⚙️ Διαχείριση ή ακύρωση συνδρομής
+          </a>
         </div>
       )}
 
