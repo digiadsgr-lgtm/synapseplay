@@ -165,6 +165,36 @@
     <changefreq>monthly</changefreq>
     <priority>0.90</priority>
   </url>
+  <url>
+    <loc>https://www.synapseplay.gr/articles/23-what-is-adhd-not-illness-no-panic</loc>
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.95</priority>
+  </url>
+  <url>
+    <loc>https://www.synapseplay.gr/articles/24-adhd-core-symptoms-guide-parents</loc>
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.95</priority>
+  </url>
+  <url>
+    <loc>https://www.synapseplay.gr/articles/25-adhd-symptoms-by-age-and-gender-boys-girls</loc>
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.95</priority>
+  </url>
+  <url>
+    <loc>https://www.synapseplay.gr/articles/26-three-types-of-adhd-inattentive-hyperactive-combined</loc>
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.95</priority>
+  </url>
+  <url>
+    <loc>https://www.synapseplay.gr/articles/27-what-causes-adhd-genetics-parenting-myths</loc>
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.95</priority>
+  </url>
 
   <!-- 4 Primary Executive Function Categories -->
   <url>
