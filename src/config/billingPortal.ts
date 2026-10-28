@@ -7,7 +7,7 @@
  *
  * Όσο είναι κενό, το κουμπί ΔΕΝ εμφανίζεται. Δεν είναι μυστικό (το βλέπει κάθε πελάτης).
  */
-export const BILLING_PORTAL_LOGIN_URL = '';
+export const BILLING_PORTAL_LOGIN_URL = 'https://billing.stripe.com/p/login/4gM00jgydcQf7jP7HK63K00';
 
 /** Ημέρες πριν την ανανέωση που στέλνει email το Stripe (όπως ρυθμιστεί στο Dashboard). */
 export const RENEWAL_REMINDER_DAYS = 7;
