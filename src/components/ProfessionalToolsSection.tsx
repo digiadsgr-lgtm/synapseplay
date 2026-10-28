@@ -9,7 +9,7 @@ import {
   parseChildProgress,
   type SynapsePlayBackup,
 } from '../db/database';
-import { generateChildCode } from '../utils/childCode';
+import { generateChildCode, isSelfChildCode } from '../utils/childCode';
 import {
   buildChildReportHtml,
   downloadTextFile,
@@ -231,7 +231,7 @@ export const ProfessionalToolsSection: React.FC = () => {
                 <span className="text-xs font-bold text-charcoal-muted">
                   {count} καταγραφές{homeCount > 0 ? ` (${homeCount} από το σπίτι)` : ''}
                 </span>
-                {p.childCode ? (
+                {p.childCode && !isSelfChildCode(p.childCode) ? (
                   <>
                     <span
                       data-testid={`pro-tools-child-code-${p.id}`}

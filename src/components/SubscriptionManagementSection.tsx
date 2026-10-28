@@ -234,7 +234,7 @@ export const SubscriptionManagementSection: React.FC = () => {
 
       {/* External Stripe Hosted Checkout Links (No embedded payment SDKs) */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <ChildCodeCheckout key={activeProfile.id} />
+        <ChildCodeCheckout key={`${activeProfile.id}:${activeProfile.childCode ?? ''}`} />
 
         <div className="p-4 rounded-2xl bg-sage-surface/60 border-2 border-sage flex flex-col justify-between gap-3">
           <div className="space-y-1.5">
