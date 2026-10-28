@@ -32,6 +32,7 @@ const DEFAULT_AMOUNT_MAP = {
   999: 'extra', // Επιπλέον παιδί 9,99€ / έτος (νέα τιμή)
   29900: 'b2b', // Therapist Pro 299€ (σημερινό link)
   99900: 'b2b', // Therapist Pro 999€ / έτος (νέα τιμή)
+  99999: 'b2b', // Therapist Pro 999,99€ / έτος (ενεργό Stripe link)
 };
 
 /* Κωδικός παιδιού — ίδιος αλγόριθμος με src/utils/childCode.ts (Luhn mod 32). */

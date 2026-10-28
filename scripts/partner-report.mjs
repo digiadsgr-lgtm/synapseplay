@@ -25,7 +25,7 @@ export const RULES = {
   VAT: 0.24,
   FEE_PCT: 0.015,
   FEE_FIXED: 0.25,
-  AMOUNTS: { 3999: 'family', 5999: 'family', 199: 'extra', 999: 'extra', 29900: 'b2b', 99900: 'b2b' },
+  AMOUNTS: { 3999: 'family', 5999: 'family', 199: 'extra', 999: 'extra', 29900: 'b2b', 99900: 'b2b', 99999: 'b2b' },
 };
 
 const ALPHABET = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
