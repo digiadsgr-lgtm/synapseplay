@@ -3,7 +3,13 @@ import { useApp } from '../context/AppContext';
 import { CheckoutLink } from './CheckoutLink';
 import { MONETIZATION_CONFIG } from '../config/monetization.config';
 import type { AgeBandId } from '../data/ageProtocols';
-import { exportBackup, parseBackup, type SynapsePlayBackup } from '../db/database';
+import {
+  exportBackup,
+  parseBackup,
+  parseChildProgress,
+  type SynapsePlayBackup,
+} from '../db/database';
+import { generateChildCode } from '../utils/childCode';
 import {
   buildChildReportHtml,
   downloadTextFile,
@@ -19,12 +25,21 @@ const AGE_OPTIONS: AgeBandId[] = ['4-5', '5-6', '6-8', '8-10', '10-12'];
  * and backup / restore for moving data between devices (until cloud sync exists).
  */
 export const ProfessionalToolsSection: React.FC = () => {
-  const { childProfiles, sessionLogs, updateChildProfileDetails, restoreBackup, licenseState } =
-    useApp();
+  const {
+    childProfiles,
+    sessionLogs,
+    updateChildProfileDetails,
+    restoreBackup,
+    licenseState,
+    importProgressFile,
+    ensureCenterCode,
+    settings,
+  } = useApp();
   const [nameDrafts, setNameDrafts] = useState<Record<string, string>>({});
   const [pendingBackup, setPendingBackup] = useState<SynapsePlayBackup | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const progressInputRef = useRef<HTMLInputElement>(null);
   const today = new Date().toISOString().slice(0, 10);
 
   const handleExportCsv = (childProfileId?: string, nickname?: string) => {
@@ -63,6 +78,50 @@ export const ProfessionalToolsSection: React.FC = () => {
       setMessage(null);
     } catch (err) {
       setPendingBackup(null);
+      setMessage(`⚠️ ${(err as Error).message}`);
+    }
+  };
+
+  const handleNewChildCode = async (profileId: string) => {
+    const center = await ensureCenterCode();
+    const code = generateChildCode(center);
+    await updateChildProfileDetails(profileId, { childCode: code });
+    setMessage(`🔑 Νέος κωδικός παιδιού: ${code}. Δώστε τον στον γονιό με το έτοιμο μήνυμα.`);
+  };
+
+  const parentMessageFor = (nickname: string, code: string) =>
+    [
+      `Καλησπέρα! Για την εξάσκηση στο σπίτι προτείνω το SynapsePlay (https://www.synapseplay.gr).`,
+      `Κωδικός παιδιού για «${nickname}»: ${code}`,
+      `Τον γράφετε στην «Περιοχή Γονέων → Διαχείριση Συνδρομής» όταν ενεργοποιείτε το οικογενειακό πλάνο.`,
+      `Μία φορά την εβδομάδα πατήστε «📤 Πρόοδος για τον θεραπευτή» και στείλτε μου το αρχείο, για να βλέπω την πρόοδο στο σπίτι.`,
+    ].join('\n');
+
+  const handleCopyParentMessage = async (nickname: string, code: string) => {
+    const text = parentMessageFor(nickname, code);
+    try {
+      await navigator.clipboard.writeText(text);
+      setMessage('📋 Το μήνυμα για τον γονιό αντιγράφηκε.');
+    } catch {
+      setMessage(text);
+    }
+  };
+
+  const handleProgressFileChosen = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      setMessage('⚠️ Το αρχείο είναι πολύ μεγάλο για αρχείο προόδου.');
+      return;
+    }
+    try {
+      const parsed = parseChildProgress(await file.text());
+      const res = await importProgressFile(parsed);
+      setMessage(
+        `✅ ${res.created ? 'Δημιουργήθηκε νέο προφίλ' : 'Ενημερώθηκε το προφίλ'} «${res.nickname}» (${parsed.childCode}): ${res.added} νέες καταγραφές από το σπίτι.`
+      );
+    } catch (err) {
       setMessage(`⚠️ ${(err as Error).message}`);
     }
   };
@@ -110,12 +169,26 @@ export const ProfessionalToolsSection: React.FC = () => {
           Επεξεργασία προφίλ, εξαγωγή αναφορών (PDF / CSV) και αντίγραφο ασφαλείας για μεταφορά σε
           άλλη συσκευή. Όλα γίνονται τοπικά — τίποτα δεν ανεβαίνει στο διαδίκτυο.
         </p>
+        <p className="text-sm text-charcoal-muted mt-1">
+          <strong>Κωδικός παιδιού:</strong> ο γονιός τον χρειάζεται για να ενεργοποιήσει το
+          οικογενειακό πλάνο. Όταν σας στέλνει το αρχείο προόδου, το «📥 Πρόοδος από γονιό» το
+          προσθέτει στο σωστό προφίλ.
+          {settings.centerCode && (
+            <span data-testid="pro-tools-center-code">
+              {' '}
+              Κωδικός κέντρου: <strong>{settings.centerCode}</strong>.
+            </span>
+          )}
+        </p>
       </div>
 
       <div className="space-y-3">
         {childProfiles.map((p) => {
           const draft = nameDrafts[p.id] ?? p.nickname;
           const count = sessionLogs.filter((l) => l.childProfileId === p.id).length;
+          const homeCount = sessionLogs.filter(
+            (l) => l.childProfileId === p.id && l.source === 'home'
+          ).length;
           return (
             <div
               key={p.id}
@@ -155,7 +228,36 @@ export const ProfessionalToolsSection: React.FC = () => {
                 </select>
               </div>
               <div className="flex flex-wrap items-center gap-2">
-                <span className="text-xs font-bold text-charcoal-muted">{count} καταγραφές</span>
+                <span className="text-xs font-bold text-charcoal-muted">
+                  {count} καταγραφές{homeCount > 0 ? ` (${homeCount} από το σπίτι)` : ''}
+                </span>
+                {p.childCode ? (
+                  <>
+                    <span
+                      data-testid={`pro-tools-child-code-${p.id}`}
+                      className="px-2 py-1 rounded-lg bg-white border border-slate text-xs font-extrabold tracking-widest"
+                    >
+                      🔑 {p.childCode}
+                    </span>
+                    <button
+                      type="button"
+                      data-testid={`pro-tools-copy-parent-msg-${p.id}`}
+                      onClick={() => void handleCopyParentMessage(p.nickname, p.childCode!)}
+                      className="touch-target px-3 py-2 rounded-xl bg-white border-2 border-slate text-xs font-extrabold"
+                    >
+                      📋 Μήνυμα για γονιό
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    type="button"
+                    data-testid={`pro-tools-new-code-btn-${p.id}`}
+                    onClick={() => void handleNewChildCode(p.id)}
+                    className="touch-target px-3 py-2 rounded-xl bg-sage-surface border-2 border-sage text-xs font-extrabold"
+                  >
+                    🔑 Κωδικός παιδιού
+                  </button>
+                )}
                 <button
                   type="button"
                   data-testid={`pro-tools-report-btn-${p.id}`}
@@ -203,6 +305,22 @@ export const ProfessionalToolsSection: React.FC = () => {
         >
           📥 Επαναφορά από αρχείο
         </button>
+        <button
+          type="button"
+          data-testid="pro-tools-import-progress-btn"
+          onClick={() => progressInputRef.current?.click()}
+          className="touch-target px-4 py-2 rounded-xl bg-white border-2 border-sage-dark text-sm font-extrabold"
+        >
+          📥 Πρόοδος από γονιό
+        </button>
+        <input
+          ref={progressInputRef}
+          type="file"
+          accept="application/json,.json"
+          className="hidden"
+          data-testid="pro-tools-progress-file-input"
+          onChange={(e) => void handleProgressFileChosen(e)}
+        />
         <input
           ref={fileInputRef}
           type="file"

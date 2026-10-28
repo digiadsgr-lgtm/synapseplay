@@ -76,13 +76,13 @@ describe('Licensing rules with payments ON', () => {
     expect(checkProfileCreationPermission(1, { trialStartedAt: startedDaysAgo(15) }, true, { nowMs }).allowed).toBe(false);
   });
 
-  it('family: 2 profiles (+ extra-child licences), no pro tools; b2b: unlimited + tools', () => {
+  it('family: 1 profile (+ extra-child licences), no pro tools; b2b: unlimited + tools', () => {
     const settings = { trialStartedAt: startedDaysAgo(40) };
     const family = resolveEffectiveLicenseState(settings, true, {
       nowMs,
       verifiedLicenses: [{ plan: 'family', exp: now + 10 * DAY }],
     });
-    expect(family.maxProfiles).toBe(2);
+    expect(family.maxProfiles).toBe(1);
     expect(family.isAccessLocked).toBe(false);
     expect(family.canUseProTools).toBe(false);
 
@@ -93,7 +93,7 @@ describe('Licensing rules with payments ON', () => {
         { plan: 'extra', exp: now + 10 * DAY, n: 2 },
       ],
     });
-    expect(familyPlus.maxProfiles).toBe(4);
+    expect(familyPlus.maxProfiles).toBe(3);
 
     const b2b = resolveEffectiveLicenseState(settings, true, {
       nowMs,

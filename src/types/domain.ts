@@ -138,6 +138,8 @@ export interface ActivitySessionLog {
   adaptiveScenarioId?: AdaptiveScenarioId;
   childProfileId?: string;
   childNickname?: string;
+  /** 'home' = εισήχθη από αρχείο προόδου του γονιού (παιχνίδι στο σπίτι). */
+  source?: 'home';
 }
 
 export type LicenseTier = 'dev-unlocked' | 'family' | 'b2b' | 'trial' | 'expired';
@@ -158,6 +160,8 @@ export interface AppSettings {
   licenseTokens?: string[];
   /** First use with payments enabled → start of the 14-day free trial (ISO). */
   trialStartedAt?: string;
+  /** Κωδικός κέντρου (4 χαρ.) για τους κωδικούς παιδιών που εκδίδει αυτή η συσκευή θεραπευτή. */
+  centerCode?: string;
 }
 
 export interface DailyUsageRecord {

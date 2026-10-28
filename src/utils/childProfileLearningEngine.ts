@@ -36,6 +36,8 @@ export interface ChildMicroProfile {
   ageBand: AgeBandId;
   createdAt: string;
   learnedModel: ChildAdaptiveLearningModel;
+  /** Κωδικός παιδιού από τον θεραπευτή (ΚΚΚΚ-ΠΠΠΠ-Ε) — βλ. utils/childCode.ts */
+  childCode?: string;
 }
 
 export const DOMAIN_LABELS_EL: Record<ClinicalDomainKey, { labelEl: string; emoji: string }> = {

@@ -1,6 +1,7 @@
 import React from 'react';
 import { describe, expect, it, vi } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { generateChildCode } from '../utils/childCode';
 import { MemoryRouter } from 'react-router-dom';
 
 // Simulate production with payments ON (VITE_ENABLE_MONETIZATION=true) for this file only
@@ -61,5 +62,34 @@ describe('Payments ON (production simulation)', () => {
     );
     expect(screen.queryByTestId('simulate-b2b-plan-btn')).not.toBeInTheDocument();
     expect(screen.getByTestId('subscription-trial-info')).toBeInTheDocument();
+
+    // Οικογενειακό: ΧΩΡΙΣ κωδικό παιδιού δεν ανοίγει η πληρωμή, ούτε υπάρχει μηνιαίο
+    expect(screen.queryByTestId('stripe-family-monthly-checkout-link')).not.toBeInTheDocument();
+    expect(screen.getByTestId('stripe-family-checkout-link')).toHaveAttribute('data-checkout-disabled', 'true');
+    expect(screen.getByTestId('stripe-extra-profile-checkout-link')).toHaveAttribute('data-checkout-disabled', 'true');
+
+    const input = screen.getByTestId('child-code-input');
+    fireEvent.change(input, { target: { value: 'K7QM-4HXA-0' } });
+    fireEvent.blur(input);
+    expect(screen.getByTestId('child-code-status')).toHaveTextContent('0, 1, O ή I');
+    expect(screen.getByTestId('stripe-family-checkout-link')).toHaveAttribute('data-checkout-disabled', 'true');
+
+    const code = generateChildCode('K7QM');
+    fireEvent.change(input, { target: { value: code.toLowerCase() } });
+    fireEvent.blur(input);
+    await waitFor(() => {
+      expect(screen.getByTestId('stripe-family-checkout-link')).toHaveAttribute(
+        'href',
+        expect.stringContaining(`client_reference_id=${code}`)
+      );
+    });
+    expect(screen.getByTestId('stripe-extra-profile-checkout-link')).toHaveAttribute(
+      'href',
+      expect.stringContaining(`client_reference_id=${code}`)
+    );
+    // ο κωδικός μένει στο προφίλ → εμφανίζεται το κουμπί «Πρόοδος για τον θεραπευτή»
+    await waitFor(() => {
+      expect(screen.getByTestId('share-progress-section')).toHaveTextContent(code);
+    });
   });
 });

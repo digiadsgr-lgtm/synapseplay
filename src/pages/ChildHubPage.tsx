@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { CheckoutLink } from '../components/CheckoutLink';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { PRICE_EXTRA_CHILD_YEAR_EL } from '../config/pricing';
 import { ACTIVITIES, CATEGORIES, getActivitiesByCategory } from '../data/activitiesCatalog';
 import { AGE_BAND_PROTOCOLS, getAgeBandProtocol, type AgeBandId } from '../data/ageProtocols';
 import { useApp } from '../context/AppContext';
@@ -513,16 +514,14 @@ export const ChildHubPage: React.FC = () => {
               {profileCreationPermission.noticeEl}
             </p>
             <div className="flex flex-wrap items-center gap-2 shrink-0">
-              <CheckoutLink
-                href={MONETIZATION_CONFIG.checkoutUrls.extraChildMonthly}
-                target="_blank"
-                rel="noopener noreferrer"
+              <Link
+                to="/parent#subscription"
                 data-testid="family-limit-stripe-upgrade-link"
                 className="touch-target px-4 py-2.5 rounded-2xl bg-terracotta text-white font-extrabold text-xs flex items-center gap-1.5 hover:opacity-95"
               >
-                <span>➕ Επιπλέον Προφίλ Παιδιού (1,99€ / μήνα)</span>
-                <span aria-hidden="true">↗️</span>
-              </CheckoutLink>
+                <span>➕ Επιπλέον παιδί ({PRICE_EXTRA_CHILD_YEAR_EL}) — Περιοχή Γονέων</span>
+                <span aria-hidden="true">→</span>
+              </Link>
               <CheckoutLink
                 href={MONETIZATION_CONFIG.checkoutUrls.therapistAnnual}
                 target="_blank"

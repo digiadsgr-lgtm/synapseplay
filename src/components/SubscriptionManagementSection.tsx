@@ -2,10 +2,18 @@ import React, { useEffect, useRef, useState } from 'react';
 import { CheckoutLink } from './CheckoutLink';
 import { useApp } from '../context/AppContext';
 import { MONETIZATION_CONFIG } from '../config/monetization.config';
+import { PRICE_B2B_YEAR_EL } from '../config/pricing';
+import { ChildCodeCheckout } from './ChildCodeCheckout';
 
 export const SubscriptionManagementSection: React.FC = () => {
-  const { settings, licenseState, childProfiles, activateLicenseKey, claimCheckoutSession } =
-    useApp();
+  const {
+    settings,
+    licenseState,
+    childProfiles,
+    activeProfile,
+    activateLicenseKey,
+    claimCheckoutSession,
+  } = useApp();
   const paymentsOn = MONETIZATION_CONFIG.isMonetizationEnabled;
   const [keyInput, setKeyInput] = useState<string>(paymentsOn ? '' : settings.licenseKey ?? '');
   const [statusFeedback, setStatusFeedback] = useState<{
@@ -39,6 +47,12 @@ export const SubscriptionManagementSection: React.FC = () => {
     })();
   }, [activateLicenseKey, claimCheckoutSession]);
 
+  // Από «/parent#subscription» (landing / όριο προφίλ): μετακίνηση στην ενότητα
+  useEffect(() => {
+    if (typeof window === 'undefined' || window.location.hash !== '#subscription') return;
+    document.getElementById('subscription')?.scrollIntoView?.({ block: 'start' });
+  }, []);
+
   const handleActivateSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const res = await activateLicenseKey(keyInput);
@@ -60,6 +74,7 @@ export const SubscriptionManagementSection: React.FC = () => {
 
   return (
     <section
+      id="subscription"
       data-testid="subscription-management-section"
       className="bg-white border-2 border-slate rounded-3xl p-6 space-y-5"
     >
@@ -179,7 +194,7 @@ export const SubscriptionManagementSection: React.FC = () => {
             onClick={() => void handleQuickActivate('FAMILY-2026')}
             className="px-3 py-1 rounded-xl bg-white border border-slate text-xs font-extrabold text-charcoal hover:bg-sand"
           >
-            👨‍👩‍👧‍👦 Δοκιμή Family Plan (Έως 2 Προφίλ)
+            👨‍👩‍👧‍👦 Δοκιμή Family Plan (1 Προφίλ)
           </button>
           <button
             type="button"
@@ -219,62 +234,17 @@ export const SubscriptionManagementSection: React.FC = () => {
 
       {/* External Stripe Hosted Checkout Links (No embedded payment SDKs) */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="p-4 rounded-2xl bg-sand-light border-2 border-sand-dark flex flex-col justify-between gap-3">
-          <div className="space-y-1.5">
-            <h3 className="text-sm font-extrabold text-charcoal">
-              👨‍👩‍👧‍👦 Οικογενειακό Πλάνο (SynapsePlay Family)
-            </h3>
-            <p className="text-xs text-charcoal-muted">
-              Πλήρης πρόσβαση σε όλες τις δραστηριότητες και έως 2 ανεξάρτητα προφίλ παιδιών στη
-              συσκευή (4,99€ / μήνα ή 39,99€ / έτος), με δυνατότητα προσθήκης επιπλέον προφίλ (1,99€
-              / μήνα).
-            </p>
-          </div>
-          <div className="space-y-2">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <CheckoutLink
-                href={MONETIZATION_CONFIG.checkoutUrls.familyMonthly}
-                target="_blank"
-                rel="noopener noreferrer"
-                data-testid="stripe-family-monthly-checkout-link"
-                className="touch-target px-3 py-2.5 rounded-xl bg-white border-2 border-slate text-charcoal font-extrabold text-xs text-center flex items-center justify-center gap-1.5 hover:bg-slate hover:text-white transition-colors"
-              >
-                <span>Εγγραφή στο Οικογενειακό — Μηνιαίο (4,99€)</span>
-                <span aria-hidden="true">↗️</span>
-              </CheckoutLink>
-              <CheckoutLink
-                href={MONETIZATION_CONFIG.checkoutUrls.familyAnnual}
-                target="_blank"
-                rel="noopener noreferrer"
-                data-testid="stripe-family-checkout-link"
-                className="touch-target px-3 py-2.5 rounded-xl bg-slate text-white font-extrabold text-xs text-center flex items-center justify-center gap-1.5 hover:bg-slate-dark transition-colors"
-              >
-                <span>Εγγραφή στο Οικογενειακό — Ετήσιο (39,99€)</span>
-                <span aria-hidden="true">↗️</span>
-              </CheckoutLink>
-            </div>
-            <CheckoutLink
-              href={MONETIZATION_CONFIG.checkoutUrls.extraChildMonthly}
-              target="_blank"
-              rel="noopener noreferrer"
-              data-testid="stripe-extra-profile-checkout-link"
-              className="touch-target w-full px-3 py-2 rounded-xl bg-terracotta-surface/70 border border-terracotta text-charcoal font-extrabold text-xs text-center flex items-center justify-center gap-1.5 hover:bg-terracotta hover:text-white transition-colors"
-            >
-              <span>➕ Επιπλέον Προφίλ Παιδιού (1,99€ / μήνα)</span>
-              <span aria-hidden="true">↗️</span>
-            </CheckoutLink>
-          </div>
-        </div>
+        <ChildCodeCheckout key={activeProfile.id} />
 
         <div className="p-4 rounded-2xl bg-sage-surface/60 border-2 border-sage flex flex-col justify-between gap-3">
           <div className="space-y-1.5">
             <h3 className="text-sm font-extrabold text-charcoal">
-              🏥 SynapsePlay Therapist Pro — Ετήσιο B2B (299,00€ / έτος)
+              🏥 SynapsePlay Therapist Pro — Ετήσιο B2B ({PRICE_B2B_YEAR_EL})
             </h3>
             <p className="text-xs text-charcoal-muted">
               Επαγγελματική άδεια για Εργοθεραπευτές, Λογοθεραπευτές &amp; Κέντρα ΔΕΠΥ: Απεριόριστα
-              προφίλ παιδιών, γρήγορη «Εναλλαγή Παιδιού», αναφορές PDF/CSV και μεταφορά δεδομένων
-              σε άλλη συσκευή.
+              προφίλ παιδιών, γρήγορη «Εναλλαγή Παιδιού», κωδικός για κάθε παιδί με εισαγωγή της
+              προόδου του σπιτιού, αναφορές PDF/CSV και μεταφορά δεδομένων σε άλλη συσκευή.
             </p>
           </div>
           <CheckoutLink
@@ -284,7 +254,7 @@ export const SubscriptionManagementSection: React.FC = () => {
             data-testid="stripe-b2b-checkout-link"
             className="touch-target px-4 py-3 rounded-xl bg-sage-dark text-white font-extrabold text-xs text-center flex items-center justify-center gap-2 hover:bg-sage transition-colors"
           >
-            <span>Απόκτηση Άδειας Θεραπευτή (B2B — 299,00€ / έτος)</span>
+            <span>Απόκτηση Άδειας Θεραπευτή (B2B — {PRICE_B2B_YEAR_EL})</span>
             <span aria-hidden="true">↗️</span>
           </CheckoutLink>
         </div>

@@ -369,3 +369,132 @@ export async function importBackup(backup: SynapsePlayBackup): Promise<ChildMicr
   }
   return [...profiles];
 }
+
+/* ------------------------------------------------------------------ */
+/* Αρχείο προόδου γονιού → θεραπευτή (ένα παιδί, με κωδικό παιδιού)    */
+/* Ο γονιός το κατεβάζει και το στέλνει ο ίδιος· ο θεραπευτής το       */
+/* εισάγει και οι καταγραφές προστίθενται στο προφίλ με τον ίδιο κωδικό */
+/* (δεν αντικαθιστούν τίποτα). Τίποτα δεν ανεβαίνει σε server.          */
+/* ------------------------------------------------------------------ */
+
+export const PROGRESS_FORMAT = 'synapseplay-progress';
+export const PROGRESS_VERSION = 1;
+
+export interface SynapsePlayProgressFile {
+  format: typeof PROGRESS_FORMAT;
+  version: number;
+  exportedAt: string;
+  childCode: string;
+  profile: { nickname: string; avatarEmoji: string; ageBand: ChildMicroProfile['ageBand'] };
+  sessionLogs: ActivitySessionLog[];
+}
+
+export async function exportChildProgress(
+  profile: ChildMicroProfile
+): Promise<SynapsePlayProgressFile | null> {
+  if (!profile.childCode) return null;
+  const logs = (await getSessionLogs()).filter((l) => l.childProfileId === profile.id);
+  return {
+    format: PROGRESS_FORMAT,
+    version: PROGRESS_VERSION,
+    exportedAt: new Date().toISOString(),
+    childCode: profile.childCode,
+    profile: { nickname: profile.nickname, avatarEmoji: profile.avatarEmoji, ageBand: profile.ageBand },
+    sessionLogs: logs.map(({ id: _id, childProfileId: _p, ...rest }) => ({
+      ...rest,
+      source: 'home' as const,
+    })),
+  };
+}
+
+/** Ελέγχει ένα (μη αξιόπιστο) αρχείο προόδου. Πετάει ελληνικό μήνυμα σε σφάλμα. */
+export function parseChildProgress(raw: string): SynapsePlayProgressFile {
+  let data: unknown;
+  try {
+    data = JSON.parse(raw);
+  } catch {
+    throw new Error('Το αρχείο δεν είναι έγκυρο αρχείο προόδου (μη έγκυρο JSON).');
+  }
+  const f = data as Partial<SynapsePlayProgressFile>;
+  if (!f || f.format !== PROGRESS_FORMAT || typeof f.version !== 'number') {
+    throw new Error('Το αρχείο δεν είναι αρχείο προόδου του SynapsePlay.');
+  }
+  if (f.version > PROGRESS_VERSION) {
+    throw new Error('Το αρχείο προέρχεται από νεότερη έκδοση της εφαρμογής. Ενημερώστε την εφαρμογή.');
+  }
+  if (
+    typeof f.childCode !== 'string' ||
+    !/^[2-9A-HJ-NP-Z]{4}-[2-9A-HJ-NP-Z]{4}-[2-9A-HJ-NP-Z]$/.test(f.childCode) ||
+    !f.profile ||
+    typeof f.profile.nickname !== 'string' ||
+    f.profile.nickname.length > 60 ||
+    !Array.isArray(f.sessionLogs) ||
+    f.sessionLogs.length > 20000
+  ) {
+    throw new Error('Το αρχείο προόδου είναι κατεστραμμένο ή έχει τροποποιηθεί.');
+  }
+  const okLog = (l: unknown): l is ActivitySessionLog => {
+    const x = l as ActivitySessionLog;
+    return (
+      !!x &&
+      typeof x.activityId === 'string' &&
+      typeof x.timestamp === 'string' &&
+      typeof x.dateKey === 'string' &&
+      typeof x.completedRounds === 'number' &&
+      typeof x.totalRounds === 'number'
+    );
+  };
+  if (!f.sessionLogs.every(okLog)) {
+    throw new Error('Το αρχείο προόδου είναι κατεστραμμένο ή έχει τροποποιηθεί.');
+  }
+  return f as SynapsePlayProgressFile;
+}
+
+/**
+ * ΠΡΟΣΘΕΤΕΙ τις καταγραφές του σπιτιού στο προφίλ με τον ίδιο κωδικό παιδιού
+ * (το δημιουργεί αν δεν υπάρχει). Διπλές καταγραφές (ίδια ώρα + δραστηριότητα) παραλείπονται.
+ */
+export async function importChildProgress(
+  file: SynapsePlayProgressFile
+): Promise<{ profiles: ChildMicroProfile[]; profile: ChildMicroProfile; added: number; created: boolean }> {
+  let profiles = await loadChildProfiles();
+  let profile = profiles.find((p) => p.childCode === file.childCode);
+  const created = !profile;
+  if (!profile) {
+    const ageBand = file.profile.ageBand ?? '6-8';
+    profile = {
+      ...createDefaultChildProfile(ageBand),
+      id: `child-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`,
+      nickname: file.profile.nickname.trim().slice(0, 40) || file.childCode,
+      avatarEmoji: file.profile.avatarEmoji || '🧒',
+      ageBand,
+      createdAt: new Date().toISOString(),
+      childCode: file.childCode,
+    };
+    profiles = await saveChildProfile(profile);
+  }
+  const existing = (await getSessionLogs()).filter((l) => l.childProfileId === profile!.id);
+  const seen = new Set(existing.map((l) => `${l.timestamp}|${l.activityId}`));
+  const toAdd: ActivitySessionLog[] = [];
+  for (const raw of file.sessionLogs) {
+    const { id: _id, ...rest } = raw;
+    const key = `${rest.timestamp}|${rest.activityId}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    toAdd.push({
+      ...rest,
+      childProfileId: profile.id,
+      childNickname: profile.nickname,
+      source: 'home',
+    } as ActivitySessionLog);
+  }
+  if (toAdd.length > 0) {
+    memoryLogs = [...toAdd, ...memoryLogs];
+    try {
+      await db.sessionLogs.bulkAdd(toAdd);
+    } catch {
+      // In-memory fallback already updated
+    }
+  }
+  return { profiles, profile, added: toAdd.length, created };
+}

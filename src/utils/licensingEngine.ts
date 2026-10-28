@@ -11,13 +11,13 @@ import {
  */
 export const ENABLE_PAYWALL = CONFIG_ENABLE_PAYWALL;
 
-export const FAMILY_PLAN_MAX_PROFILES = 2;
+export const FAMILY_PLAN_MAX_PROFILES = 1;
 
 export const FAMILY_PLAN_LIMIT_NOTICE_EL =
-  'Το οικογενειακό πλάνο περιλαμβάνει έως 2 προφίλ παιδιών. Για επιπλέον προφίλ απαιτείται αναβάθμιση.';
+  'Το οικογενειακό πλάνο περιλαμβάνει 1 προφίλ παιδιού. Για κάθε επιπλέον παιδί προστίθεται «Επιπλέον παιδί» (9,99€ / έτος) με τον δικό του κωδικό από τον θεραπευτή.';
 
 export const DEV_UNLOCKED_STATUS_LABEL_EL = 'Δοκιμαστική Έκδοση - Όλα Ξεκλείδωτα';
-export const FAMILY_PLAN_STATUS_LABEL_EL = 'Οικογενειακό Πλάνο (Έως 2 Προφίλ Παιδιών)';
+export const FAMILY_PLAN_STATUS_LABEL_EL = 'Οικογενειακό Πλάνο (1 Προφίλ Παιδιού)';
 export const B2B_PLAN_STATUS_LABEL_EL =
   'Επαγγελματική Άδεια B2B / Θεραπευτή (Απεριόριστα Προφίλ)';
 
@@ -77,7 +77,7 @@ const BASE_STATE = {
  *   everything unlocked; the local test codes (FAMILY-…, B2B-…) only simulate limits.
  * Payments ON:
  *   valid B2B licence      → unlimited profiles, therapist switcher, pro tools
- *   valid Family licence   → 2 profiles (+1 per valid "extra child" licence), no pro tools
+ *   valid Family licence   → 1 profile (+1 per valid "extra child" licence), no pro tools
  *   no licence, ≤14 days   → free trial: everything open
  *   no licence, >14 days   → games locked (profiles/history kept, Parent Area works)
  */
@@ -300,7 +300,7 @@ export function validateAndParseLicenseKey(
       tier: 'family',
       normalizedKey: clean,
       messageEl:
-        'Ενεργοποιήθηκε επιτυχώς το Οικογενειακό Πλάνο (Family Plan — έως 2 προφίλ παιδιών).',
+        'Ενεργοποιήθηκε επιτυχώς το Οικογενειακό Πλάνο (Family Plan — 1 προφίλ παιδιού).',
     };
   }
 

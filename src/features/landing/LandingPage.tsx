@@ -4,6 +4,11 @@ import { Link, useNavigate } from 'react-router-dom';
 import { SynapsePlayLogoMark } from '../../components/SynapsePlayLogoMark';
 import { GdprConsentBanner } from '../../components/GdprConsentBanner';
 import { MONETIZATION_CONFIG } from '../../config/monetization.config';
+import {
+  PRICE_B2B_YEAR_EL,
+  PRICE_EXTRA_CHILD_YEAR_EL,
+  PRICE_FAMILY_YEAR_EL,
+} from '../../config/pricing';
 import { ADHD_PARENT_AND_B2B_ARTICLES } from '../../data/adhdParentArticles';
 import { ADHD_SEO_FAQ_ITEMS, SOCIAL_LINKS } from '../../utils/seoEngine';
 
@@ -724,7 +729,15 @@ export const LandingPage: React.FC = () => {
                   <span className="text-[#7A9A7B]" aria-hidden="true">
                     ✔
                   </span>
-                  <span>Έως 2 Προφίλ Παιδιών</span>
+                  <span>
+                    1 παιδί — {PRICE_FAMILY_YEAR_EL} (κάθε επιπλέον παιδί {PRICE_EXTRA_CHILD_YEAR_EL})
+                  </span>
+                </li>
+                <li className="flex items-center gap-2.5">
+                  <span className="text-[#7A9A7B]" aria-hidden="true">
+                    ✔
+                  </span>
+                  <span>Σε συνεργασία με τον θεραπευτή του παιδιού (κωδικός παιδιού)</span>
                 </li>
                 <li className="flex items-center gap-2.5">
                   <span className="text-[#7A9A7B]" aria-hidden="true">
@@ -751,39 +764,17 @@ export const LandingPage: React.FC = () => {
                   <span aria-hidden="true">→</span>
                 </Link>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                  <CheckoutLink
-                    href={MONETIZATION_CONFIG.checkoutUrls.familyMonthly}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    data-testid="landing-stripe-family-monthly-link"
-                    className="touch-target py-2.5 px-4 rounded-xl bg-white border-2 border-[#4A6B82] text-[#2C3539] font-extrabold text-xs sm:text-sm text-center flex items-center justify-center gap-1.5 hover:bg-[#4A6B82] hover:text-white transition-colors"
-                  >
-                    <span>Εγγραφή στο Οικογενειακό — Μηνιαίο (4,99€)</span>
-                    <span aria-hidden="true">↗️</span>
-                  </CheckoutLink>
-                  <CheckoutLink
-                    href={MONETIZATION_CONFIG.checkoutUrls.familyAnnual}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    data-testid="landing-stripe-family-yearly-link"
-                    className="touch-target py-2.5 px-4 rounded-xl bg-[#4A6B82] text-white font-extrabold text-xs sm:text-sm text-center flex items-center justify-center gap-1.5 hover:opacity-95 transition-opacity"
-                  >
-                    <span>Εγγραφή στο Οικογενειακό — Ετήσιο (39,99€)</span>
-                    <span aria-hidden="true">↗️</span>
-                  </CheckoutLink>
-                </div>
-
-                <CheckoutLink
-                  href={MONETIZATION_CONFIG.checkoutUrls.extraChildMonthly}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  data-testid="landing-stripe-extra-profile-link"
-                  className="touch-target w-full py-2.5 px-4 rounded-xl bg-[#EFE8D8] border border-[#2C3539]/25 text-[#2C3539] font-extrabold text-xs sm:text-sm text-center flex items-center justify-center gap-1.5 hover:bg-[#D97757]/20 transition-colors"
+                <Link
+                  to="/parent#subscription"
+                  data-testid="landing-family-subscribe-btn"
+                  className="touch-target w-full py-2.5 px-4 rounded-xl bg-[#4A6B82] text-white font-extrabold text-xs sm:text-sm text-center flex items-center justify-center gap-1.5 hover:opacity-95 transition-opacity"
                 >
-                  <span>➕ Επιπλέον Προφίλ Παιδιού (1,99€ / μήνα)</span>
-                  <span aria-hidden="true">↗️</span>
-                </CheckoutLink>
+                  <span>Εγγραφή με κωδικό παιδιού — {PRICE_FAMILY_YEAR_EL}</span>
+                  <span aria-hidden="true">→</span>
+                </Link>
+                <p className="text-xs font-bold text-[#2C3539]/70 text-center">
+                  Ο κωδικός παιδιού δίνεται από τον θεραπευτή ή το κέντρο του παιδιού.
+                </p>
               </div>
             </div>
 
@@ -806,7 +797,7 @@ export const LandingPage: React.FC = () => {
                   SynapsePlay Therapist Pro (Ετήσιο B2B)
                 </h3>
                 <p className="text-sm font-bold text-[#4A6B82]">
-                  Για Εργοθεραπευτές, Λογοθεραπευτές & Κέντρα Ειδικών Θεραπειών • 299,00€ / έτος
+                  Για Εργοθεραπευτές, Λογοθεραπευτές & Κέντρα Ειδικών Θεραπειών • {PRICE_B2B_YEAR_EL}
                 </p>
 
                 <ul className="space-y-2.5 pt-2 text-sm font-bold text-[#2C3539]">
@@ -828,6 +819,12 @@ export const LandingPage: React.FC = () => {
                     </span>
                     <span>Εξαγωγή Αναφορών Παρατήρησης για τον Φάκελο του Παιδιού</span>
                   </li>
+                  <li className="flex items-center gap-2.5">
+                    <span className="text-[#7A9A7B]" aria-hidden="true">
+                      ✔
+                    </span>
+                    <span>Κωδικός για κάθε παιδί & η πρόοδος του σπιτιού στο προφίλ του</span>
+                  </li>
                 </ul>
               </div>
 
@@ -839,7 +836,7 @@ export const LandingPage: React.FC = () => {
                   data-testid="landing-stripe-b2b-yearly-link"
                   className="touch-target w-full py-3.5 px-6 rounded-2xl bg-[#7A9A7B] text-white font-extrabold text-sm sm:text-base text-center flex items-center justify-center gap-2 hover:opacity-95 transition-opacity"
                 >
-                  <span>Απόκτηση Άδειας Θεραπευτή B2B (299,00€ / έτος)</span>
+                  <span>Απόκτηση Άδειας Θεραπευτή B2B ({PRICE_B2B_YEAR_EL})</span>
                   <span aria-hidden="true">↗️</span>
                 </CheckoutLink>
 

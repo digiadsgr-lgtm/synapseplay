@@ -24,6 +24,8 @@ import { ClinicalFeedbackSection } from '../components/ClinicalFeedbackSection';
 import { SubscriptionManagementSection } from '../components/SubscriptionManagementSection';
 import { ProfessionalToolsSection } from '../components/ProfessionalToolsSection';
 import { MONETIZATION_CONFIG } from '../config/monetization.config';
+import { PRICE_B2B_YEAR_EL, PRICE_EXTRA_CHILD_YEAR_EL } from '../config/pricing';
+import { ShareProgressWithTherapist } from '../components/ShareProgressWithTherapist';
 import { formatLogAccuracy, summarizeRecentAccuracy } from '../utils/progressMetrics';
 
 export const ParentDashboardPage: React.FC = () => {
@@ -560,6 +562,8 @@ export const ParentDashboardPage: React.FC = () => {
       {/* Subscription & Licensing Management Section ("Διαχείριση Συνδρομής") */}
       <SubscriptionManagementSection />
 
+      <ShareProgressWithTherapist />
+
       {/* Clinical & Parent Evaluation, Observations & Suggestions Hub */}
       <ClinicalFeedbackSection />
 
@@ -661,16 +665,14 @@ export const ParentDashboardPage: React.FC = () => {
                 {profileCreationPermission.noticeEl}
               </p>
               <div className="flex flex-wrap items-center gap-2 shrink-0">
-                <CheckoutLink
-                  href={MONETIZATION_CONFIG.checkoutUrls.extraChildMonthly}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <a
+                  href="#subscription"
                   data-testid="parent-family-limit-stripe-upgrade-link"
                   className="touch-target px-4 py-2.5 rounded-2xl bg-terracotta text-white font-extrabold text-xs flex items-center gap-1.5 hover:opacity-95"
                 >
-                  <span>➕ Επιπλέον Προφίλ Παιδιού (1,99€ / μήνα)</span>
-                  <span aria-hidden="true">↗️</span>
-                </CheckoutLink>
+                  <span>➕ Επιπλέον παιδί ({PRICE_EXTRA_CHILD_YEAR_EL}) με κωδικό</span>
+                  <span aria-hidden="true">↑</span>
+                </a>
                 <CheckoutLink
                   href={MONETIZATION_CONFIG.checkoutUrls.therapistAnnual}
                   target="_blank"
@@ -678,7 +680,7 @@ export const ParentDashboardPage: React.FC = () => {
                   data-testid="parent-family-limit-stripe-b2b-link"
                   className="touch-target px-4 py-2.5 rounded-2xl bg-sage-dark text-white font-extrabold text-xs flex items-center gap-1.5 hover:bg-sage"
                 >
-                  <span>🏥 Άδεια Θεραπευτή B2B (299,00€ / έτος)</span>
+                  <span>🏥 Άδεια Θεραπευτή B2B ({PRICE_B2B_YEAR_EL})</span>
                   <span aria-hidden="true">↗️</span>
                 </CheckoutLink>
               </div>

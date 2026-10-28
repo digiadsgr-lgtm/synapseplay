@@ -550,7 +550,7 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
     expect(reportText).toContain('Δοκιμή αναφοράς Κέντρου ΔΕΠΥ.');
   });
 
-  it('License & Profiles Architecture: 100% Free & Unlocked in Dev Mode, 2-Profile Limit in Family Mode, and Unlimited Profiles + Quick Switcher in B2B Mode', async () => {
+  it('License & Profiles Architecture: 100% Free & Unlocked in Dev Mode, 1-Profile Limit in Family Mode, and Unlimited Profiles + Quick Switcher in B2B Mode', async () => {
     // 1. Default Development Mode: ENABLE_PAYWALL is false, unlimited profiles, zero paywall prompts
     expect(ENABLE_PAYWALL).toBe(false);
     const defaultLicense = resolveEffectiveLicenseState({ licenseTier: 'dev-unlocked' });
@@ -559,11 +559,11 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
     expect(checkProfileCreationPermission(5, { licenseTier: 'dev-unlocked' }).allowed).toBe(true);
 
     // 2. Unit-test Family Plan (when ENABLE_PAYWALL = true or Family License Key active)
+    const familyPermAt0 = checkProfileCreationPermission(0, { licenseTier: 'family' });
+    expect(familyPermAt0.allowed).toBe(true);
     const familyPermAt1 = checkProfileCreationPermission(1, { licenseTier: 'family' });
-    expect(familyPermAt1.allowed).toBe(true);
-    const familyPermAt2 = checkProfileCreationPermission(2, { licenseTier: 'family' });
-    expect(familyPermAt2.allowed).toBe(false);
-    expect(familyPermAt2.noticeEl).toBe(FAMILY_PLAN_LIMIT_NOTICE_EL);
+    expect(familyPermAt1.allowed).toBe(false);
+    expect(familyPermAt1.noticeEl).toBe(FAMILY_PLAN_LIMIT_NOTICE_EL);
 
     // 3. Unit-test B2B / Therapist License
     const b2bKeyRes = validateAndParseLicenseKey('B2B-CLINIC-2026');
@@ -602,19 +602,21 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
       );
     });
 
-    // Create 2nd profile in Parent Area (allowed, total = 2)
+    // Family Plan = 1 child → a 2nd profile needs «Επιπλέον παιδί» (with its own child code)
     fireEvent.change(screen.getByTestId('parent-new-profile-name-input'), {
       target: { value: 'Δεύτερο Παιδί' },
     });
     fireEvent.click(screen.getByTestId('parent-create-profile-btn'));
 
-    // Now at 2 profiles under Family Plan -> friendly notice is displayed for 3rd profile!
     await waitFor(() => {
       expect(screen.getByTestId('parent-family-plan-limit-notice')).toHaveTextContent(
-        'Το οικογενειακό πλάνο περιλαμβάνει έως 2 προφίλ παιδιών. Για επιπλέον προφίλ απαιτείται αναβάθμιση.'
+        'Το οικογενειακό πλάνο περιλαμβάνει 1 προφίλ παιδιού.'
       );
     });
-    expect(screen.getByTestId('parent-family-limit-stripe-upgrade-link')).toBeInTheDocument();
+    expect(screen.getByTestId('parent-family-limit-stripe-upgrade-link')).toHaveAttribute(
+      'href',
+      '#subscription'
+    );
 
     // Activate B2B / Therapist License via "Κωδικός Ενεργοποίησης" -> unlocks 3+ profiles & Quick Switcher
     fireEvent.change(screen.getByTestId('license-key-input'), {
@@ -626,15 +628,17 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
       expect(screen.getByTestId('therapist-quick-profile-switcher')).toBeInTheDocument();
     });
 
-    // Create 3rd profile under B2B mode -> succeeds without any limitation!
-    fireEvent.change(screen.getByTestId('parent-new-profile-name-input'), {
-      target: { value: 'Τρίτο Παιδί Κλινικής' },
-    });
-    fireEvent.click(screen.getByTestId('parent-create-profile-btn'));
-
-    await waitFor(() => {
-      expect(screen.getByTestId('therapist-quick-switcher-select').children.length).toBe(3);
-    });
+    // Create 2nd and 3rd profile under B2B mode -> succeeds without any limitation!
+    for (const name of ['Δεύτερο Παιδί Κλινικής', 'Τρίτο Παιδί Κλινικής']) {
+      fireEvent.change(screen.getByTestId('parent-new-profile-name-input'), {
+        target: { value: name },
+      });
+      fireEvent.click(screen.getByTestId('parent-create-profile-btn'));
+      await waitFor(() => {
+        expect(screen.getByTestId('therapist-quick-switcher-select')).toHaveTextContent(name);
+      });
+    }
+    expect(screen.getByTestId('therapist-quick-switcher-select').children.length).toBe(3);
 
     unmountParent();
   });
@@ -699,15 +703,17 @@ describe('Comprehensive Enrichment Suite (A-ST): Dynamic Gate, Age Adaptation, 8
     expect(screen.getByTestId('landing-beta-free-badge')).toHaveTextContent(
       'Τρέχουσα Φάση: Δωρεάν Δοκιμαστική Πρόσβαση (Beta) για Όλους!'
     );
-    expect(screen.getByTestId('landing-plan-family')).toHaveTextContent('Έως 2 Προφίλ Παιδιών');
+    expect(screen.getByTestId('landing-plan-family')).toHaveTextContent('1 παιδί — 59,99€ / έτος');
+    expect(screen.getByTestId('landing-plan-family')).not.toHaveTextContent('μήνα');
+    expect(screen.getByTestId('landing-family-subscribe-btn')).toHaveAttribute(
+      'href',
+      '/parent#subscription'
+    );
     expect(screen.getByTestId('landing-plan-b2b')).toHaveTextContent(
       'Απεριόριστα Προφίλ Παιδιών & Γρήγορος Profile Switcher'
     );
     // Checkout buttons render disabled during the free beta; URLs stay configured for launch
     for (const id of [
-      'landing-stripe-family-monthly-link',
-      'landing-stripe-family-yearly-link',
-      'landing-stripe-extra-profile-link',
       'landing-stripe-b2b-yearly-link',
     ]) {
       expect(screen.getByTestId(id)).toHaveAttribute('data-checkout-disabled', 'true');

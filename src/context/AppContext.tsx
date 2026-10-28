@@ -23,8 +23,11 @@ import {
   getTodayDateKey,
   wipeAllLocalData,
   importBackup,
+  importChildProgress,
   type SynapsePlayBackup,
+  type SynapsePlayProgressFile,
 } from '../db/database';
+import { centerCodeFromLicenseRef, parseChildCode, randomCenterCode } from '../utils/childCode';
 import {
   createDefaultChildProfile,
   createInitialLearningModel,
@@ -69,10 +72,16 @@ interface AppContextValue {
   /** Rename a child profile and/or change its age band (parent area). */
   updateChildProfileDetails: (
     profileId: string,
-    changes: { nickname?: string; ageBand?: AgeBandId }
+    changes: { nickname?: string; ageBand?: AgeBandId; childCode?: string }
   ) => Promise<void>;
   /** Replace all profiles + session logs with a validated backup file. */
   restoreBackup: (backup: SynapsePlayBackup) => Promise<void>;
+  /** Θεραπευτής: προσθέτει την πρόοδο του σπιτιού (αρχείο γονιού) στο προφίλ με τον ίδιο κωδικό. */
+  importProgressFile: (
+    file: SynapsePlayProgressFile
+  ) => Promise<{ added: number; created: boolean; nickname: string }>;
+  /** Κωδικός κέντρου αυτής της συσκευής (δημιουργείται την πρώτη φορά). */
+  ensureCenterCode: () => Promise<string>;
   deleteChildProfile: (profileId: string) => Promise<void>;
   recordStrategyPreference: (strategyId: 'time' | 'example' | 'retry') => Promise<void>;
   elapsedSeconds: number;
@@ -436,14 +445,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   );
 
   const updateChildProfileDetails = useCallback(
-    async (profileId: string, changes: { nickname?: string; ageBand?: AgeBandId }) => {
+    async (
+      profileId: string,
+      changes: { nickname?: string; ageBand?: AgeBandId; childCode?: string }
+    ) => {
       const target = childProfiles.find((p) => p.id === profileId);
       if (!target) return;
       const nickname = changes.nickname?.trim().slice(0, 40);
+      const childCode = changes.childCode ? parseChildCode(changes.childCode)?.code : undefined;
       const updated: ChildMicroProfile = {
         ...target,
         ...(nickname ? { nickname } : {}),
         ...(changes.ageBand ? { ageBand: changes.ageBand } : {}),
+        ...(childCode ? { childCode } : {}),
       };
       setChildProfiles((prev) => prev.map((p) => (p.id === profileId ? updated : p)));
       const updatedList = await saveChildProfile(updated);
@@ -470,6 +484,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
     setSessionLogs(await getSessionLogs());
   }, []);
+
+  const importProgressFile = useCallback(async (file: SynapsePlayProgressFile) => {
+    const res = await importChildProgress(file);
+    setChildProfiles(res.profiles);
+    setSessionLogs(await getSessionLogs());
+    return { added: res.added, created: res.created, nickname: res.profile.nickname };
+  }, []);
+
+  const ensureCenterCode = useCallback(async () => {
+    if (settings.centerCode) return settings.centerCode;
+    const b2bRef = verifiedLicenses.find((l) => l.plan === 'b2b' && l.ref)?.ref;
+    const centerCode = b2bRef ? centerCodeFromLicenseRef(b2bRef) : randomCenterCode();
+    await updateSettings({ centerCode });
+    return centerCode;
+  }, [settings.centerCode, verifiedLicenses, updateSettings]);
 
   const deleteChildProfile = useCallback(
     async (profileId: string) => {
@@ -615,6 +644,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         updateProfileAvatar,
         updateChildProfileDetails,
         restoreBackup,
+        importProgressFile,
+        ensureCenterCode,
         deleteChildProfile,
         recordStrategyPreference,
         elapsedSeconds,

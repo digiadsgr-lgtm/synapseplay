@@ -55,6 +55,7 @@ const CSV_HEADERS = [
   'Διάρκεια (δευτ.)',
   'Διάμεσος χρόνος γύρου (δευτ.)',
   'Μέτρηση',
+  'Πού',
 ];
 
 /**
@@ -83,6 +84,7 @@ export function sessionLogsToCsv(
         l.durationSeconds,
         typeof l.medianRoundMs === 'number' ? (l.medianRoundMs / 1000).toFixed(1) : '',
         l.measurement === 'self-report' ? 'αυτοαναφορά' : 'μετρήσιμο',
+        l.source === 'home' ? 'σπίτι' : 'συσκευή',
       ]
         .map(csvCell)
         .join(';');
