@@ -99,6 +99,14 @@ export function summarize(payments, rules = RULES) {
       withoutCode.push(s);
       continue;
     }
+    if (code.startsWith('SELF-')) {
+      // «Δεν θέλω θεραπευτή»: μετριέται μόνο για ενημέρωση — καμία επιστροφή/πληρωμή σε κέντρο
+      const self = get('SELF');
+      if (plan === 'extra') self.extras += 1;
+      else self.families += 1;
+      self.isSelf = true;
+      continue;
+    }
     const c = get(code.slice(0, 4));
     const net = netOf(s.amount / 100, rules);
     if (plan === 'extra') {
@@ -110,11 +118,12 @@ export function summarize(payments, rules = RULES) {
     if (c.families > rules.THRESHOLD) c.payoutOver += Math.max(0, net - rules.KEEP_NET);
   }
   const rows = [...centers.values()].map((c) => {
-    const refund = c.hasB2B ? Math.min(c.families, rules.THRESHOLD) * rules.REFUND_PER_FAMILY : 0;
+    const refund =
+      c.hasB2B && !c.isSelf ? Math.min(c.families, rules.THRESHOLD) * rules.REFUND_PER_FAMILY : 0;
     return {
       ...c,
       b2bRefund: r2(refund),
-      familiesOverThreshold: Math.max(0, c.families - rules.THRESHOLD),
+      familiesOverThreshold: c.isSelf ? 0 : Math.max(0, c.families - rules.THRESHOLD),
       payoutOver: r2(c.payoutOver),
       payoutExtras: r2(c.payoutExtras),
       total: r2(refund + c.payoutOver + c.payoutExtras),
@@ -141,7 +150,7 @@ export function toCsv({ centers }) {
   ];
   const rows = centers.map((c) =>
     [
-      c.center,
+      c.isSelf ? 'SELF (χωρίς θεραπευτή)' : c.center,
       c.b2bEmail,
       c.hasB2B ? 'ναι' : 'όχι',
       c.families,

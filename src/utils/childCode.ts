@@ -16,6 +16,9 @@
  */
 
 export const CHILD_CODE_ALPHABET = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
+
+/** Δεσμευμένος «κωδικός κέντρου» για οικογένειες που επιλέγουν «Δεν θέλω θεραπευτή». */
+export const SELF_CENTER_CODE = 'SELF';
 const N = CHILD_CODE_ALPHABET.length; // 32
 
 const GREEK_TO_LATIN: Record<string, string> = {
@@ -103,7 +106,18 @@ export function childCodeErrorEl(raw: string): string | null {
 
 /** Τυχαίος κωδικός κέντρου (4 χαρακτήρες) — χρησιμοποιείται όσο δεν υπάρχει άδεια B2B. */
 export function randomCenterCode(): string {
-  return randomChars(4);
+  let c = randomChars(4);
+  while (c === SELF_CENTER_CODE) c = randomChars(4);
+  return c;
+}
+
+/** Κωδικός χωρίς θεραπευτή (κέντρο SELF) — δεν αποδίδει τίποτα σε κέντρο. */
+export function generateSelfChildCode(): string {
+  return format(SELF_CENTER_CODE + randomChars(4));
+}
+
+export function isSelfChildCode(code: string | undefined | null): boolean {
+  return parseChildCode(code ?? '')?.centerCode === SELF_CENTER_CODE;
 }
 
 /**
@@ -121,13 +135,17 @@ export function centerCodeFromLicenseRef(ref: string): string {
     out += CHILD_CODE_ALPHABET[h % N];
     h = Math.floor(h / N);
   }
-  return out;
+  return out === SELF_CENTER_CODE ? 'SELG' : out;
 }
 
 /** Νέος κωδικός παιδιού για το κέντρο. */
 export function generateChildCode(centerCode: string): string {
   const center = compact(centerCode).slice(0, 4);
-  if (center.length !== 4 || [...center].some((ch) => !CHILD_CODE_ALPHABET.includes(ch))) {
+  if (
+    center.length !== 4 ||
+    center === SELF_CENTER_CODE ||
+    [...center].some((ch) => !CHILD_CODE_ALPHABET.includes(ch))
+  ) {
     throw new Error('Μη έγκυρος κωδικός κέντρου');
   }
   return format(center + randomChars(4));

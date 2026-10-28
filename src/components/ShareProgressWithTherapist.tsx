@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { exportChildProgress } from '../db/database';
 import { downloadTextFile, safeFilePart } from '../utils/reportExport';
+import { isSelfChildCode } from '../utils/childCode';
 
 /**
  * Γονιός → θεραπευτής: αρχείο προόδου για κάθε παιδί που έχει κωδικό παιδιού.
@@ -11,7 +12,7 @@ export const ShareProgressWithTherapist: React.FC = () => {
   const { childProfiles, sessionLogs } = useApp();
   const [message, setMessage] = useState<string | null>(null);
   const today = new Date().toISOString().slice(0, 10);
-  const linked = childProfiles.filter((p) => p.childCode);
+  const linked = childProfiles.filter((p) => p.childCode && !isSelfChildCode(p.childCode));
 
   const handleExport = async (profileId: string) => {
     const profile = childProfiles.find((p) => p.id === profileId);

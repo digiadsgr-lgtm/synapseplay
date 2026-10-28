@@ -3,7 +3,14 @@ import { CheckoutLink } from './CheckoutLink';
 import { useApp } from '../context/AppContext';
 import { MONETIZATION_CONFIG } from '../config/monetization.config';
 import { PRICE_EXTRA_CHILD_YEAR_EL, PRICE_FAMILY_YEAR_EL } from '../config/pricing';
-import { childCodeErrorEl, parseChildCode, withChildCode } from '../utils/childCode';
+import {
+  childCodeErrorEl,
+  generateSelfChildCode,
+  isSelfChildCode,
+  parseChildCode,
+  withChildCode,
+} from '../utils/childCode';
+import { NoTherapistOptions } from './NoTherapistOptions';
 
 /**
  * Οικογενειακή συνδρομή: ο κωδικός παιδιού από τον θεραπευτή είναι ΥΠΟΧΡΕΩΤΙΚΟΣ.
@@ -28,6 +35,13 @@ export const ChildCodeCheckout: React.FC = () => {
         void updateChildProfileDetails(activeProfile.id, { childCode: parsed.code });
       }
     }
+  };
+
+  const handleNoTherapist = () => {
+    const selfCode = generateSelfChildCode();
+    setDraft(selfCode);
+    setTouched(true);
+    void updateChildProfileDetails(activeProfile.id, { childCode: selfCode });
   };
 
   const familyHref = code
@@ -78,7 +92,12 @@ export const ChildCodeCheckout: React.FC = () => {
           }`}
         />
         <p id="child-code-help" data-testid="child-code-status" className="text-[11px] font-bold">
-          {code ? (
+          {code && isSelfChildCode(code) ? (
+            <span className="text-sage-dark">
+              ✅ Κωδικός ενεργοποίησης χωρίς θεραπευτή. Αν αργότερα σας δώσει κωδικό θεραπευτής,
+              γράψτε τον εδώ.
+            </span>
+          ) : code ? (
             <span className="text-sage-dark">✅ Ο κωδικός είναι σωστός.</span>
           ) : error ? (
             <span className="text-terracotta-dark">⚠️ {error}</span>
@@ -89,6 +108,10 @@ export const ChildCodeCheckout: React.FC = () => {
           )}
         </p>
       </div>
+
+      {!code && (
+        <NoTherapistOptions onNoTherapist={handleNoTherapist} defaultAgeBand={activeProfile.ageBand} />
+      )}
 
       <div className="space-y-2">
         <CheckoutLink
