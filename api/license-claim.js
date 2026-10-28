@@ -7,7 +7,13 @@
  * if so, return a signed licence token that the app stores on the device.
  * (The same licence is also e-mailed by /api/stripe-webhook for other devices/renewals.)
  */
-import { isLicensingConfigured, issueLicenseToken, planFor, stripeGet } from './_lib/license.js';
+import {
+  isLicensingConfigured,
+  issueLicenseToken,
+  normalizeChildCode,
+  planFor,
+  stripeGet,
+} from './_lib/license.js';
 
 export default async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
@@ -54,12 +60,24 @@ export default async function handler(req, res) {
     (sub && sub.items && sub.items.data && sub.items.data[0] && sub.items.data[0].current_period_end) ||
     Math.floor(Date.now() / 1000) + 31 * 24 * 3600;
 
+  // Κωδικός παιδιού: η εφαρμογή τον περνά στο Payment Link ως client_reference_id
+  const childCode = plan === 'b2b' ? null : normalizeChildCode(session.client_reference_id);
+
   const { token, payload } = issueLicenseToken({
     plan,
     periodEnd,
     quantity: (item && item.quantity) || 1,
     ref: (sub && sub.id) || session.id,
+    childCode,
   });
 
-  return res.status(200).json({ ok: true, token, plan, expiresAt: payload.e });
+  // Η πληρωμή έγινε → η άδεια δίνεται πάντα· χωρίς κωδικό το email του webhook σας ειδοποιεί.
+  return res.status(200).json({
+    ok: true,
+    token,
+    plan,
+    expiresAt: payload.e,
+    childCode,
+    childCodeMissing: plan !== 'b2b' && !childCode,
+  });
 }

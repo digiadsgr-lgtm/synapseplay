@@ -10,6 +10,8 @@ export interface VerifiedLicense {
   /** Quantity (number of extra child profiles for 'extra'). */
   n: number;
   ref?: string;
+  /** Κωδικός παιδιού της αγοράς (family/extra). */
+  childCode?: string;
   token: string;
 }
 
@@ -69,6 +71,7 @@ export async function verifyLicenseToken(
       i?: number;
       n?: number;
       r?: string;
+      c?: string;
     };
     if (payload.v !== 1 || !payload.p || !PLANS.has(payload.p) || typeof payload.e !== 'number') {
       return { ok: false, reason: 'malformed' };
@@ -81,6 +84,7 @@ export async function verifyLicenseToken(
         iat: typeof payload.i === 'number' ? payload.i : 0,
         n: typeof payload.n === 'number' && payload.n > 0 ? Math.floor(payload.n) : 1,
         ref: payload.r,
+        childCode: typeof payload.c === 'string' ? payload.c : undefined,
         token: clean,
       },
     };

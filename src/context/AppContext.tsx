@@ -321,6 +321,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           .filter((v) => kept.includes(v.token) && v.exp > nowSec)
           .map((v) => v.token);
         await updateSettings({ licenseTokens: [...stillValid, lic.token].slice(-10) });
+        // Η άδεια φέρει τον κωδικό παιδιού της αγοράς → συνδέεται με το τρέχον προφίλ αν δεν έχει
+        if (
+          lic.childCode &&
+          !activeProfile.childCode &&
+          !childProfiles.some((p) => p.childCode === lic.childCode)
+        ) {
+          setChildProfiles(await saveChildProfile({ ...activeProfile, childCode: lic.childCode }));
+        }
         const until = new Date(lic.exp * 1000).toLocaleDateString('el-GR');
         const label =
           lic.plan === 'b2b'
@@ -346,7 +354,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
       return result;
     },
-    [updateSettings, settings.licenseTokens, verifiedLicenses]
+    [updateSettings, settings.licenseTokens, verifiedLicenses, activeProfile, childProfiles]
   );
 
   const claimCheckoutSession = useCallback(

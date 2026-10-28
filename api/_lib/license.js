@@ -3,7 +3,8 @@
  *
  * A licence is a signed, self-contained token that the app verifies OFFLINE:
  *     SP1.<base64url(JSON payload)>.<base64url(ECDSA P-256 / SHA-256 signature)>
- * payload = { v: 1, p: 'family' | 'extra' | 'b2b', e: expiresAt(unix s), i: issuedAt, n: count, r: ref }
+ * payload = { v: 1, p: 'family' | 'extra' | 'b2b', e: expiresAt(unix s), i: issuedAt, n: count, r: ref,
+ *             c?: child code ΚΚΚΚ-ΠΠΠΠ-Ε (family/extra — από το client_reference_id του Stripe) }
  *
  * Only this server holds the PRIVATE key (env LICENSE_SIGNING_KEY); the app ships the PUBLIC key
  * (src/config/licensePublicKey.ts). Nobody can create a valid code without the private key.
@@ -22,12 +23,48 @@ const GRACE_SECONDS = 3 * 24 * 3600; // renewal payments can arrive a little lat
 const OWNER_FALLBACK_EMAIL = 'digiadsgr@gmail.com';
 
 // Fallback when LICENSE_PRICE_MAP is not set: unit amount in cents (EUR) → plan
+// Παλιές ΚΑΙ νέες τιμές: λειτουργεί με όποιο Payment Link κι αν είναι ενεργό
 const DEFAULT_AMOUNT_MAP = {
-  499: 'family', // Οικογενειακό μηνιαίο 4,99€
-  3999: 'family', // Οικογενειακό ετήσιο 39,99€
-  199: 'extra', // Επιπλέον προφίλ παιδιού 1,99€
-  29900: 'b2b', // Therapist Pro 299€
+  499: 'family', // Οικογενειακό μηνιαίο 4,99€ (παλιό link — δεν προβάλλεται πια)
+  3999: 'family', // Οικογενειακό ετήσιο 39,99€ (σημερινό link)
+  5999: 'family', // Οικογενειακό ετήσιο 59,99€ (νέα τιμή)
+  199: 'extra', // Επιπλέον παιδί 1,99€ / μήνα (σημερινό link)
+  999: 'extra', // Επιπλέον παιδί 9,99€ / έτος (νέα τιμή)
+  29900: 'b2b', // Therapist Pro 299€ (σημερινό link)
+  99900: 'b2b', // Therapist Pro 999€ / έτος (νέα τιμή)
 };
+
+/* Κωδικός παιδιού — ίδιος αλγόριθμος με src/utils/childCode.ts (Luhn mod 32). */
+const CHILD_CODE_ALPHABET = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
+function childCodeCheckChar(body) {
+  let factor = 2;
+  let sum = 0;
+  for (let i = body.length - 1; i >= 0; i--) {
+    let addend = factor * CHILD_CODE_ALPHABET.indexOf(body[i]);
+    factor = factor === 2 ? 1 : 2;
+    addend = Math.floor(addend / 32) + (addend % 32);
+    sum += addend;
+  }
+  return CHILD_CODE_ALPHABET[(32 - (sum % 32)) % 32];
+}
+
+/** client_reference_id → κωδικός παιδιού σε κανονική μορφή, ή null. */
+export function normalizeChildCode(raw) {
+  const c = String(raw || '').toUpperCase().replace(/[^0-9A-Z]/g, '');
+  if (c.length !== 9 || ![...c].every((ch) => CHILD_CODE_ALPHABET.includes(ch))) return null;
+  if (childCodeCheckChar(c.slice(0, 8)) !== c[8]) return null;
+  return `${c.slice(0, 4)}-${c.slice(4, 8)}-${c[8]}`;
+}
+
+/** Κωδικός παιδιού της αρχικής αγοράς μιας συνδρομής (για τις ανανεώσεις). */
+export async function childCodeForSubscription(subscriptionId) {
+  if (!subscriptionId || !process.env.STRIPE_SECRET_KEY) return null;
+  const list = await stripeGet(
+    `checkout/sessions?subscription=${encodeURIComponent(subscriptionId)}&limit=1`
+  );
+  const s = list && list.data && list.data[0];
+  return s ? normalizeChildCode(s.client_reference_id) : null;
+}
 
 export const PLAN_LABELS_EL = {
   family: 'Οικογενειακό Πλάνο',
@@ -61,7 +98,7 @@ export function isLicensingConfigured() {
 }
 
 /** Creates a signed licence token. periodEnd = unix seconds of the paid period's end. */
-export function issueLicenseToken({ plan, periodEnd, quantity = 1, ref }) {
+export function issueLicenseToken({ plan, periodEnd, quantity = 1, ref, childCode }) {
   const payload = {
     v: 1,
     p: plan,
@@ -69,6 +106,7 @@ export function issueLicenseToken({ plan, periodEnd, quantity = 1, ref }) {
     i: Math.floor(Date.now() / 1000),
     n: Math.max(1, Math.floor(Number(quantity) || 1)),
     r: ref ? String(ref).slice(-10) : undefined,
+    c: childCode || undefined,
   };
   const body = b64url(JSON.stringify(payload));
   const signingInput = `SP1.${body}`;
@@ -93,7 +131,7 @@ export function activationLink(token) {
 }
 
 /** E-mails the licence to the customer (best effort). Owner gets a BCC copy for support. */
-export async function emailLicense({ to, token, plan, expiresAt }) {
+export async function emailLicense({ to, token, plan, expiresAt, childCode }) {
   const key = process.env.RESEND_API_KEY;
   if (!key || !to) return false;
   const owner = process.env.FEEDBACK_RECEIVER_EMAIL || OWNER_FALLBACK_EMAIL;
@@ -106,6 +144,7 @@ export async function emailLicense({ to, token, plan, expiresAt }) {
     'Ευχαριστούμε για τη συνδρομή σας στο SynapsePlay!',
     '',
     `Πλάνο: ${PLAN_LABELS_EL[plan] || plan}`,
+    ...(plan === 'b2b' ? [] : [`Κωδικός παιδιού: ${childCode || '— (δεν δόθηκε· θα επικοινωνήσουμε μαζί σας)'}`]),
     `Ισχύει έως: ${until} (ανανεώνεται αυτόματα με κάθε πληρωμή — θα λάβετε νέο κωδικό)`,
     '',
     'Ενεργοποίηση με 1 πάτημα (ανοίξτε το από τη συσκευή του παιδιού):',
@@ -124,7 +163,9 @@ export async function emailLicense({ to, token, plan, expiresAt }) {
         from,
         to: [to],
         bcc: owner && owner !== to ? [owner] : undefined,
-        subject: `SynapsePlay — Κωδικός ενεργοποίησης (${PLAN_LABELS_EL[plan] || plan})`,
+        subject: `SynapsePlay — Κωδικός ενεργοποίησης (${PLAN_LABELS_EL[plan] || plan})${
+          plan !== 'b2b' && !childCode ? ' [ΧΩΡΙΣ ΚΩΔΙΚΟ ΠΑΙΔΙΟΥ]' : ''
+        }`,
         text,
       }),
     });

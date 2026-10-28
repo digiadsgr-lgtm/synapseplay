@@ -8,6 +8,7 @@
  * Env: STRIPE_WEBHOOK_SECRET (whsec_…), LICENSE_SIGNING_KEY, RESEND_API_KEY (+ LICENSE_FROM_EMAIL)
  */
 import {
+  childCodeForSubscription,
   emailLicense,
   issueLicenseToken,
   planFor,
@@ -68,11 +69,19 @@ export default async function handler(req, res) {
   if (!plan) return res.status(200).json({ ok: true, ignored: 'unknown-plan' });
 
   const periodEnd = (line.period && line.period.end) || invoice.period_end;
+  const subscriptionId =
+    invoice.subscription ||
+    (invoice.parent && invoice.parent.subscription_details && invoice.parent.subscription_details.subscription) ||
+    (line.parent && line.parent.subscription_item_details && line.parent.subscription_item_details.subscription) ||
+    null;
+  // Κωδικός παιδιού από την αρχική αγορά (client_reference_id) — ισχύει και στις ανανεώσεις
+  const childCode = plan === 'b2b' ? null : await childCodeForSubscription(subscriptionId);
   const { token, payload } = issueLicenseToken({
     plan,
     periodEnd,
     quantity,
-    ref: invoice.subscription || (line.parent && line.parent.subscription_item_details && line.parent.subscription_item_details.subscription) || invoice.id,
+    ref: subscriptionId || invoice.id,
+    childCode,
   });
 
   const sent = await emailLicense({
@@ -80,8 +89,9 @@ export default async function handler(req, res) {
     token,
     plan,
     expiresAt: payload.e,
+    childCode,
   });
 
   // Always 200 so Stripe does not retry endlessly; "emailed" tells you in the Stripe log if mail failed.
-  return res.status(200).json({ ok: true, plan, emailed: sent });
+  return res.status(200).json({ ok: true, plan, emailed: sent, childCode });
 }
