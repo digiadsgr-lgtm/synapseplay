@@ -21,6 +21,9 @@ import { Activity17SensoryProprioception } from './Activity17SensoryPropriocepti
 import { Activity18AdlPraxis } from './Activity18AdlPraxis';
 import { Activity19EmotionalTheater } from './Activity19EmotionalTheater';
 import { Activity20MusicKineticRhythm } from './Activity20MusicKineticRhythm';
+import { Activity21TongueGym } from './Activity21TongueGym';
+import { Activity22ClearSounds } from './Activity22ClearSounds';
+import { Activity23VoiceTheater } from './Activity23VoiceTheater';
 
 interface ActivityDispatcherProps {
   activityId: ActivityId;
@@ -72,5 +75,11 @@ export const ActivityDispatcher: React.FC<ActivityDispatcherProps> = ({
       return <Activity19EmotionalTheater {...runnerProps} />;
     case '20-music-kinetic-rhythm':
       return <Activity20MusicKineticRhythm {...runnerProps} />;
+    case '21-tongue-gym':
+      return <Activity21TongueGym {...runnerProps} />;
+    case '22-clear-sounds':
+      return <Activity22ClearSounds {...runnerProps} />;
+    case '23-voice-theater':
+      return <Activity23VoiceTheater {...runnerProps} />;
   }
 };

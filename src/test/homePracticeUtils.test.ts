@@ -16,6 +16,7 @@ import { currentSeason, gameOfTheWeek, isoWeek, orthodoxEaster } from '../utils/
 import { buildIcs, foldLine } from '../utils/reminders';
 import { canOfferMissionToday, pickHomeMission, pendingMissions } from '../utils/homeMissions';
 import { buildAfterSessionTalk } from '../utils/afterSessionTalk';
+import { ACTIVITIES } from '../data/activitiesCatalog';
 import { checkInChange, isCheckInDue } from '../utils/parentCheckIn';
 
 const log = (over: Partial<ActivitySessionLog> = {}): ActivitySessionLog => ({
@@ -188,8 +189,8 @@ describe('Κήπος, εποχές, αποστολές, «τι να πείτε»
   it('το παιχνίδι της εβδομάδας αλλάζει κάθε εβδομάδα και περνά από όλα', () => {
     expect(isoWeek(new Date(2026, 9, 28)).week).toBe(44);
     const seen = new Set<string>();
-    for (let w = 0; w < 20; w++) seen.add(gameOfTheWeek(new Date(2026, 0, 5 + w * 7)).id);
-    expect(seen.size).toBe(20);
+    for (let w = 0; w < ACTIVITIES.length; w++) seen.add(gameOfTheWeek(new Date(2026, 0, 5 + w * 7)).id);
+    expect(seen.size).toBe(ACTIVITIES.length);
   });
 
   it('μία αποστολή τη μέρα, ταιριαστή στο παιχνίδι, χωρίς επανάληψη μέσα στην εβδομάδα', () => {

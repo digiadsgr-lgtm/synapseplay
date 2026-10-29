@@ -485,6 +485,9 @@ export const ACTIVITY_DOMAIN_MAP: Record<ActivityId, ClinicalDomainKey[]> = {
   '18-adl-praxis': ['motorPraxis'],
   '19-emotional-theater': ['emotionalRegulation', 'inhibitoryControl'],
   '20-music-kinetic-rhythm': ['emotionalRegulation', 'inhibitoryControl'],
+  '21-tongue-gym': ['speechLanguage', 'motorPraxis'],
+  '22-clear-sounds': ['speechLanguage'],
+  '23-voice-theater': ['speechLanguage', 'emotionalRegulation'],
 };
 
 export function createInitialLearningModel(ageBand: AgeBandId = '6-8'): ChildAdaptiveLearningModel {
@@ -563,6 +566,10 @@ export const SELF_REPORT_ACTIVITY_IDS: ReadonlySet<ActivityId> = new Set<Activit
   '10-copy-animal',
   '11-real-world-mission',
   '17-sensory-proprioception',
+  // Λόγος: την ορθότητα την κρίνει ο ενήλικας, όχι η εφαρμογή
+  '21-tongue-gym',
+  '22-clear-sounds',
+  '23-voice-theater',
 ]);
 
 /** Go/No-Go activities: a wrong tap here is a real "commission error" (tap when you should wait). */

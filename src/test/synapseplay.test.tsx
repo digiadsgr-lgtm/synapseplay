@@ -31,7 +31,7 @@ describe('SynapsePlay (FocusEngine 5+) — Full Gate 1 to Gate 5 Verification Su
 
     it('enforces maximum 4 primary categories on Child Hub and displays non-medical disclaimer', () => {
       expect(CATEGORIES).toHaveLength(4);
-      expect(ACTIVITIES).toHaveLength(20);
+      expect(ACTIVITIES).toHaveLength(23); // 20 + 3 παιχνίδια λόγου (21–23)
 
       renderWithRouter(['/app']);
       expect(screen.getByTestId('child-hub-page')).toBeInTheDocument();

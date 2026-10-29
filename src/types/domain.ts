@@ -43,7 +43,10 @@ export type ActivityId =
   | '17-sensory-proprioception'
   | '18-adl-praxis'
   | '19-emotional-theater'
-  | '20-music-kinetic-rhythm';
+  | '20-music-kinetic-rhythm'
+  | '21-tongue-gym'
+  | '22-clear-sounds'
+  | '23-voice-theater';
 
 export type HintLevel = 0 | 1 | 2;
 
@@ -174,6 +177,10 @@ export interface AppSettings {
   };
   /** Όνομα θεραπευτή/κέντρου όπως το βλέπει ο γονιός στο πρόγραμμα. */
   therapistLabel?: string;
+  /** Μικρόφωνο για τις ασκήσεις λόγου (συγκατάθεση γονιού· ανάλυση μόνο στη συσκευή). */
+  micEnabled?: boolean;
+  /** Ήχος-στόχος για την «Καθαρή Προφορά» (π.χ. 's', 'r'). */
+  articulationTarget?: string;
 }
 
 export interface DailyUsageRecord {

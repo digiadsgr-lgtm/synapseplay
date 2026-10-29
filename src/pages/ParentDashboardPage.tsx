@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { CheckoutLink } from '../components/CheckoutLink';
 import { Link, useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
@@ -28,6 +28,17 @@ import { PRICE_B2B_YEAR_EL, PRICE_EXTRA_CHILD_YEAR_EL } from '../config/pricing'
 import { ShareProgressWithTherapist } from '../components/ShareProgressWithTherapist';
 import { HomePracticeParentSection } from '../components/HomePracticeParentSection';
 import { TherapistHomePracticeSection } from '../components/TherapistHomePracticeSection';
+import {
+  DashboardNav,
+  SECTION_TABS,
+  TABS,
+  initialNav,
+  rememberMode,
+  type DashboardMode,
+  type DashboardSection,
+  type DashboardTab,
+} from '../components/DashboardNav';
+import { ParentTodaySummary } from '../components/ParentTodaySummary';
 import { formatLogAccuracy, summarizeRecentAccuracy } from '../utils/progressMetrics';
 
 export const ParentDashboardPage: React.FC = () => {
@@ -57,6 +68,30 @@ export const ParentDashboardPage: React.FC = () => {
   const [parentNewProfileAvatar, setParentNewProfileAvatar] = useState('🦊');
   const [showParentFamilyLimitNotice, setShowParentFamilyLimitNotice] = useState(false);
   const [appliedPresetNotice, setAppliedPresetNotice] = useState<string | null>(null);
+  const [nav, setNav] = useState(() =>
+    initialNav(typeof window === 'undefined' ? { search: '', hash: '' } : window.location)
+  );
+  const dashMode = nav.mode;
+  const dashTab = nav.tab;
+  const showSection = (k: DashboardSection) => SECTION_TABS[k].includes(dashTab);
+  const handleMode = (mode: DashboardMode) => {
+    rememberMode(mode);
+    setNav({ mode, tab: TABS[mode][0].id });
+  };
+  const handleTab = (tab: DashboardTab) => setNav((n) => ({ ...n, tab }));
+  const scrollToArea = (anchor: string) => {
+    const el =
+      document.getElementById(anchor) ?? document.querySelector(`[data-testid="${anchor}"]`);
+    el?.scrollIntoView?.({ behavior: 'smooth', block: 'start' });
+  };
+  // Σύνδεσμοι «#subscription» μέσα στη σελίδα (π.χ. όριο προφίλ) → καρτέλα Συνδρομή
+  useEffect(() => {
+    const onHash = () => {
+      if (window.location.hash === '#subscription') setNav((n) => ({ ...n, tab: 'subscription' }));
+    };
+    window.addEventListener('hashchange', onHash);
+    return () => window.removeEventListener('hashchange', onHash);
+  }, []);
 
   // Enforce accidental-access barrier even on direct URL navigation to /parent
   if (!isParentUnlocked) {
@@ -217,11 +252,11 @@ export const ParentDashboardPage: React.FC = () => {
           </div>
         )}
 
-        <div className="p-4 rounded-2xl bg-slate-surface border border-slate text-xs md:text-sm text-charcoal space-y-1">
-          <p className="font-extrabold">
-            ⚖️ Παιδαγωγική Δήλωση & Προστασία Ιδιωτικότητας (Privacy-by-Design):
-          </p>
-          <p>
+        <details className="p-3 rounded-2xl bg-slate-surface border border-slate text-xs md:text-sm text-charcoal">
+          <summary className="font-extrabold cursor-pointer">
+            ⚖️ Δεν είναι ιατρική συσκευή · τα δεδομένα μένουν στη συσκευή σας
+          </summary>
+          <p className="mt-2">
             Το SynapsePlay είναι εκπαιδευτικό εργαλείο ενίσχυσης της εκτελεστικής λειτουργίας και
             αυτορρύθμισης.{' '}
             <strong>
@@ -231,9 +266,14 @@ export const ParentDashboardPage: React.FC = () => {
             (IndexedDB) και δεν αποστέλλονται πουθενά. Χωρίς διαφημίσεις· στατιστικά επισκεψιμότητας
             μόνο αν τα έχετε αποδεχτεί.
           </p>
-        </div>
+        </details>
       </section>
 
+      <DashboardNav mode={dashMode} tab={dashTab} onMode={handleMode} onTab={handleTab} />
+
+      {dashTab === 'today' && <ParentTodaySummary onGo={scrollToArea} />}
+
+      <div hidden={!showSection('presets')} data-area="presets">
       {/* Smart 1-Click Beginner Presets for Parents */}
       <section
         aria-label="Έτοιμες Ρυθμίσεις με 1 Κλικ για Αρχάριους Γονείς"
@@ -333,7 +373,9 @@ export const ParentDashboardPage: React.FC = () => {
           </button>
         </div>
       </section>
+      </div>
 
+      <div hidden={!showSection('session-settings')} data-area="session-settings">
       {/* Session Time Limit & Smooth Landing Controls */}
       <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="bg-white border-2 border-sand-dark rounded-3xl p-6 space-y-4">
@@ -527,6 +569,24 @@ export const ParentDashboardPage: React.FC = () => {
               </span>
             </button>
 
+            <button
+              type="button"
+              data-testid="parent-toggle-mic"
+              onClick={() => void updateSettings({ micEnabled: !settings.micEnabled })}
+              aria-pressed={!!settings.micEnabled}
+              className="touch-target w-full px-4 py-3 rounded-2xl bg-sand-light border-2 border-sand-dark flex items-center justify-between font-bold text-charcoal text-left gap-3"
+            >
+              <span>
+                🎙️ Μικρόφωνο για τις ασκήσεις λόγου
+                <span className="block text-xs font-normal text-charcoal-muted">
+                  Η φωνή αναλύεται μόνο σε αυτή τη συσκευή· δεν αποθηκεύεται, δεν στέλνεται.
+                </span>
+              </span>
+              <span className="px-3 py-1 rounded-xl bg-white border border-charcoal/20 text-sm shrink-0">
+                {settings.micEnabled ? 'ΝΑΙ' : 'ΟΧΙ'}
+              </span>
+            </button>
+
             {/* Greek Speech Synthesis Engine Diagnostics & Audition */}
             <div
               data-testid="parent-voice-diagnostics-box"
@@ -560,17 +620,27 @@ export const ParentDashboardPage: React.FC = () => {
           </div>
         </div>
       </section>
+      </div>
 
+      <div hidden={!showSection('subscription')} data-area="subscription">
       {/* Subscription & Licensing Management Section ("Διαχείριση Συνδρομής") */}
       <SubscriptionManagementSection />
+      </div>
 
+      <div hidden={!showSection('home-practice')} data-area="home-practice">
       <HomePracticeParentSection />
+      </div>
 
+      <div hidden={!showSection('share-progress')} data-area="share-progress">
       <ShareProgressWithTherapist />
+      </div>
 
+      <div hidden={!showSection('pilot-feedback')} data-area="pilot-feedback">
       {/* Clinical & Parent Evaluation, Observations & Suggestions Hub */}
       <ClinicalFeedbackSection />
+      </div>
 
+      <div hidden={!showSection('profiles')} data-area="profiles">
       {/* Per-Device Child Micro-Profiles & Continual Learning Adaptation */}
       <section
         data-testid="child-profiles-learning-section"
@@ -804,12 +874,18 @@ export const ParentDashboardPage: React.FC = () => {
           })}
         </div>
       </section>
+      </div>
 
+      <div hidden={!showSection('pro-tools')} data-area="pro-tools">
       {/* Profiles editing, PDF/CSV reports, backup & restore */}
       <ProfessionalToolsSection />
+      </div>
 
+      <div hidden={!showSection('therapist-home')} data-area="therapist-home">
       <TherapistHomePracticeSection />
+      </div>
 
+      <div hidden={!showSection('history')} data-area="history">
       {/* Activity Session Logs & One-Click Data Wipe */}
       <section className="bg-white border-2 border-sand-dark rounded-3xl p-6 space-y-5">
         <div className="flex flex-wrap items-center justify-between gap-4">
@@ -907,7 +983,9 @@ export const ParentDashboardPage: React.FC = () => {
           </div>
         )}
       </section>
+      </div>
 
+      <div hidden={!showSection('device')} data-area="device">
       {/* Device Ergonomics Strategy & Pedagogical Reference Guide */}
       <section
         data-testid="device-strategy-section"
@@ -931,7 +1009,9 @@ export const ParentDashboardPage: React.FC = () => {
           </div>
         </div>
       </section>
+      </div>
 
+      <div hidden={!showSection('protocols')} data-area="protocols">
       {/* Pedagogical Reference Guide for All 20 Activities */}
       <section
         data-testid="interdisciplinary-protocols-section"
@@ -963,7 +1043,9 @@ export const ParentDashboardPage: React.FC = () => {
           ))}
         </div>
       </section>
+      </div>
 
+      <div hidden={!showSection('engine')} data-area="engine">
       {/* Invisible Adaptive Scenario Engine Overview (Visible Only to Parents/Clinicians) */}
       <section
         data-testid="invisible-adaptive-engine-section"
@@ -989,7 +1071,9 @@ export const ParentDashboardPage: React.FC = () => {
           ))}
         </div>
       </section>
+      </div>
 
+      <div hidden={!showSection('studies')} data-area="studies">
       {/* Background reading that inspired the design (NOT evidence that SynapsePlay works) */}
       <section
         data-testid="clinical-studies-rct-section"
@@ -1032,7 +1116,9 @@ export const ParentDashboardPage: React.FC = () => {
           ))}
         </div>
       </section>
+      </div>
 
+      <div hidden={!showSection('activity-guide')} data-area="activity-guide">
       {/* Pedagogical Reference Guide for All 20 Activities */}
       <section className="bg-sand-light border-2 border-sand-dark rounded-3xl p-6 space-y-4">
         <h2 className="text-xl font-extrabold text-charcoal">
@@ -1053,6 +1139,7 @@ export const ParentDashboardPage: React.FC = () => {
           ))}
         </div>
       </section>
+      </div>
 
       {/* GDPR Compliance & DIGIADS Developer Attribution Footer */}
       <section
